@@ -3,6 +3,7 @@ import * as Icons from 'lucide-react';
 import CodeBlock from './CodeBlock';
 import InfoBox from './InfoBox';
 import WarningBox from './WarningBox';
+import { VideoEmbed, SlideDeckEmbed } from './Embeds';
 
 const ContentRenderer = ({ blocks }) => {
   if (!blocks) return null;
@@ -27,13 +28,23 @@ const ContentRenderer = ({ blocks }) => {
               </p>
             );
 
+          case 'video':
+            return <VideoEmbed key={index} url={block.url} title={block.title} />;
+
+          case 'slides':
+            return <SlideDeckEmbed key={index} url={block.url} title={block.title} />;
+
           case 'grid':
             return (
               <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                 {block.items.map((item, i) => {
                   const Icon = Icons[item.icon] || Icons.HelpCircle;
                   return (
-                    <div key={i} className={`bg-[#132617] p-6 rounded-xl border border-[#1f3d25] ${item.border ? `border-t-4 border-t-[${item.border}]` : ''}`}>
+                    <div
+                      key={i}
+                      className={`bg-[#132617] p-6 rounded-xl border border-[#1f3d25] ${item.border ? 'border-t-4' : ''}`}
+                      style={item.border ? { borderTopColor: item.border } : {}}
+                    >
                       <Icon className="text-[#4ade80] w-10 h-10 mb-4" />
                       <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                       <p className="text-[#86efac] text-sm">{item.content}</p>

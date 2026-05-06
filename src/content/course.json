@@ -7,6 +7,11 @@
       "duration": "5 mins",
       "blocks": [
         { "type": "h1", "content": "Course Introduction" },
+        {
+          "type": "video",
+          "url": "https://drive.google.com/file/d/1vS8u_y86q4T6A1S-Xv7I8v5r5v5v5v5/view",
+          "title": "AGV Concept Walkthrough"
+        },
         { "type": "p", "content": "Welcome to the future of software engineering. This course introduces you to Google Antigravity (AGV) and the Tridorian standard for Secure Agentic Development." },
         {
           "type": "grid",
@@ -281,6 +286,11 @@
       "duration": "2 mins",
       "blocks": [
         { "type": "congrats", "content": "You have successfully mastered Google Antigravity. You've transitioned from coding manually to securely orchestrating AI agents, utilizing visual browsers, and automating tasks with custom workflows." },
+        {
+          "type": "slides",
+          "url": "https://docs.google.com/presentation/d/1vS8u_y86q4T6A1S-Xv7I8v5r5v5v5v5/edit",
+          "title": "AGV Post-Course Reference"
+        },
         {
           "type": "next_steps",
           "title": "Next Steps to Explore",

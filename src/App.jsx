@@ -8,7 +8,9 @@ import {
   Cloud,
   CloudOff,
   RefreshCw,
-  User
+  User,
+  Lock,
+  CheckCircle2
 } from 'lucide-react';
 import courseData from './content/course.json';
 import ContentRenderer from './components/ContentRenderer';
@@ -24,10 +26,12 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [driveFileId, setDriveFileId] = useState(null);
   const [lastSynced, setLastSynced] = useState(null);
+  const [completedSteps, setCompletedSteps] = useState([0]);
 
   const courseSteps = courseData.steps;
   const activeStep = courseSteps[activeStepIndex];
-  const progressPercentage = ((activeStepIndex + 1) / courseSteps.length) * 100;
+  const totalSteps = courseSteps.length;
+  const progressPercentage = (completedSteps.length / totalSteps) * 100;
 
   // Initialize Google Auth
   useEffect(() => {
@@ -62,8 +66,11 @@ export default function App() {
       setDriveFileId(file.id);
       if (file.appProperties && file.appProperties.activeStepIndex) {
         const index = parseInt(file.appProperties.activeStepIndex, 10);
-        if (!isNaN(index) && index >= 0 && index < courseSteps.length) {
+        if (!isNaN(index) && index >= 0 && index < totalSteps) {
           setActiveStepIndex(index);
+          // Reconstruct completed steps up to this index
+          const completed = Array.from({ length: index + 1 }, (_, i) => i);
+          setCompletedSteps(completed);
           setLastSynced(new Date());
         }
       }
@@ -72,7 +79,7 @@ export default function App() {
     } finally {
       setIsSyncing(false);
     }
-  }, [courseSteps.length]);
+  }, [totalSteps]);
 
   // Save Progress
   const syncProgress = useCallback(async (index) => {
@@ -107,8 +114,12 @@ export default function App() {
   }, [activeStepIndex]);
 
   const goToNext = () => {
-    if (activeStepIndex < courseSteps.length - 1) {
-      setActiveStepIndex(activeStepIndex + 1);
+    if (activeStepIndex < totalSteps - 1) {
+      const nextIndex = activeStepIndex + 1;
+      setActiveStepIndex(nextIndex);
+      if (!completedSteps.includes(nextIndex)) {
+        setCompletedSteps(prev => [...prev, nextIndex]);
+      }
     }
   };
 
@@ -199,31 +210,53 @@ export default function App() {
 
         <div className="p-4 flex-1">
           <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Course Modules</h2>
-          <nav className="space-y-1">
-            {courseSteps.map((step, index) => (
-              <button
-                key={step.id}
-                onClick={() => {
-                  setActiveStepIndex(index);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex justify-between items-center ${
-                  index === activeStepIndex
-                    ? 'bg-[#132617] text-[#4ade80] border border-[#1f3d25]'
-                    : 'text-gray-400 hover:bg-[#132617]/50 hover:text-white'
-                }`}
-              >
-                <span className="truncate pr-2">{step.title}</span>
-                <span className="text-xs opacity-50 whitespace-nowrap">{step.duration}</span>
-              </button>
-            ))}
+          <nav className="space-y-2">
+            {courseSteps.map((step, index) => {
+              const isCompleted = completedSteps.includes(index);
+              const isActive = index === activeStepIndex;
+              const isLocked = index > 0 && !completedSteps.includes(index - 1) && !isCompleted;
+
+              return (
+                <button
+                  key={step.id}
+                  disabled={isLocked}
+                  onClick={() => {
+                    setActiveStepIndex(index);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex justify-between items-center group relative ${
+                    isActive
+                      ? 'bg-[#132617] text-[#4ade80] border border-[#1f3d25] shadow-[0_0_15px_rgba(74,222,128,0.1)]'
+                      : isLocked
+                        ? 'text-gray-600 cursor-not-allowed opacity-50'
+                        : 'text-gray-400 hover:bg-[#132617]/50 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 truncate">
+                    {isLocked ? (
+                      <Lock size={14} className="text-gray-600" />
+                    ) : isCompleted ? (
+                      <CheckCircle2 size={14} className="text-[#4ade80]" />
+                    ) : (
+                      <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-[#4ade80] animate-pulse' : 'border-gray-500'}`}></div>
+                    )}
+                    <span className="truncate">{step.title}</span>
+                  </div>
+                  <span className="text-[10px] opacity-40 whitespace-nowrap font-mono">{step.duration}</span>
+
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#4ade80] rounded-r-full shadow-[0_0_8px_#4ade80]"></div>
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
         {/* Global Progress */}
         <div className="p-6 border-t border-[#1f3d25] bg-[#050805]">
           <div className="flex justify-between text-xs text-[#86efac] mb-2">
-            <span>Progress</span>
+            <span>Overall Progress</span>
             <span>{Math.round(progressPercentage)}%</span>
           </div>
           <div className="h-2 w-full bg-[#132617] rounded-full overflow-hidden">
@@ -242,9 +275,24 @@ export default function App() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#4ade80]/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
 
         <main className="flex-1 p-6 md:p-12 lg:p-16 max-w-4xl mx-auto w-full z-10">
-          {/* Step Indicator */}
-          <div className="text-xs font-mono text-[#86efac] mb-4 tracking-wider">
-            STEP {activeStepIndex + 1} OF {courseSteps.length}
+          {/* Module Progress Header */}
+          <div className="mb-8 flex items-center justify-between">
+          <div className="text-xs font-mono text-[#86efac] tracking-widest uppercase flex items-center gap-2">
+            <span>Module {activeStepIndex + 1} <span className="opacity-30 mx-2">//</span> {activeStep.title.replace(/^\d+\.\s*/, '')}</span>
+            {activeStep.optional && (
+              <span className="bg-[#1f3d25] text-[#4ade80] text-[10px] px-2 py-0.5 rounded border border-[#4ade80]/30 font-bold">OPTIONAL</span>
+            )}
+            </div>
+            <div className="text-[10px] font-mono text-gray-500">
+              {activeStepIndex + 1} / {totalSteps}
+            </div>
+          </div>
+
+          <div className="h-1 w-full bg-[#132617] rounded-full overflow-hidden mb-12">
+            <div
+              className="h-full bg-gradient-to-r from-[#1f3d25] to-[#4ade80] transition-all duration-700 ease-in-out"
+              style={{ width: `${((activeStepIndex + 1) / totalSteps) * 100}%` }}
+            ></div>
           </div>
 
           {/* Inject Content */}
@@ -270,9 +318,9 @@ export default function App() {
 
           <button
             onClick={goToNext}
-            disabled={activeStepIndex === courseSteps.length - 1}
+            disabled={activeStepIndex === totalSteps - 1}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
-              activeStepIndex === courseSteps.length - 1
+              activeStepIndex === totalSteps - 1
                 ? 'opacity-0 pointer-events-none'
                 : 'bg-[#4ade80] text-black hover:bg-[#22c55e] shadow-[0_0_15px_rgba(74,222,128,0.3)]'
             }`}
