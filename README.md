@@ -1,6 +1,10 @@
 # AGV Course Demo
 
+[![Build and Deploy](https://github.com/wtg-codes/agv-course-demo/actions/workflows/deploy.yml/badge.svg)](https://github.com/wtg-codes/agv-course-demo/actions/workflows/deploy.yml)
+
 The next generation Agentic SDLC course demo. This project showcases the capabilities of Google Antigravity (AGV) and the Tridorian standard for Secure Agentic Development through an interactive web-based course.
+
+**[🚀 Launch Live Course](https://wtg-codes.github.io/agv-course-demo/)**
 
 ## Overview
 
