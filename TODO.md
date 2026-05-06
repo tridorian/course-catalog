@@ -5,6 +5,13 @@
 - [x] Set up automated deployment via GitHub Actions.
 - [x] Initialize comprehensive documentation (README, ARCH, DOCS).
 - [ ] Add more interactive elements to course modules.
+- [ ] **Google Drive Integration:**
+  - [x] Define Document Specification (TDS).
+  - [x] Create Apps Script Validator.
+  - [ ] Implement `scripts/sync-docs.js` (Google Docs API integration).
+  - [ ] Implement `src/components/ContentRenderer.jsx`.
+  - [ ] Refactor `app.js` to support dynamic JSON loading.
+  - [ ] Automate sync via GitHub Actions.
 
 ## Future Improvements
 - [ ] **Search Functionality:** Add a search bar to the sidebar to quickly find modules or topics.
