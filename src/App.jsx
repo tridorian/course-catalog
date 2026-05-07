@@ -6,10 +6,12 @@ import {
   Menu,
   X,
   CheckCircle2,
-  Lock
+  Lock,
+  AlertTriangle
 } from 'lucide-react';
 
 import ContentRenderer from './components/ContentRenderer';
+import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
 
 // --- Main App Component ---
 
@@ -20,34 +22,59 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [completedSteps, setCompletedSteps] = useState([0]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Parse trackId and courseId from URL hash: #/trackId/courseId
+  const getRouteParams = () => {
+    const hash = window.location.hash.replace(/^#\//, '');
+    const parts = hash.split('/');
+    if (parts.length >= 2) {
+      return { trackId: parts[0], courseId: parts[1] };
+    }
+    // Default or fallback
+    return { trackId: 'labs', courseId: 'agv-01' };
+  };
+
+  const { trackId, courseId } = getRouteParams();
 
   // Load course manifest and metadata
   useEffect(() => {
     async function loadCourse() {
+      setIsLoading(true);
+      setError(null);
       try {
-        const manifestResponse = await fetch('./content/tracks/labs/agv-01/manifest.json');
-        const manifest = await manifestResponse.json();
-
-        const metadataResponse = await fetch(`./content/tracks/labs/agv-01/${manifest.metadata}`);
-        const metadata = await metadataResponse.json();
+        const manifest = await fetchCourseManifest(trackId, courseId);
+        const metadata = await fetchCourseMetadata(trackId, courseId, manifest.metadata);
         setCourseMetadata(metadata);
 
         // Load all module content
-        const stepPromises = manifest.modules.map(async (mod) => {
-          const res = await fetch(`./content/tracks/labs/agv-01/${mod.file}`);
-          return res.json();
-        });
+        const stepPromises = manifest.modules.map((mod) =>
+          fetchModuleContent(trackId, courseId, mod.file)
+        );
 
         const steps = await Promise.all(stepPromises);
         setCourseSteps(steps);
         setIsLoading(false);
-      } catch (error) {
-        console.error("Failed to load course content:", error);
+      } catch (err) {
+        console.error("Failed to load course content:", err);
+        setError(err.message);
         setIsLoading(false);
       }
     }
 
     loadCourse();
+  }, [trackId, courseId]);
+
+  // Listen for hash changes to support navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      // Re-render will trigger loadCourse because trackId/courseId will change
+      // However, we might want to reset state
+      setActiveStepIndex(0);
+      setCompletedSteps([0]);
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const activeStep = courseSteps[activeStepIndex];
@@ -82,6 +109,24 @@ export default function App() {
       <div className="min-h-screen bg-[#050805] flex items-center justify-center">
         <div className="text-[#4ade80] font-mono animate-pulse text-xl tracking-widest">
           LOADING TRIDORIAN MISSION...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#050805] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-[#0a120c] border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
+          <AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Mission Interrupted</h2>
+          <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
+          <button
+            onClick={() => window.location.hash = '#/labs/agv-01'}
+            className="px-6 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded font-mono text-xs transition-all"
+          >
+            RETURN TO BASE (AGV-01)
+          </button>
         </div>
       </div>
     );
