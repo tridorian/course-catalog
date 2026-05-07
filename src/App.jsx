@@ -32,7 +32,7 @@ export default function App() {
       return { trackId: parts[0], courseId: parts[1] };
     }
     // Default or fallback
-    return { trackId: 'labs', courseId: 'agv-01' };
+    return { trackId: 'agentic-engineering', courseId: 'agv-01' };
   };
 
   const { trackId, courseId } = getRouteParams();
@@ -122,7 +122,7 @@ export default function App() {
           <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Mission Interrupted</h2>
           <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
           <button
-            onClick={() => window.location.hash = '#/labs/agv-01'}
+            onClick={() => window.location.hash = '#/agentic-engineering/agv-01'}
             className="px-6 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded font-mono text-xs transition-all"
           >
             RETURN TO BASE (AGV-01)
