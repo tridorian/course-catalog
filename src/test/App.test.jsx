@@ -29,7 +29,7 @@ describe('App Integration', () => {
   });
 
   it('loads and renders a course correctly', async () => {
-    window.location.hash = '#/labs/agv-01';
+    window.location.hash = '#/agentic-engineering/agv-01';
 
     render(<App />);
 
