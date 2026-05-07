@@ -6,7 +6,17 @@ const PresentationModule = ({ module }) => {
   if (!module) return null;
 
   // Find the primary embed (first video or slides block)
-  const embedBlock = module.blocks?.find(block => block.type === 'video' || block.type === 'slides');
+  let embedBlock = module.blocks?.find(block => block.type === 'video' || block.type === 'slides');
+
+  // Robustness: If no embed block but a top-level url exists, create a virtual block
+  if (!embedBlock && module.url) {
+    const isSlides = module.url.includes('docs.google.com/presentation');
+    embedBlock = {
+      type: isSlides ? 'slides' : 'video',
+      url: module.url,
+      title: module.title || 'Presentation'
+    };
+  }
 
   // Other blocks will be treated as notes/transcript
   const otherBlocks = module.blocks?.filter(block => block !== embedBlock) || [];

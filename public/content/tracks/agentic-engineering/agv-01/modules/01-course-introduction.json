@@ -2,6 +2,7 @@
   "id": 1,
   "title": "1. Course Introduction",
   "duration": "5 mins",
+  "type": "presentation",
   "blocks": [
     {
       "type": "h1",
@@ -45,6 +46,5 @@
         "**Disaster Recovery:** Learn to use the Panic Button."
       ]
     }
-  ],
-  "type": "presentation"
+  ]
 }
