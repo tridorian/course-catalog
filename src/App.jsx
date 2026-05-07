@@ -10,7 +10,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-import ContentRenderer from './components/ContentRenderer';
+import ModuleRenderer from './components/ModuleRenderer';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
 
 // --- Main App Component ---
@@ -251,7 +251,7 @@ export default function App() {
 
           {/* Inject Content */}
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <ContentRenderer blocks={activeStep.blocks} />
+            <ModuleRenderer module={activeStep} />
           </div>
         </main>
 
