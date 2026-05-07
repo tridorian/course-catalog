@@ -10,14 +10,7 @@ The course catalog demo. This project showcases the capabilities of  the Tridori
 
 This application is a React-based interactive course platform. It utilizes a dynamic loading architecture to fetch course content structured in a 4-tier hierarchy (Track > Course > Module > Step). Content is decoupled from the source code, defined in JSON files, and rendered dynamically.
 
-The featured course guides users through setting up and using AGV. It covers:
-- Environment Setup (Tier 1-3)
-- Mission Control Settings
-- Micro-AI Mechanics
-- Agent Orchestration & Artifacts
-- Visual Walkthroughs
-- Rules vs. Workflows
-- Disaster Recovery
+The featured courses are listed on the Dashboard
 
 ## Getting Started
 
