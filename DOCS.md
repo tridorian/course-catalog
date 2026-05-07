@@ -2,26 +2,14 @@
 
 ## Course Content Management
 
-The course content is managed within `app.js` in the `courseSteps` array.
+The course content is dynamically loaded and follows a 4-tier hierarchy (Track > Course > Module > Step). Content is stored in JSON format within the `public/content/tracks/` directory.
 
 ### Adding a New Module
 
-To add a new module, append a new object to the `courseSteps` array with the following format:
-
-```javascript
-{
-  id: 10,
-  title: "10. New Module Title",
-  duration: "5 mins",
-  content: (
-    <div className="space-y-6">
-      <h1 className="text-4xl font-extrabold text-white mb-6">New Module Title</h1>
-      <p className="text-lg text-[#bbf7d0]">Description of the new module.</p>
-      {/* Add more JSX content here */}
-    </div>
-  )
-}
-```
+1.  **Create the Module File:** Create a new JSON file (e.g., `10-new-module.json`) in the appropriate course directory (e.g., `public/content/tracks/[track_id]/[course_id]/modules/`).
+2.  **Define Module Structure:** The JSON file must adhere to the `ModuleSchema`. It requires a `title`, `type` (e.g., `lab`, `presentation`, `resource`), and depending on the type, `blocks` (for labs), `url` (for presentations/resources).
+3.  **Update Manifest:** Add the filename of the new module to the `modules` array in the course's `manifest.json` file.
+4.  **Using Blocks:** The platform dynamically renders content using `ContentRenderer.jsx`. Define content blocks in the JSON using supported types like `h1`, `p`, `grid`, `code`, `info`, etc. For details on available block types and their properties, refer to `src/components/ContentRenderer.jsx`.
 
 ### UI Components
 

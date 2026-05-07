@@ -1,6 +1,6 @@
-# Course Catolog Demo
+# Course Catalog Demo
 
-[![Build and Deploy](https://github.com/wtg-codes/agv-course-demo/actions/workflows/deploy.yml/badge.svg)](https://github.com/wtg-codes/agv-course-demo/actions/workflows/deploy.yml)
+[![Build and Deploy](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml/badge.svg)](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml)
 
 The course catalog demo. This project showcases the capabilities of  the Tridorian standard for  an interactive web-based course.
 
@@ -8,7 +8,9 @@ The course catalog demo. This project showcases the capabilities of  the Tridori
 
 ## Overview
 
-This application is a React-based interactive course that guides users through setting up and using AGV. It covers:
+This application is a React-based interactive course platform. It utilizes a dynamic loading architecture to fetch course content structured in a 4-tier hierarchy (Track > Course > Module > Step). Content is decoupled from the source code, defined in JSON files, and rendered dynamically.
+
+The featured course guides users through setting up and using AGV. It covers:
 - Environment Setup (Tier 1-3)
 - Mission Control Settings
 - Micro-AI Mechanics
@@ -29,7 +31,7 @@ This application is a React-based interactive course that guides users through s
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd agv-course-demo
+   cd course-catalog
    ```
 
 2. Install dependencies:
