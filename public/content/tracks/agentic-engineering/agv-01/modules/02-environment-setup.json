@@ -57,5 +57,6 @@
       "content": "Once inside, verify everything is staged perfectly without installing a single package:",
       "code": "python3 --version\nagv --version\npython3 -c \"from playwright.sync_api import sync_playwright; print('\u2705 Playwright is ready.')\""
     }
-  ]
+  ],
+  "type": "lab"
 }

@@ -8,19 +8,19 @@ This roadmap outlines the phased development of the platform, following a strict
 **Objective:** Refactor the content loading system to support the 4-tier hierarchy (Track > Course > Module > Step).
 
 ### 1.1 Testing Infrastructure (Prerequisite)
-- [ ] **Step 1:** Implement unit tests for `fetchCourseManifest` and `fetchModuleContent` utilities.
-- [ ] **Step 2:** Create mock JSON structures for valid/invalid Tracks and Courses to test validation logic.
-- [ ] **Step 3:** Implement integration tests using Playwright to verify that a course loads correctly given a valid path.
+- [x] **Step 1:** Implement unit tests for `fetchCourseManifest` and `fetchModuleContent` utilities.
+- [x] **Step 2:** Create mock JSON structures for valid/invalid Tracks and Courses to test validation logic.
+- [x] **Step 3:** Implement integration tests using Vitest/RTL to verify that a course loads correctly given a valid path.
 
 ### 1.2 Hierarchy Refactor
-- [ ] **Sub-step:** Update `src/App.jsx` to parse Track and Course IDs from the URL (e.g., `/#/labs/agv-01`).
-- [ ] **Sub-step:** Refactor file fetching logic to use the new path structure: `public/content/tracks/[track]/[course]/`.
-- [ ] **Sub-step:** Implement a `ModuleSchema` validator to ensure JSON files contain required fields (`id`, `type`, `title`, `blocks`).
+- [x] **Sub-step:** Update `src/App.jsx` to parse Track and Course IDs from the URL (e.g., `/#/agentic-engineering/agv-01`).
+- [x] **Sub-step:** Refactor file fetching logic to use the new path structure: `public/content/tracks/[track]/[course]/`.
+- [x] **Sub-step:** Implement a `ModuleSchema` validator to ensure JSON files contain required fields (`id`, `type`, `title`, `blocks`).
 
 ### Exit Criteria
-- Tests pass for manifest loading from arbitrary track/course paths.
-- Application gracefully handles "Course Not Found" errors.
-- **PR 1:** "Core: Implement 4-tier content loading and schema validation."
+- [x] Tests pass for manifest loading from arbitrary track/course paths.
+- [x] Application gracefully handles "Course Not Found" errors.
+- [x] **PR 1:** "Core: Implement 4-tier content loading and schema validation."
 
 ---
 

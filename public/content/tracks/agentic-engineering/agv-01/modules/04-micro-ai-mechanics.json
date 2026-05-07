@@ -33,5 +33,6 @@
       "title": "Explain and Fix",
       "content": "Hover your mouse over the red squiggly error line in the editor. Click the **Quick Fix** or **Explain** lightbulb icon to have the AI resolve the syntax error instantly."
     }
-  ]
+  ],
+  "type": "lab"
 }

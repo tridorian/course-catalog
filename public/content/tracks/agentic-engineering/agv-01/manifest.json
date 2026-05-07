@@ -3,48 +3,63 @@
   "modules": [
     {
       "id": 1,
+      "type": "presentation",
       "title": "1. Course Introduction",
       "file": "modules/01-course-introduction.json"
     },
     {
       "id": 2,
+      "type": "lab",
       "title": "2. Environment Setup",
       "file": "modules/02-environment-setup.json"
     },
     {
       "id": 3,
+      "type": "lab",
       "title": "3. Mission Control Settings",
       "file": "modules/03-mission-control-settings.json"
     },
     {
       "id": 4,
+      "type": "lab",
       "title": "4. Micro-AI Mechanics",
       "file": "modules/04-micro-ai-mechanics.json"
     },
     {
       "id": 5,
+      "type": "lab",
       "title": "5. Agent Orchestration",
       "file": "modules/05-agent-orchestration.json"
     },
     {
       "id": 6,
+      "type": "lab",
       "title": "6. Visual Walkthroughs",
       "file": "modules/06-visual-walkthroughs.json"
     },
     {
       "id": 7,
+      "type": "lab",
       "title": "7. Rules vs. Workflows",
       "file": "modules/07-rules-vs-workflows.json"
     },
     {
       "id": 8,
+      "type": "lab",
       "title": "8. Disaster Recovery",
       "file": "modules/08-disaster-recovery.json"
     },
     {
       "id": 9,
+      "type": "lab",
       "title": "9. Wrap Up",
       "file": "modules/09-wrap-up.json"
+    },
+    {
+      "id": 10,
+      "type": "resource",
+      "title": "10. Additional Resources",
+      "file": "modules/10-additional-resources.json"
     }
   ]
 }

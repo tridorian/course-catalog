@@ -57,5 +57,6 @@
       "title": "Test it Out!",
       "content": "Open the Agent Manager. Type `/generate-tests` in the chat. The agent will read your workflow prompt, generate the tests for your active file, AND automatically apply the Copyright header based on your global Rule!"
     }
-  ]
+  ],
+  "type": "lab"
 }

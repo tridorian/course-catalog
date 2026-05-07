@@ -1,0 +1,30 @@
+{
+  "id": 10,
+  "title": "10. Additional Resources",
+  "duration": "5 mins",
+  "type": "resource",
+  "resources": [
+    {
+      "title": "AGV Security Whitepaper",
+      "description": "Deep dive into the security architecture of the Antigravity Browser and its sandbox environment.",
+      "url": "https://docs.google.com/document/d/1example1/edit",
+      "type": "PDF/DOC"
+    },
+    {
+      "title": "Agent Manager API Reference",
+      "description": "Full technical documentation for interacting with the Agent Manager programmatically.",
+      "url": "https://docs.google.com/document/d/1example2/edit",
+      "type": "API REF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Why these resources matter"
+    },
+    {
+      "type": "p",
+      "content": "These documents provide the underlying technical specifications that ensure your agentic workflows remain secure and compliant with Tridorian standards."
+    }
+  ]
+}
