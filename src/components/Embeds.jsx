@@ -32,12 +32,17 @@ export const VideoEmbed = ({ url, title = "Video Walkthrough" }) => {
 };
 
 export const SlideDeckEmbed = ({ url, title = "Reference Slide Deck" }) => {
-  // Convert Google Slides share link to embed link
+  // Convert Google Slides share link to the standard embed link
   // Share link: https://docs.google.com/presentation/d/FILE_ID/edit?usp=sharing
-  // Embed link: https://docs.google.com/presentation/d/FILE_ID/embed?start=false&loop=false&delayms=3000
+  // Standard Embed: https://docs.google.com/presentation/d/FILE_ID/embed?start=false
   let embedUrl = url;
   if (url.includes('docs.google.com/presentation')) {
-    embedUrl = url.replace(/\/edit.*$/, '/embed').replace(/\/pub.*$/, '/embed');
+    // 1. Strip off /edit, /view, or /pub and anything that comes after it
+    let baseUrl = url.replace(/\/(edit|view|pub).*$/, '');
+    
+    // 2. Append /embed. Removing rm=minimal brings back the bottom navigation 
+    // bar while still hiding the top menu (File, Edit, Sign In)
+    embedUrl = `${baseUrl}/embed?start=false&loop=false&delayms=3000`;
   }
 
   return (
