@@ -19,7 +19,7 @@
       "type": "tier_card",
       "title": "\u25b6 TIER 1: Easy (Direct Binary Install)",
       "description": "Best for getting up and running quickly on a personal machine.",
-      "code": "# macOS & Linux\ncurl -sL https://dl.google.com/agv/install.sh | bash\n\n# Windows (Winget)\nwinget install Google.Antigravity"
+      "code": "# macOS & Linux\curl -sL "https://raw.githubusercontent.com/wtg-codes/agv-easy-install/main/antigravity-manager.sh" | bash\n\n# Windows (Winget)\nwinget install Google.Antigravity"
     },
     {
       "type": "tier_card",
