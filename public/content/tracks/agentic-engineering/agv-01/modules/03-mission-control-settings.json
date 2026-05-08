@@ -17,7 +17,7 @@
         {
           "title": "Create the Project:",
           "content": "Initialize your project folder in your active terminal:",
-          "code": "mkdir -p my-agent-app\ncd my-agent-app"
+          "code": "mkdir -p my-antigravity-work\ncd my-antigravity-work"
         },
         {
           "title": "Launch AGV:",
@@ -25,7 +25,7 @@
         },
         {
           "title": "Open Workspace:",
-          "content": "Click *Open Folder* and select the `my-agent-app` directory."
+          "content": "Click *Open Folder* and select the `my-antigravity-work` directory."
         },
         {
           "title": "Set Guardrails:",
