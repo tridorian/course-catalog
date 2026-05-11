@@ -42,12 +42,12 @@ function AppContent() {
       setError(null);
       try {
         const manifest = await fetchCourseManifest(currentTrackId, currentCourseId);
-        const metadata = await fetchCourseMetadata(currentTrackId, currentCourseId, manifest.metadata);
+        const metadata = await fetchCourseMetadata(trackId, courseId, manifest.metadata);
         setCourseMetadata(metadata);
 
         // Load all module content
         const stepPromises = manifest.modules.map((mod) =>
-          fetchModuleContent(currentTrackId, currentCourseId, mod.file)
+          fetchModuleContent(trackId, courseId, mod.file)
         );
 
         const steps = await Promise.all(stepPromises);
@@ -63,15 +63,16 @@ function AppContent() {
     loadCourse();
   }, [trackId, courseId]);
 
-
-
-  let activeStepIndex = 0;
-  if (moduleId) {
-    const index = courseSteps.findIndex(s => s.id === moduleId);
-    if (index !== -1) {
-      activeStepIndex = index;
-    }
-  }
+  // Listen for hash changes to support navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      // Re-render will trigger loadCourse because trackId/courseId will change
+      // However, we might want to reset state
+      setActiveStepIndex(0);
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const activeStep = courseSteps[activeStepIndex];
   const totalSteps = courseSteps.length;

@@ -28,17 +28,17 @@ This roadmap outlines the phased development of the platform, following a strict
 **Objective:** Implement specialized rendering for Lab, Presentation, and Resource modules.
 
 ### 2.1 Component Testing
-- [ ] **Step 1:** Write unit tests for `ModuleRenderer` to ensure it switches components based on `module.type`.
-- [ ] **Step 2:** Create visual regression tests (screenshots) for `Presentation` (Slides/Video) and `Resource` (Docs) components.
+- [x] **Step 1:** Write unit tests for `ModuleRenderer` to ensure it switches components based on `module.type`.
+- [x] **Step 2:** Create visual regression tests (screenshots) for `Presentation` (Slides/Video) and `Resource` (Docs) components.
 
 ### 2.2 Presentation Modules
-- [ ] **Sub-step:** Create `src/components/modules/PresentationModule.jsx`.
-- [ ] **Sub-step:** Integrate `VideoEmbed` and `SlideDeckEmbed` into the layout.
-- [ ] **Sub-step:** Add support for "Presentation Notes" section below the embed.
+- [x] **Sub-step:** Create `src/components/modules/PresentationModule.jsx`.
+- [x] **Sub-step:** Integrate `VideoEmbed` and `SlideDeckEmbed` into the layout.
+- [x] **Sub-step:** Add support for "Presentation Notes" section below the embed.
 
 ### 2.3 Resource Modules
-- [ ] **Sub-step:** Create `src/components/modules/ResourceModule.jsx`.
-- [ ] **Sub-step:** Implement a "Document Gallery" or "Embedded Guide" view for Google Docs resources.
+- [x] **Sub-step:** Create `src/components/modules/ResourceModule.jsx`.
+- [x] **Sub-step:** Implement a "Document Gallery" or "Embedded Guide" view for Google Docs resources.
 
 ### Exit Criteria
 - Module type `presentation` successfully renders a slide deck.
@@ -51,13 +51,13 @@ This roadmap outlines the phased development of the platform, following a strict
 **Objective:** Enhance the user experience with better navigation and URL persistence.
 
 ### 3.1 Navigation Testing
-- [ ] **Step 1:** Write tests for the `Sidebar` to verify it correctly highlights the active module and respects "locked" status.
-- [ ] **Step 2:** Write tests for breadcrumb generation based on the 4-tier hierarchy.
+- [x] **Step 1:** Write tests for the `Sidebar` to verify it correctly highlights the active module and respects "locked" status.
+- [x] **Step 2:** Write tests for breadcrumb generation based on the 4-tier hierarchy.
 
 ### 3.2 Routing & Breadcrumbs
-- [ ] **Sub-step:** Implement `react-router-dom` (or simple state-based routing) to support deep links to specific modules.
-- [ ] **Sub-step:** Add a Breadcrumb component: `Track > Course > Module`.
-- [ ] **Sub-step:** Implement "Course Map" view - a high-level overview of all modules in a course.
+- [x] **Sub-step:** Implement `react-router-dom` (or simple state-based routing) to support deep links to specific modules.
+- [x] **Sub-step:** Add a Breadcrumb component: `Track > Course > Module`.
+- [x] **Sub-step:** Implement "Course Map" view - a high-level overview of all modules in a course.
 
 ### Exit Criteria
 - Users can share a URL that opens a specific module.
