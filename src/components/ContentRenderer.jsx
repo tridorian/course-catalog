@@ -119,7 +119,7 @@ const ContentRenderer = ({ blocks, sourceFile }) => {
             return <WarningBox key={index} title={block.title}>{block.content}</WarningBox>;
 
           case 'code':
-            return <CodeBlock key={index} language={block.language} code={block.content} />;
+            return <CodeBlock key={index} language={block.language} code={block.code || block.content} />;
 
           case 'feature_card':
             const FeatureIcon = Icons[block.icon] || Icons.Code2;
@@ -212,13 +212,20 @@ const ContentRenderer = ({ blocks, sourceFile }) => {
 function renderMarkdown(text) {
   if (typeof text !== 'string') return text;
 
-  const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
+  // Split by bold, code, or links
+  const parts = text.split(/(\*\*.*?\*\*|`.*?`|\[.*?\]\(.*?\))/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return <strong key={i} className="text-white">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
       return <code key={i} className="bg-[#132617] px-1 rounded text-[#86efac]">{part.slice(1, -1)}</code>;
+    }
+    if (part.startsWith('[') && part.endsWith(')')) {
+      const match = part.match(/\[(.*?)\]\((.*?)\)/);
+      if (match) {
+        return <a key={i} href={match[2]} target="_blank" rel="noreferrer" className="text-[#4ade80] hover:underline underline-offset-2">{match[1]}</a>;
+      }
     }
     return part;
   });
