@@ -3,7 +3,7 @@ import ContentRenderer from './ContentRenderer';
 import { SlideDeckEmbed, VideoEmbed } from './Embeds';
 import { FileText, ExternalLink } from 'lucide-react';
 
-const ModuleRenderer = ({ module }) => {
+const ModuleRenderer = ({ module, sourceFile }) => {
   if (!module) return null;
 
   switch (module.type) {
@@ -12,9 +12,9 @@ const ModuleRenderer = ({ module }) => {
         <div className="space-y-6">
           <h1 className="text-3xl font-bold text-white mb-6">{module.title}</h1>
           {module.url && module.url.includes('docs.google.com/presentation') ? (
-            <SlideDeckEmbed url={module.url} title={module.title} />
+            <SlideDeckEmbed url={module.url} title={module.title} sourceFile={sourceFile} />
           ) : module.url ? (
-            <VideoEmbed url={module.url} title={module.title} />
+            <VideoEmbed url={module.url} title={module.title} sourceFile={sourceFile} />
           ) : null}
           {module.notes && (
             <div className="mt-8 bg-[#132617] p-6 rounded-xl border border-[#1f3d25]">
@@ -59,7 +59,7 @@ const ModuleRenderer = ({ module }) => {
 
     case 'lab':
     default:
-      return <ContentRenderer blocks={module.blocks} />;
+      return <ContentRenderer blocks={module.blocks} sourceFile={sourceFile} />;
   }
 };
 

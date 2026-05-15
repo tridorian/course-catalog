@@ -1,0 +1,10 @@
+{
+  "tracks": [
+    {
+      "id": "agentic-engineering",
+      "title": "Agentic Engineering",
+      "description": "Master AI-powered development with Google Antigravity. Build, orchestrate, and secure autonomous AI agents for real-world software delivery.",
+      "icon": "Cpu"
+    }
+  ]
+}

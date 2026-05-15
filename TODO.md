@@ -66,6 +66,29 @@ This roadmap outlines the phased development of the platform, following a strict
 
 ---
 
+## Bug Fix: Course Progression Navigation (Resolved)
+**Objective:** Fix critical navigation bug preventing course progression via Next/Back/sidebar buttons.
+
+### Root Cause
+- [x] Module IDs in manifest and module JSON files were **numeric** (`"id": 1`), but React Router's `useParams()` returns **strings** (`"1"`). Strict equality `1 === "1"` always failed, locking `activeStepIndex` at `0`.
+
+### Fixes Applied
+- [x] Convert all module IDs to strings in both `agv-01` and `gemini-cli` courses (manifest + module JSON files).
+- [x] Add defensive `String()` coercion in `App.jsx` findIndex lookup to prevent regression.
+- [x] Reset `completedSteps` on course switch to support multi-course navigation without stale progress.
+- [x] Fix missing `metadata` field in Navigation test mock.
+- [x] Add regression test for numeric ID handling.
+- [x] Update `ARCH.md` and `DOCS.md` with ID format requirements.
+- [x] Add "Complete Course" button on last module (marks 100%, returns to Course Map).
+- [x] Add dev-mode embed URL editor (pencil icon overlay showing source file + URL with copy buttons).
+
+### Verification
+- [x] 14/14 unit tests passing.
+- [x] Browser-tested: Next, Back, sidebar clicks, deep linking, and multi-course switching all verified.
+- [x] **Branch:** `fix/course-progression-nav`
+
+---
+
 ## Phase 4: State Persistence & Google Drive Sync
 **Objective:** Transition from `localStorage` to cloud-based progress saving and automated content updates.
 
@@ -92,3 +115,10 @@ This roadmap outlines the phased development of the platform, following a strict
 - [ ] Audit all components for accessibility (A11y).
 - [ ] Optimize build size and asset loading.
 - [ ] Implement search across all modules in a track.
+- [x] Add a track-level index/landing page for browsing multiple courses within a track.
+- [x] Add root Dashboard page (`catalog.json`) for browsing all tracks.
+- [x] Add `track.json` manifests for per-track course listings.
+- [x] Implement clickable breadcrumbs (Track → Course → Module).
+- [x] Dev-mode embed URL editor (pencil icon overlay).
+- [x] "Complete Course" button on last module (marks 100%, returns to Course Map).
+- [ ] Add inter-course navigation (e.g., "Next Course" after completing all modules).

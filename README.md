@@ -8,9 +8,9 @@ The course catalog demo. This project showcases the capabilities of  the Tridori
 
 ## Overview
 
-This application is a React-based interactive course platform. It utilizes a dynamic loading architecture to fetch course content structured in a 4-tier hierarchy (Track > Course > Module > Step). Content is decoupled from the source code, defined in JSON files, and rendered dynamically.
+This application is a React-based interactive course platform. It utilizes a dynamic loading architecture to fetch course content structured in a 4-tier hierarchy (Track > Course > Module > Step). Content is decoupled from the source code, defined in JSON files, and rendered dynamically. Each track supports **multiple courses** — simply add a new directory under `public/content/tracks/[track_id]/` and navigate to it via URL.
 
-The featured courses are listed on the Dashboard
+The featured courses are listed on the Dashboard.
 
 ## Getting Started
 
@@ -57,11 +57,15 @@ This project is configured for automated deployment to GitHub Pages via GitHub A
 
 ## Architecture
 
-See [ARCH.md](./ARCH.md) for detailed architecture documentation.
+See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed architecture documentation.
 
 ## Documentation
 
-See [DOCS.md](./DOCS.md) for more details on course content and configuration.
+See [CONTENT_GUIDE.md](./docs/CONTENT_GUIDE.md) for content authoring and configuration.
+
+## Agent Instructions
+
+See [AGENTS.md](./AGENTS.md) for AI agent coding conventions and workflow rules.
 
 ## Roadmap & To-Do
 

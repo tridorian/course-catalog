@@ -5,7 +5,7 @@ import InfoBox from './InfoBox';
 import WarningBox from './WarningBox';
 import { VideoEmbed, SlideDeckEmbed } from './Embeds';
 
-const ContentRenderer = ({ blocks }) => {
+const ContentRenderer = ({ blocks, sourceFile }) => {
   if (!blocks) return null;
 
   return (
@@ -29,10 +29,10 @@ const ContentRenderer = ({ blocks }) => {
             );
 
           case 'video':
-            return <VideoEmbed key={index} url={block.url} title={block.title} />;
+            return <VideoEmbed key={index} url={block.url} title={block.title} sourceFile={sourceFile} />;
 
           case 'slides':
-            return <SlideDeckEmbed key={index} url={block.url} title={block.title} />;
+            return <SlideDeckEmbed key={index} url={block.url} title={block.title} sourceFile={sourceFile} />;
 
           case 'grid':
             return (

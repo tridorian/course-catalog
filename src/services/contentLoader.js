@@ -1,5 +1,29 @@
 
 /**
+ * Fetches the root catalog listing all available tracks.
+ */
+export async function fetchCatalog() {
+  const path = `./content/catalog.json`;
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new Error(`Failed to load catalog: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetches a track manifest listing all courses in a track.
+ */
+export async function fetchTrackManifest(trackId) {
+  const path = `./content/tracks/${trackId}/track.json`;
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new Error(`Track not found: ${trackId}`);
+  }
+  return response.json();
+}
+
+/**
  * Fetches the course manifest.
  */
 export async function fetchCourseManifest(trackId, courseId) {
