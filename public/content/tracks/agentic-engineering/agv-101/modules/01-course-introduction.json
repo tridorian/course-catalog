@@ -19,7 +19,6 @@
     {
       "type": "p",
       "content": "Based on our enterprise pilot sessions, **AGV-101 v0.2** focuses *exclusively* on getting Antigravity successfully installed and initialized within a restricted corporate IT environment. We will bypass Docker and external repository blocks by utilizing a secure Tarball method on a provisioned Cloudtop VM. As we like to say: *\"No install, no magic.\"*"
-    },
     }
   ]
 }
