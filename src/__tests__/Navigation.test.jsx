@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import * as contentLoader from '../services/contentLoader';
 
@@ -10,8 +10,20 @@ describe('Navigation & Deep Linking', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    // Mock catalog and track manifest (used by Dashboard/TrackPage)
+    contentLoader.fetchCatalog.mockResolvedValue({
+      tracks: [{ id: 'agentic-engineering', title: 'Agentic Engineering', description: 'Test', icon: 'Cpu' }]
+    });
+    contentLoader.fetchTrackManifest.mockResolvedValue({
+      track_id: 'agentic-engineering',
+      title: 'Agentic Engineering',
+      description: 'Test track',
+      courses: [{ id: 'agv-01', title: 'AGV-01', description: 'Test course', modules: 2, icon: 'Rocket' }]
+    });
+
     // Mock successful course load
     contentLoader.fetchCourseManifest.mockResolvedValue({
+      metadata: 'metadata.json',
       modules: [
         { id: 'module-1', file: 'module-1.json', title: 'Module 1' },
         { id: 'module-2', file: 'module-2.json', title: 'Module 2' }
@@ -45,11 +57,7 @@ describe('Navigation & Deep Linking', () => {
   const renderApp = (initialEntry = '/agentic-engineering/agv-01/module-1') => {
     render(
       <MemoryRouter initialEntries={[initialEntry]}>
-        <Routes>
-          <Route path="/:trackId/:courseId/:moduleId/*" element={<App />} />
-          <Route path="/:trackId/:courseId" element={<App />} />
-          <Route path="/" element={<App />} />
-        </Routes>
+        <App />
       </MemoryRouter>
     );
   };

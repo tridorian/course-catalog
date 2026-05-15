@@ -1,0 +1,21 @@
+{
+  "track_id": "agentic-engineering",
+  "title": "Agentic Engineering",
+  "description": "Build, orchestrate, and secure autonomous AI agents for real-world software delivery using Google Antigravity and the Tridorian standard.",
+  "courses": [
+    {
+      "id": "agv-01",
+      "title": "AGV-01: Agentic Workflows",
+      "description": "Master Google Antigravity and the Tridorian standard for Secure Agentic Development. 9 hands-on modules covering setup, orchestration, and disaster recovery.",
+      "modules": 9,
+      "icon": "Rocket"
+    },
+    {
+      "id": "gemini-cli",
+      "title": "Gemini CLI Deep Dive",
+      "description": "Advanced command-line AI orchestration with Gemini. Learn to leverage CLI tools for automated workflows and pipeline integration.",
+      "modules": 9,
+      "icon": "Terminal"
+    }
+  ]
+}

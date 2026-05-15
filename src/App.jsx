@@ -8,10 +8,13 @@ import {
   X,
   CheckCircle2,
   Lock,
-  AlertTriangle
+  AlertTriangle,
+  Trophy
 } from 'lucide-react';
 
 import ModuleRenderer from './components/ModuleRenderer';
+import Dashboard from './components/Dashboard';
+import TrackPage from './components/TrackPage';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
 
 // --- Main App Component ---
@@ -28,11 +31,8 @@ function AppContent() {
   const { trackId, courseId, moduleId } = useParams();
   const navigate = useNavigate();
 
-  const defaultTrackId = 'agentic-engineering';
-  const defaultCourseId = 'agv-01';
-
-  const currentTrackId = trackId || defaultTrackId;
-  const currentCourseId = courseId || defaultCourseId;
+  const currentTrackId = trackId;
+  const currentCourseId = courseId;
 
 
   // Load course manifest and metadata
@@ -40,15 +40,18 @@ function AppContent() {
     async function loadCourse() {
       setIsLoading(true);
       setError(null);
+      setCompletedSteps([]);
       try {
         const manifest = await fetchCourseManifest(currentTrackId, currentCourseId);
         const metadata = await fetchCourseMetadata(currentTrackId, currentCourseId, manifest.metadata);
         setCourseMetadata(metadata);
 
-        // Load all module content
-        const stepPromises = manifest.modules.map((mod) =>
-          fetchModuleContent(currentTrackId, currentCourseId, mod.file)
-        );
+        // Load all module content and tag each with its source file
+        const stepPromises = manifest.modules.map(async (mod) => {
+          const moduleData = await fetchModuleContent(currentTrackId, currentCourseId, mod.file);
+          moduleData._sourceFile = `public/content/tracks/${currentTrackId}/${currentCourseId}/${mod.file}`;
+          return moduleData;
+        });
 
         const steps = await Promise.all(stepPromises);
         setCourseSteps(steps);
@@ -67,7 +70,7 @@ function AppContent() {
 
   let activeStepIndex = 0;
   if (moduleId) {
-    const index = courseSteps.findIndex(s => s.id === moduleId);
+    const index = courseSteps.findIndex(s => String(s.id) === String(moduleId));
     if (index !== -1) {
       activeStepIndex = index;
     }
@@ -100,6 +103,14 @@ function AppContent() {
     }
   };
 
+  const completeCourse = () => {
+    // Mark all steps as completed
+    const allIndices = courseSteps.map((_, i) => i);
+    setCompletedSteps(allIndices);
+    // Navigate back to the Course Map
+    navigate(`/${currentTrackId}/${currentCourseId}`);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050805] flex items-center justify-center">
@@ -118,10 +129,10 @@ function AppContent() {
           <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Mission Interrupted</h2>
           <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
           <button
-            onClick={() => navigate('/agentic-engineering/agv-01')}
+            onClick={() => navigate('/')}
             className="px-6 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded font-mono text-xs transition-all"
           >
-            RETURN TO BASE (AGV-01)
+            RETURN TO DASHBOARD
           </button>
         </div>
       </div>
@@ -229,9 +240,12 @@ function AppContent() {
 
         <main className="flex-1 p-6 md:p-12 lg:p-16 max-w-4xl mx-auto w-full z-10">
 
-          {/* Breadcrumbs Placeholder */}
+          {/* Breadcrumbs */}
           <div className="mb-4 text-xs font-mono text-gray-500 tracking-wider">
-             {currentTrackId} <span className="opacity-50 mx-1">/</span> {currentCourseId} {moduleId ? <><span className="opacity-50 mx-1">/</span> {activeStep?.title}</> : null}
+             <button onClick={() => navigate(`/${currentTrackId}`)} className="hover:text-[#4ade80] transition-colors">{currentTrackId}</button>
+             <span className="opacity-50 mx-1">/</span>
+             <button onClick={() => navigate(`/${currentTrackId}/${currentCourseId}`)} className="hover:text-[#4ade80] transition-colors">{currentCourseId}</button>
+             {moduleId ? <><span className="opacity-50 mx-1">/</span> <span className="text-[#86efac]">{activeStep?.title}</span></> : null}
           </div>
 
           {!moduleId ? (
@@ -278,7 +292,7 @@ function AppContent() {
 
           {/* Inject Content */}
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <ModuleRenderer module={activeStep} />
+            <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} />
           </div>
             </>
           )}
@@ -300,18 +314,23 @@ function AppContent() {
             Back
           </button>
 
-          <button
-            onClick={goToNext}
-            disabled={activeStepIndex === totalSteps - 1}
-            className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
-              activeStepIndex === totalSteps - 1
-                ? 'opacity-0 pointer-events-none'
-                : 'bg-[#4ade80] text-black hover:bg-[#22c55e] shadow-[0_0_15px_rgba(74,222,128,0.3)]'
-            }`}
-          >
-            Next
-            <ChevronRight size={20} />
-          </button>
+          {activeStepIndex === totalSteps - 1 ? (
+            <button
+              onClick={completeCourse}
+              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-[#4ade80] text-black hover:bg-[#22c55e] shadow-[0_0_15px_rgba(74,222,128,0.3)] animate-pulse"
+            >
+              <Trophy size={20} />
+              Complete Course
+            </button>
+          ) : (
+            <button
+              onClick={goToNext}
+              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-[#4ade80] text-black hover:bg-[#22c55e] shadow-[0_0_15px_rgba(74,222,128,0.3)]"
+            >
+              Next
+              <ChevronRight size={20} />
+            </button>
+          )}
         </footer>
         )}
       </div>
@@ -340,7 +359,8 @@ function AppContent() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<AppContent />} />
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/:trackId" element={<TrackPage />} />
       <Route path="/:trackId/:courseId" element={<AppContent />} />
       <Route path="/:trackId/:courseId/:moduleId" element={<AppContent />} />
     </Routes>
