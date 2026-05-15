@@ -1,0 +1,71 @@
+{
+  "id": "1",
+  "title": "1. Course Introduction",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Secure Agentic Development: Installation & Setup"
+    },
+    {
+      "type": "p",
+      "content": "**Course Abstract:** Welcome to the foundational session of Google Antigravity (AGV). Before we can orchestrate AI agents to write code or execute terminal commands, we must establish a secure, working environment."
+    },
+    {
+      "type": "p",
+      "content": "Based on our enterprise pilot sessions, **AGV-101 v0.2** focuses *exclusively* on getting Antigravity successfully installed and initialized within a restricted corporate IT environment. We will bypass Docker and external repository blocks by utilizing a secure Tarball method on a provisioned Cloudtop VM. As we like to say: *\"No install, no magic.\"*"
+    },
+    {
+      "type": "h2",
+      "content": "Slide Deck Outline - Course Introduction"
+    },
+    {
+      "type": "info",
+      "content": "Instructor Note: Use this outline to create the introductory slide deck for the session. Present this before beginning the hands-on labs."
+    },
+    {
+      "type": "h3",
+      "content": "Slide 1: Welcome to Secure Agentic Development (L100)"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Visual:** Course title with high-tech, futuristic AGV branding focusing on \"Installation & Setup\".",
+        "**Talking Track:** \"Welcome to Secure Agentic Development with Google Antigravity. Today, we are focusing on the critical first step: successfully installing and securing your AGV Mission Control in a locked-down corporate environment.\""
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Slide 2: What is Google Antigravity (AGV)?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Visual:** Diagram showing a developer at a laptop (Mission Control) orchestrating multiple AI agents (Workers).",
+        "**Talking Track:** \"Google Antigravity is your Mission Control for agentic workflows. However, before agents can build for us, we need a functional, secure installation that abides by strict corporate guardrails.\""
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Slide 3: The Corporate IT Environment & Installation Strategy"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Visual:** A warning icon next to a terminal window, transitioning to a terminal executing a 1-click install script.",
+        "**Talking Track:** \"Corporate IT environments restrict Docker and external repositories. To bypass these limitations securely, we will utilize the open-source AGV Easy Install manager on a provisioned Cloudtop Linux VM. This gives us a seamless, interactive menu to securely deploy the official binaries.\""
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Slide 4: Course Roadmap"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Visual:** A progressive path (Provision VM -> AGV Easy Install -> Initialize Workspace -> Verify Toolchain -> Test Agent).",
+        "**Talking Track:** \"In this session, we focus entirely on our L100 goal: 'Getting the software installed and verified.' Future sessions will cover navigating the console, building your first app, and configuring advanced agent skills.\""
+      ]
+    }
+  ]
+}

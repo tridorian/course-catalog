@@ -10,7 +10,7 @@ The Google Doc must use **Tabs** to organize content.
 - **Purpose:** Metadata and course-wide settings.
 - **Format:** A single 2-column table.
 - **Required Keys:**
-  - `course_id`: A unique URL-friendly slug (e.g., `agv-01`).
+  - `course_id`: A unique URL-friendly slug (e.g., `agv-101`).
   - `title`: The display name of the course.
   - `version`: Semver versioning (e.g., `1.0.0`).
   - `author`: Name of the creator.

@@ -4,10 +4,10 @@
   "description": "Build, orchestrate, and secure autonomous AI agents for real-world software delivery using Google Antigravity and the Tridorian standard.",
   "courses": [
     {
-      "id": "agv-01",
-      "title": "AGV-01: Agentic Workflows",
-      "description": "Master Google Antigravity and the Tridorian standard for Secure Agentic Development. 9 hands-on modules covering setup, orchestration, and disaster recovery.",
-      "modules": 9,
+      "id": "agv-101",
+      "title": "AGV-101: Secure Agentic Development: Installation & Setup (L100)",
+      "description": "Welcome to the foundational session of Google Antigravity (AGV). Before we can orchestrate AI agents to write code or execute terminal commands, we must establish a secure, working environment.",
+      "modules": 5,
       "icon": "Rocket"
     },
     {

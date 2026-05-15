@@ -19,7 +19,7 @@ describe('App Integration', () => {
       track_id: 'agentic-engineering',
       title: 'Agentic Engineering',
       description: 'Test track',
-      courses: [{ id: 'agv-01', title: 'AGV-01', description: 'Test course', modules: 2, icon: 'Rocket' }]
+      courses: [{ id: 'agv-101', title: 'AGV-101', description: 'Test course', modules: 2, icon: 'Rocket' }]
     });
 
     // Default mock implementation
@@ -53,7 +53,7 @@ describe('App Integration', () => {
     window.scrollTo = vi.fn();
   });
 
-  const renderApp = (initialEntry = '/agentic-engineering/agv-01/module-1') => {
+  const renderApp = (initialEntry = '/agentic-engineering/agv-101/module-1') => {
     render(
       <MemoryRouter initialEntries={[initialEntry]}>
         <App />
@@ -143,7 +143,7 @@ describe('App Integration', () => {
     });
 
     // URL param "1" is a string, content id is number 1
-    renderApp('/agentic-engineering/agv-01/1');
+    renderApp('/agentic-engineering/agv-101/1');
 
     await waitFor(() => {
       expect(screen.getByText('Numeric Content 1')).toBeInTheDocument();

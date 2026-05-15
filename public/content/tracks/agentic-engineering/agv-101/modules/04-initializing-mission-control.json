@@ -1,0 +1,94 @@
+{
+  "id": "4",
+  "title": "4. Initializing Mission Control",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab 2: Initializing Mission Control"
+    },
+    {
+      "type": "p",
+      "content": "**Learning Objective:** Launch AGV, authenticate securely, verify the toolchain, and run a test execution prompt."
+    },
+    {
+      "type": "h2",
+      "content": "Lab Steps"
+    },
+    {
+      "type": "h3",
+      "content": "1. Launch AGV & Authenticate"
+    },
+    {
+      "type": "p",
+      "content": "Open the Antigravity application from your desktop grid. Sign in using your personal, non-google.com gMail account."
+    },
+    {
+      "type": "info",
+      "content": "**Instructor Comment:** *If you encounter a token error during authentication, verify that your browser hasn't defaulted to your corporate workspace profile.*"
+    },
+    {
+      "type": "h3",
+      "content": "2. Create the Project"
+    },
+    {
+      "type": "p",
+      "content": "Initialize your project folder in your active terminal:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "mkdir -p my-agv-workspace\ncd my-agv-workspace"
+    },
+    {
+      "type": "h3",
+      "content": "3. Open Workspace"
+    },
+    {
+      "type": "p",
+      "content": "In Antigravity, click **Open Folder** and select the `my-agv-workspace` directory."
+    },
+    {
+      "type": "h3",
+      "content": "4. Verify the Toolchain"
+    },
+    {
+      "type": "p",
+      "content": "Ensure everything is staged perfectly without installing any extra packages. Open the Antigravity integrated terminal and run:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "python3 --version\nagv --version"
+    },
+    {
+      "type": "warning",
+      "content": "**Troubleshooting Tip - Unrecognized Commands:** *Are your CLI commands (like `agv` or `npx`) failing in the Antigravity terminal? You can fix this by sourcing your `.bashrc` file inside your `.bash_profile`. This ensures that all your existing configurations are loaded whenever Antigravity starts.*"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Open your `~/.bash_profile` file in Antigravity.",
+        "Add the following code block to the file:\n```bash\nsource ~/.bashrc\n```",
+        "Save the file and Restart Antigravity."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "5. Test Your Agent's Permissions"
+    },
+    {
+      "type": "p",
+      "content": "To confirm the AI agent has the correct read, write, and execution permissions in your new secure workspace, let's run a test prompt. Open the **Agent Panel** in Antigravity, and paste the following prompt:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "code": "Create a file named `hello_agv.py` that prints \"Antigravity environment is fully secured and operational!\". Run the file in the terminal and verify the output."
+    },
+    {
+      "type": "info",
+      "content": "✅ **Success Criteria:** *Watch as the agent autonomously creates the file in your workspace, executes the Python script in your integrated terminal, and reads the output back to you. If it succeeds, your \"No install, no magic\" phase is complete!*"
+    }
+  ]
+}

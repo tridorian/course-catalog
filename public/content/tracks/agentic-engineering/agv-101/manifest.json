@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Course Introduction",
+      "file": "modules/01-course-introduction.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Prerequisites & Environment Provisioning",
+      "file": "modules/02-prerequisites-environment.json"
+    },
+    {
+      "id": "3",
+      "title": "3. The Hardened Install",
+      "file": "modules/03-hardened-install.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Initializing Mission Control",
+      "file": "modules/04-initializing-mission-control.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Wrap Up & Next Steps",
+      "file": "modules/05-wrap-up-next-steps.json"
+    }
+  ]
+}
