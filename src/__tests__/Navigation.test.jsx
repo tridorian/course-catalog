@@ -18,7 +18,7 @@ describe('Navigation & Deep Linking', () => {
       track_id: 'agentic-engineering',
       title: 'Agentic Engineering',
       description: 'Test track',
-      courses: [{ id: 'agv-01', title: 'AGV-01', description: 'Test course', modules: 2, icon: 'Rocket' }]
+      courses: [{ id: 'agv-101', title: 'AGV-101', description: 'Test course', modules: 2, icon: 'Rocket' }]
     });
 
     // Mock successful course load
@@ -54,7 +54,7 @@ describe('Navigation & Deep Linking', () => {
     });
   });
 
-  const renderApp = (initialEntry = '/agentic-engineering/agv-01/module-1') => {
+  const renderApp = (initialEntry = '/agentic-engineering/agv-101/module-1') => {
     render(
       <MemoryRouter initialEntries={[initialEntry]}>
         <App />
@@ -95,7 +95,7 @@ describe('Navigation & Deep Linking', () => {
 
   it('loads correct state from deep link', async () => {
     window.scrollTo = vi.fn();
-    renderApp('/agentic-engineering/agv-01/module-2');
+    renderApp('/agentic-engineering/agv-101/module-2');
 
     await waitFor(() => {
       expect(screen.queryByText('Module 2 Content') || screen.queryByText('Module 1 Content')).toBeInTheDocument();

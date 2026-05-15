@@ -52,7 +52,7 @@ The application fetches content dynamically from the `public/content/` directory
 - This decoupling allows content updates without rebuilding the application.
 
 ### Multi-Course Support
-A single Track can contain multiple Courses. Each course lives in its own directory under `public/content/tracks/[track_id]/`. When a user navigates between courses (e.g., from `agv-01` to `gemini-cli`), the application:
+A single Track can contain multiple Courses. Each course lives in its own directory under `public/content/tracks/[track_id]/`. When a user navigates between courses (e.g., from `agv-101` to `gemini-cli`), the application:
 - Re-fetches the manifest and all module content for the new course.
 - **Resets `completedSteps`** to avoid stale progress from the previous course bleeding over.
 

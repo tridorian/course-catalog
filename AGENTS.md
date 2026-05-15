@@ -24,7 +24,7 @@ This is a **React + Vite** interactive course platform with a dark "Tridorian" t
 
 ```
 Track (e.g., "agentic-engineering")
- └── Course (e.g., "agv-01", "gemini-cli")
+ └── Course (e.g., "agv-101", "gemini-cli")
       └── Module (e.g., "01-course-introduction.json")
            └── Step/Block (content blocks inside a module)
 ```
@@ -266,8 +266,8 @@ The app uses `HashRouter` (for GitHub Pages compatibility):
 |---------|------|---------|
 | `/#/` | Dashboard (all tracks) | `/#/` |
 | `/#/:trackId` | Track page (all courses) | `/#/agentic-engineering` |
-| `/#/:trackId/:courseId` | Course Map | `/#/agentic-engineering/agv-01` |
-| `/#/:trackId/:courseId/:moduleId` | Module view | `/#/agentic-engineering/agv-01/1` |
+| `/#/:trackId/:courseId` | Course Map | `/#/agentic-engineering/agv-101` |
+| `/#/:trackId/:courseId/:moduleId` | Module view | `/#/agentic-engineering/agv-101/1` |
 
 ---
 
