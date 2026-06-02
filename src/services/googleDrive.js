@@ -63,6 +63,7 @@ async function driveFetch(url, options = {}, retryCount = 0) {
  * Gets local progress from localStorage.
  */
 function getLocalProgress() {
+  if (typeof localStorage === 'undefined') return {};
   const data = localStorage.getItem(LOCAL_STORAGE_KEY);
   return data ? JSON.parse(data) : {};
 }
@@ -71,6 +72,7 @@ function getLocalProgress() {
  * Saves progress to localStorage.
  */
 function saveLocalProgress(progress) {
+  if (typeof localStorage === 'undefined') return;
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(progress));
 }
 
@@ -78,6 +80,7 @@ function saveLocalProgress(progress) {
  * Queues a progress update for offline sync.
  */
 function queueOfflineUpdate(trackId, courseId, update) {
+  if (typeof localStorage === 'undefined') return;
   const queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
   queue.push({
     trackId,
@@ -183,6 +186,7 @@ export async function saveCourseProgress(trackId, courseId, activeModuleId, comp
  */
 export async function syncOfflineQueue() {
   if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+  if (typeof localStorage === 'undefined') return;
 
   const queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
   if (queue.length === 0) return;
@@ -232,7 +236,9 @@ export async function syncOfflineQueue() {
       body: JSON.stringify(localProgress)
     });
 
-    localStorage.removeItem(OFFLINE_QUEUE_KEY);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(OFFLINE_QUEUE_KEY);
+    }
     saveLocalProgress(localProgress);
 
   } catch (err) {

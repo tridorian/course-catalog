@@ -55,12 +55,14 @@ describe('Resume Last Session Banner', () => {
   });
 
   it('shows resume banner when session differs and no moduleId in URL', async () => {
-    googleDrive.getProgressFile.mockResolvedValue({
-      id: 'file123',
-      appProperties: {
-        trackId: 'track1',
-        courseId: 'course1',
-        moduleId: 'mod1'
+    googleDrive.loadProgress.mockResolvedValue({
+      fileId: 'file123',
+      progress: {
+        track1_course1: {
+          activeModuleId: 'mod1',
+          completedIndices: [],
+          lastUpdated: new Date().toISOString()
+        }
       }
     });
 
@@ -76,12 +78,14 @@ describe('Resume Last Session Banner', () => {
   });
 
   it('does not show resume banner when already on a module URL', async () => {
-    googleDrive.getProgressFile.mockResolvedValue({
-      id: 'file123',
-      appProperties: {
-        trackId: 'track1',
-        courseId: 'course1',
-        moduleId: 'mod1'
+    googleDrive.loadProgress.mockResolvedValue({
+      fileId: 'file123',
+      progress: {
+        track1_course1: {
+          activeModuleId: 'mod1',
+          completedIndices: [],
+          lastUpdated: new Date().toISOString()
+        }
       }
     });
 
@@ -97,12 +101,14 @@ describe('Resume Last Session Banner', () => {
   });
 
   it('navigates to saved session when Resume is clicked', async () => {
-    googleDrive.getProgressFile.mockResolvedValue({
-      id: 'file123',
-      appProperties: {
-        trackId: 'track1',
-        courseId: 'course1',
-        moduleId: 'mod1'
+    googleDrive.loadProgress.mockResolvedValue({
+      fileId: 'file123',
+      progress: {
+        track1_course1: {
+          activeModuleId: 'mod1',
+          completedIndices: [],
+          lastUpdated: new Date().toISOString()
+        }
       }
     });
 

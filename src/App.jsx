@@ -19,7 +19,7 @@ import SyncStatus from './components/SyncStatus';
 import Dashboard from './components/Dashboard';
 import TrackPage from './components/TrackPage';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
-import { getProgressFile, saveProgress } from './services/googleDrive';
+import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/googleDrive';
 import { getAccessToken } from './services/googleAuth';
 
 // --- Main App Component ---
@@ -45,48 +45,25 @@ function AppContent() {
   const currentTrackId = trackId;
   const currentCourseId = courseId;
 
-
-  // Sync logic: Fetch progress from Google Drive on mount
+  // Handle offline queue sync when connection is restored
   useEffect(() => {
-    async function initSync() {
-      const token = getAccessToken();
-      if (!token) return;
-
-      try {
-        const progressFile = await getProgressFile();
-        setDriveFileId(progressFile.id);
-        
-        const props = progressFile.appProperties;
-        if (props && props.trackId && props.courseId && props.moduleId) {
-          // Check if it's different from current
-          const isSame = props.trackId === trackId && 
-                         props.courseId === courseId && 
-                         props.moduleId === moduleId;
-          
-          if (!isSame && !moduleId && !isBannerDismissed) {
-            setResumeSession({
-              trackId: props.trackId,
-              courseId: props.courseId,
-              moduleId: props.moduleId,
-              activeStepIndex: parseInt(props.activeStepIndex || '0')
-            });
-            setIsResumeBannerVisible(true);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to sync with Google Drive:", err);
-        setSyncStatus('error');
-      }
+    const handleOnline = () => {
+      syncOfflineQueue();
+    };
+    window.addEventListener('online', handleOnline);
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      syncOfflineQueue();
     }
-    initSync();
-  }, [trackId, courseId, moduleId]);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
 
-  // Load course manifest and metadata
+  // Load course manifest, metadata, and progress
   useEffect(() => {
     async function loadCourse() {
       setIsLoading(true);
       setError(null);
-      setCompletedSteps([]);
       try {
         const manifest = await fetchCourseManifest(currentTrackId, currentCourseId);
         const metadata = await fetchCourseMetadata(currentTrackId, currentCourseId, manifest.metadata);
@@ -101,6 +78,49 @@ function AppContent() {
 
         const steps = await Promise.all(stepPromises);
         setCourseSteps(steps);
+
+        // Load progress from Drive / Cache
+        const token = getAccessToken();
+        if (token) {
+          const { progress, fileId } = await loadProgress();
+          setDriveFileId(fileId);
+
+          const currentProgress = progress[`${currentTrackId}_${currentCourseId}`];
+          if (currentProgress && currentProgress.completedIndices) {
+            setCompletedSteps(currentProgress.completedIndices.map(Number));
+          } else {
+            setCompletedSteps([]);
+          }
+
+          // Resume session check
+          let newest = null;
+          for (const [key, val] of Object.entries(progress)) {
+            if (val && val.lastUpdated) {
+              if (!newest || new Date(val.lastUpdated) > new Date(newest.lastUpdated)) {
+                const [tId, cId] = key.split('_');
+                newest = {
+                  trackId: tId,
+                  courseId: cId,
+                  moduleId: val.activeModuleId,
+                  lastUpdated: val.lastUpdated
+                };
+              }
+            }
+          }
+
+          if (newest && !isBannerDismissed) {
+            const isSameModule = newest.trackId === currentTrackId && 
+                                 newest.courseId === currentCourseId &&
+                                 newest.moduleId === moduleId;
+            if (!isSameModule) {
+              setResumeSession(newest);
+              setIsResumeBannerVisible(true);
+            }
+          }
+        } else {
+          setCompletedSteps([]);
+        }
+
         setIsLoading(false);
       } catch (err) {
         console.error("Failed to load course content:", err);
@@ -110,9 +130,7 @@ function AppContent() {
     }
 
     loadCourse();
-  }, [trackId, courseId]);
-
-
+  }, [trackId, courseId, isBannerDismissed]);
 
   let activeStepIndex = 0;
   if (moduleId) {
@@ -122,18 +140,13 @@ function AppContent() {
     }
   }
 
-  // Update progress in Drive whenever module changes
+  // Update progress in Drive whenever module or completed steps change
   useEffect(() => {
     if (driveFileId && moduleId && activeStepIndex !== -1) {
       const syncProgress = async () => {
         setSyncStatus('syncing');
         try {
-          await saveProgress(driveFileId, {
-            activeStepIndex,
-            trackId,
-            courseId,
-            moduleId
-          });
+          await saveCourseProgress(trackId, courseId, moduleId, completedSteps);
           setSyncStatus('synced');
         } catch (err) {
           console.error("Failed to save progress:", err);
@@ -142,18 +155,13 @@ function AppContent() {
       };
       syncProgress();
     }
-  }, [driveFileId, trackId, courseId, moduleId, activeStepIndex]);
+  }, [driveFileId, trackId, courseId, moduleId, completedSteps, activeStepIndex]);
 
   const handleRetrySync = async () => {
     if (!driveFileId || !moduleId) return;
     setSyncStatus('syncing');
     try {
-      await saveProgress(driveFileId, {
-        activeStepIndex,
-        trackId,
-        courseId,
-        moduleId
-      });
+      await saveCourseProgress(trackId, courseId, moduleId, completedSteps);
       setSyncStatus('synced');
     } catch (err) {
       setSyncStatus('error');
