@@ -9,13 +9,18 @@ import {
   CheckCircle2,
   Lock,
   AlertTriangle,
-  Trophy
+  Trophy,
+  History,
+  CheckCircle
 } from 'lucide-react';
 
 import ModuleRenderer from './components/ModuleRenderer';
+import SyncStatus from './components/SyncStatus';
 import Dashboard from './components/Dashboard';
 import TrackPage from './components/TrackPage';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
+import { getProgressFile, saveProgress } from './services/googleDrive';
+import { getAccessToken } from './services/googleAuth';
 
 // --- Main App Component ---
 
@@ -27,6 +32,12 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [syncStatus, setSyncStatus] = useState('synced');
+  const [driveFileId, setDriveFileId] = useState(null);
+  const [resumeSession, setResumeSession] = useState(null);
+  const [isResumeBannerVisible, setIsResumeBannerVisible] = useState(false);
+  const [isBannerDismissed, setIsBannerDismissed] = useState(false);
+
 
   const { trackId, courseId, moduleId } = useParams();
   const navigate = useNavigate();
@@ -34,6 +45,41 @@ function AppContent() {
   const currentTrackId = trackId;
   const currentCourseId = courseId;
 
+
+  // Sync logic: Fetch progress from Google Drive on mount
+  useEffect(() => {
+    async function initSync() {
+      const token = getAccessToken();
+      if (!token) return;
+
+      try {
+        const progressFile = await getProgressFile();
+        setDriveFileId(progressFile.id);
+
+        const props = progressFile.appProperties;
+        if (props && props.trackId && props.courseId && props.moduleId) {
+          // Check if it's different from current
+          const isSame = props.trackId === trackId &&
+                         props.courseId === courseId &&
+                         props.moduleId === moduleId;
+
+          if (!isSame && !moduleId && !isBannerDismissed) {
+            setResumeSession({
+              trackId: props.trackId,
+              courseId: props.courseId,
+              moduleId: props.moduleId,
+              activeStepIndex: parseInt(props.activeStepIndex || '0')
+            });
+            setIsResumeBannerVisible(true);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to sync with Google Drive:", err);
+        setSyncStatus('error');
+      }
+    }
+    initSync();
+  }, [trackId, courseId, moduleId]);
 
   // Load course manifest and metadata
   useEffect(() => {
@@ -75,6 +121,44 @@ function AppContent() {
       activeStepIndex = index;
     }
   }
+
+  // Update progress in Drive whenever module changes
+  useEffect(() => {
+    if (driveFileId && moduleId && activeStepIndex !== -1) {
+      const syncProgress = async () => {
+        setSyncStatus('syncing');
+        try {
+          await saveProgress(driveFileId, {
+            activeStepIndex,
+            trackId,
+            courseId,
+            moduleId
+          });
+          setSyncStatus('synced');
+        } catch (err) {
+          console.error("Failed to save progress:", err);
+          setSyncStatus('error');
+        }
+      };
+      syncProgress();
+    }
+  }, [driveFileId, trackId, courseId, moduleId, activeStepIndex]);
+
+  const handleRetrySync = async () => {
+    if (!driveFileId || !moduleId) return;
+    setSyncStatus('syncing');
+    try {
+      await saveProgress(driveFileId, {
+        activeStepIndex,
+        trackId,
+        courseId,
+        moduleId
+      });
+      setSyncStatus('synced');
+    } catch (err) {
+      setSyncStatus('error');
+    }
+  };
 
   const activeStep = courseSteps[activeStepIndex];
   const totalSteps = courseSteps.length;
@@ -168,7 +252,10 @@ function AppContent() {
         transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar
       `}>
         <div className="p-6 hidden md:block border-b border-[#1f3d25]">
-          <div className="font-extrabold text-xl text-[#4ade80] tracking-[0.2em]">TRIDORIAN</div>
+          <div className="flex justify-between items-start mb-2">
+            <div className="font-extrabold text-xl text-[#4ade80] tracking-[0.2em]">TRIDORIAN</div>
+            <SyncStatus status={syncStatus} onRetry={handleRetrySync} />
+          </div>
           <div className="text-xs text-[#86efac] mt-1 font-mono uppercase">{courseMetadata?.title || 'LABS // UNKNOWN'}</div>
         </div>
 
@@ -234,6 +321,45 @@ function AppContent() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden pb-24 md:pb-0">
+
+        {/* Resume Session Banner */}
+        {isResumeBannerVisible && resumeSession && !isBannerDismissed && (
+          <div className="bg-[#132617] border-b border-[#4ade80]/30 p-4 animate-in slide-in-from-top duration-500 z-50">
+            <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#4ade80]/10 flex items-center justify-center border border-[#4ade80]/20">
+                  <History size={20} className="text-[#4ade80]" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white">Resume Session?</div>
+                  <div className="text-xs text-gray-400 font-mono">
+                    You were last working on <span className="text-[#4ade80]">{resumeSession.courseId} / {resumeSession.moduleId}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setIsResumeBannerVisible(false);
+                    setIsBannerDismissed(true);
+                  }}
+                  className="px-4 py-1.5 text-xs font-mono text-gray-400 hover:text-white transition-colors"
+                >
+                  DISMISS
+                </button>
+                <button
+                  onClick={() => {
+                    navigate(`/${resumeSession.trackId}/${resumeSession.courseId}/${resumeSession.moduleId}`);
+                    setIsResumeBannerVisible(false);
+                  }}
+                  className="px-4 py-1.5 bg-[#4ade80] text-black text-xs font-bold rounded flex items-center gap-2 hover:bg-[#22c55e] transition-all"
+                >
+                  RESUME MISSION
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Subtle Background Glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#4ade80]/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>

@@ -50,6 +50,9 @@ export async function getProgressFile() {
       // Store initial progress in appProperties
       appProperties: {
         activeStepIndex: '0',
+        trackId: '',
+        courseId: '',
+        moduleId: '',
         lastUpdated: new Date().toISOString()
       }
     })
@@ -57,14 +60,18 @@ export async function getProgressFile() {
 }
 
 /**
- * Updates the activeStepIndex in the file's appProperties.
+ * Updates the session progress in the file's appProperties.
  */
-export async function saveProgress(fileId, stepIndex) {
+export async function saveProgress(fileId, progress) {
+  const { activeStepIndex, trackId, courseId, moduleId } = progress;
   return driveFetch(`${DRIVE_API_BASE}/${fileId}`, {
     method: 'PATCH',
     body: JSON.stringify({
       appProperties: {
-        activeStepIndex: stepIndex.toString(),
+        activeStepIndex: activeStepIndex.toString(),
+        trackId: trackId || '',
+        courseId: courseId || '',
+        moduleId: moduleId || '',
         lastUpdated: new Date().toISOString()
       }
     })
