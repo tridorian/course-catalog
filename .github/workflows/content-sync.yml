@@ -1,0 +1,54 @@
+name: Content Sync
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Nightly at 2:00 AM UTC
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/**'
+  workflow_dispatch:
+    inputs:
+      docId:
+        description: 'Google Doc ID to sync (optional, overrides config)'
+        required: false
+      trackId:
+        description: 'Target Track ID (required if docId is provided)'
+        required: false
+      courseId:
+        description: 'Target Course ID (required if docId is provided)'
+        required: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run sync script
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.docId }}" != "" ]; then
+            # Temporary config for manual run
+            echo '[{"docId": "${{ github.event.inputs.docId }}", "trackId": "${{ github.event.inputs.trackId }}", "courseId": "${{ github.event.inputs.courseId }}"}]' > scripts/sync-config.temp.json
+            mv scripts/sync-config.temp.json scripts/sync-config.json
+          fi
+          node scripts/sync-docs.js
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: automated content sync [skip ci]"
+          file_pattern: 'public/content/**'
