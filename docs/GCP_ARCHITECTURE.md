@@ -41,3 +41,19 @@ The platform cannot be fully public. Access control will be implemented via **Go
 *   **Authentication:** Users must log in using their Google accounts.
 *   **Authorization (Phase 1):** Initially, we will gate access based on specific email domains (e.g., `@yourcompany.com`) to keep unauthorized users out.
 *   **Authorization (Phase 2):** Implement granular access control lists (ACLs) or Firestore Security Rules for more targeted user management later.
+
+## 5. Technical Validation: Google Docs Tabs API
+
+The single-document-with-tabs approach is fully supported by the Google Docs API.
+- The `documents.get` method returns a `Document` resource.
+- Within the `Document` resource, the `tabs` property contains an array of `Tab` objects.
+- Each `Tab` contains its own `DocumentTab` object, which holds the structural elements (Body, Headers, Footers, etc.) identical to a standard, non-tabbed document.
+- The sync engine will iterate through the `tabs` array, treating each tab as a distinct Module according to the Tridorian Document Specification (TDS).
+
+## 6. AI-Driven Updates & Sync Orchestration
+
+To streamline the maintenance and generation of course content, the sync process will be designed to be triggered autonomously by AI agents (e.g., Jules or AGY).
+
+*   **Cloud Function / Webhook:** The sync engine will expose a secure Cloud Function endpoint.
+*   **MCP Integration:** We will create an MCP (Model Context Protocol) server wrapping this endpoint.
+*   **Agentic Workflow:** When an agent updates a course (by editing the Google Doc via API or other means), it can immediately call the MCP tool to trigger the Sync Engine. This allows the agent to verify that the generated JSON in Firestore accurately reflects the changes, completing the CI/CD loop entirely autonomously.
