@@ -9,8 +9,8 @@ To avoid building a custom editor, Google Drive serves as the source of truth fo
 ```
 📁 Course Catalog (Root Folder)
 ├── 📁 Track: Agentic Engineering
-│   ├── 📄 Course: AGV-101 (Google Doc)
-│   └── 📄 Course: AGV-102 (Google Doc)
+│   ├── 📄 Course: AGY-101 (Google Doc)
+│   └── 📄 Course: AGY-102 (Google Doc)
 └── 📁 Track: Cloud Operations
     ├── 📄 Course: Cloud-101 (Google Doc)
     └── 📄 Course: Kubernetes (Google Doc)

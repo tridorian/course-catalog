@@ -15,7 +15,7 @@ This document describes the high-level architecture of the Tridorian Course Plat
 The platform follows a 4-tier content hierarchy for maximum modularity and scalability:
 
 1.  **Track:** The top-level container (e.g., "AI Engineering", "Cloud Operations"). A Track contains multiple Courses.
-2.  **Course:** A specific learning path within a Track (e.g., "AGV-01: Agentic Workflows"). A Course is composed of multiple Modules.
+2.  **Course:** A specific learning path within a Track (e.g., "AGY-01: Agentic Workflows"). A Course is composed of multiple Modules.
 3.  **Module:** A discrete unit of learning. Modules can be of different types:
     - **Lab:** An interactive, step-by-step technical guide (the primary module type).
     - **Presentation:** A module centered around a Google Slides deck or a Google Drive video walkthrough.
@@ -52,7 +52,7 @@ The application fetches content dynamically from the `public/content/` directory
 - This decoupling allows content updates without rebuilding the application.
 
 ### Multi-Course Support
-A single Track can contain multiple Courses. Each course lives in its own directory under `public/content/tracks/[track_id]/`. When a user navigates between courses (e.g., from `agv-101` to `gemini-cli`), the application:
+A single Track can contain multiple Courses. Each course lives in its own directory under `public/content/tracks/[track_id]/`. When a user navigates between courses (e.g., from `agy-101` to `gemini-cli`), the application:
 - Re-fetches the manifest and all module content for the new course.
 - **Resets `completedSteps`** to avoid stale progress from the previous course bleeding over.
 

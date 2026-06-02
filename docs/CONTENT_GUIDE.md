@@ -47,7 +47,7 @@ To add a completely new learning track:
 
 A single track can contain multiple courses. To add a new course:
 
-1.  **Create the Course Directory:** Create a new folder under the track (e.g., `public/content/tracks/agentic-engineering/agv-02/`).
+1.  **Create the Course Directory:** Create a new folder under the track (e.g., `public/content/tracks/agentic-engineering/agy-02/`).
 2.  **Create `manifest.json`:** Define the course modules with **string IDs**:
     ```json
     {
@@ -60,7 +60,7 @@ A single track can contain multiple courses. To add a new course:
 3.  **Create `metadata.json`:** Define the course title and description.
 4.  **Create Module Files:** Add JSON files to `modules/` following the schema.
 5.  **Update `track.json`:** Add the new course to the track's `track.json` file.
-6.  **Navigate:** Access the course via `/#/[track_id]/[course_id]` (e.g., `/#/agentic-engineering/agv-02`).
+6.  **Navigate:** Access the course via `/#/[track_id]/[course_id]` (e.g., `/#/agentic-engineering/agy-02`).
 
 ### UI Components
 

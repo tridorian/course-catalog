@@ -13,7 +13,7 @@ This roadmap outlines the phased development of the platform, following a strict
 - [x] **Step 3:** Implement integration tests using Vitest/RTL to verify that a course loads correctly given a valid path.
 
 ### 1.2 Hierarchy Refactor
-- [x] **Sub-step:** Update `src/App.jsx` to parse Track and Course IDs from the URL (e.g., `/#/agentic-engineering/agv-101`).
+- [x] **Sub-step:** Update `src/App.jsx` to parse Track and Course IDs from the URL (e.g., `/#/agentic-engineering/agy-101`).
 - [x] **Sub-step:** Refactor file fetching logic to use the new path structure: `public/content/tracks/[track]/[course]/`.
 - [x] **Sub-step:** Implement a `ModuleSchema` validator to ensure JSON files contain required fields (`id`, `type`, `title`, `blocks`).
 
@@ -73,7 +73,7 @@ This roadmap outlines the phased development of the platform, following a strict
 - [x] Module IDs in manifest and module JSON files were **numeric** (`"id": 1`), but React Router's `useParams()` returns **strings** (`"1"`). Strict equality `1 === "1"` always failed, locking `activeStepIndex` at `0`.
 
 ### Fixes Applied
-- [x] Convert all module IDs to strings in both `agv-101` and `gemini-cli` courses (manifest + module JSON files).
+- [x] Convert all module IDs to strings in both `agy-101` and `gemini-cli` courses (manifest + module JSON files).
 - [x] Add defensive `String()` coercion in `App.jsx` findIndex lookup to prevent regression.
 - [x] Reset `completedSteps` on course switch to support multi-course navigation without stale progress.
 - [x] Fix missing `metadata` field in Navigation test mock.

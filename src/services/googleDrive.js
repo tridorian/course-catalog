@@ -5,7 +5,7 @@
 import { getAccessToken } from './googleAuth';
 
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3/files';
-const PROGRESS_FILE_NAME = 'agv_course_progress.json';
+const PROGRESS_FILE_NAME = 'agy_course_progress.json';
 
 async function driveFetch(url, options = {}) {
   const token = getAccessToken();

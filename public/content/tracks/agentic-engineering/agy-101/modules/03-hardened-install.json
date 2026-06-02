@@ -25,16 +25,16 @@
     },
     {
       "type": "h3",
-      "content": "2. Run the AGV Easy Install Script"
+      "content": "2. Run the AGY Easy Install Script"
     },
     {
       "type": "p",
-      "content": "We will use the unofficial AGV Easy Install manager by `wtg-codes`. This script auto-detects your environment and recommends the best method. Execute the following command in your terminal:"
+      "content": "We will use the unofficial AGY Easy Install manager by `wtg-codes`. This script auto-detects your environment and recommends the best method. Execute the following command in your terminal:"
     },
     {
       "type": "code",
       "language": "bash",
-      "code": "curl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agv-easy-install/main/antigravity-manager.sh\" | bash"
+      "code": "curl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agy-easy-install/main/antigravity-manager.sh\" | bash"
     },
     {
       "type": "info",
