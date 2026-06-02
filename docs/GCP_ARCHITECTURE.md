@@ -57,3 +57,12 @@ To streamline the maintenance and generation of course content, the sync process
 *   **Cloud Function / Webhook:** The sync engine will expose a secure Cloud Function endpoint.
 *   **MCP Integration:** We will create an MCP (Model Context Protocol) server wrapping this endpoint.
 *   **Agentic Workflow:** When an agent updates a course (by editing the Google Doc via API or other means), it can immediately call the MCP tool to trigger the Sync Engine. This allows the agent to verify that the generated JSON in Firestore accurately reflects the changes, completing the CI/CD loop entirely autonomously.
+
+## 7. Google Workspace Add-on & Metadata "Tattooing"
+
+To streamline authoring and prevent data collisions, we will develop a native **Google Workspace Add-on** for both Google Docs and Google Drive.
+
+*   **Authoring Companion:** The Add-on provides a sidebar inside Google Docs, allowing authors to validate the Tridorian Document Specification (TDS) syntax, preview module blocks, and manually trigger the Sync Engine without leaving the editor.
+*   **Metadata Tattooing:** The Add-on and Sync Engine will utilize the Google Drive `Properties` (or `appProperties`) service and the Docs `DocumentProperties` to "tattoo" crucial metadata directly onto the files.
+    *   **Stored Properties:** `last_sync_timestamp`, `live_version_id`, `course_slug`, and `validation_status`.
+    *   **Stale Update Prevention:** Before the Sync Engine updates Firestore, it compares the tattooed `live_version_id` against the current Docs version. If a collision is detected (e.g., the doc was modified concurrently), the Add-on alerts the user, preventing stale or conflicting updates from going live.
