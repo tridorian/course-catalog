@@ -64,6 +64,15 @@ A single Track can contain multiple Courses. Each course lives in its own direct
 - `completedSteps`: An array of indices representing finished modules, used for progress tracking and locking. Reset on course switch.
 - `courseMetadata`: Stores the high-level information about the current course.
 
+### Persistence & Offline Support
+The application uses a hybrid persistence model to save user progress:
+- **Primary (Google Drive):** Progress is synced to a hidden `agv_course_progress.json` file in the user's Google Drive `appDataFolder`.
+- **Metadata (appProperties):** Concise progress summaries (active module ID, completed indices) are stored as `appProperties` on the Drive file for fast querying. Key limit is 124 bytes per entry.
+- **Local Cache (localStorage):** All changes are mirrored to `localStorage` (`agv_local_progress`) for immediate UI responsiveness.
+- **Offline Queuing:** If Drive is unreachable, updates are queued in `agv_offline_queue`.
+- **Sync Logic:** When back online, the app merges queued deltas back to Drive using Union for completed steps and Last-Write-Wins (LWW) for active steps based on timestamps.
+- **Auto-Reauth:** The Google Drive service automatically handles `401 Unauthorized` errors by triggering a transparent re-authentication flow via Google Identity Services.
+
 ### Routing
 The app uses `HashRouter` with four route patterns:
 - `/#/` — Dashboard, showing all available tracks from `catalog.json`.

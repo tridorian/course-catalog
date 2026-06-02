@@ -93,11 +93,11 @@ This roadmap outlines the phased development of the platform, following a strict
 **Objective:** Transition from `localStorage` to cloud-based progress saving and automated content updates.
 
 ### 4.1 Sync Testing
-- [ ] **Step 1:** Mock Google Drive API responses to test `ProgressService` save/load cycles.
+- [x] **Step 1:** Mock Google Drive API responses to test `ProgressService` save/load cycles.
 - [ ] **Step 2:** Implement a "Sync Status" indicator test (Idle, Syncing, Error, Success).
 
 ### 4.2 Progress Persistence
-- [ ] **Sub-step:** Refine `src/services/googleDrive.js` to store `completedSteps` and `activeStep` in `appProperties`.
+- [x] **Sub-step:** Refine `src/services/googleDrive.js` to store `completedSteps` and `activeStep` in `appProperties`.
 - [ ] **Sub-step:** Implement "Resume from last session" prompt on course load.
 
 ### 4.3 Content Sync Engine (CI/CD)

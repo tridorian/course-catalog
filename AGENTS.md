@@ -275,7 +275,7 @@ The app uses `HashRouter` (for GitHub Pages compatibility):
 
 1. **`app.js` is legacy** — The root-level `app.js` is the original monolithic version with hardcoded JSX content. It is NOT used by the current app. Do not modify it. It will be removed in a future cleanup.
 
-2. **Google services are Phase 4** — `googleAuth.js` and `googleDrive.js` exist but are not yet integrated. Do not import them into active components until Phase 4.
+2. **Google services are Phase 4** — `googleAuth.js` and `googleDrive.js` are now functional but integration into the main UI components is still pending. Use the refined `googleDrive.js` for all persistence needs.
 
 3. **Tailwind JIT purging** — Dynamic class names constructed via string interpolation may be purged. Always use full class strings or pass via `style` prop.
 
