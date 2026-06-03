@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Palette, Check, Volume2, VolumeX, Sparkles, Cpu } from 'lucide-react';
+import { Palette, Check, Volume2, VolumeX, Sparkles, Cpu, Trash2 } from 'lucide-react';
 import * as themeAudio from '../services/themeAudio';
-import { saveCustomTheme, getCustomTheme } from '../services/customTheme';
-import { generateThemeWithGemini } from '../services/themeGenerator';
+import { saveCustomTheme, getCustomTheme, getCustomThemes, deleteCustomTheme, setActiveCustomTheme } from '../services/customTheme';
+import { generateThemeWithGemini, generateMusicWithLyria } from '../services/themeGenerator';
 
 const THEME_OPTIONS = [
   { id: 'dark', label: '🌿 Tridorian Dark', swatches: ['#050805', '#4ade80', '#f0fdf4'] },
@@ -24,7 +24,7 @@ const GlobalControls = ({ theme, setTheme }) => {
   });
   const dropdownRef = useRef(null);
   const [audioState, setAudioState] = useState(() => themeAudio.getAudioState());
-  const [isSliderVisible, setIsSliderVisible] = useState(false);
+
 
   // AI Theme Generator state
   const [showGenerator, setShowGenerator] = useState(false);
@@ -36,9 +36,17 @@ const GlobalControls = ({ theme, setTheme }) => {
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
+  const [genStatus, setGenStatus] = useState('');
 
-  const customThemeVars = getCustomTheme();
-  const hasCustomTheme = !!customThemeVars;
+  const [customThemes, setCustomThemes] = useState(() => getCustomThemes());
+  const activeCustomTheme = getCustomTheme();
+
+  // Refresh themes list when dropdown is opened to ensure sync
+  useEffect(() => {
+    if (isOpen) {
+      setCustomThemes(getCustomThemes());
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isCursorEnabled) {
@@ -74,16 +82,68 @@ const GlobalControls = ({ theme, setTheme }) => {
       setGenError("Prompt cannot be empty.");
       return;
     }
+
+    // Check maximum limit: max 3 custom themes
+    const currentThemes = getCustomThemes();
+    if (currentThemes.length >= 3) {
+      setGenError("Maximum limit of 3 custom themes reached. You must delete an existing custom theme to generate a new one.");
+      return;
+    }
+
+    // Check rate limit: 1 custom theme per hour
+    const lastGenTimeStr = localStorage.getItem('tridorian_last_theme_gen_time');
+    let lastGenTime = lastGenTimeStr ? Number(lastGenTimeStr) : 0;
+    
+    // Check existing themes' generation timestamps just in case
+    currentThemes.forEach(t => {
+      if (t.generatedAt) {
+        const tTime = new Date(t.generatedAt).getTime();
+        if (tTime > lastGenTime) {
+          lastGenTime = tTime;
+        }
+      }
+    });
+
+    if (lastGenTime > 0) {
+      const elapsed = Date.now() - lastGenTime;
+      if (elapsed < 3600000) {
+        const remainingMinutes = Math.ceil((3600000 - elapsed) / 60000);
+        setGenError(`You can only generate one custom theme per hour. Please wait another ${remainingMinutes} minute(s).`);
+        return;
+      }
+    }
+
     setIsGenerating(true);
     setGenError(null);
+    setGenStatus("Generating theme colors...");
 
     try {
       const themeVars = await generateThemeWithGemini(prompt, apiKey);
+      
+      // Save Gemini API key if entered/changed
+      if (apiKey) {
+        localStorage.setItem('tridorian_gemini_api_key', apiKey);
+      }
+
       saveCustomTheme(themeVars);
+      localStorage.setItem('tridorian_last_theme_gen_time', Date.now().toString());
+
+      setGenStatus("Synthesizing ambient music track (Lyria AI)...");
+      try {
+        const audioDataUrl = await generateMusicWithLyria(prompt, apiKey);
+        localStorage.setItem(`tridorian_custom_theme_audio_${themeVars.id}`, audioDataUrl);
+        localStorage.setItem('tridorian_custom_theme_audio', audioDataUrl);
+      } catch (err) {
+        console.warn("Failed to generate music with Lyria, falling back to synthesizer loop:", err);
+        localStorage.removeItem(`tridorian_custom_theme_audio_${themeVars.id}`);
+        localStorage.removeItem('tridorian_custom_theme_audio');
+      }
+
+      setCustomThemes(getCustomThemes());
       setTheme('custom');
       themeAudio.playThemeMusic('custom');
-      setShowGenerator(false);
       setPrompt('');
+      setShowGenerator(false);
     } catch (e) {
       if (e.message === 'API_KEY_REQUIRED') {
         setGenError("A Gemini API Key is required to run the theme generator.");
@@ -92,6 +152,36 @@ const GlobalControls = ({ theme, setTheme }) => {
       }
     } finally {
       setIsGenerating(false);
+      setGenStatus('');
+    }
+  };
+
+  const handleDeleteTheme = (e, themeId) => {
+    e.stopPropagation();
+    const activeCustom = getCustomTheme();
+    deleteCustomTheme(themeId);
+    
+    // Refresh local list
+    const updated = getCustomThemes();
+    setCustomThemes(updated);
+    
+    // Fallback if deleted active theme
+    if (activeCustom && activeCustom.id === themeId) {
+      if (theme === 'custom') {
+        const nextCustom = updated[updated.length - 1];
+        if (nextCustom) {
+          setActiveCustomTheme(nextCustom);
+          themeAudio.playThemeMusic('custom');
+        } else {
+          setTheme('dark');
+          themeAudio.playThemeMusic('dark');
+        }
+      } else {
+        const nextCustom = updated[updated.length - 1];
+        if (nextCustom) {
+          setActiveCustomTheme(nextCustom);
+        }
+      }
     }
   };
 
@@ -110,66 +200,7 @@ const GlobalControls = ({ theme, setTheme }) => {
 
   return (
     <div className="flex items-center gap-2 select-none" ref={dropdownRef}>
-      {/* 1. Custom Cursor Toggle Button */}
-      <button
-        onClick={toggleCursor}
-        className="flex items-center justify-center p-2 rounded-full border transition-all duration-200 hover:brightness-110 active:scale-95"
-        style={{
-          borderColor: isCursorEnabled ? 'var(--accent-border)' : 'var(--border-main)',
-          backgroundColor: isCursorEnabled ? 'var(--accent-muted)' : 'var(--bg-panel)',
-          color: isCursorEnabled ? 'var(--accent-text)' : 'var(--text-muted)',
-          boxShadow: isCursorEnabled ? '0 0 12px var(--accent-border)' : 'none',
-        }}
-        title={isCursorEnabled ? "Disable Custom Cursor" : "Enable Custom Cursor"}
-        data-testid="global-cursor-toggle"
-      >
-        <Sparkles size={12} className={isCursorEnabled ? "animate-pulse" : ""} />
-      </button>
-
-      {/* 2. Interactive Audio Controls */}
-      <div 
-        className="flex items-center rounded-full border px-2 py-1.5 transition-all duration-300"
-        onMouseEnter={() => setIsSliderVisible(true)}
-        onMouseLeave={() => setIsSliderVisible(false)}
-        style={{
-          borderColor: 'var(--border-main)',
-          backgroundColor: 'var(--bg-panel)',
-          color: 'var(--text-muted)',
-        }}
-      >
-        <button
-          onClick={handleToggleMute}
-          className="flex items-center justify-center hover:text-main transition-colors focus:outline-none pr-1"
-          title={audioState.isMuted ? "Unmute Ambient Music" : "Mute Ambient Music"}
-        >
-          {audioState.isMuted ? <VolumeX size={12} className="text-red-400" /> : <Volume2 size={12} />}
-        </button>
-
-        <div 
-          className="overflow-hidden transition-all duration-300 flex items-center"
-          style={{
-            width: isSliderVisible ? '80px' : '0px',
-            opacity: isSliderVisible ? 1 : 0,
-            marginLeft: isSliderVisible ? '4px' : '0px',
-          }}
-        >
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={audioState.volume}
-            onChange={handleVolumeChange}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-1 bg-muted rounded-lg appearance-none cursor-pointer"
-            style={{
-              accentColor: 'var(--accent-bg)',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* 3. Theme Picker Button & Dropdown */}
+      {/* 1. Theme Picker Button & Dropdown */}
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -188,7 +219,7 @@ const GlobalControls = ({ theme, setTheme }) => {
 
         {isOpen && (
           <div
-            className="absolute right-0 top-full mt-2 w-56 rounded-xl border overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200"
+            className="absolute left-0 top-full mt-2 w-72 rounded-xl border overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200"
             style={{
               backgroundColor: 'var(--bg-panel)',
               borderColor: 'var(--border-main)',
@@ -244,41 +275,61 @@ const GlobalControls = ({ theme, setTheme }) => {
                 );
               })}
 
-              {/* Injected AI Custom Theme Option if saved */}
-              {hasCustomTheme && (
-                <button
-                  onClick={() => {
-                    setTheme('custom');
-                    themeAudio.playThemeMusic('custom');
-                    setIsOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
-                  style={{
-                    backgroundColor: theme === 'custom' ? 'var(--accent-muted)' : 'transparent',
-                    color: theme === 'custom' ? 'var(--text-main)' : 'var(--text-muted)',
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    borderColor: theme === 'custom' ? 'var(--accent-border)' : 'transparent',
-                  }}
-                  data-testid="theme-option-custom"
-                >
-                  <div className="flex gap-0.5">
-                    {customThemeVars.swatches?.map((color, i) => (
-                      <div
-                        key={i}
-                        className="w-4 h-4 rounded-full border border-black/20"
-                        style={{ backgroundColor: color }}
-                      />
-                    )) || (
-                      <div className="w-12 h-4 rounded-full border border-black/20 bg-accent/20 flex items-center justify-center font-mono text-[9px]">AI</div>
-                    )}
+              {/* Injected AI Custom Theme Options */}
+              {customThemes.map((opt) => {
+                const isActive = theme === 'custom' && activeCustomTheme && activeCustomTheme.id === opt.id;
+                const swatches = opt.swatches || [
+                  opt['bg-base'] || '#080c08',
+                  opt['accent-bg'] || '#22c55e',
+                  opt['text-main'] || '#f0fdf4'
+                ];
+                return (
+                  <div key={opt.id} className="w-full flex items-center gap-1 group px-1">
+                    <button
+                      onClick={() => {
+                        setActiveCustomTheme(opt);
+                        setTheme('custom');
+                        themeAudio.playThemeMusic('custom');
+                        setIsOpen(false);
+                      }}
+                      className="flex-1 flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-muted/30"
+                      style={{
+                        backgroundColor: isActive ? 'var(--accent-muted)' : 'transparent',
+                        color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        borderColor: isActive ? 'var(--accent-border)' : 'transparent',
+                        minWidth: 0
+                      }}
+                      data-testid={`theme-option-custom-${opt.id}`}
+                    >
+                      <div className="flex gap-0.5 shrink-0">
+                        {swatches.map((color, i) => (
+                          <div
+                            key={i}
+                            className="w-3.5 h-3.5 rounded-full border border-black/20"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                      <span className="flex-1 text-left truncate text-xs font-mono">
+                        {opt['theme-name'] || opt.themeName || 'AI Custom Theme'}
+                      </span>
+                      {isActive && (
+                        <Check size={12} className="shrink-0 text-accent-text" />
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteTheme(e, opt.id)}
+                      className="p-2 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-all duration-150 shrink-0 opacity-40 group-hover:opacity-100 focus:opacity-100"
+                      title="Delete Custom Theme"
+                      data-testid={`delete-theme-${opt.id}`}
+                    >
+                      <Trash2 size={12} />
+                    </button>
                   </div>
-                  <span className="flex-1 text-left">🎨 AI Custom Theme</span>
-                  {theme === 'custom' && (
-                    <Check size={14} style={{ color: 'var(--accent-text)' }} />
-                  )}
-                </button>
-              )}
+                );
+              })}
             </div>
 
             {/* AI Theme Generator Button */}
@@ -310,16 +361,74 @@ const GlobalControls = ({ theme, setTheme }) => {
         )}
       </div>
 
+      {/* 2. Custom Cursor Toggle Button */}
+      <button
+        onClick={toggleCursor}
+        className="flex items-center justify-center p-2 rounded-full border transition-all duration-200 hover:brightness-110 active:scale-95"
+        style={{
+          borderColor: isCursorEnabled ? 'var(--accent-border)' : 'var(--border-main)',
+          backgroundColor: isCursorEnabled ? 'var(--accent-muted)' : 'var(--bg-panel)',
+          color: isCursorEnabled ? 'var(--accent-text)' : 'var(--text-muted)',
+          boxShadow: isCursorEnabled ? '0 0 12px var(--accent-border)' : 'none',
+        }}
+        title={isCursorEnabled ? "Disable Custom Cursor" : "Enable Custom Cursor"}
+        data-testid="global-cursor-toggle"
+      >
+        <Sparkles size={12} className={isCursorEnabled ? "animate-pulse" : ""} />
+      </button>
+
+      {/* 3. Static Audio Controls */}
+      <div 
+        className="flex items-center rounded-full border px-2 py-1.5"
+        style={{
+          borderColor: 'var(--border-main)',
+          backgroundColor: 'var(--bg-panel)',
+          color: 'var(--text-muted)',
+        }}
+      >
+        <button
+          onClick={handleToggleMute}
+          className="flex items-center justify-center hover:text-main transition-colors focus:outline-none pr-1"
+          title={audioState.isMuted ? "Unmute Ambient Music" : "Mute Ambient Music"}
+        >
+          {audioState.isMuted ? <VolumeX size={12} className="text-red-400" /> : <Volume2 size={12} />}
+        </button>
+
+        <div 
+          className="flex items-center"
+          style={{
+            width: '60px',
+            opacity: 1,
+            marginLeft: '4px',
+          }}
+        >
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={audioState.volume}
+            onChange={handleVolumeChange}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full h-1 bg-muted rounded-lg appearance-none cursor-pointer"
+            style={{
+              accentColor: 'var(--accent-bg)',
+            }}
+          />
+        </div>
+      </div>
+
       {/* 4. AI Theme Generator Prompt Modal */}
       {showGenerator && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-panel border border-border-main rounded-xl p-6 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] font-sans">
+          <div className="bg-panel border border-border-main rounded-xl p-6 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] font-sans max-h-[95vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-main mb-2">AI Theme Generator</h3>
             <p className="text-text-muted text-xs mb-4">
-              Enter a design style and generate a custom CSS theme palette using Gemini.
+              Enter a design style to generate custom colors & synthesizer loops using Gemini.
             </p>
             
             <div className="space-y-4">
+              {/* API Key */}
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="text-[10px] font-mono uppercase text-text-muted">Gemini API Key</label>
@@ -341,16 +450,26 @@ const GlobalControls = ({ theme, setTheme }) => {
                 />
               </div>
               
+              {/* Theme Prompt */}
               <div>
                 <label className="block text-[10px] font-mono uppercase text-text-muted mb-1">Theme Prompt</label>
                 <textarea
                   placeholder="e.g. Cyberpunk neon orange and deep purple, Autumn forest warm browns and greens, Soft minimalist slate blue..."
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  rows="3"
+                  rows="2"
                   className="w-full px-3 py-2 bg-muted border border-border-main rounded-lg text-sm text-main placeholder-text-muted/50 focus:outline-none focus:border-accent resize-none"
                 />
               </div>
+
+              {/* Generate Button */}
+              <button
+                disabled={isGenerating}
+                onClick={handleGenerateTheme}
+                className="w-full py-2.5 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 disabled:opacity-50 transition-all flex items-center justify-center gap-2 text-sm"
+              >
+                {isGenerating ? (genStatus || "Generating...") : "Generate Theme Colors & Music"}
+              </button>
               
               {genError && (
                 <div className="text-red-400 text-xs font-mono max-w-xs break-words">
@@ -358,22 +477,16 @@ const GlobalControls = ({ theme, setTheme }) => {
                 </div>
               )}
               
-              <div className="flex gap-3">
-                <button
-                  disabled={isGenerating}
-                  onClick={handleGenerateTheme}
-                  className="flex-1 py-2.5 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-                >
-                  {isGenerating ? "Generating..." : "Generate Theme"}
-                </button>
+              {/* Actions */}
+              <div className="flex gap-3 border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
                 <button
                   onClick={() => {
                     setShowGenerator(false);
                     setGenError(null);
                   }}
-                  className="px-4 py-2.5 bg-muted text-text-muted rounded-lg hover:bg-elevated transition-all"
+                  className="w-full py-2 bg-muted text-text-muted rounded-lg hover:bg-elevated transition-all text-sm font-bold"
                 >
-                  Cancel
+                  Close
                 </button>
               </div>
             </div>

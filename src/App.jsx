@@ -23,6 +23,8 @@ import TrackPage from './components/TrackPage';
 import AdminPanel from './components/AdminPanel';
 import HelpSection from './components/HelpSection';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
+import * as contentLoaderService from './services/contentLoader';
+import { checkUserRole } from './services/roleManager';
 import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/googleDrive';
 import { getAccessToken } from './services/googleAuth';
 import GlobalControls from './components/GlobalControls';
@@ -30,6 +32,7 @@ import { useTheme } from './hooks/useTheme';
 import * as themeAudio from './services/themeAudio';
 import BadgeCelebration from './components/BadgeCelebration';
 import { extractQuizQuestions } from './services/quizParser';
+import { saveCustomTheme } from './services/customTheme';
 
 // --- Main App Component ---
 
@@ -50,6 +53,8 @@ function AppContent({ theme, setTheme }) {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [activeStepQuizPassed, setActiveStepQuizPassed] = useState(true);
+  const [trackManifest, setTrackManifest] = useState(null);
+  const [userRole, setUserRole] = useState('student');
 
 
   const { trackId, courseId, moduleId } = useParams();
@@ -82,6 +87,27 @@ function AppContent({ theme, setTheme }) {
         const metadata = await fetchCourseMetadata(currentTrackId, currentCourseId, manifest.metadata);
         setCourseMetadata(metadata);
 
+        // Load track manifest and user role defensively
+        let trackData = null;
+        if (typeof contentLoaderService.fetchTrackManifest === 'function') {
+          try {
+            trackData = await contentLoaderService.fetchTrackManifest(currentTrackId);
+          } catch (e) {
+            console.error("Failed to load track manifest:", e);
+          }
+        }
+        setTrackManifest(trackData);
+
+        let role = 'student';
+        if (typeof checkUserRole === 'function') {
+          try {
+            role = await checkUserRole();
+          } catch (e) {
+            console.error("Failed to check user role:", e);
+          }
+        }
+        setUserRole(role || 'student');
+
         // Load all module content and tag each with its source file
         const stepPromises = manifest.modules.map(async (mod) => {
           const moduleData = await fetchModuleContent(currentTrackId, currentCourseId, mod.file);
@@ -97,6 +123,13 @@ function AppContent({ theme, setTheme }) {
         if (token) {
           const { progress, fileId } = await loadProgress();
           setDriveFileId(fileId);
+
+          if (progress && progress._custom_themes) {
+            localStorage.setItem('tridorian_custom_themes_list', JSON.stringify(progress._custom_themes));
+          }
+          if (progress && progress._custom_theme) {
+            saveCustomTheme(progress._custom_theme);
+          }
 
           const currentProgress = progress[`${currentTrackId}_${currentCourseId}`];
           if (currentProgress && currentProgress.completedIndices) {
@@ -347,6 +380,18 @@ function AppContent({ theme, setTheme }) {
       </div>
     );
   }
+
+  // Get active courses in this track
+  const activeCourses = trackManifest?.courses?.filter(
+    course => userRole === 'admin' || course.status !== 'Draft'
+  ) || [];
+
+  const currentCourseIndex = activeCourses.findIndex(c => c.id === currentCourseId);
+  const nextCourse = currentCourseIndex !== -1 && currentCourseIndex < activeCourses.length - 1
+    ? activeCourses[currentCourseIndex + 1]
+    : null;
+
+  const trackCompleted = currentCourseIndex !== -1 && currentCourseIndex === activeCourses.length - 1;
 
   return (
     <div className="min-h-screen bg-base text-main font-sans flex flex-col md:flex-row selection:bg-accent selection:text-accent-fg relative overflow-hidden">
@@ -625,18 +670,46 @@ function AppContent({ theme, setTheme }) {
           </button>
 
           {activeStepIndex === totalSteps - 1 ? (
-            <button
-              disabled={!activeStepQuizPassed}
-              onClick={completeCourse}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
-                activeStepQuizPassed
-                  ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse'
-                  : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
-              }`}
-            >
-              {activeStepQuizPassed ? <Trophy size={20} /> : <Lock size={20} />}
-              Complete Course
-            </button>
+            completedSteps.includes(activeStepIndex) ? (
+              <div className="flex gap-3">
+                <button
+                  onClick={completeCourse}
+                  className="flex items-center gap-2 px-4 py-2 border border-border-main text-text-muted hover:text-main rounded-lg font-medium transition-colors"
+                >
+                  <Trophy size={16} />
+                  Review Badge
+                </button>
+                {nextCourse ? (
+                  <button
+                    onClick={() => navigate(`/${currentTrackId}/${nextCourse.id}`)}
+                    className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
+                  >
+                    Next Course
+                    <ChevronRight size={20} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate('/')}
+                    className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
+                  >
+                    Complete Track
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                disabled={!activeStepQuizPassed}
+                onClick={completeCourse}
+                className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
+                  activeStepQuizPassed
+                    ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse'
+                    : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
+                }`}
+              >
+                {activeStepQuizPassed ? <Trophy size={20} /> : <Lock size={20} />}
+                Complete Course
+              </button>
+            )
           ) : (
             <button
               disabled={!activeStepQuizPassed}
@@ -666,7 +739,19 @@ function AppContent({ theme, setTheme }) {
       {showCelebration && (
         <BadgeCelebration
           badgeTitle={courseMetadata?.title || 'Course Completed'}
-          trackName={trackId}
+          trackName={trackManifest?.title || trackId}
+          nextCourse={nextCourse}
+          trackCompleted={trackCompleted}
+          onNextCourse={() => {
+            setShowCelebration(false);
+            if (nextCourse) {
+              navigate(`/${currentTrackId}/${nextCourse.id}`);
+            }
+          }}
+          onReturnToDashboard={() => {
+            setShowCelebration(false);
+            navigate('/');
+          }}
           onDismiss={() => {
             setShowCelebration(false);
             navigate(`/${currentTrackId}/${currentCourseId}`);

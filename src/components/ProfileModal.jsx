@@ -11,11 +11,11 @@ export default function ProfileModal({ isOpen, onClose, catalog }) {
   const completedCourses = [];
   const activeCourses = [];
 
-  catalog.tracks.forEach(track => {
+  (catalog.tracks || []).forEach(track => {
     let trackCompleted = true;
     let trackHasProgress = false;
 
-    track.courses.forEach(course => {
+    (track.courses || []).forEach(course => {
       const courseProg = localProgress[`${track.id}_${course.id}`];
       const completedCount = courseProg && courseProg.completedIndices ? courseProg.completedIndices.length : 0;
       const totalModules = course.modules || 0;
@@ -42,7 +42,7 @@ export default function ProfileModal({ isOpen, onClose, catalog }) {
       }
     });
 
-    if (trackCompleted && track.courses.length > 0) {
+    if (trackCompleted && (track.courses || []).length > 0) {
       completedTracks.push(track);
     }
   });

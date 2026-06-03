@@ -6,6 +6,8 @@ import * as googleAuth from '../services/googleAuth';
 import { checkUserRole } from '../services/roleManager';
 import GlobalControls from './GlobalControls';
 import ProfileModal from './ProfileModal';
+import { loadProgress } from '../services/googleDrive';
+import { saveCustomTheme } from '../services/customTheme';
 
 const Dashboard = ({ theme, setTheme }) => {
   const [catalog, setCatalog] = useState(null);
@@ -24,13 +26,48 @@ const Dashboard = ({ theme, setTheme }) => {
           fetchCatalog(),
           checkUserRole()
         ]);
-        setCatalog(data);
+
+        // Enrich catalog tracks with course lists from their manifests
+        const tracksWithCourses = await Promise.all(
+          (data.tracks || []).map(async (t) => {
+            if (t.courses) {
+              return t;
+            }
+            try {
+              const trackManifest = await fetchTrackManifest(t.id);
+              return { ...t, courses: trackManifest.courses || [] };
+            } catch (err) {
+              console.error(`Failed to load track manifest for ${t.id}:`, err);
+              return { ...t, courses: [] };
+            }
+          })
+        );
+
+        const enrichedCatalog = { ...data, tracks: tracksWithCourses };
+        setCatalog(enrichedCatalog);
         setRole(userRole);
 
-        const localProgress = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
+        // Fetch progress from Drive/cache if connected to restore state & custom theme on Dashboard
+        let progress = null;
+        if (googleAuth.getAccessToken()) {
+          try {
+            const syncData = await loadProgress();
+            progress = syncData ? syncData.progress : null;
+            if (progress && progress._custom_themes) {
+              localStorage.setItem('tridorian_custom_themes_list', JSON.stringify(progress._custom_themes));
+            }
+            if (progress && progress._custom_theme) {
+              saveCustomTheme(progress._custom_theme);
+            }
+          } catch (e) {
+            console.warn("Failed to load Drive progress on Dashboard:", e);
+          }
+        }
+
+        const localProgress = progress || JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
         const progressStats = {};
 
-        for (const track of data.tracks) {
+        for (const track of enrichedCatalog.tracks) {
           let totalModules = 0;
           let completedModules = 0;
 

@@ -14,7 +14,8 @@ vi.mock('../../services/contentLoader', () => ({
   fetchCourseManifest: vi.fn(() => Promise.resolve({ metadata: {}, modules: [] })),
   fetchCourseMetadata: vi.fn(() => Promise.resolve({ title: 'Test Course' })),
   fetchModuleContent: vi.fn(() => Promise.resolve({ id: 'mod1', title: 'Module 1' })),
-  fetchCatalog: vi.fn(() => Promise.resolve({ tracks: [] }))
+  fetchCatalog: vi.fn(() => Promise.resolve({ tracks: [] })),
+  fetchTrackManifest: vi.fn(() => Promise.resolve({ courses: [] }))
 }));
 
 describe('SyncStatus Component', () => {

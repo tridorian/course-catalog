@@ -19,7 +19,10 @@ describe('App Integration', () => {
       track_id: 'agentic-engineering',
       title: 'Agentic Engineering',
       description: 'Test track',
-      courses: [{ id: 'agy-101', title: 'AGY-101', description: 'Test course', modules: 2, icon: 'Rocket' }]
+      courses: [
+        { id: 'agy-101', title: 'AGY-101', description: 'Test course 1', modules: 2, icon: 'Rocket' },
+        { id: 'agy-102', title: 'AGY-102', description: 'Test course 2', modules: 2, icon: 'Flame' }
+      ]
     });
 
     // Default mock implementation
@@ -216,5 +219,81 @@ describe('App Integration', () => {
 
     // Clean up
     alertMock.mockRestore();
+  });
+
+  it('displays Next Course button in celebration modal and footer when there is a next course', async () => {
+    // Go to module 2 (the last module of agy-101)
+    renderApp('/agentic-engineering/agy-101/module-2');
+
+    await waitFor(() => {
+      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+    });
+
+    // Complete course
+    const completeBtn = screen.getByRole('button', { name: /Complete Course/i });
+    fireEvent.click(completeBtn);
+
+    // Verify celebration modal shows Next Course button
+    await waitFor(() => {
+      expect(screen.getByText(/Badge Unlocked/i)).toBeInTheDocument();
+      expect(screen.getByText(/Next Course: AGY-102/i)).toBeInTheDocument();
+    });
+
+    // Click Return to Course Map to dismiss it
+    const dismissBtn = screen.getByRole('button', { name: /Return to Course Map/i });
+    fireEvent.click(dismissBtn);
+
+    // Verify we are back on Course Map
+    await waitFor(() => {
+      expect(screen.getByText('Course Map')).toBeInTheDocument();
+    });
+
+    // Go back to Module 2 to check its footer
+    const reviewBtns = screen.getAllByRole('button', { name: /Review Module/i });
+    fireEvent.click(reviewBtns[1]);
+
+    // Now that the course is completed, the footer of the last module should show Review Badge and Next Course buttons
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Review Badge/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Next Course/i })).toBeInTheDocument();
+    });
+  });
+
+  it('displays track completion prompt in celebration modal and footer when it is the last course', async () => {
+    // Go to module 2 (last module of agy-102, which is the last course in the track)
+    renderApp('/agentic-engineering/agy-102/module-2');
+
+    await waitFor(() => {
+      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+    });
+
+    // Complete course
+    const completeBtn = screen.getByRole('button', { name: /Complete Course/i });
+    fireEvent.click(completeBtn);
+
+    // Verify celebration modal shows track completion prompt
+    await waitFor(() => {
+      expect(screen.getByText(/Track Completed!/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Return to Dashboard/i })).toBeInTheDocument();
+    });
+
+    // Click Return to Course Map to dismiss it
+    const dismissBtn2 = screen.getByRole('button', { name: /Return to Course Map/i });
+    fireEvent.click(dismissBtn2);
+
+    // Verify we are back on Course Map
+    await waitFor(() => {
+      expect(screen.getByText('Course Map')).toBeInTheDocument();
+    });
+
+    // Go back to Module 2 to check its footer
+    const reviewBtns2 = screen.getAllByRole('button', { name: /Review Module/i });
+    fireEvent.click(reviewBtns2[1]);
+
+    // Now that the course is completed and it's the last course, the footer of the last module should show Review Badge and Complete Track
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Review Badge/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Complete Track/i })).toBeInTheDocument();
+    });
   });
 });

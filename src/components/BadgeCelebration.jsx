@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-export default function BadgeCelebration({ badgeTitle, trackName, onDismiss }) {
+export default function BadgeCelebration({ 
+  badgeTitle, 
+  trackName, 
+  onDismiss, 
+  nextCourse = null, 
+  onNextCourse = null, 
+  trackCompleted = false, 
+  onReturnToDashboard = null 
+}) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showConfetti, setShowConfetti] = useState(true);
 
@@ -98,16 +106,44 @@ export default function BadgeCelebration({ badgeTitle, trackName, onDismiss }) {
         </div>
 
         <h3 className="text-xl font-bold text-main mb-2">{badgeTitle}</h3>
-        <p className="text-sm text-text-muted mb-8 leading-relaxed">
-          You have successfully completed all lessons and verified capstone requirements for the <span className="text-main font-bold">{trackName}</span> track.
-        </p>
+        {trackCompleted ? (
+          <div className="mb-8 p-4 bg-accent/10 border border-accent/30 rounded-xl text-center">
+            <span className="text-4xl block mb-2" role="img" aria-label="party popper">🎉</span>
+            <p className="text-sm font-bold text-accent-text uppercase tracking-wider mb-1">Track Completed!</p>
+            <p className="text-xs text-text-muted">
+              Congratulations! You have successfully completed all courses in the <span className="text-main font-bold">{trackName}</span> track.
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-text-muted mb-8 leading-relaxed">
+            You have successfully completed all lessons and verified capstone requirements for this course.
+          </p>
+        )}
 
         <div className="flex flex-col gap-3">
+          {nextCourse && onNextCourse && (
+            <button
+              onClick={onNextCourse}
+              className="w-full py-3 bg-accent text-accent-fg font-extrabold rounded-lg hover:brightness-110 active:scale-[0.98] transition-all shadow-accent flex items-center justify-center gap-2"
+            >
+              <span>Next Course: {nextCourse.title || nextCourse.id}</span>
+            </button>
+          )}
+
+          {trackCompleted && onReturnToDashboard && (
+            <button
+              onClick={onReturnToDashboard}
+              className="w-full py-3 bg-accent text-accent-fg font-extrabold rounded-lg hover:brightness-110 active:scale-[0.98] transition-all shadow-accent"
+            >
+              Return to Dashboard
+            </button>
+          )}
+
           <button
             onClick={onDismiss}
-            className="w-full py-3 bg-accent text-accent-fg font-extrabold rounded-lg hover:brightness-110 active:scale-[0.98] transition-all shadow-accent"
+            className="w-full py-3 bg-muted hover:bg-elevated text-gray-400 font-bold rounded-lg transition-all"
           >
-            Return to Mission Map
+            Return to Course Map
           </button>
         </div>
       </div>

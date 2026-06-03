@@ -1,7 +1,8 @@
 // src/services/customTheme.js
-// Stores and injects dynamic custom themes in browser cookies/localStorage.
+// Stores, manages, and injects dynamic custom themes in browser cookies/localStorage.
 
 const CUSTOM_THEME_COOKIE = 'tridorian_custom_theme_vars';
+const CUSTOM_THEMES_LIST_KEY = 'tridorian_custom_themes_list';
 
 export function setCookie(name, value, days = 30) {
   const date = new Date();
@@ -21,26 +22,148 @@ export function getCookie(name) {
   return null;
 }
 
+// Get the array of all custom themes
+export function getCustomThemes() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_THEMES_LIST_KEY);
+    if (!raw) {
+      // Migrate legacy single theme if present
+      const legacy = getCookie(CUSTOM_THEME_COOKIE) || localStorage.getItem(CUSTOM_THEME_COOKIE);
+      if (legacy) {
+        const theme = JSON.parse(legacy);
+        if (theme && !theme.id) {
+          theme.id = 'custom_legacy';
+          theme['theme-name'] = theme['theme-name'] || 'Legacy Custom Theme';
+        }
+        const list = [theme];
+        localStorage.setItem(CUSTOM_THEMES_LIST_KEY, JSON.stringify(list));
+        return list;
+      }
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// Save a theme into the themes list and set it as active
 export function saveCustomTheme(vars) {
   try {
-    const str = JSON.stringify(vars);
-    setCookie(CUSTOM_THEME_COOKIE, str, 30);
-    localStorage.setItem(CUSTOM_THEME_COOKIE, str); // redundancy
+    if (!vars) return;
+    
+    // Assign ID and timestamp if missing
+    if (!vars.id) {
+      vars.id = `custom_${Date.now()}`;
+    }
+    if (!vars.generatedAt) {
+      vars.generatedAt = new Date().toISOString();
+    }
+
+    const themes = getCustomThemes();
+    const updatedThemes = themes.filter(t => t.id !== vars.id);
+    updatedThemes.push(vars);
+
+    // Save themes list
+    localStorage.setItem(CUSTOM_THEMES_LIST_KEY, JSON.stringify(updatedThemes));
+
+    // Save active theme reference (for backwards compatibility/cookie load)
+    const activeStr = JSON.stringify(vars);
+    setCookie(CUSTOM_THEME_COOKIE, activeStr, 30);
+    localStorage.setItem(CUSTOM_THEME_COOKIE, activeStr);
+
     injectCustomThemeStyles(vars);
+
+    // Sync state to standard progress profile object for Drive sync
+    try {
+      const LOCAL_PROGRESS_KEY = 'agy_local_progress';
+      const localProg = JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY) || '{}');
+      localProg['_custom_themes'] = updatedThemes;
+      localProg['_custom_theme'] = vars;
+      localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+    } catch (err) {
+      console.warn("Failed to store custom themes in user progress profile:", err);
+    }
   } catch (e) {
     console.error("Failed to save custom theme:", e);
   }
 }
 
-export function getCustomTheme() {
+// Set an existing custom theme as active
+export function setActiveCustomTheme(vars) {
   try {
+    if (!vars) return;
+    const activeStr = JSON.stringify(vars);
+    setCookie(CUSTOM_THEME_COOKIE, activeStr, 30);
+    localStorage.setItem(CUSTOM_THEME_COOKIE, activeStr);
+
+    injectCustomThemeStyles(vars);
+
+    // Sync state to standard progress profile object for Drive sync
+    try {
+      const LOCAL_PROGRESS_KEY = 'agy_local_progress';
+      const localProg = JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY) || '{}');
+      localProg['_custom_theme'] = vars;
+      localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+    } catch (err) {
+      console.warn("Failed to store custom theme in user progress profile:", err);
+    }
+  } catch (e) {
+    console.error("Failed to set active custom theme:", e);
+  }
+}
+
+// Get active custom theme vars or a specific one by ID
+export function getCustomTheme(id = '') {
+  try {
+    const themes = getCustomThemes();
+    if (id) {
+      return themes.find(t => t.id === id) || null;
+    }
     const raw = getCookie(CUSTOM_THEME_COOKIE) || localStorage.getItem(CUSTOM_THEME_COOKIE);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? JSON.parse(raw) : (themes.length > 0 ? themes[themes.length - 1] : null);
   } catch (e) {
     return null;
   }
 }
 
+// Delete a custom theme by ID
+export function deleteCustomTheme(id) {
+  try {
+    const themes = getCustomThemes();
+    const updatedThemes = themes.filter(t => t.id !== id);
+    localStorage.setItem(CUSTOM_THEMES_LIST_KEY, JSON.stringify(updatedThemes));
+
+    // Cleanup audio cache
+    localStorage.removeItem(`tridorian_custom_theme_audio_${id}`);
+
+    // If active theme was deleted, clear active cookie/localStorage
+    const active = getCustomTheme();
+    if (active && active.id === id) {
+      setCookie(CUSTOM_THEME_COOKIE, '', -1);
+      localStorage.removeItem(CUSTOM_THEME_COOKIE);
+      // Remove style element
+      const styleTag = document.getElementById('tridorian-custom-theme');
+      if (styleTag) styleTag.remove();
+    }
+
+    // Sync updated list to standard progress profile object
+    try {
+      const LOCAL_PROGRESS_KEY = 'agy_local_progress';
+      const localProg = JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY) || '{}');
+      localProg['_custom_themes'] = updatedThemes;
+      if (active && active.id === id) {
+        delete localProg['_custom_theme'];
+      }
+      localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+    } catch (err) {}
+  } catch (e) {
+    console.error("Failed to delete custom theme:", e);
+  }
+}
+
+// Inject styling variables for .theme-custom class dynamically
 export function injectCustomThemeStyles(vars) {
   if (!vars) return;
   let styleTag = document.getElementById('tridorian-custom-theme');

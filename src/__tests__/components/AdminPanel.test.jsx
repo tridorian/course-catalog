@@ -18,7 +18,8 @@ vi.mock('../../services/contentLoader', () => ({
         ]
       }
     ]
-  }))
+  })),
+  fetchTrackManifest: vi.fn(() => Promise.resolve({ courses: [] }))
 }));
 
 describe('AdminPanel Component', () => {

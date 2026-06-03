@@ -23,8 +23,9 @@ export async function generateThemeWithGemini(promptText, userApiKey = '') {
 Generate a custom CSS theme palette in JSON format matching the user's stylistic description.
 Return raw JSON only, no markdown blocks, no code blocks, no text wrapper.
 Ensure high readability and contrast (minimum 4.5:1 text-to-background contrast ratio).
-Specify these exact keys with hex values or standard rgba strings:
+Specify these exact keys with hex values or standard rgba strings, plus a music configuration:
 {
+  "theme-name": "A short, cool, and creative name for this theme based on the prompt (e.g. 'Cyberpunk Oasis', 'Ethereal Forest', 'Midnight Neon')",
   "bg-base": "hex color for general page background",
   "bg-panel": "hex color for card panels",
   "bg-muted": "hex color for code block background",
@@ -39,7 +40,16 @@ Specify these exact keys with hex values or standard rgba strings:
   "accent-muted": "rgba string with 0.08 opacity matching accent-bg",
   "accent-border": "rgba string with 0.25 opacity matching accent-bg",
   "shadow-accent": "box shadow string, e.g. '0 0 15px rgba(..., 0.2)'",
-  "swatches": ["bg-base", "accent-bg", "text-main"]
+  "swatches": ["bg-base", "accent-bg", "text-main"],
+  "music": {
+    "scale": "one of: major pentatonic, minor pentatonic, dorian, phrygian, mixolydian",
+    "tempo": 240,
+    "waveform": "one of: sine, triangle, sawtooth, square",
+    "pattern": [0, 2, 4, 7, 9, 7],
+    "instrument": "one of: bell, synth, pad, chiptune",
+    "droneType": "one of: sawtooth, triangle, sine",
+    "density": 0.5
+  }
 }`;
 
   let url;
@@ -80,6 +90,62 @@ Specify these exact keys with hex values or standard rgba strings:
   const data = await response.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   
-  const variables = JSON.parse(text.trim());
+  let cleanedText = text.trim();
+  if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText.replace(/^```(?:json)?\n?/i, '').replace(/```$/i, '').trim();
+  }
+  
+  const variables = JSON.parse(cleanedText);
   return variables;
+}
+
+export async function generateMusicWithLyria(promptText, userApiKey = '') {
+  const apiKey = userApiKey || 
+                 localStorage.getItem('tridorian_gemini_api_key') || 
+                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') || 
+                 '';
+
+  const gAuthToken = getAccessToken();
+
+  if (!apiKey && !gAuthToken) {
+    throw new Error('API_KEY_REQUIRED');
+  }
+
+  let url;
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (apiKey) {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/lyria-3-clip-preview:generateContent?key=${apiKey}`;
+  } else {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/lyria-3-clip-preview:generateContent`;
+    headers['Authorization'] = `Bearer ${gAuthToken}`;
+  }
+
+  const payload = {
+    contents: {
+      parts: [{ text: `Generate a 30-second seamless ambient background instrumental music track. No spoken vocals. Mood: ${promptText}` }]
+    },
+    generationConfig: {
+      responseModalities: ['AUDIO', 'TEXT']
+    }
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Lyria API error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+  if (!part || !part.inlineData || !part.inlineData.data) {
+    throw new Error('No audio data returned from Lyria model.');
+  }
+
+  return `data:audio/mpeg;base64,${part.inlineData.data}`;
 }
