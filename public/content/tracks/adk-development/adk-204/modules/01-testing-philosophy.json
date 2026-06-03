@@ -1,0 +1,32 @@
+{
+  "id": "1",
+  "title": "1. Designing unit tests for custom tools",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Testing Philosophy for Agents"
+    },
+    {
+      "type": "p",
+      "content": "Agent tests are divided into tool function verification and orchestration flow verification. Unit testing your tool functions ensures bugs in your backend logic are caught independently of the LLM."
+    },
+    {
+      "type": "h2",
+      "content": "Tool Function Unit Test Example"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import unittest\nfrom tools.math_tool import add_numbers\n\nclass TestMathTool(unittest.TestCase):\n    def test_addition(self):\n        result = add_numbers(2.5, 3.5)\n        self.assertEqual(result, 6.0)"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why test tool functions separately from the main agent routing logic?\n- A) The LLM requires compiled Python binaries.\n- B) It isolates programmatic logic bugs from stochastic LLM behavior.\n- C) It avoids OAuth verification procedures.\n\nFeedback: Option B is correct. Unit testing tools isolates system bugs from LLM randomness."
+    }
+  ]
+}

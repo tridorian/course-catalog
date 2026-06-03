@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Understanding React rendering rules in A2UI",
+      "file": "modules/01-a2ui-react-rules.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Authoring a custom React-based component",
+      "file": "modules/02-custom-react-blocks.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Binding client-side interactivity and event loops",
+      "file": "modules/03-interactivity-callbacks.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Designing rich file uploads and interactive charts",
+      "file": "modules/04-charts-uploads.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Implementing a real-time data visualization card",
+      "file": "modules/05-lab-data-card.json"
+    }
+  ]
+}

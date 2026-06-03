@@ -1,0 +1,37 @@
+{
+  "id": "3",
+  "title": "3. Directing the agent output format",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Directing Agent Output Format"
+    },
+    {
+      "type": "p",
+      "content": "For applications consuming agent responses programmatically, standardizing outputs (like raw Markdown or structured JSON) prevents parser errors."
+    },
+    {
+      "type": "h2",
+      "content": "Formatting Directives"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "settings:\n  system_instructions: |\n    You must reply ONLY with a valid JSON array of objects. Do not include markdown wraps or backticks.\n    Example:\n    [{\"name\": \"item_name\", \"count\": 2}]"
+    },
+    {
+      "type": "warning",
+      "title": "Enforcing Formats",
+      "content": "Providing a schema pattern in the system prompt reduces generation errors. Use model response schemas where supported."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What should be avoided when requesting JSON output from an agent?\n- A) Using Pydantic models\n- B) Requesting formatting markdown code-blocks (e.g. ```json) if raw JSON is required\n- C) Defining key descriptions\n\nFeedback: Option B is correct. Markdown formatting ticks can break plain string JSON parsers."
+    }
+  ]
+}

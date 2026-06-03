@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Crafting system instructions and behavioral constraints",
+      "file": "modules/01-system-instructions.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Implementing few-shot examples in system prompts",
+      "file": "modules/02-few-shot-prompting.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Directing the agent output format",
+      "file": "modules/03-output-formatting.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Mitigating hallucinations and out-of-boundary queries",
+      "file": "modules/04-mitigating-hallucinations.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Authoring a structured system instruction suite",
+      "file": "modules/05-lab-instruction-suite.json"
+    }
+  ]
+}

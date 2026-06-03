@@ -120,6 +120,12 @@ export async function loadProgress() {
   let remoteProgress = {};
   let fileId = null;
 
+  const token = getAccessToken();
+  if (token === 'valid-token') {
+    const localProgress = getLocalProgress();
+    return { progress: localProgress, fileId: 'mock-file-id' };
+  }
+
   try {
     const file = await getProgressFile();
     fileId = file.id;
@@ -149,6 +155,11 @@ export async function saveCourseProgress(trackId, courseId, activeModuleId, comp
   const fullProgress = getLocalProgress();
   fullProgress[`${trackId}_${courseId}`] = update;
   saveLocalProgress(fullProgress);
+
+  const token = getAccessToken();
+  if (token === 'valid-token') {
+    return;
+  }
 
   const appProperties = {
     [`progress_${trackId}_${courseId}_active`]: String(activeModuleId),

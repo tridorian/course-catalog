@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Tridorian Course Catalog - Jules VM Environment Setup
-# Enforces a clean, reproducible setup, warms dev caches, and registers aliases.
+# Enforces a clean, reproducible setup, warms dev caches, registers developer
+# aliases, autoconfigures Git credentials, and automates GCP credentials sync.
 # ==============================================================================
 
 set -euo pipefail
@@ -29,7 +30,7 @@ log_step() {
     echo -e "${BLUE}=== $1 ===${NC}"
 }
 
-log_step "Tridorian Environment Setup & Optimization"
+log_step "Tridorian Jules VM Environment Setup & Optimization"
 
 # 1. System Diagnostics
 log_info "Node.js version: $(node --version)"
@@ -42,7 +43,7 @@ fi
 log_info "Checking for zombie processes on port 5173..."
 if command -v lsof &>/dev/null; then
     PORT_PID=$(lsof -t -i:5173 || true)
-    if [[ -not -z "$PORT_PID" ]]; then
+    if [[ -n "$PORT_PID" ]]; then
         log_warn "Port 5173 is occupied by PID(s): $PORT_PID. Terminating..."
         kill -9 $PORT_PID || true
     fi
@@ -61,17 +62,39 @@ npm install
 log_info "Installing Puppeteer for screenshot automation..."
 npm install puppeteer --no-save
 
-# 5. Pre-build Vite Client (Warms up pre-bundling caches)
+# 5. Git Autoconfiguration inside VM
+log_info "Configuring Git identity inside Jules VM..."
+git config --global user.name "Jules Agent"
+git config --global user.email "jules-agent@google.com"
+git config --global init.defaultBranch main
+
+# 6. GCP/GWS Credentials Automation
+# Checks if the user passed GOOGLE_SERVICE_ACCOUNT_KEY in the Jules settings env
+if [[ -n "${GOOGLE_SERVICE_ACCOUNT_KEY:-}" ]]; then
+    log_info "GOOGLE_SERVICE_ACCOUNT_KEY detected in environment variables."
+    ADC_DIR="/var/home/wtg/.gcloud_config"
+    ADC_PATH="$ADC_DIR/application_default_credentials.json"
+    log_info "Creating credentials directory at: $ADC_DIR"
+    mkdir -p "$ADC_DIR"
+    echo "$GOOGLE_SERVICE_ACCOUNT_KEY" > "$ADC_PATH"
+    log_info "Successfully wrote Application Default Credentials to $ADC_PATH"
+    export GOOGLE_APPLICATION_CREDENTIALS="$ADC_PATH"
+else
+    log_warn "GOOGLE_SERVICE_ACCOUNT_KEY not found in environment."
+    log_warn "Google Drive / Docs sync scripts will fall back to local mock data unless authorized."
+fi
+
+# 7. Pre-build Vite Client (Warms up pre-bundling caches)
 log_info "Running a production compilation dry-run to warm up bundler caches..."
 npm run build
 
-# 6. Validate Course Catalog Schema
+# 8. Validate Course Catalog Schema
 if [[ -f "scripts/validate-catalog.js" ]]; then
     log_info "Validating course catalog schema..."
     node scripts/validate-catalog.js || log_warn "Catalog schema validation found discrepancies."
 fi
 
-# 7. Register Helpful Shell Aliases
+# 9. Register Helpful Shell Aliases
 log_info "Registering custom dev aliases in ~/.bashrc..."
 {
     echo ""
@@ -83,9 +106,8 @@ log_info "Registering custom dev aliases in ~/.bashrc..."
     echo "export PS1=\"\[\033[0;32m\][Jules-VM] \[\033[0;34m\]\w\[\033[0m\]\\$ \""
 } >> ~/.bashrc || log_warn "Unable to append aliases to ~/.bashrc"
 
-# 8. Confirm Test Suite Passes
+# 10. Confirm Test Suite Passes
 log_info "Running local Vitest suite verification..."
 npm test -- --run
 
 log_step "Setup Completed Successfully"
-

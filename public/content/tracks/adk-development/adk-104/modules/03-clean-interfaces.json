@@ -1,0 +1,46 @@
+{
+  "id": "3",
+  "title": "3. Creating clean API tool interfaces",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Clean API Tool Design"
+    },
+    {
+      "type": "p",
+      "content": "Tools should do one thing and return structured data. Avoid returning raw HTML, giant nested blobs, or unformatted text logs to the LLM, as this wastes tokens."
+    },
+    {
+      "type": "grid",
+      "items": [
+        {
+          "icon": "Wrench",
+          "title": "Single Responsibility",
+          "content": "One function should solve one exact query (e.g., look up order vs edit order).",
+          "border": "#4ade80"
+        },
+        {
+          "icon": "ListFilter",
+          "title": "Filtering Blobs",
+          "content": "Discard metadata fields (like headers, tracing keys) before returning data to the agent.",
+          "border": "#3b82f6"
+        },
+        {
+          "icon": "Shield",
+          "title": "Error Boundaries",
+          "content": "Never throw uncaught generic exceptions; catch them and return error messages.",
+          "border": "#ef4444"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why should tool returns be compact and structured?\n- A) It compiles the project faster.\n- B) To minimize token consumption and guide clean LLM generation.\n- C) It is required by the OAuth standard.\n\nFeedback: Option B is correct. Keeping responses minimal saves token costs."
+    }
+  ]
+}

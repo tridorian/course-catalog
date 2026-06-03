@@ -1,0 +1,37 @@
+{
+  "id": "3",
+  "title": "3. Implementing voting and consensus-based decisions",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Voting & Consensus Patterns"
+    },
+    {
+      "type": "p",
+      "content": "For safety-critical decisions, you can query multiple instances of an agent and require a consensus vote before executing a tool (like releasing funds)."
+    },
+    {
+      "type": "h2",
+      "content": "Consensus Logic Code"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "votes = [agent_a.evaluate(data), agent_b.evaluate(data), agent_c.evaluate(data)]\n# Count yes/no votes\nyes_count = sum(1 for v in votes if v == \"APPROVED\")\nconsensus_reached = yes_count >= 2"
+    },
+    {
+      "type": "warning",
+      "title": "Latency Cost",
+      "content": "Voting patterns require multiple LLM calls. Ensure the execution time does not exceed the application's timeout budgets."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary disadvantage of multi-agent voting architectures?\n- A) They are less accurate.\n- B) They increase latency and API token costs because multiple LLM calls run in parallel.\n- C) They require database migrations.\n\nFeedback: Option B is correct. More calls mean higher costs and times."
+    }
+  ]
+}

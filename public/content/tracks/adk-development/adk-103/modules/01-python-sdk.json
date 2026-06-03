@@ -1,0 +1,37 @@
+{
+  "id": "1",
+  "title": "1. Setting up Python ADK SDK bindings",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Python SDK Bindings"
+    },
+    {
+      "type": "p",
+      "content": "While the CLI is great for quick setups, programmatic SDK execution allows embedding agents inside existing web applications, daemons, and microservices."
+    },
+    {
+      "type": "h2",
+      "content": "SDK Installation and Basic Initialization"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from google_adk import AgentRuntime\n\n# Instantiate the agent using a local configuration file\nruntime = AgentRuntime(config_path=\"agent.yaml\")\nresponse = runtime.execute(prompt=\"Explain quantum computing in one sentence.\")\nprint(f\"Agent Output: {response.content}\")"
+    },
+    {
+      "type": "info",
+      "title": "Prerequisites",
+      "content": "You must run 'pip install google-adk' in a Python 3.10+ environment to make these modules importable."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which class is the primary entry point for launching agents in Python?\n- A) AgentCLI\n- B) AgentRuntime\n- C) ModelClient\n\nFeedback: Option B is correct. AgentRuntime handles config loading and execution execution."
+    }
+  ]
+}

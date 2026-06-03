@@ -1,0 +1,41 @@
+{
+  "id": "5",
+  "title": "5. Lab: Writing a structured weather and currency conversion tool",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Structured Weather & Currency Tools"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will author two custom tools in a python file, registering them via `agent.yaml`, and ensuring their parameters utilize clean, documented schemas."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Tool Source Code"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from google_adk.tools import tool\n\n@tool\ndef get_weather_forecast(city: str, days: int = 1) -> dict:\n    \"\"\"\n    Retrieves the weather forecast for a target city for a specific number of days.\n    \n    Args:\n        city: Name of the target location, e.g. 'Boston, MA'\n        days: Duration in days to forecast (1 to 5)\n    \"\"\"\n    # Mock weather API data\n    return {\"city\": city, \"forecast\": [{\"day\": i, \"temp\": 72 + i, \"condition\": \"Sunny\"} for i in range(days)]}\n\n@tool\ndef convert_currency(amount: float, source_currency: str, target_currency: str) -> dict:\n    \"\"\"\n    Converts financial monetary value from a source currency to a target currency.\n    \"\"\"\n    rates = {\"USD\": 1.0, \"EUR\": 0.92, \"GBP\": 0.78}\n    src = rates.get(source_currency.upper())\n    tgt = rates.get(target_currency.upper())\n    if not src or not tgt:\n        return {\"success\": False, \"error\": \"Currency code unsupported\"}\n    \n    value = (amount / src) * tgt\n    return {\"success\": True, \"converted_amount\": round(value, 2)}\n"
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Register in agent.yaml"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "tools:\n  - name: \"get_weather_forecast\"\n    source: \"src/tools/weather.py\"\n  - name: \"convert_currency\"\n    source: \"src/tools/weather.py\""
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What would happen if the agent tried to convert USD to JPY using the convert_currency tool above?\n- A) The host environment crashes.\n- B) The tool returns a dictionary with 'success: False' and an error message.\n- C) The tool runs an infinite loop.\n\nFeedback: Option B is correct. Unsupported currencies trigger the boundary check."
+    }
+  ]
+}

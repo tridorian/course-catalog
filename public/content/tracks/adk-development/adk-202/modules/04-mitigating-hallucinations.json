@@ -1,0 +1,32 @@
+{
+  "id": "4",
+  "title": "4. Mitigating hallucinations and out-of-boundary queries",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Mitigating Hallucinations"
+    },
+    {
+      "type": "p",
+      "content": "Agents must limit actions to their registered tools. They must refuse queries outside their designated parameters."
+    },
+    {
+      "type": "h2",
+      "content": "Out of Bound Directives"
+    },
+    {
+      "type": "code",
+      "language": "markdown",
+      "code": "If the user asks a question that cannot be answered using the provided tools, reply with: 'I am unable to answer this question as I do not have access to the appropriate data sources.' Do not guess."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How do you prevent an agent from inventing factually incorrect statistics?\n- A) Increase the model temperature.\n- B) Enforce strict refusal parameters and lower the temperature setting.\n- C) Remove all tool definitions.\n\nFeedback: Option B is correct. Lower temperatures make outputs deterministic; strict constraints prompt refusal."
+    }
+  ]
+}

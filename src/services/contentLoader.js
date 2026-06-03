@@ -1,9 +1,8 @@
-
 /**
  * Fetches the root catalog listing all available tracks.
  */
 export async function fetchCatalog() {
-  const path = `./content/catalog.json`;
+  const path = `/content/catalog.json`;
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Failed to load catalog: ${response.statusText}`);
@@ -15,7 +14,7 @@ export async function fetchCatalog() {
  * Fetches a track manifest listing all courses in a track.
  */
 export async function fetchTrackManifest(trackId) {
-  const path = `./content/tracks/${trackId}/track.json`;
+  const path = `/content/tracks/${trackId}/track.json`;
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Track not found: ${trackId}`);
@@ -27,7 +26,7 @@ export async function fetchTrackManifest(trackId) {
  * Fetches the course manifest.
  */
 export async function fetchCourseManifest(trackId, courseId) {
-  const path = `./content/tracks/${trackId}/${courseId}/manifest.json`;
+  const path = `/content/tracks/${trackId}/${courseId}/manifest.json`;
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Failed to load manifest: ${response.statusText}`);
@@ -41,7 +40,7 @@ export async function fetchCourseManifest(trackId, courseId) {
  * Fetches course metadata.
  */
 export async function fetchCourseMetadata(trackId, courseId, metadataFile) {
-  const path = `./content/tracks/${trackId}/${courseId}/${metadataFile}`;
+  const path = `/content/tracks/${trackId}/${courseId}/${metadataFile}`;
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Failed to load metadata: ${response.statusText}`);
@@ -53,7 +52,7 @@ export async function fetchCourseMetadata(trackId, courseId, metadataFile) {
  * Fetches module content.
  */
 export async function fetchModuleContent(trackId, courseId, moduleFile) {
-  const path = `./content/tracks/${trackId}/${courseId}/${moduleFile}`;
+  const path = `/content/tracks/${trackId}/${courseId}/${moduleFile}`;
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Failed to load module content: ${response.statusText}`);

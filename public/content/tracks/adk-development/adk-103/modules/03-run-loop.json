@@ -1,0 +1,32 @@
+{
+  "id": "3",
+  "title": "3. Executing the Agent run loop programmatically",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Programmatic Run Loops"
+    },
+    {
+      "type": "p",
+      "content": "Under the hood, the runtime executes a cycle: parse prompt -> query model -> trigger tools -> review tool results -> query model -> emit final response. Programmatic bindings allow developers to control each iteration of this loop."
+    },
+    {
+      "type": "h2",
+      "content": "Python Iterative Loop"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "runtime = AgentRuntime(config_path=\"agent.yaml\")\nstep_generator = runtime.execute_iterative(prompt=\"Calculate sales tax for $1500\")\n\nfor step in step_generator:\n    print(f\"Step Type: {step.type}\")\n    if step.type == \"tool_call\":\n        print(f\"Invoking Tool: {step.tool_name} with {step.args}\")\n    elif step.type == \"model_thinking\":\n        print(\"Agent is processing...\")"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the benefit of using execute_iterative over execute?\n- A) It runs faster.\n- B) It yields intermediate steps, allowing UI feedback and step validation.\n- C) It bypasses local API keys.\n\nFeedback: Option B is correct. Iterative execution lets developers render ongoing agent progress to users."
+    }
+  ]
+}

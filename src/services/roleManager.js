@@ -6,6 +6,7 @@ import { getAccessToken } from './googleAuth';
  * @returns {Promise<string>} - Returns 'admin' or 'student'.
  */
 export async function checkUserRole(configOverrides = {}) {
+  console.log('checkUserRole trace:', new Error().stack);
   const config = {
     testingMode: true,
     allowedAdmin: "taylor@tridorian.com",

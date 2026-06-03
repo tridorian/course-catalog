@@ -1,0 +1,32 @@
+{
+  "id": "2",
+  "title": "2. Windowed conversation histories vs summarization",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Windowed Memory vs Summarized Memory"
+    },
+    {
+      "type": "p",
+      "content": "Sliding windows are simple and maintain precise local context. Summarized memory uses an intermediate LLM run to condense historical turns, preserving older context at lower accuracy."
+    },
+    {
+      "type": "h2",
+      "content": "Window Configuration Example"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from google_adk.memory import WindowedMemory\n\n# Configure memory to store only the last 4 conversational turns\nmemory = WindowedMemory(window_size=4)"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: When is a sliding window memory format preferred over summarization?\n- A) When long-term history is critical.\n- B) When precise details of the last few messages must be preserved without distortion.\n- C) When saving maximum tokens is the only priority.\n\nFeedback: Option B is correct. Windows preserve exact wording for recent turns."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "5",
+  "title": "5. Lab: Bootstrapping a custom SDK-based Slack bot",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Bootstrapping a custom SDK-based Slack bot"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will write a Python script that integrates the ADK runtime with a mock Slack bot server, invoking the agent whenever a channel message is received."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Slack-ADK Bridge"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import json\nfrom google_adk import AgentRuntime\n\n# Mocking a slack event dispatcher\nclass MockSlackClient:\n    def __init__(self, token):\n        self.token = token\n    def post_message(self, channel, text):\n        print(f\"[SLACK SEND] Channel: {channel} | Message: {text}\")\n\ndef handle_slack_message(event, runtime, slack_client):\n    user_msg = event.get(\"text\")\n    channel = event.get(\"channel\")\n    \n    print(f\"Received message from slack: {user_msg}\")\n    # Run ADK agent loop\n    response = runtime.execute(prompt=user_msg)\n    \n    # Reply back to slack\n    slack_client.post_message(channel, response.content)\n\nif __name__ == '__main__':\n    client = MockSlackClient(\"xoxb-mock-token\")\n    agent = AgentRuntime(\"agent.yaml\")\n    mock_event = {\"channel\": \"#general\", \"text\": \"Find flight details for next Monday.\"}\n    handle_slack_message(mock_event, agent, client)"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How does the agent structure its reply in the script above?\n- A) It directly prints to sys.stdout without saving.\n- B) It extracts response.content and passes it to the slack client's dispatch method.\n- C) It sends raw JSON files to the Slack channel API.\n\nFeedback: Option B is correct. response.content retrieves the final text reply."
+    }
+  ]
+}

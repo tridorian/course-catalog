@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Introduction to agent conversation memory paradigms",
+      "file": "modules/01-memory-concepts.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Windowed conversation histories vs summarization",
+      "file": "modules/02-window-vs-summary.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Persistence layer: Redis adapters",
+      "file": "modules/03-redis-adapters.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Memory isolation in multi-tenant configurations",
+      "file": "modules/04-memory-isolation.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Building a stateful memory management agent",
+      "file": "modules/05-lab-stateful-memory.json"
+    }
+  ]
+}

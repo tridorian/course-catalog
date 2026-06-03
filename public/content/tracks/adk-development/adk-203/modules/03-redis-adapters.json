@@ -1,0 +1,37 @@
+{
+  "id": "3",
+  "title": "3. Persistence layer: Redis adapters",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Redis Memory Persistence"
+    },
+    {
+      "type": "p",
+      "content": "Redis is an in-memory database ideal for low-latency session caches. In multi-user setups, storing thread history in Redis ensures horizontal scaling."
+    },
+    {
+      "type": "h2",
+      "content": "Python Redis Adapter Setup"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import redis\nfrom google_adk.memory import RedisMemoryStore\n\nr_client = redis.Redis(host='localhost', port=6379, db=0)\n# Connect the memory manager to Redis with a 1 hour TTL\nstore = RedisMemoryStore(client=r_client, ttl_seconds=3600)"
+    },
+    {
+      "type": "info",
+      "title": "TTL Strategy",
+      "content": "Setting an explicit TTL ensures stale chat sessions are evicted, managing memory usage automatically."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why is Redis highly suitable for session memory stores?\n- A) It supports complex SQL queries.\n- B) It offers extremely low-latency reads and writes with automatic TTL eviction.\n- C) It runs inside the client web browser.\n\nFeedback: Option B is correct. Redis handles fast lookups and auto-eviction."
+    }
+  ]
+}

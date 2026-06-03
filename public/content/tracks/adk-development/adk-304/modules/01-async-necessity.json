@@ -1,0 +1,32 @@
+{
+  "id": "1",
+  "title": "1. The necessity of asynchronous execution in multi-agent routing",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Asynchronous Execution Necessity"
+    },
+    {
+      "type": "p",
+      "content": "Executing multi-agent tasks synchronously blocks connection threads. If Agent A calls Agent B, which calls Agent C, any network jitter or model delay will cascade, leading to timeout errors. Asynchronous queues solve this."
+    },
+    {
+      "type": "h2",
+      "content": "Sync vs Async Call Graph"
+    },
+    {
+      "type": "info",
+      "title": "Message Queue Paradigm",
+      "content": "In an async queue, Agent A writes a message to the broker and returns a taskId. Workers pick up the task and update the taskId state, decoupling the pipeline."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What problem does asynchronous queueing solve in agent communications?\n- A) It increases model temperatures.\n- B) It prevents cascading timeouts by decoupling agent call requests from task completion.\n- C) It compiles python bindings.\n\nFeedback: Option B is correct. Decoupling stops network timeouts."
+    }
+  ]
+}

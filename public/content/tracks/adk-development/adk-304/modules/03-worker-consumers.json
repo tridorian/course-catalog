@@ -1,0 +1,37 @@
+{
+  "id": "3",
+  "title": "3. Designing worker agents that consume queues",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Worker Agent Consumers"
+    },
+    {
+      "type": "p",
+      "content": "Worker agents run in background processes, listening to queues. When a task arrives, they run the agent, process the query, and publish results to an output queue."
+    },
+    {
+      "type": "h2",
+      "content": "Worker Consumer Code"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "def on_request(ch, method, props, body):\n    query = body.decode()\n    print(f\"Processing task: {query}\")\n    # Run agent logic\n    result = \"Processed: \" + query\n    \n    # Publish back response\n    ch.basic_publish(exchange='', routing_key=props.reply_to, body=result)\n    ch.basic_ack(delivery_tag=method.delivery_tag)"
+    },
+    {
+      "type": "warning",
+      "title": "Acknowledge Messages",
+      "content": "Always send an acknowledgment (basic_ack) after processing finishes. If the worker crashes, the broker will re-queue the task."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What happens if a consumer worker crashes before acknowledging a task?\n- A) The message is deleted by the broker.\n- B) The broker re-queues the message so another worker can process it.\n- C) The queue crashes.\n\nFeedback: Option B is correct. Unacknowledged messages are re-queued to maintain reliability."
+    }
+  ]
+}

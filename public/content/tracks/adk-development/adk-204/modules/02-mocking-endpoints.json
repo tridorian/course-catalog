@@ -1,0 +1,32 @@
+{
+  "id": "2",
+  "title": "2. Mocking model responses and external API calls",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Mocking Model Responses"
+    },
+    {
+      "type": "p",
+      "content": "Querying LLM APIs during unit tests increases expenses and introduces network dependencies. Mocking endpoints returns pre-configured strings, enabling offline tests."
+    },
+    {
+      "type": "h2",
+      "content": "Mocking with Pytest"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from unittest.mock import MagicMock\nfrom google_adk import AgentRuntime\n\ndef test_agent_with_mock():\n    runtime = AgentRuntime(config_path=\"agent.yaml\")\n    # Mock the internal execute method\n    runtime.execute = MagicMock(return_value=MagicMock(content=\"Mocked response\"))\n    \n    res = runtime.execute(prompt=\"Hello\")\n    assert res.content == \"Mocked response\""
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the main benefit of mocking model responses in local test suites?\n- A) It guarantees the model is 100% accurate.\n- B) It prevents billing charges and network dependency errors during testing.\n- C) It compiles Javascript dependencies.\n\nFeedback: Option B is correct. Mocking makes tests cheap, deterministic, and fast."
+    }
+  ]
+}

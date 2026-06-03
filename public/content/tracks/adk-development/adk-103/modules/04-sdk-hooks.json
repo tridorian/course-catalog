@@ -1,0 +1,37 @@
+{
+  "id": "4",
+  "title": "4. Capturing agent hooks and execution events",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lifecycle Hooks"
+    },
+    {
+      "type": "p",
+      "content": "SDK events and lifecycle hooks allow auditing, metrics logging, or custom security checks before executing model decisions or tool runs."
+    },
+    {
+      "type": "h2",
+      "content": "Subscribing to Runtime Events in NodeJS"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "code": "const runtime = new AgentRuntime({ configPath: 'agent.yaml' });\n\nruntime.on('tool:start', (event) => {\n  console.log(`[AUDIT] Tool execution requested: ${event.toolName}`);\n});\n\nruntime.on('model:request', (event) => {\n  console.log(`[METRIC] Tokens sent: ${event.promptTokens}`);\n});"
+    },
+    {
+      "type": "warning",
+      "title": "Blocking Hooks",
+      "content": "Ensure listener methods resolve quickly. Long-running synchronous handlers will block the agent's reasoning cycle, inducing high latencies."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which hook is ideal for validating if a tool has permission to run?\n- A) model:request\n- B) tool:start\n- C) execution:complete\n\nFeedback: Option B is correct. tool:start triggers before the actual tool code executes."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "1",
+  "title": "1. Shared state blackboard architectures",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Blackboard Architectures"
+    },
+    {
+      "type": "p",
+      "content": "In a blackboard architecture, agents do not message each other directly. Instead, they read from and write to a centralized, shared state space called the 'Blackboard'."
+    },
+    {
+      "type": "h2",
+      "content": "Blackboard Structure"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "class Blackboard:\n    def __init__(self):\n        self.data = {}\n    def update(self, key, value):\n        self.data[key] = value\n    def get(self, key):\n        return self.data.get(key)"
+    },
+    {
+      "type": "info",
+      "title": "Decoupling Benefits",
+      "content": "This decouples agent logic. Agents monitor changes on the blackboard and act only when their specialized inputs are ready."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How do agents exchange information in a Blackboard architecture?\n- A) Direct network sockets\n- B) By posting to and reading from a shared central memory store\n- C) Via command-line arguments\n\nFeedback: Option B is correct. The Blackboard is a shared space."
+    }
+  ]
+}

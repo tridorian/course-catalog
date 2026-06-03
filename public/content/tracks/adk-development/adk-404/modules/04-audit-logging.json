@@ -1,0 +1,32 @@
+{
+  "id": "4",
+  "title": "4. Monitoring, logging, and auditing agent tool executions",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Audit Logging Protocols"
+    },
+    {
+      "type": "p",
+      "content": "Enterprise governance requires detailed audit records. Log every tool call, argument, returned JSON blob, and executing user session identifier."
+    },
+    {
+      "type": "h2",
+      "content": "Secure Log Entry Schema"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"timestamp\": \"2026-06-03T15:47:00Z\",\n  \"user_id\": \"usr_90210\",\n  \"tool\": \"fetch_db\",\n  \"args\": {\"query\": \"SELECT * FROM users\"},\n  \"allowed\": true\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What details are required in enterprise agent audit records?\n- A) Program build variables only.\n- B) User identity, invoked tool name, exact arguments, and permission status.\n- C) The API token string.\n\nFeedback: Option B is correct. Complete session context is required for security review."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "2",
+  "title": "2. Sequential processing pipelines with intermediate validation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Sequential Pipelines"
+    },
+    {
+      "type": "p",
+      "content": "A sequential pipeline passes a work artifact along a chain of agents. For example, a Writer Agent drafts text, a Reviewer Agent identifies bugs, and an Editor Agent applies corrections."
+    },
+    {
+      "type": "h2",
+      "content": "Pipeline Flow Code"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "draft = writer.draft_topic(\"ADK Security\")\nerrors = reviewer.review_content(draft)\nif errors:\n    final_doc = editor.apply_corrections(draft, errors)\nelse:\n    final_doc = draft"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the purpose of intermediate validation in sequential pipelines?\n- A) To encrypt files before saving.\n- B) To verify quality at each step, preventing downstream errors.\n- C) To compile code modules.\n\nFeedback: Option B is correct. Validation ensures errors are corrected early."
+    }
+  ]
+}

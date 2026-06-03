@@ -1,0 +1,28 @@
+{
+  "id": "1",
+  "title": "1. The Supervisor-Worker design pattern",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Supervisor-Worker Design Pattern"
+    },
+    {
+      "type": "p",
+      "content": "For large projects, a single agent with 50 tools will make errors. The Supervisor-Worker pattern breaks this down. A supervisor agent handles triage, extracting intent and delegating sub-tasks to specialized sub-agents with 3-5 tools each."
+    },
+    {
+      "type": "info",
+      "title": "Architecture",
+      "content": "The supervisor agent is the primary endpoint, and it routes payloads to sub-agents via the A2A network protocol. It consolidates the final responses."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the main benefit of the Supervisor-Worker pattern?\n- A) It removes the need for LLMs.\n- B) It prevents tool selection confusion by isolating tools within small, focused sub-agents.\n- C) It is faster to execute.\n\nFeedback: Option B is correct. Focus limits selection mistakes."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "5",
+  "title": "5. Lab: Building an asynchronous order-processing agent queue",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Building an Asynchronous Order-Processing Agent Queue"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will write a complete Python script simulating a message queue dispatcher that puts order tasks in a local list queue and processes them asynchronously."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the queue processor"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import queue\nimport time\n\n# Mocking an AMQP queue\ntask_queue = queue.Queue()\n\ndef produce_task(order_id, details):\n    task = {\"id\": order_id, \"details\": details}\n    task_queue.put(task)\n    print(f\"Enqueued Order: {order_id}\")\n\ndef consume_tasks():\n    while not task_queue.empty():\n        task = task_queue.get()\n        print(f\"Processing Order {task['id']}: {task['details']}\")\n        time.sleep(0.1) # Simulate tool latency\n        task_queue.task_done()\n\nif __name__ == '__main__':\n    produce_task(1001, \"Item: Laptop\")\n    produce_task(1002, \"Item: Monitor\")\n    consume_tasks()"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What does task_queue.task_done() signal?\n- A) That the broker must be restarted.\n- B) That the enqueued task was successfully processed.\n- C) That the queue is empty.\n\nFeedback: Option B is correct. It signals task completion to the queue manager."
+    }
+  ]
+}

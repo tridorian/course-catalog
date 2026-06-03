@@ -24,6 +24,7 @@ async function run() {
   await new Promise(resolve => setTimeout(resolve, 4000));
 
   let browser;
+  let page;
   try {
     console.log('Launching Headless Chrome...');
     browser = await puppeteer.launch({
@@ -31,7 +32,9 @@ async function run() {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
-    const page = await browser.newPage();
+    page = await browser.newPage();
+    page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
+    page.on('pageerror', err => console.error('BROWSER ERROR:', err.message || err));
     // Use high resolution for clean, crisp screenshots
     await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 });
 
@@ -71,7 +74,7 @@ async function run() {
 
     // Scenario 3: Course Map
     console.log('Scenario 3: Course Map...');
-    await page.goto('http://localhost:5173/agentic-engineering/agy-101');
+    await page.goto('http://localhost:5173/#/agentic-engineering/agy-101');
     await page.waitForSelector('h1');
     await new Promise(resolve => setTimeout(resolve, 1500));
     await page.screenshot({ path: path.join(screenshotDir, 'course-map.png') });
@@ -79,7 +82,7 @@ async function run() {
 
     // Scenario 4: Module View
     console.log('Scenario 4: Module View...');
-    await page.goto('http://localhost:5173/agentic-engineering/agy-101/1');
+    await page.goto('http://localhost:5173/#/agentic-engineering/agy-101/1');
     await page.waitForSelector('main');
     await new Promise(resolve => setTimeout(resolve, 1500));
     await page.screenshot({ path: path.join(screenshotDir, 'module-view.png') });
@@ -87,7 +90,7 @@ async function run() {
 
     // Scenario 5: Reset Modal
     console.log('Scenario 5: Reset Modal...');
-    await page.goto('http://localhost:5173/agentic-engineering/agy-101/1');
+    await page.goto('http://localhost:5173/#/agentic-engineering/agy-101/1');
     await page.waitForSelector('button');
     await page.evaluate(() => {
       // Find the button and trigger click
@@ -101,6 +104,14 @@ async function run() {
 
   } catch (error) {
     console.error('An error occurred during screenshot generation:', error);
+    if (page) {
+      try {
+        await page.screenshot({ path: path.join(screenshotDir, 'debug-error.png') });
+        console.log('Saved debug-error.png');
+      } catch (err) {
+        console.error('Failed to save debug-error.png:', err);
+      }
+    }
   } finally {
     if (browser) {
       await browser.close();

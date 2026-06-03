@@ -1,0 +1,32 @@
+{
+  "id": "2",
+  "title": "2. Connecting A2AServer to RabbitMQ brokers",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "RabbitMQ Integration with A2A"
+    },
+    {
+      "type": "p",
+      "content": "A2AServer supports RabbitMQ out of the box. Instead of using standard local memory routing, we configure the daemon to listen to an AMQP broker."
+    },
+    {
+      "type": "h2",
+      "content": "Python AMQP Listener Setup"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import pika\n\nconnection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))\nchannel = connection.channel()\n\n# Declare queue for agent communications\nchannel.queue_declare(queue='agent_tasks')\nprint(\"Connected to RabbitMQ task broker.\")"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which protocol does RabbitMQ utilize for message transportation?\n- A) HTTP\n- B) AMQP\n- C) FTP\n\nFeedback: Option B is correct. AMQP (Advanced Message Queuing Protocol) is the standard for RabbitMQ."
+    }
+  ]
+}
