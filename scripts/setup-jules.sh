@@ -1,22 +1,91 @@
-#!/bin/bash
-# Idempotent setup script for the Tridorian Course Catalog in Jules VM environments.
-# Configured via the Jules Web UI Codebase Settings under "Initial Setup".
-# This prepares dependencies and caches them in the VM snapshot.
+#!/usr/bin/env bash
+# ==============================================================================
+# Tridorian Course Catalog - Jules VM Environment Setup
+# Enforces a clean, reproducible setup, warms dev caches, and registers aliases.
+# ==============================================================================
 
-set -e
+set -euo pipefail
 
-echo "=== Tridorian Environment Setup ==="
+# --- Color Codes for Logging ---
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly RED='\033[0;31m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
 
-# 1. Install regular dependencies
-echo "Installing project dependencies..."
+log_info() {
+    echo -e "${GREEN}[INFO] $(date +'%H:%M:%S') - $1${NC}"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN] $(date +'%H:%M:%S') - $1${NC}"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR] $(date +'%H:%M:%S') - $1${NC}" >&2
+}
+
+log_step() {
+    echo -e "${BLUE}=== $1 ===${NC}"
+}
+
+log_step "Tridorian Environment Setup & Optimization"
+
+# 1. System Diagnostics
+log_info "Node.js version: $(node --version)"
+log_info "npm version: $(npm --version)"
+if command -v free &>/dev/null; then
+    log_info "Available Memory: $(free -h | awk '/^Mem:/ {print $4 \" / \" $2}')"
+fi
+
+# 2. Clean Up Zombie Processes on Port 5173
+log_info "Checking for zombie processes on port 5173..."
+if command -v lsof &>/dev/null; then
+    PORT_PID=$(lsof -t -i:5173 || true)
+    if [[ -not -z "$PORT_PID" ]]; then
+        log_warn "Port 5173 is occupied by PID(s): $PORT_PID. Terminating..."
+        kill -9 $PORT_PID || true
+    fi
+else
+    # Fallback to fuser
+    if command -v fuser &>/dev/null; then
+        fuser -k 5173/tcp &>/dev/null || true
+    fi
+fi
+
+# 3. Install Standard Dependencies
+log_info "Installing project dependencies..."
 npm install
 
-# 2. Install Puppeteer locally for screenshot capture scripts
-echo "Installing Puppeteer for screenshot automation..."
+# 4. Install Puppeteer locally for screenshot capture scripts
+log_info "Installing Puppeteer for screenshot automation..."
 npm install puppeteer --no-save
 
-# 3. Confirm all tests pass locally in the sandbox
-echo "Validating test suite..."
+# 5. Pre-build Vite Client (Warms up pre-bundling caches)
+log_info "Running a production compilation dry-run to warm up bundler caches..."
+npm run build
+
+# 6. Validate Course Catalog Schema
+if [[ -f "scripts/validate-catalog.js" ]]; then
+    log_info "Validating course catalog schema..."
+    node scripts/validate-catalog.js || log_warn "Catalog schema validation found discrepancies."
+fi
+
+# 7. Register Helpful Shell Aliases
+log_info "Registering custom dev aliases in ~/.bashrc..."
+{
+    echo ""
+    echo "# --- Tridorian Dev Shortcuts ---"
+    echo "alias test-catalog='npm test -- --run'"
+    echo "alias build-catalog='npm run build'"
+    echo "alias snap='node scripts/take-screenshots.js'"
+    echo "alias validate-catalog='node scripts/validate-catalog.js'"
+    echo "export PS1=\"\[\033[0;32m\][Jules-VM] \[\033[0;34m\]\w\[\033[0m\]\\$ \""
+} >> ~/.bashrc || log_warn "Unable to append aliases to ~/.bashrc"
+
+# 8. Confirm Test Suite Passes
+log_info "Running local Vitest suite verification..."
 npm test -- --run
 
-echo "=== Setup Completed Successfully ==="
+log_step "Setup Completed Successfully"
+

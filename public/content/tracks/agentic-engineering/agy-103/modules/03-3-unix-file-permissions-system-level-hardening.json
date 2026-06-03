@@ -25,7 +25,6 @@
       "content": "# Create a workspace directory specifically for the agent\nmkdir -p /var/home/wtg/workspace_agy_project\n\n# Assign ownership to the invoking user and set group ownership to a restricted group\nsudo chown -R $USER:nogroup /var/home/wtg/workspace_agy_project\n\n# Apply restrictive permissions (Owner: read/write/execute, Group/Others: none)\nchmod 700 /var/home/wtg/workspace_agy_project\n\n# Verify that permissions are set correctly\nls -ld /var/home/wtg/workspace_agy_project\n# Expected output shows: drwx------"
     },
     {
-    {
       "type": "p",
       "content": "For production environments, running the agent within a dedicated, low-privilege system user account (e.g., `agy-sandbox`) is a baseline. However, modifying host home directory permissions (such as `chmod 700` on your entire home directory) is highly problematic as it can break user applications, SSH agents, and desktop environment functionalities."
     },
