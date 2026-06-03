@@ -12,7 +12,8 @@ import {
   Trophy,
   History,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
+  ArrowDown
 } from 'lucide-react';
 
 import ModuleRenderer from './components/ModuleRenderer';
@@ -29,7 +30,7 @@ import { useTheme } from './hooks/useTheme';
 
 // --- Main App Component ---
 
-function AppContent() {
+function AppContent({ theme, setTheme }) {
   const [courseMetadata, setCourseMetadata] = useState(null);
   const [courseSteps, setCourseSteps] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,6 +44,7 @@ function AppContent() {
   const [isResumeBannerVisible, setIsResumeBannerVisible] = useState(false);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
 
   const { trackId, courseId, moduleId } = useParams();
@@ -145,6 +147,34 @@ function AppContent() {
       activeStepIndex = index;
     }
   }
+
+  // Scroll indicator hook
+  useEffect(() => {
+    const handleScroll = () => {
+      const doc = document.documentElement;
+      const totalHeight = doc.scrollHeight;
+      const scrolled = window.innerHeight + window.scrollY;
+      
+      // Show indicator if there is scrollable content and we haven't scrolled to bottom
+      if (totalHeight - scrolled > 120 && doc.scrollHeight > window.innerHeight + 100) {
+        setShowScrollIndicator(true);
+      } else {
+        setShowScrollIndicator(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    
+    // Check initial state after content renders
+    const timer = setTimeout(handleScroll, 600);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+      clearTimeout(timer);
+    };
+  }, [moduleId, activeStepIndex, courseSteps]);
 
   // Update progress in Drive whenever module or completed steps change
   useEffect(() => {
@@ -287,10 +317,18 @@ function AppContent() {
 
       {/* Mobile Header */}
       <div className="md:hidden bg-panel border-b border-border-main p-4 flex justify-between items-center sticky top-0 z-50">
-        <div className="font-bold text-accent-text tracking-widest">TRIDORIAN</div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-main">
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        <button 
+          onClick={() => navigate('/')} 
+          className="font-bold text-accent-text tracking-widest hover:opacity-85 transition-opacity"
+        >
+          TRIDORIAN
         </button>
+        <div className="flex items-center gap-4">
+          <ThemePicker theme={theme} setTheme={setTheme} />
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-main">
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar Navigation */}
@@ -302,10 +340,20 @@ function AppContent() {
       `}>
         <div className="p-6 hidden md:block border-b border-border-main">
           <div className="flex justify-between items-start mb-2">
-            <div className="font-extrabold text-xl text-accent-text tracking-[0.2em]">TRIDORIAN</div>
+            <button 
+              onClick={() => navigate('/')} 
+              className="font-extrabold text-xl text-accent-text tracking-[0.2em] hover:opacity-85 transition-opacity"
+            >
+              TRIDORIAN
+            </button>
             <SyncStatus status={syncStatus} onRetry={handleRetrySync} />
           </div>
-          <div className="text-xs text-text-muted mt-1 font-mono uppercase">{courseMetadata?.title || 'LABS // UNKNOWN'}</div>
+          <div className="flex justify-between items-center gap-2 mt-3">
+            <div className="text-xs text-text-muted font-mono uppercase truncate max-w-[160px]" title={courseMetadata?.title}>
+              {courseMetadata?.title || 'LABS // UNKNOWN'}
+            </div>
+            <ThemePicker theme={theme} setTheme={setTheme} />
+          </div>
         </div>
 
         <div className="p-4 flex-1">
@@ -324,7 +372,7 @@ function AppContent() {
                       ? 'bg-muted text-accent-text border border-border-main shadow-accent'
                       : isLocked
                         ? 'text-gray-600 opacity-50'
-                        : 'text-gray-400 hover:bg-muted/50 hover:text-white'
+                        : 'text-gray-400 hover:bg-muted/50 hover:text-main'
                   }`}
                 >
                   <button
@@ -396,8 +444,8 @@ function AppContent() {
       {showResetModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-panel border border-border-main rounded-xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-            <h3 className="text-xl font-bold text-white mb-4">Reset Progress?</h3>
-            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+            <h3 className="text-xl font-bold text-main mb-4">Reset Progress?</h3>
+            <p className="text-text-muted text-sm mb-8 leading-relaxed">
               Are you sure you want to reset your progress for this course? This cannot be undone.
             </p>
             <div className="flex flex-col gap-3">
@@ -430,8 +478,8 @@ function AppContent() {
                   <History size={20} className="text-accent-text" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Resume Session?</div>
-                  <div className="text-xs text-gray-400 font-mono">
+                  <div className="text-sm font-bold text-main">Resume Session?</div>
+                  <div className="text-xs text-text-muted font-mono">
                     You were last working on <span className="text-accent-text">{resumeSession.courseId} / {resumeSession.moduleId}</span>
                   </div>
                 </div>
@@ -442,7 +490,7 @@ function AppContent() {
                     setIsResumeBannerVisible(false);
                     setIsBannerDismissed(true);
                   }}
-                  className="px-4 py-1.5 text-xs font-mono text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-1.5 text-xs font-mono text-gray-400 hover:text-main transition-colors"
                 >
                   DISMISS
                 </button>
@@ -475,7 +523,7 @@ function AppContent() {
 
           {!moduleId ? (
             <div className="space-y-6">
-              <h1 className="text-3xl font-bold text-white mb-6">Course Map</h1>
+              <h1 className="text-3xl font-bold text-main mb-6">Course Map</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {courseSteps.map((step, index) => {
                    const isCompleted = completedSteps.includes(index);
@@ -483,7 +531,7 @@ function AppContent() {
                    return (
                      <div key={step.id} className={`p-4 rounded-xl border ${isLocked ? 'border-border-main bg-panel opacity-50' : 'border-border-main bg-muted'}`}>
                         <h3 className="font-bold text-accent-text mb-2">{step.title}</h3>
-                        <p className="text-sm text-gray-400 mb-4">{step.description || 'Module details'}</p>
+                        <p className="text-sm text-text-muted mb-4">{step.description || 'Module details'}</p>
                         <button
                           disabled={isLocked}
                           onClick={() => navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`)}
@@ -532,7 +580,7 @@ function AppContent() {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
               activeStepIndex === 0
                 ? 'text-gray-600 cursor-not-allowed'
-                : 'text-white hover:bg-muted'
+                : 'text-main hover:bg-muted'
             }`}
           >
             <ChevronLeft size={20} />
@@ -560,6 +608,12 @@ function AppContent() {
         )}
       </div>
 
+      {showScrollIndicator && (
+        <div className="fixed bottom-24 md:bottom-8 right-6 bg-accent/90 backdrop-blur text-accent-fg px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold shadow-accent animate-bounce z-40">
+          <span>Scroll down to proceed</span>
+          <Icons.ArrowDown size={14} />
+        </div>
+      )}
 
     </div>
   );
@@ -571,11 +625,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard theme={theme} setTheme={setTheme} />} />
-      <Route path="/admin" element={<AdminPanel />} />
-      <Route path="/help" element={<HelpSection />} />
-      <Route path="/:trackId" element={<TrackPage />} />
-      <Route path="/:trackId/:courseId" element={<AppContent />} />
-      <Route path="/:trackId/:courseId/:moduleId" element={<AppContent />} />
+      <Route path="/admin" element={<AdminPanel theme={theme} setTheme={setTheme} />} />
+      <Route path="/help" element={<HelpSection theme={theme} setTheme={setTheme} />} />
+      <Route path="/:trackId" element={<TrackPage theme={theme} setTheme={setTheme} />} />
+      <Route path="/:trackId/:courseId" element={<AppContent theme={theme} setTheme={setTheme} />} />
+      <Route path="/:trackId/:courseId/:moduleId" element={<AppContent theme={theme} setTheme={setTheme} />} />
     </Routes>
   );
 }

@@ -43,12 +43,19 @@ async function main() {
   const existingTabs = doc.data.tabs || [];
   console.log(`Document currently has ${existingTabs.length} tabs.`);
 
+  const getTabTitle = (title) => {
+    if (title.length > 47) {
+      return title.substring(0, 45) + '...';
+    }
+    return title;
+  };
+
   // Smart Tab Management: Reuse existing tabs with correct titles, add missing ones, delete extra ones
   const cleanupRequests = [];
   const addRequests = [];
   const targetTabs = ['[Intro]'];
   courseData.modules.forEach(mod => {
-    targetTabs.push(`[${mod.title}]`);
+    targetTabs.push(`[${getTabTitle(mod.title)}]`);
   });
 
   // 1. Rename the first tab to [Config] if it's not already
@@ -202,10 +209,11 @@ async function main() {
 
   // C. Populate Modules
   courseData.modules.forEach(mod => {
-    const modTab = newTabs.find(t => t.tabProperties.title === `[${mod.title}]`);
+    const cleanTitle = getTabTitle(mod.title);
+    const modTab = newTabs.find(t => t.tabProperties.title === `[${cleanTitle}]`);
     if (modTab) {
       const modTabId = modTab.tabProperties.tabId;
-      let fullText = `# [${mod.title}]\n\n`;
+      let fullText = `# [${cleanTitle}]\n\n`;
       
       mod.blocks.forEach(block => {
         if (block.type === 'h2') {

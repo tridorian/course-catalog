@@ -3,8 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Shield, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
 import { checkUserRole } from '../services/roleManager';
 import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
+import ThemePicker from './ThemePicker';
 
-const AdminPanel = () => {
+const AdminPanel = ({ theme, setTheme }) => {
   const [role, setRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [catalog, setCatalog] = useState(null);
@@ -122,10 +123,11 @@ const AdminPanel = () => {
               <Shield size={18} />
               <span className="font-mono text-xs tracking-[0.3em] uppercase">Security Level: Administrator</span>
             </div>
-            <h1 className="text-4xl font-extrabold text-white">Tridorian Admin Control Center</h1>
+            <h1 className="text-4xl font-extrabold text-main">Tridorian Admin Control Center</h1>
           </div>
           
           <div className="flex items-center gap-4">
+            <ThemePicker theme={theme} setTheme={setTheme} />
             <Link 
               to="/" 
               className="flex items-center gap-2 px-4 py-2 bg-muted text-text-muted border border-border-main rounded-lg hover:bg-elevated transition-all text-sm font-medium"
@@ -136,7 +138,7 @@ const AdminPanel = () => {
             <button
               onClick={triggerSync}
               disabled={syncing}
-              className={`flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 transition-all shadow-accent ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 transition-all shadow-accent"
             >
               <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
               {syncing ? 'Dispatching...' : 'Trigger Catalog Sync'}
@@ -160,13 +162,13 @@ const AdminPanel = () => {
             <div key={track.id} className="bg-panel border border-border-main rounded-2xl overflow-hidden shadow-xl">
               <div className="p-6 bg-muted/50 border-b border-border-main flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-main flex items-center gap-3">
                     {track.title}
                     <span className="px-2 py-0.5 bg-base text-text-muted text-[10px] font-mono border border-border-main rounded">
                       {track.id}
                     </span>
                   </h2>
-                  <p className="text-gray-400 text-sm mt-1">{track.description}</p>
+                  <p className="text-text-muted text-sm mt-1">{track.description}</p>
                 </div>
                 <Link 
                   to={`/${track.id}`}
@@ -191,11 +193,11 @@ const AdminPanel = () => {
                   <tbody className="divide-y divide-border-main">
                     {track.courses.map((course) => (
                       <tr key={course.id} className="hover:bg-muted/20 transition-colors group">
-                        <td className="px-6 py-4 font-mono text-xs text-gray-400">{course.id}</td>
+                        <td className="px-6 py-4 font-mono text-xs text-text-muted">{course.id}</td>
                         <td className="px-6 py-4">
-                          <div className="font-medium text-white group-hover:text-accent-text transition-colors">{course.title}</div>
+                          <div className="font-medium text-main group-hover:text-accent-text transition-colors">{course.title}</div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-400">{course.modules}</td>
+                        <td className="px-6 py-4 text-sm text-text-muted">{course.modules}</td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter ${
                             course.status?.toLowerCase() === 'draft' 

@@ -93,7 +93,30 @@ const Dashboard = ({ theme, setTheme }) => {
       {/* Background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-accent/5 rounded-full blur-[150px] pointer-events-none"></div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 py-16">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-8 md:py-12">
+        {/* Top Controls Row */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-12 border-b border-border-subtle pb-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link 
+              to="/help" 
+              className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+            >
+              <Icons.HelpCircle size={12} />
+              Help & Troubleshooting
+            </Link>
+            <ThemePicker theme={theme} setTheme={setTheme} />
+          </div>
+          {role === 'admin' && (
+            <Link 
+              to="/admin" 
+              className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+            >
+              <Icons.Shield size={12} />
+              Admin Control Panel
+            </Link>
+          )}
+        </div>
+
         {/* Connection Status / Onboarding Banner */}
         <div className="mb-12">
           {!isConnected ? (
@@ -103,7 +126,7 @@ const Dashboard = ({ theme, setTheme }) => {
                   <Icons.CloudOff className="text-accent-text" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold">Connect Google Drive to Sync Progress</h3>
+                  <h3 className="text-main font-bold">Connect Google Drive to Sync Progress</h3>
                   <p className="text-text-muted text-sm">Save your mission status across devices and resume where you left off.</p>
                 </div>
               </div>
@@ -124,29 +147,8 @@ const Dashboard = ({ theme, setTheme }) => {
 
         {/* Header */}
         <div className="text-center mb-16 relative">
-          <div className="absolute top-0 left-0 flex items-center gap-2">
-            <Link 
-              to="/help" 
-              className="flex items-center gap-2 px-3 py-1 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
-            >
-              <Icons.HelpCircle size={12} />
-              Help & Troubleshooting
-            </Link>
-            <ThemePicker theme={theme} setTheme={setTheme} />
-          </div>
-          {role === 'admin' && (
-            <div className="absolute top-0 right-0">
-              <Link 
-                to="/admin" 
-                className="flex items-center gap-2 px-3 py-1 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
-              >
-                <Icons.Shield size={12} />
-                Admin Control Panel
-              </Link>
-            </div>
-          )}
           <div className="font-extrabold text-2xl text-accent-text tracking-[0.3em] mb-4">TRIDORIAN</div>
-          <h1 className="text-5xl font-extrabold text-white mb-4">Course Catalog</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-main mb-4">Course Catalog</h1>
           <p className="text-lg text-text-muted max-w-2xl mx-auto">
             Select a learning track to begin your mission. Each track contains multiple courses designed to build expertise progressively.
           </p>
@@ -173,7 +175,7 @@ const Dashboard = ({ theme, setTheme }) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold text-white group-hover:text-accent-text transition-colors">{track.title}</h2>
+                        <h2 className="text-2xl font-bold text-main group-hover:text-accent-text transition-colors">{track.title}</h2>
                         <Icons.ChevronRight className="text-gray-600 group-hover:text-accent-text group-hover:translate-x-1 transition-all" size={24} />
                       </div>
                       {trackProgress[track.id] && (

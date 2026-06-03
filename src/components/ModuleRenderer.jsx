@@ -10,7 +10,7 @@ const ModuleRenderer = ({ module, sourceFile }) => {
     case 'presentation':
       return (
         <div className="space-y-6">
-          <h1 className="text-3xl font-bold text-white mb-6">{module.title}</h1>
+          <h1 className="text-3xl font-bold text-main mb-6">{module.title}</h1>
           {module.url && module.url.includes('docs.google.com/presentation') ? (
             <SlideDeckEmbed url={module.url} title={module.title} sourceFile={sourceFile} />
           ) : module.url ? (
@@ -30,14 +30,14 @@ const ModuleRenderer = ({ module, sourceFile }) => {
     case 'resource':
       return (
         <div className="space-y-6">
-          <h1 className="text-3xl font-bold text-white mb-6">{module.title}</h1>
+          <h1 className="text-3xl font-bold text-main mb-6">{module.title}</h1>
 
           <div className="bg-panel p-8 rounded-xl border border-border-main flex flex-col items-center text-center max-w-2xl mx-auto mt-12">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-6 border border-border-main">
               <FileText className="text-accent-text" size={32} />
             </div>
 
-            <h2 className="text-2xl font-bold text-white mb-4">Reference Material</h2>
+            <h2 className="text-2xl font-bold text-main mb-4">Reference Material</h2>
 
             {module.description && (
               <p className="text-text-muted mb-8">{module.description}</p>

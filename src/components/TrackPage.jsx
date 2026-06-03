@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { fetchTrackManifest } from '../services/contentLoader';
 import { checkUserRole } from '../services/roleManager';
+import ThemePicker from './ThemePicker';
 
 // Simple markdown formatter helper for titles and descriptions
 function renderSimpleMarkdown(text) {
@@ -10,7 +11,7 @@ function renderSimpleMarkdown(text) {
   const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="text-main font-bold">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
       return <code key={i} className="bg-black/40 px-1.5 py-0.5 rounded text-gray-300 font-mono text-xs">{part.slice(1, -1)}</code>;
@@ -19,7 +20,7 @@ function renderSimpleMarkdown(text) {
   });
 }
 
-const TrackPage = () => {
+const TrackPage = ({ theme, setTheme }) => {
   const { trackId } = useParams();
   const navigate = useNavigate();
   const [track, setTrack] = useState(null);
@@ -98,21 +99,33 @@ const TrackPage = () => {
       {/* Background glow */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 py-16">
-        {/* Breadcrumb */}
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-accent-text transition-colors mb-8 tracking-wider group"
-        >
-          <Icons.ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-          ALL TRACKS
-        </button>
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-8 md:py-12">
+        {/* Top Controls Row */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 border-b border-border-subtle pb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-accent-text transition-colors tracking-wider group"
+          >
+            <Icons.ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+            ALL TRACKS
+          </button>
+          <div className="flex items-center gap-3">
+            <Link 
+              to="/help" 
+              className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+            >
+              <Icons.HelpCircle size={12} />
+              Help & Troubleshooting
+            </Link>
+            <ThemePicker theme={theme} setTheme={setTheme} />
+          </div>
+        </div>
 
         {/* Track Header */}
         <div className="mb-12">
           <div className="text-[10px] font-mono text-gray-600 tracking-widest uppercase mb-3">{track.track_id}</div>
-          <h1 className="text-4xl font-extrabold text-white mb-4">{track.title}</h1>
-          <p className="text-lg text-text-muted max-w-3xl">{track.description}</p>
+          <h1 className="text-4xl font-extrabold text-main mb-4">{track.title}</h1>
+          <p className="text-lg text-text-muted max-w-3xl leading-relaxed">{track.description}</p>
           <div className="mt-4 text-xs font-mono text-gray-500">
             {track.courses.length} {track.courses.length === 1 ? 'course' : 'courses'} available
           </div>
@@ -222,7 +235,7 @@ const TrackPage = () => {
                         <CourseIcon style={{ color: style.accent || 'var(--accent-bg)' }} size={24} />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white group-hover:text-white transition-colors leading-tight">
+                        <h3 className="text-lg font-bold text-main group-hover:text-accent-text transition-colors leading-tight">
                           {renderSimpleMarkdown(course.title)}
                         </h3>
                       </div>
