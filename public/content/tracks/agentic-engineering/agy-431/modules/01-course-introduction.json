@@ -1,0 +1,15 @@
+{
+  "id": "1",
+  "title": "1. Course Introduction",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "AGY-431: Scale & Immutable DevOps (L400)"
+    },
+    {
+      "type": "p",
+      "content": "Welcome to the draft curriculum for AGY-431: Scale & Immutable DevOps (L400)."
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Course Introduction",
+      "file": "modules/01-course-introduction.json"
+    }
+  ]
+}

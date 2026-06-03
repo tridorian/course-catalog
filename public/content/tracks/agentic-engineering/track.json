@@ -16,6 +16,102 @@
       "description": "Advanced command-line AI orchestration with Gemini. Learn to leverage CLI tools for automated workflows and pipeline integration.",
       "modules": 9,
       "icon": "Terminal"
+    },
+    {
+      "id": "agy-102",
+      "title": "AGY-102: The UI Landscape & Selection (L100)",
+      "description": "A comparative tour of the three major interfaces: the standalone visual board (antigravity), the command line (agy), and the workspace editor (antigravity-ide).",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Compass"
+    },
+    {
+      "id": "agy-103",
+      "title": "AGY-103: Workspace Design & File Security (L100)",
+      "description": "Defining workspace boundaries (directory locking), setting up folder permissions, and building firewalls to protect sensitive personal folders.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Shield"
+    },
+    {
+      "id": "agy-104",
+      "title": "AGY-104: Agent-Human Collaboration Loops (L100)",
+      "description": "Constructing clear instructions, managing terminal execution approvals, and learning how to safely pause, redirect, and resume an agent task.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "RefreshCw"
+    },
+    {
+      "id": "agy-201",
+      "title": "AGY-201: Standalone Operations (L200)",
+      "description": "Managing asynchronous agent boards, prompt engineering for document generation, and tracking web-scraper visual playback tapes inside antigravity.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Monitor"
+    },
+    {
+      "id": "agy-202",
+      "title": "AGY-202: AGY CLI Operations (L200)",
+      "description": "Mastering global command line syntax, piping local folder inputs, executing bulk file modifications, and running rapid query batch jobs inside agy.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Terminal"
+    },
+    {
+      "id": "agy-203",
+      "title": "AGY-203: Interactive Workspaces (L200)",
+      "description": "Synchronous side-by-side co-authoring, workspace markdown navigation, and live text rewriting or code refactoring inside antigravity-ide.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Edit3"
+    },
+    {
+      "id": "agy-311",
+      "title": "AGY-311: Scripting with the SDK (L300)",
+      "description": "Programmatic automation. Triggering agent cycles, passing context arrays, and handling outputs using Python and Node.js SDK libraries.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Code"
+    },
+    {
+      "id": "agy-411",
+      "title": "AGY-411: Custom MCP Servers (L400)",
+      "description": "Designing, hosting, and deploying custom Model Context Protocol (MCP) servers to let agents safely read custom databases and API endpoints.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Server"
+    },
+    {
+      "id": "agy-321",
+      "title": "AGY-321: Jules VM Orchestration (L300)",
+      "description": "Spawning Jules virtual machine instances to run complex, isolated build pipelines and testing jobs across remote pools.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Cpu"
+    },
+    {
+      "id": "agy-421",
+      "title": "AGY-421: Enterprise Governance & Rules (L400)",
+      "description": "Codifying compliance guidelines, security boundaries, and architectural patterns inside local workspace .gemini.md rules.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Lock"
+    },
+    {
+      "id": "agy-331",
+      "title": "AGY-331: Advanced Container Sandboxing (L300)",
+      "description": "Configuring local distrobox or devcontainers environments using the portable agy-box OCI image to run high-autonomy agent loops.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "Box"
+    },
+    {
+      "id": "agy-431",
+      "title": "AGY-431: Scale & Immutable DevOps (L400)",
+      "description": "Deploying agy-box images to remote cloud VMs, setting up private container registries under corporate proxies, and running headless pipeline runs.",
+      "modules": 1,
+      "status": "Draft",
+      "icon": "GitBranch"
     }
   ]
 }

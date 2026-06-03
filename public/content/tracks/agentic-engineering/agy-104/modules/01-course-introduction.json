@@ -1,0 +1,15 @@
+{
+  "id": "1",
+  "title": "1. Course Introduction",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "AGY-104: Agent-Human Collaboration Loops (L100)"
+    },
+    {
+      "type": "p",
+      "content": "Welcome to the draft curriculum for AGY-104: Agent-Human Collaboration Loops (L100)."
+    }
+  ]
+}

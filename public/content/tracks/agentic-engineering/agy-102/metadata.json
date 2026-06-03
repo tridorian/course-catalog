@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-102",
+  "title": "AGY-102: The UI Landscape & Selection (L100)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "All Learners",
+  "description": "A comparative tour of the three major interfaces: the standalone visual board (antigravity), the command line (agy), and the workspace editor (antigravity-ide).",
+  "status": "Draft"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "1",
+  "title": "1. Course Introduction",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "AGY-411: Custom MCP Servers (L400)"
+    },
+    {
+      "type": "p",
+      "content": "Welcome to the draft curriculum for AGY-411: Custom MCP Servers (L400)."
+    }
+  ]
+}

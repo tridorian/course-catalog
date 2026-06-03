@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-203",
+  "title": "AGY-203: Interactive Workspaces (L200)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "Writers, Devs, & Editor Enthusiasts",
+  "description": "Synchronous side-by-side co-authoring, workspace markdown navigation, and live text rewriting or code refactoring inside antigravity-ide.",
+  "status": "Draft"
+}

@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-311",
+  "title": "AGY-311: Scripting with the SDK (L300)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "Software Devs & Tool Builders",
+  "description": "Programmatic automation. Triggering agent cycles, passing context arrays, and handling outputs using Python and Node.js SDK libraries.",
+  "status": "Draft"
+}

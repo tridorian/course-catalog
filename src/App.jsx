@@ -37,6 +37,7 @@ function AppContent() {
   const [resumeSession, setResumeSession] = useState(null);
   const [isResumeBannerVisible, setIsResumeBannerVisible] = useState(false);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
 
   const { trackId, courseId, moduleId } = useParams();
@@ -203,6 +204,41 @@ function AppContent() {
     navigate(`/${currentTrackId}/${currentCourseId}`);
   };
 
+  const handleResetProgress = async () => {
+    const storageKey = 'agy_local_progress';
+    try {
+      const localProgress = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      const courseKey = `${currentTrackId}_${currentCourseId}`;
+      delete localProgress[courseKey];
+      localStorage.setItem(storageKey, JSON.stringify(localProgress));
+    } catch (e) {
+      console.error(e);
+    }
+    try {
+      await saveCourseProgress(trackId, courseId, moduleId || '', []);
+    } catch (err) {
+      console.error(err);
+    }
+    setCompletedSteps([]);
+    setShowResetModal(false);
+  };
+
+  const handleToggleComplete = async (index, e) => {
+    e.stopPropagation();
+    let updated;
+    if (completedSteps.includes(index)) {
+      updated = completedSteps.filter(i => i !== index);
+    } else {
+      updated = [...completedSteps, index].sort((a, b) => a - b);
+    }
+    setCompletedSteps(updated);
+    try {
+      await saveCourseProgress(trackId, courseId, moduleId || '', updated);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050805] flex items-center justify-center">
@@ -276,37 +312,48 @@ function AppContent() {
               const isLocked = index > 0 && !completedSteps.includes(index - 1);
 
               return (
-                <button
+                <div
                   key={`${step.id || ""}-${index}`}
-                  disabled={isLocked}
-                  onClick={() => {
-                    navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`);
-                    setIsMobileMenuOpen(false);
-                  }}
                   className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex justify-between items-center group relative ${
                     isActive
                       ? 'bg-[#132617] text-[#4ade80] border border-[#1f3d25] shadow-[0_0_15px_rgba(74,222,128,0.1)]'
                       : isLocked
-                        ? 'text-gray-600 cursor-not-allowed opacity-50'
+                        ? 'text-gray-600 opacity-50'
                         : 'text-gray-400 hover:bg-[#132617]/50 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center gap-3 truncate">
-                    {isLocked ? (
-                      <Lock size={14} className="text-gray-600" />
-                    ) : isCompleted ? (
-                      <CheckCircle2 size={14} className="text-[#4ade80]" data-testid={`check-icon-${index}`} />
-                    ) : (
-                      <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-[#4ade80] animate-pulse' : 'border-gray-500'}`}></div>
-                    )}
+                  <button
+                    disabled={isLocked}
+                    onClick={() => {
+                      navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="absolute inset-0 w-full h-full z-0 rounded-lg text-transparent select-none"
+                  >
+                    {step.title}
+                  </button>
+                  <div className="flex items-center gap-3 truncate relative z-10 pointer-events-none">
+                    <button
+                      onClick={(e) => handleToggleComplete(index, e)}
+                      data-testid={`toggle-complete-${index}`}
+                      className="flex-shrink-0 focus:outline-none pointer-events-auto"
+                    >
+                      {isLocked ? (
+                        <Lock size={14} className="text-gray-600" />
+                      ) : isCompleted ? (
+                        <CheckCircle2 size={14} className="text-[#4ade80]" data-testid={`check-icon-${index}`} />
+                      ) : (
+                        <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-[#4ade80] animate-pulse' : 'border-gray-500'}`}></div>
+                      )}
+                    </button>
                     <span className="truncate">{step.title}</span>
                   </div>
-                  <span className="text-[10px] opacity-40 whitespace-nowrap font-mono">{step.duration}</span>
+                  <span className="text-[10px] opacity-40 whitespace-nowrap font-mono relative z-10 pointer-events-none">{step.duration}</span>
 
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#4ade80] rounded-r-full shadow-[0_0_8px_#4ade80]"></div>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#4ade80] rounded-r-full shadow-[0_0_8px_#4ade80] z-20"></div>
                   )}
-                </button>
+                </div>
               );
             })}
           </nav>
@@ -318,14 +365,46 @@ function AppContent() {
             <span>Progress</span>
             <span>{Math.round(progressPercentage)}%</span>
           </div>
-          <div className="h-2 w-full bg-[#132617] rounded-full overflow-hidden">
+          <div className="h-2 w-full bg-[#132617] rounded-full overflow-hidden mb-4">
             <div
               className="h-full bg-[#4ade80] transition-all duration-500 ease-out shadow-[0_0_10px_#4ade80]"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
+          <button
+            onClick={() => setShowResetModal(true)}
+            className="w-full py-2 text-[10px] font-mono text-gray-500 hover:text-red-400 border border-[#1f3d25] hover:border-red-900/30 rounded transition-all uppercase tracking-tighter"
+          >
+            Reset Progress
+          </button>
         </div>
       </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a120c] border border-[#1f3d25] rounded-xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <h3 className="text-xl font-bold text-white mb-4">Reset Progress?</h3>
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              Are you sure you want to reset your progress for this course? This cannot be undone.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleResetProgress}
+                className="w-full py-3 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded-lg font-bold transition-all"
+              >
+                Confirm Reset
+              </button>
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="w-full py-3 bg-[#132617] hover:bg-[#1f3d25] text-gray-400 rounded-lg font-medium transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden pb-24 md:pb-0">

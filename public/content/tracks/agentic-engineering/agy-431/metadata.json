@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-431",
+  "title": "AGY-431: Scale & Immutable DevOps (L400)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "DevOps Leads & Platform Engineers",
+  "description": "Deploying agy-box images to remote cloud VMs, setting up private container registries under corporate proxies, and running headless pipeline runs.",
+  "status": "Draft"
+}

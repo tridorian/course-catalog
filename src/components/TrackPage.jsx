@@ -9,6 +9,7 @@ const TrackPage = () => {
   const [track, setTrack] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [courseProgress, setCourseProgress] = useState({});
 
   useEffect(() => {
     async function loadTrack() {
@@ -17,6 +18,22 @@ const TrackPage = () => {
       try {
         const data = await fetchTrackManifest(trackId);
         setTrack(data);
+
+        // Load local progress
+        const localProgress = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
+        const progressMap = {};
+        data.courses.forEach(course => {
+          const courseProg = localProgress[`${trackId}_${course.id}`];
+          if (courseProg && courseProg.completedIndices) {
+            const completedCount = courseProg.completedIndices.length;
+            progressMap[course.id] = {
+              completed: completedCount,
+              total: course.modules,
+              percentage: Math.round((completedCount / course.modules) * 100)
+            };
+          }
+        });
+        setCourseProgress(progressMap);
       } catch (err) {
         console.error('Failed to load track:', err);
         setError(err.message);
@@ -84,6 +101,9 @@ const TrackPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {track.courses.map((course, index) => {
             const CourseIcon = Icons[course.icon] || Icons.BookOpen;
+            const progress = courseProgress[course.id];
+            const isCompleted = progress && progress.completed === progress.total;
+
             return (
               <button
                 key={course.id}
@@ -108,12 +128,27 @@ const TrackPage = () => {
 
                   <p className="text-sm text-[#86efac] mb-4 leading-relaxed">{course.description}</p>
 
+                  {progress && (
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] font-mono text-[#4ade80] uppercase tracking-wider">Progress</span>
+                        <span className="text-[10px] font-mono text-[#4ade80]">{progress.percentage}%</span>
+                      </div>
+                      <div className="h-1 w-full bg-[#132617] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#4ade80] shadow-[0_0_5px_#4ade80]"
+                          style={{ width: `${progress.percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono text-gray-500 tracking-wider">
-                      {course.modules} MODULES
+                      {course.modules} MODULES {isCompleted && <span className="text-[#4ade80] ml-2 font-bold">// COMPLETED</span>}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-gray-500 group-hover:text-[#4ade80] transition-colors">
-                      Start Course <Icons.ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                      {progress ? 'Resume Mission' : 'Start Mission'} <Icons.ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                     </span>
                   </div>
                 </div>

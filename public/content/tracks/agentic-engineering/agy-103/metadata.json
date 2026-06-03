@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-103",
+  "title": "AGY-103: Workspace Design & File Security (L100)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "All Learners",
+  "description": "Defining workspace boundaries (directory locking), setting up folder permissions, and building firewalls to protect sensitive personal folders.",
+  "status": "Draft"
+}

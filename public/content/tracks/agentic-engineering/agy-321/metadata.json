@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-321",
+  "title": "AGY-321: Jules VM Orchestration (L300)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "Solutions Architects",
+  "description": "Spawning Jules virtual machine instances to run complex, isolated build pipelines and testing jobs across remote pools.",
+  "status": "Draft"
+}

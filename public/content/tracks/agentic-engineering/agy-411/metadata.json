@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-411",
+  "title": "AGY-411: Custom MCP Servers (L400)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "Systems Integrators & SAs",
+  "description": "Designing, hosting, and deploying custom Model Context Protocol (MCP) servers to let agents safely read custom databases and API endpoints.",
+  "status": "Draft"
+}

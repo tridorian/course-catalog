@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-202",
+  "title": "AGY-202: AGY CLI Operations (L200)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "Terminal-First Users, Devs, & Analysts",
+  "description": "Mastering global command line syntax, piping local folder inputs, executing bulk file modifications, and running rapid query batch jobs inside agy.",
+  "status": "Draft"
+}

@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-421",
+  "title": "AGY-421: Enterprise Governance & Rules (L400)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "Lead Architects & Delivery Directors",
+  "description": "Codifying compliance guidelines, security boundaries, and architectural patterns inside local workspace .gemini.md rules.",
+  "status": "Draft"
+}

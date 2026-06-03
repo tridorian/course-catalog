@@ -207,14 +207,56 @@ async function syncCourse(docs, docId, targetTrackId, targetCourseId) {
   });
 
   const tabs = doc.data.tabs || [];
+  const isSingleDoc = tabs.length <= 1;
+
+  const sectionsList = [];
+  if (isSingleDoc) {
+    let bodyContent = [];
+    if (tabs.length === 1) {
+      bodyContent = tabs[0].documentTab?.body?.content || [];
+    } else {
+      bodyContent = doc.data.body?.content || [];
+    }
+
+    let currentSectionName = null;
+    const sections = {};
+    bodyContent.forEach(element => {
+      if (element.paragraph && element.paragraph.paragraphStyle?.namedStyleType === 'HEADING_1') {
+        const text = parseParagraph(element.paragraph).trim();
+        const sectionName = text.replace(/^#\s*/, '').trim();
+        if (sectionName.startsWith('[') && sectionName.endsWith(']')) {
+          currentSectionName = sectionName;
+          sections[currentSectionName] = [];
+          return;
+        }
+      }
+      if (currentSectionName) {
+        sections[currentSectionName].push(element);
+      }
+    });
+
+    for (const title of Object.keys(sections)) {
+      sectionsList.push({
+        title,
+        content: sections[title]
+      });
+    }
+  } else {
+    for (const tab of tabs) {
+      sectionsList.push({
+        title: tab.tabProperties.title,
+        content: tab.documentTab.body.content
+      });
+    }
+  }
   
   let config = {};
   let intro = {};
   const modules = [];
 
-  for (const tab of tabs) {
-    const title = tab.tabProperties.title;
-    const content = tab.documentTab.body.content;
+  for (const item of sectionsList) {
+    const title = item.title;
+    const content = item.content;
 
     if (title === '[Config]') {
       config = parseConfigTab(content);
@@ -246,6 +288,13 @@ async function syncCourse(docs, docId, targetTrackId, targetCourseId) {
         blocks
       });
     }
+  }
+
+  // Check if status is Draft
+  const status = config.status || config.Status;
+  if (status && status.trim() === 'Draft') {
+    console.log(`Course [${targetCourseId}] is a draft; skipping sync`);
+    return;
   }
 
   const courseDir = path.join(ROOT_DIR, 'public/content/tracks', targetTrackId, targetCourseId);
@@ -393,4 +442,16 @@ async function main() {
   }
 }
 
-main();
+if (process.argv[1] && (process.argv[1] === fileURLToPath(import.meta.url) || process.argv[1].endsWith('sync-docs.js'))) {
+  main();
+}
+
+export {
+  parseTextRun,
+  parseParagraph,
+  parseTabContent,
+  parseConfigTab,
+  parseIntroTab,
+  classifyModule,
+  syncCourse
+};

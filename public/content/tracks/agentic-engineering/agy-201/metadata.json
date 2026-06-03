@@ -1,0 +1,9 @@
+{
+  "course_id": "AGY-201",
+  "title": "AGY-201: Standalone Operations (L200)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "target_audience": "Visual Learners, SAs, & Analysts",
+  "description": "Managing asynchronous agent boards, prompt engineering for document generation, and tracking web-scraper visual playback tapes inside antigravity.",
+  "status": "Draft"
+}
