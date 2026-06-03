@@ -43,51 +43,79 @@ async function main() {
   const existingTabs = doc.data.tabs || [];
   console.log(`Document currently has ${existingTabs.length} tabs.`);
 
-  const requests = [];
-
-  // Step 1: Rename the first tab to [Config] and delete all other tabs
-  if (existingTabs.length > 0) {
-    const firstTabId = existingTabs[0].tabProperties.tabId;
-    requests.push({
-      updateDocumentTabProperties: {
-        tabProperties: {
-          tabId: firstTabId,
-          title: '[Config]'
-        },
-        fields: 'title'
-      }
-    });
-
-    for (let i = 1; i < existingTabs.length; i++) {
-      requests.push({
-        deleteTab: {
-          tabId: existingTabs[i].tabProperties.tabId
-        }
-      });
-    }
-  }
-
-  // Step 2: Create new tabs for Intro and each module
+  // Smart Tab Management: Reuse existing tabs with correct titles, add missing ones, delete extra ones
+  const cleanupRequests = [];
+  const addRequests = [];
   const targetTabs = ['[Intro]'];
   courseData.modules.forEach(mod => {
     targetTabs.push(`[${mod.title}]`);
   });
 
-  targetTabs.forEach(title => {
-    requests.push({
-      addDocumentTab: {
-        tabProperties: {
-          title: title
+  // 1. Rename the first tab to [Config] if it's not already
+  if (existingTabs.length > 0) {
+    const firstTab = existingTabs[0];
+    if (firstTab.tabProperties.title !== '[Config]') {
+      cleanupRequests.push({
+        updateDocumentTabProperties: {
+          tabProperties: {
+            tabId: firstTab.tabProperties.tabId,
+            title: '[Config]'
+          },
+          fields: 'title'
         }
+      });
+    }
+  }
+
+  // 2. Map existing tabs to target titles
+  const tabMap = {}; // title -> tabId
+  if (existingTabs.length > 0) {
+    tabMap['[Config]'] = existingTabs[0].tabProperties.tabId;
+    
+    for (let i = 1; i < existingTabs.length; i++) {
+      const tab = existingTabs[i];
+      const title = tab.tabProperties.title;
+      if (targetTabs.includes(title)) {
+        tabMap[title] = tab.tabProperties.tabId;
+      } else {
+        // Extra tab, mark for deletion
+        cleanupRequests.push({
+          deleteTab: {
+            tabId: tab.tabProperties.tabId
+          }
+        });
       }
-    });
+    }
+  }
+
+  // 3. Add missing tabs
+  targetTabs.forEach(title => {
+    if (!tabMap[title]) {
+      addRequests.push({
+        addDocumentTab: {
+          tabProperties: {
+            title: title
+          }
+        }
+      });
+    }
   });
 
-  console.log('Resetting and creating tabs...');
-  await docs.documents.batchUpdate({
-    documentId: docId,
-    requestBody: { requests }
-  });
+  if (cleanupRequests.length > 0) {
+    console.log('Cleaning up old and conflicting tabs...');
+    await docs.documents.batchUpdate({
+      documentId: docId,
+      requestBody: { requests: cleanupRequests }
+    });
+  }
+
+  if (addRequests.length > 0) {
+    console.log('Creating missing tabs...');
+    await docs.documents.batchUpdate({
+      documentId: docId,
+      requestBody: { requests: addRequests }
+    });
+  }
 
   console.log('Tabs updated. Fetching updated document structure...');
   const updatedDoc = await docs.documents.get({ documentId: docId, includeTabsContent: true });
