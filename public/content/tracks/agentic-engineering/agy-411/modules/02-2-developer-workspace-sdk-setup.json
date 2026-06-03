@@ -1,0 +1,751 @@
+{
+  "id": "2",
+  "title": "2. Developer Workspace & SDK Setup",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "## Prerequisites and Developer Environment Setup"
+    },
+    {
+      "type": "p",
+      "content": "Building production-ready MCP servers requires setting up node runtimes and virtual environments. We support both Node.js (TypeScript) and Python SDKs. These SDKs handle the details of JSON-RPC schema validation and stdio streaming under the hood."
+    },
+    {
+      "type": "p",
+      "content": "### Initializing a Node.js TypeScript Workspace"
+    },
+    {
+      "type": "p",
+      "content": "To construct a TypeScript MCP server, initialize the npm environment and install the required compiler tools:"
+    },
+    {
+      "type": "p",
+      "content": "```bash"
+    },
+    {
+      "type": "p",
+      "content": "# Create project folder"
+    },
+    {
+      "type": "p",
+      "content": "mkdir -p ~/workspace/agy-mcp-server-ts"
+    },
+    {
+      "type": "p",
+      "content": "cd ~/workspace/agy-mcp-server-ts"
+    },
+    {
+      "type": "p",
+      "content": "# Initialize package"
+    },
+    {
+      "type": "p",
+      "content": "npm init -y"
+    },
+    {
+      "type": "p",
+      "content": "# Install standard dependencies"
+    },
+    {
+      "type": "p",
+      "content": "npm install @modelcontextprotocol/sdk"
+    },
+    {
+      "type": "p",
+      "content": "# Install development dependencies"
+    },
+    {
+      "type": "p",
+      "content": "npm install -D typescript @types/node tsx"
+    },
+    {
+      "type": "p",
+      "content": "# Generate default configuration"
+    },
+    {
+      "type": "p",
+      "content": "npx tsc --init"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "Edit the compiled tsconfig.json file to utilize ESM imports and modern JS targets:"
+    },
+    {
+      "type": "p",
+      "content": "```json"
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "\"compilerOptions\": {"
+    },
+    {
+      "type": "p",
+      "content": "\"target\": \"ES2022\","
+    },
+    {
+      "type": "p",
+      "content": "\"module\": \"NodeNext\","
+    },
+    {
+      "type": "p",
+      "content": "\"moduleResolution\": \"NodeNext\","
+    },
+    {
+      "type": "p",
+      "content": "\"esModuleInterop\": true,"
+    },
+    {
+      "type": "p",
+      "content": "\"strict\": true,"
+    },
+    {
+      "type": "p",
+      "content": "\"skipLibCheck\": true,"
+    },
+    {
+      "type": "p",
+      "content": "\"outDir\": \"./dist\""
+    },
+    {
+      "type": "p",
+      "content": "},"
+    },
+    {
+      "type": "p",
+      "content": "\"include\": [\"src/**/*\"]"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "### Writing the TypeScript Server"
+    },
+    {
+      "type": "p",
+      "content": "Create 'src/index.ts'. This script instantiates a basic Server class registering a system resource URI and a diagnostic echo tool:"
+    },
+    {
+      "type": "p",
+      "content": "```typescript"
+    },
+    {
+      "type": "p",
+      "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";"
+    },
+    {
+      "type": "p",
+      "content": "import { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";"
+    },
+    {
+      "type": "p",
+      "content": "import {"
+    },
+    {
+      "type": "p",
+      "content": "CallToolRequestSchema,"
+    },
+    {
+      "type": "p",
+      "content": "ListResourcesRequestSchema,"
+    },
+    {
+      "type": "p",
+      "content": "ListToolsRequestSchema,"
+    },
+    {
+      "type": "p",
+      "content": "ReadResourceRequestSchema"
+    },
+    {
+      "type": "p",
+      "content": "} from \"@modelcontextprotocol/sdk/types.js\";"
+    },
+    {
+      "type": "p",
+      "content": "// Instantiate server"
+    },
+    {
+      "type": "p",
+      "content": "const server = new Server("
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "name: \"diagnostic-server\","
+    },
+    {
+      "type": "p",
+      "content": "version: \"1.0.0\""
+    },
+    {
+      "type": "p",
+      "content": "},"
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "capabilities: {"
+    },
+    {
+      "type": "p",
+      "content": "resources: {},"
+    },
+    {
+      "type": "p",
+      "content": "tools: {}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": ");"
+    },
+    {
+      "type": "p",
+      "content": "// List resources handler"
+    },
+    {
+      "type": "p",
+      "content": "server.setRequestHandler(ListResourcesRequestSchema, async () => {"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "resources: ["
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "uri: \"diagnostic://metrics\","
+    },
+    {
+      "type": "p",
+      "content": "name: \"System Performance Metrics\","
+    },
+    {
+      "type": "p",
+      "content": "mimeType: \"application/json\","
+    },
+    {
+      "type": "p",
+      "content": "description: \"Live system diagnostic statistics\""
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "// Read resource handler"
+    },
+    {
+      "type": "p",
+      "content": "server.setRequestHandler(ReadResourceRequestSchema, async (request) => {"
+    },
+    {
+      "type": "p",
+      "content": "if (request.params.uri === \"diagnostic://metrics\") {"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "contents: ["
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "uri: request.params.uri,"
+    },
+    {
+      "type": "p",
+      "content": "mimeType: \"application/json\","
+    },
+    {
+      "type": "p",
+      "content": "text: JSON.stringify({"
+    },
+    {
+      "type": "p",
+      "content": "status: \"HEALTHY\","
+    },
+    {
+      "type": "p",
+      "content": "cpu_usage_pct: 12.5,"
+    },
+    {
+      "type": "p",
+      "content": "memory_free_gb: 8.4,"
+    },
+    {
+      "type": "p",
+      "content": "timestamp: new Date().toISOString()"
+    },
+    {
+      "type": "p",
+      "content": "})"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "throw new Error(\"Resource not found\");"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "// List tools handler"
+    },
+    {
+      "type": "p",
+      "content": "server.setRequestHandler(ListToolsRequestSchema, async () => {"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "tools: ["
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "name: \"echo_diagnostics\","
+    },
+    {
+      "type": "p",
+      "content": "description: \"Echoes back status metrics with custom user label\","
+    },
+    {
+      "type": "p",
+      "content": "inputSchema: {"
+    },
+    {
+      "type": "p",
+      "content": "type: \"object\","
+    },
+    {
+      "type": "p",
+      "content": "properties: {"
+    },
+    {
+      "type": "p",
+      "content": "label: {"
+    },
+    {
+      "type": "p",
+      "content": "type: \"string\","
+    },
+    {
+      "type": "p",
+      "content": "description: \"A custom label for the audit logs\""
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "},"
+    },
+    {
+      "type": "p",
+      "content": "required: [\"label\"]"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "// Call tool handler"
+    },
+    {
+      "type": "p",
+      "content": "server.setRequestHandler(CallToolRequestSchema, async (request) => {"
+    },
+    {
+      "type": "p",
+      "content": "if (request.params.name === \"echo_diagnostics\") {"
+    },
+    {
+      "type": "p",
+      "content": "const label = request.params.arguments?.label || \"default\";"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "content: ["
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "type: \"text\","
+    },
+    {
+      "type": "p",
+      "content": "text: `Diagnostics generated with label: [${label}]. All systems nominal.`"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "throw new Error(\"Tool not found\");"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "// Start the server"
+    },
+    {
+      "type": "p",
+      "content": "async function run() {"
+    },
+    {
+      "type": "p",
+      "content": "const transport = new StdioServerTransport();"
+    },
+    {
+      "type": "p",
+      "content": "await server.connect(transport);"
+    },
+    {
+      "type": "p",
+      "content": "console.error(\"Diagnostic MCP Server running on stdio\");"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "run().catch((error) => {"
+    },
+    {
+      "type": "p",
+      "content": "console.error(\"Fatal error:\", error);"
+    },
+    {
+      "type": "p",
+      "content": "process.exit(1);"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "### Alternative Python SDK & FastMCP Setup"
+    },
+    {
+      "type": "p",
+      "content": "Python developers can deploy MCP servers with less boilerplate using the FastMCP framework. Run the terminal commands to install and verify dependencies:"
+    },
+    {
+      "type": "p",
+      "content": "```bash"
+    },
+    {
+      "type": "p",
+      "content": "# Setup virtual environment"
+    },
+    {
+      "type": "p",
+      "content": "mkdir -p ~/workspace/agy-mcp-server-py"
+    },
+    {
+      "type": "p",
+      "content": "cd ~/workspace/agy-mcp-server-py"
+    },
+    {
+      "type": "p",
+      "content": "python3 -m venv venv"
+    },
+    {
+      "type": "p",
+      "content": "source venv/bin/activate"
+    },
+    {
+      "type": "p",
+      "content": "# Install the Python SDK"
+    },
+    {
+      "type": "p",
+      "content": "pip install mcp mcp[cli]"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "Create 'server.py' to implement the python equivalent using standard decorators:"
+    },
+    {
+      "type": "p",
+      "content": "```python"
+    },
+    {
+      "type": "p",
+      "content": "from mcp.server.fastmcp import FastMCP"
+    },
+    {
+      "type": "p",
+      "content": "# Initialize FastMCP Server"
+    },
+    {
+      "type": "p",
+      "content": "mcp = FastMCP(\"Calculators\")"
+    },
+    {
+      "type": "p",
+      "content": "@mcp.tool()"
+    },
+    {
+      "type": "p",
+      "content": "def add_numbers(a: int, b: int) -> str:"
+    },
+    {
+      "type": "p",
+      "content": "\"\"\"Adds two integers and returns the formatted sum.\"\"\""
+    },
+    {
+      "type": "p",
+      "content": "return f\"The sum of {a} and {b} is {a + b}\""
+    },
+    {
+      "type": "p",
+      "content": "@mcp.resource(\"config://app\")"
+    },
+    {
+      "type": "p",
+      "content": "def get_config() -> str:"
+    },
+    {
+      "type": "p",
+      "content": "\"\"\"Returns application configuration file data.\"\"\""
+    },
+    {
+      "type": "p",
+      "content": "return \"app_version=1.0.0\\nenvironment=development\\ndebug_enabled=true\""
+    },
+    {
+      "type": "p",
+      "content": "if __name__ == \"__main__\":"
+    },
+    {
+      "type": "p",
+      "content": "mcp.run()"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "### Verifying Setup with the Inspector CLI"
+    },
+    {
+      "type": "p",
+      "content": "Verify that the servers build and compile correctly, and run them through the official modelcontextprotocol inspector web tool to validate transport parsing:"
+    },
+    {
+      "type": "p",
+      "content": "```bash"
+    },
+    {
+      "type": "p",
+      "content": "# Compile TS to JS"
+    },
+    {
+      "type": "p",
+      "content": "npx tsc"
+    },
+    {
+      "type": "p",
+      "content": "# Start the inspector interface locally"
+    },
+    {
+      "type": "p",
+      "content": "npx @modelcontextprotocol/inspector node dist/index.js"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Ensure console.log statements are removed from the server code before connecting to stdio. The inspector will fail if standard output receives unexpected data."
+    },
+    {
+      "type": "p",
+      "content": "## Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why must diagnostic logging inside an MCP server process run via console.error instead of console.log?"
+    },
+    {
+      "type": "p",
+      "content": "A. console.log is intercepted by OS security sandboxes."
+    },
+    {
+      "type": "p",
+      "content": "B. console.log output interferes with JSON-RPC communication on stdout, which crashes the transport parser."
+    },
+    {
+      "type": "p",
+      "content": "C. console.error executes synchronously, preventing memory leaks."
+    },
+    {
+      "type": "p",
+      "content": "D. The AGY client only parses standard error stream logs."
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: B is correct. In stdio transport, stdout is reserved strictly for protocol frames. Extra text from console.log corrupts the JSON-RPC parsing structure, leading to protocol errors."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What is the purpose of the `@modelcontextprotocol/inspector` tool?"
+    },
+    {
+      "type": "p",
+      "content": "A. To scan the server for security vulnerabilities and SQL injection paths."
+    },
+    {
+      "type": "p",
+      "content": "B. To deploy the server to production cloud environments automatically."
+    },
+    {
+      "type": "p",
+      "content": "C. To provide a CLI/Web GUI developer workspace to query, verify, and call tools on an active MCP server."
+    },
+    {
+      "type": "p",
+      "content": "D. To package the server into an OCI container image."
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: C is correct. The inspector provides an interactive developer UI to inspect tools, resources, and triggers, allowing local testing without full agent integrations."
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "id": "2",
+  "title": "2. Private Container Registries & Corporate Proxy Integration",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Navigating Restrictive Corporate Networks"
+    },
+    {
+      "type": "p",
+      "content": "Enterprise environments route all external traffic through forward proxies (such as Squid or Zscaler) that perform SSL interception. To deploy agy-box reliably, you must configure the container runtime to trust corporate certificates and route image pull and push requests through the appropriate proxies."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Failing to inject corporate Root CA certificates into both the host container daemon and the agy-box image itself will result in immediate SSL handshake failures (x509: certificate signed by unknown authority) when communicating with public or private APIs."
+    },
+    {
+      "type": "h3",
+      "content": "Injecting Custom SSL Certificates"
+    },
+    {
+      "type": "p",
+      "content": "To ensure the engine can download dependencies and connect to LLM endpoints, the enterprise Root CA certificate must be copied into the container during the build stage."
+    },
+    {
+      "type": "code",
+      "content": "# Custom Dockerfile extending the base agy-box image",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "FROM gcr.io/tridorian-corp/agy-box:v1.2.0",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Switch to root to import certificates",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "USER root",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Copy corporate ROOT CA certificate",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "COPY certs/corp-root-ca.crt /usr/local/share/ca-certificates/corp-root-ca.crt",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Update certificates database",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "RUN chmod 644 /usr/local/share/ca-certificates/corp-root-ca.crt && \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "update-ca-certificates",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Revert to unprivileged runner user",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "USER agy_runner",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Registry Setup & Proxy Configurations"
+    },
+    {
+      "type": "p",
+      "content": "Configure the container engine (Podman/Docker) to use the corporate proxy for pulling images, while bypassing the proxy for internal private registries."
+    },
+    {
+      "type": "code",
+      "content": "# Create systemd override directory for Podman/Docker",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo mkdir -p /etc/systemd/system/podman.service.d/",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Define proxy environment variables in systemd override configuration",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat <<EOF | sudo tee /etc/systemd/system/podman.service.d/http-proxy.conf",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Service]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Environment=\"HTTP_PROXY=http://proxy.corp.internal:8080\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Environment=\"HTTPS_PROXY=http://proxy.corp.internal:8080\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Environment=\"NO_PROXY=localhost,127.0.0.1,private-registry.corp.internal,169.254.169.254\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "EOF",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Reload systemd daemon and restart the container service",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo systemctl daemon-reload",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo systemctl restart podman",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Authenticate to the private registry using corporate credentials",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "podman login private-registry.corp.internal \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--username agy-deployer \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--password-stdin < /etc/secrets/registry-token.txt",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary cause of the error 'x509: certificate signed by unknown authority' during an agy-box deploy run inside a corporate environment?"
+    },
+    {
+      "type": "p",
+      "content": "A) The agent API key is invalid."
+    },
+    {
+      "type": "p",
+      "content": "B) The container runtime lacks the enterprise's custom SSL Root CA certificate in its trusted store."
+    },
+    {
+      "type": "p",
+      "content": "C) The system timezone is out of sync with the cloud provider."
+    },
+    {
+      "type": "p",
+      "content": "D) Podman is running in rootful instead of rootless mode."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: B. Corporate proxies intercept SSL traffic and resign certificates. The container will reject these connection attempts unless the custom enterprise Root CA certificate is injected and trusted."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: How do you configure a container daemon to bypass corporate proxies for a local private registry?"
+    },
+    {
+      "type": "p",
+      "content": "A) By setting the proxy IP in HTTPS_PROXY."
+    },
+    {
+      "type": "p",
+      "content": "B) By deleting the docker daemon configuration."
+    },
+    {
+      "type": "p",
+      "content": "C) By adding the private registry hostname or IP to the NO_PROXY environment variable list."
+    },
+    {
+      "type": "p",
+      "content": "D) By running the registry on port 80 without SSL."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: C. The NO_PROXY environment variable lists hostnames and IP addresses that must be accessed directly, bypassing the proxy."
+    }
+  ]
+}

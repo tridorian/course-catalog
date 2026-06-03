@@ -1,0 +1,132 @@
+{
+  "id": "2",
+  "title": "2. Defining Workspace Boundaries & SDK Directory Locking",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "The Google Antigravity (AGY) SDK provides native support for restricting file access to defined directories. By configuring the `workspaces` parameter in the agent configuration, you apply an implicit workspace boundary. This boundary is enforced by a built-in policy middleware called `policy.workspace_only()`, which inspects all file operations and rejects those pointing outside the allowed paths."
+    },
+    {
+      "type": "code",
+      "content": "import os",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from google.antigravity import Agent, LocalAgentConfig, CapabilitiesConfig",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Define the absolute path to your project workspace",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "project_dir = os.path.abspath(\"/var/home/wtg/workspace_agy_project\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Ensure the directory exists",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "os.makedirs(project_dir, exist_ok=True)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Initialize the agent configuration with a workspace lock",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "config = LocalAgentConfig(",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "system_instructions=\"You are a filesystem helper agent.\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "capabilities=CapabilitiesConfig(),",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "workspaces=[project_dir] # Explicit list of allowed directories",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": ")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Workspace lock set to: {project_dir}\")",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "When the `workspaces` list is populated, the AGY SDK will block file-related tools (such as `view_file`, `create_file`, and `edit_file`) from reading or writing to files outside those paths. It enforces this by resolving target file paths to their absolute canonical form. This prevents directory traversal attacks, where an agent might try to access restricted files using relative references (e.g., `../../etc/passwd`)."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Symlink Directory Traversal. Symlinks (symbolic links) placed inside a workspace can point to files outside the boundary. The `workspace_only()` policy resolves symlinks to their absolute canonical targets before comparing them to the workspace path. If a symlink points to a file outside the workspace, the SDK will block access to the target path. Avoid creating symlinks to external directories within your workspaces."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Under the hood, if `LocalAgentConfig.workspaces` is defined, the SDK prepends the `policy.workspace_only()` checker to the policy evaluation list. This ensures path resolution happens first before any other tool permissions are evaluated."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How does the `policy.workspace_only()` middleware prevent directory traversal attacks (e.g., path sequences using `../../`)?"
+    },
+    {
+      "type": "p",
+      "content": "A) It rewrites the target path to point to a safe system folder."
+    },
+    {
+      "type": "p",
+      "content": "B) It runs a regular expression match to look for dots in the path."
+    },
+    {
+      "type": "p",
+      "content": "C) It resolves all file path parameters to their absolute canonical form before checking them against the allowed workspace roots."
+    },
+    {
+      "type": "p",
+      "content": "D) It disables the terminal command execution tool completely."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: C"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Feedback: The SDK resolves all relative and symlinked paths to their absolute canonical targets. This ensures that any attempt to break out of the workspace boundary using path traversal sequences (like `..`) is detected and blocked before the tool executes."
+    }
+  ]
+}

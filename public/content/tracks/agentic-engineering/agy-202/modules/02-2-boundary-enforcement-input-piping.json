@@ -1,0 +1,158 @@
+{
+  "id": "2",
+  "title": "2. Boundary Enforcement & Input Piping",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [2. Boundary Enforcement & Input Piping]"
+    },
+    {
+      "type": "h2",
+      "content": "Defining Boundaries and Redirecting Streams"
+    },
+    {
+      "type": "p",
+      "content": "In this module, you will learn how to configure workspace boundary safety rules and redirect input streams. Piping allows you to inject local directory listings, file contents, and command stdout directly into the agent's context window, streamlining troubleshooting and translation tasks."
+    },
+    {
+      "type": "h3",
+      "content": "The Security Boundary File (.gemini.md)"
+    },
+    {
+      "type": "p",
+      "content": "To protect your system files, the agy CLI reads security constraints from a local configuration file named .gemini.md. This file must exist in the root of the workspace directory. If the agent attempts to read or write to any file path outside this locked directory (e.g. /etc/passwd or ~/.ssh), the execution engine will block the action immediately."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Boundary Policy: Run agy verify in any new workspace to ensure that directories are correctly locked. If a valid .gemini.md file is missing, the CLI will refuse to execute run prompts unless run in a container sandbox."
+    },
+    {
+      "type": "code",
+      "content": "# Create a fresh workspace and setup boundaries",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "mkdir -p /var/home/wtg/Repos/dev-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cd /var/home/wtg/Repos/dev-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Create a boundary configuration file restricting actions",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"permissions: read-only [./docs], read-write [./src]\" > .gemini.md",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Verify that the boundaries are recognized by the CLI",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy verify",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Piping Local File Contexts to the CLI"
+    },
+    {
+      "type": "p",
+      "content": "You can feed standard input streams into the agent by using the dash - notation or by direct piping. This allows you to include database schemas, logs, or file structures directly in the run context."
+    },
+    {
+      "type": "p",
+      "content": "- Piping directory structure: Use find or tree to let the agent inspect a codebase path before adding files."
+    },
+    {
+      "type": "p",
+      "content": "- Piping file text: Stream logs or schemas directly into the prompt to generate scripts or summaries."
+    },
+    {
+      "type": "p",
+      "content": "- Input redirection: Use standard shell redirectors (<) to feed configurations directly to the runner."
+    },
+    {
+      "type": "code",
+      "content": "# Pipe folder contents to the agent for a quick README generation",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "find src/ -maxdepth 2 | agy run -p \"Analyze this structure and outline the project module structure:\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Pipe an unformatted database schema to output SQL queries",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat src/schema.sql | agy run -p \"Generate 3 sample INSERT statements based on the table definitions in this stream.\"",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Test your understanding of security boundaries and piping workflows:"
+    },
+    {
+      "type": "p",
+      "content": "- Question 1: What happens if the agent attempts to write a file outside the directory containing the active .gemini.md file?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The agent executes the change but logs a security warning in the console."
+    },
+    {
+      "type": "p",
+      "content": "- B) The operation is blocked by the CLI security engine to prevent directory traversal."
+    },
+    {
+      "type": "p",
+      "content": "- C) The agent prompts the user to enter their root password."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Workspace boundaries are strictly enforced. Any attempt to write outside the root folder is blocked automatically by the execution engine."
+    },
+    {
+      "type": "p",
+      "content": "- Question 2: Which command correctly uses piping to analyze a server log file via the CLI?"
+    },
+    {
+      "type": "p",
+      "content": "- A) cat server.log | agy run -p \"Find all connection errors in this log\""
+    },
+    {
+      "type": "p",
+      "content": "- B) agy run -p \"Find all connection errors in this log\" --file server.log"
+    },
+    {
+      "type": "p",
+      "content": "- C) agy read server.log | agy scan"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option A is correct. Piping output via cat into agy run streams the log contents directly into standard input, where the agent parses it based on the prompt."
+    }
+  ]
+}

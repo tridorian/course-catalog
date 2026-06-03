@@ -1,0 +1,456 @@
+{
+  "id": "2",
+  "title": "2. Streaming & Chat Cycles",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [2. Streaming & Chat Cycles]"
+    },
+    {
+      "type": "h2",
+      "content": "Streaming Responses & Execution Loops"
+    },
+    {
+      "type": "p",
+      "content": "Programmatic applications require fast interaction feedback. Waiting for a complete response to generate can lead to bad user experiences. In this module, we explore how to stream text tokens and reasoning thoughts asynchronously in both Python and Node.js."
+    },
+    {
+      "type": "h3",
+      "content": "Token-by-Token Text Streaming"
+    },
+    {
+      "type": "p",
+      "content": "Streaming text response tokens is implemented using an asynchronous iterator. As the model outputs new text segments, the transport connection yields them immediately without buffering."
+    },
+    {
+      "type": "h3",
+      "content": "Python Text Streaming Script"
+    },
+    {
+      "type": "code",
+      "content": "import asyncio",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from google.antigravity import Agent, LocalAgentConfig",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async def stream_text():",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "config = LocalAgentConfig()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async with Agent(config) as agent:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "response = await agent.chat('Explain the concept of quantum computing in one paragraph.')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print('Agent text stream: ', end='', flush=True)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Iterate asynchronously over incoming text tokens",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async for token in response:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(token, end='', flush=True)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if __name__ == '__main__':",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "asyncio.run(stream_text())",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Node.js Text Streaming Script"
+    },
+    {
+      "type": "code",
+      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async function streamText() {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const config = new LocalAgentConfig();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const agent = new Agent(config);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.start();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const response = await agent.chat('Explain the concept of quantum computing in one paragraph.');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "process.stdout.write('Agent text stream: ');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// Asynchronously iterate over stream updates",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "for await (const token of response) {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "process.stdout.write(token);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "} finally {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.stop();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "streamText().catch(console.error);",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Streaming Reasoning Thoughts"
+    },
+    {
+      "type": "p",
+      "content": "Next-generation Gemini models generate internal reasoning chains before presenting their final answer. The SDK exposes these reasoning thoughts via the thoughts property on the response stream, allowing developers to trace the agent's logic."
+    },
+    {
+      "type": "h3",
+      "content": "Python Thought Streaming Script"
+    },
+    {
+      "type": "code",
+      "content": "import asyncio",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from google.antigravity import Agent, LocalAgentConfig",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async def stream_thoughts():",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "config = LocalAgentConfig()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async with Agent(config) as agent:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "response = await agent.chat('How many letters are in the word \"Antigravity\"?')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print('Agent thinking process:')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Iterate over thinking tokens",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async for thought in response.thoughts:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(thought, end='', flush=True)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print('\\n\\nFinal Response:')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Iterate over text response tokens",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async for token in response:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(token, end='', flush=True)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if __name__ == '__main__':",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "asyncio.run(stream_thoughts())",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Node.js Thought Streaming Script"
+    },
+    {
+      "type": "code",
+      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async function streamThoughts() {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const config = new LocalAgentConfig();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const agent = new Agent(config);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.start();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const response = await agent.chat('How many letters are in the word \"Antigravity\"?');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log('Agent thinking process:');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "for await (const thought of response.thoughts) {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "process.stdout.write(thought);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log('\\n\\nFinal Response:');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "for await (const token of response) {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "process.stdout.write(token);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "} finally {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.stop();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "streamThoughts().catch(console.error);",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Do not call run_interactive_loop() inside headless production environments or CI/CD pipelines. This helper attempts to capture keyboard inputs from terminal stdout/stdin, which will block execution indefinitely if a human is not present to type an response."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which property on the response stream object is used to access the model's reasoning process?"
+    },
+    {
+      "type": "p",
+      "content": "- A) response.reasoning"
+    },
+    {
+      "type": "p",
+      "content": "- B) response.thoughts"
+    },
+    {
+      "type": "p",
+      "content": "- C) response.thinking_chain"
+    },
+    {
+      "type": "p",
+      "content": "- D) response.trace"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. The model's intermediate thinking steps are exposed via the response.thoughts async iterator."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What occurs when a developer invokes run_interactive_loop() inside an automated pipeline running on a remote cloud server?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The SDK executes a fast shadow loop and outputs the response."
+    },
+    {
+      "type": "p",
+      "content": "- B) The SDK raises a ValidationException error immediately."
+    },
+    {
+      "type": "p",
+      "content": "- C) The program hangs indefinitely waiting for keyboard input."
+    },
+    {
+      "type": "p",
+      "content": "- D) The agent automatically redirects outputs to a text file."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: C. run_interactive_loop() is intended for manual terminal trials and prompts for console input, causing headless systems to block."
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "id": "1",
+  "title": "1. Enterprise Sandbox Architecture & Host Isolation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "The Paradigm of Immutable Agent Isolation"
+    },
+    {
+      "type": "p",
+      "content": "Traditional agent deployments execute scripts directly on the host virtual machine, presenting an unacceptable risk profile in enterprise environments. An autonomous agent with shell access can perform destructive commands, compromise host credentials, or escalate privileges. In the Antigravity architecture, we enforce Tier 3 Sandboxing using the `agy-box` OCI image. This ensures that the engine runs in an ephemeral, containerized environment, separating the agent's execution context from the host VM's kernel and metadata server."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> The agy-box image is built on a minimal, hardened base distro (typically Alpine or Wolfi) and runs as a rootless container. It strips unnecessary kernel capabilities, enforces strict read-only root filesystems, and locks the agent workspace to a single mapped volume."
+    },
+    {
+      "type": "h3",
+      "content": "Rootless Podman vs. Docker Sandboxing"
+    },
+    {
+      "type": "p",
+      "content": "In high-security enterprise environments, rootless Podman is the preferred container runtime. Since Podman does not rely on a root-owned daemon, it leverages Linux user namespaces (userns) to map the container's root user to an unprivileged UID on the host VM. This prevents container escape vulnerabilities from compromising the host."
+    },
+    {
+      "type": "code",
+      "content": "# Verify host support for user namespaces",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sysctl user.max_user_namespaces",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Create an unprivileged system user for agy-box execution",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo useradd -r -s /usr/sbin/nologin agy_runner",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Configure subuid and subgid mappings for rootless container execution",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"agy_runner:100000:65536\" | sudo tee -a /etc/subuid",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"agy_runner:100000:65536\" | sudo tee -a /etc/subgid",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Run a diagnostic container to verify rootless execution mapping",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo -u agy_runner podman run --rm alpine whoami",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Firewalling & Network Egress Restrictions"
+    },
+    {
+      "type": "p",
+      "content": "AI agents must be restricted to prevent data exfiltration. The agy-box container should only have egress access to approved API endpoints (such as Google Vertex AI, GCP APIs, and private registries) while blocking access to internal databases, metadata servers, and other VMs."
+    },
+    {
+      "type": "code",
+      "content": "# Deny container access to the GCP Instance Metadata Server (169.254.169.254)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# This prevents the agent from harvesting host service account tokens.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo iptables -A OUTPUT -d 169.254.169.254 -j REJECT",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Launch the agy-box container with specific network controls",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "podman run -d \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--name agy-sandbox \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--network slirp4netns:port_forward=8080 \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--cap-drop=ALL \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--security-opt label=disable \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--read-only \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--tmpfs /tmp \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "-v /opt/agy/workspace:/workspace:z \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "gcr.io/tridorian-corp/agy-box:v1.2.0",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why is running the containerized sandbox (agy-box) in rootless Podman preferred over standard Docker in L400 enterprise deployments?"
+    },
+    {
+      "type": "p",
+      "content": "A) Podman supports visual browser streams natively without X11 forwarding."
+    },
+    {
+      "type": "p",
+      "content": "B) Podman runs without a root daemon, mapping the container's root user to an unprivileged host UID to mitigate container-escape risks."
+    },
+    {
+      "type": "p",
+      "content": "C) Docker cannot run OCI-compliant containers behind corporate firewalls."
+    },
+    {
+      "type": "p",
+      "content": "D) Rootless containers automatically authenticate to Google Artifact Registry."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: B. Rootless Podman maps container users to unprivileged host UIDs, ensuring that even if the agent escapes the container, it only gains the privileges of an unprivileged host user."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which IP address must be blocked via firewalls to prevent an autonomous agent from extracting host VM cloud credentials?"
+    },
+    {
+      "type": "p",
+      "content": "A) 10.0.0.1"
+    },
+    {
+      "type": "p",
+      "content": "B) 127.0.0.1"
+    },
+    {
+      "type": "p",
+      "content": "C) 169.254.169.254"
+    },
+    {
+      "type": "p",
+      "content": "D) 8.8.8.8"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: C. 169.254.169.254 is the cloud provider metadata service IP. Blocking it prevents the containerized agent from stealing the host's IAM service account credentials."
+    }
+  ]
+}

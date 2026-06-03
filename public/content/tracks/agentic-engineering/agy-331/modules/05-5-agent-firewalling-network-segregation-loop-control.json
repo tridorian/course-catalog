@@ -1,0 +1,196 @@
+{
+  "id": "5",
+  "title": "5. Agent Firewalling, Network Segregation & Loop Control",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "5.1 Network Security for Agent sandboxes"
+    },
+    {
+      "type": "p",
+      "content": "If an agent has unrestricted outbound network access, it can execute requests to retrieve malicious scripts, connect to command-and-control servers, or leak proprietary code. Furthermore, when running on cloud-hosted virtual machines (such as Google Cloudtops, Compute Engine, or AWS instances), containers can access the cloud metadata server by requesting '169.254.169.254'. This endpoint returns temporary access tokens for the machine's service account, allowing immediate privilege escalation to the entire cloud project. This module teaches how to implement container firewalls and network routing limits."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> The Metadata Risk:"
+    },
+    {
+      "type": "p",
+      "content": "> Cloud instance metadata endpoints (169.254.169.254) are a high-value target. If an agent executes 'curl http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token', it can extract tokens to access storage buckets, databases, and container clusters. You MUST block this IP."
+    },
+    {
+      "type": "h2",
+      "content": "5.2 Configuring an Isolated Container Network with Podman"
+    },
+    {
+      "type": "p",
+      "content": "To secure container networks, we define an isolated network bridge in Podman that blocks local subnets and the metadata IP while allowing required internet access for dependency updates (e.g. npm or pip package downloads)."
+    },
+    {
+      "type": "h3",
+      "content": "5.3 Script: Setting Up Network Isolation Rules"
+    },
+    {
+      "type": "p",
+      "content": "Execute the following shell commands on the host system to establish firewall rules blocking link-local and internal network traffic from the container bridge network ('cni-podman0'):"
+    },
+    {
+      "type": "code",
+      "content": "#!/usr/bin/env bash",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Define the target container subnet and interface",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "CONTAINER_INTERFACE=\"cni-podman0\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "METADATA_IP=\"169.254.169.254\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Block access to the cloud metadata endpoint",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d $METADATA_IP -j REJECT",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Block access to corporate private network subnets (RFC 1918)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 10.0.0.0/8 -j REJECT",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 172.16.0.0/12 -j REJECT",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 192.168.0.0/16 -j REJECT",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Verify the rule insertion",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo iptables -L FORWARD -v -n",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "5.4 Restricting Agent Loops via Auto-Approval Constraints"
+    },
+    {
+      "type": "p",
+      "content": "In addition to network constraints, we must limit execution loops. When running headlessly, agents should be governed by execution thresholds. Configure execution timeouts, maximum token counts, and loop boundaries using system environment variables and execution flags."
+    },
+    {
+      "type": "code",
+      "content": "# Execute an agent task with execution timeouts and automatic loop termination",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy --run \"Clean build artifacts and run local tests\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--timeout=300 \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--max-iterations=10 \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--auto-approve=false",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "5.5 Check Your Understanding Quiz"
+    },
+    {
+      "type": "h3",
+      "content": "Question 1: What is the primary risk of allowing an agent container to access 169.254.169.254?"
+    },
+    {
+      "type": "p",
+      "content": "A) The container will experience high network latency."
+    },
+    {
+      "type": "p",
+      "content": "B) The agent can fetch cloud provider metadata and steal temporary API access tokens, compromising cloud infrastructure."
+    },
+    {
+      "type": "p",
+      "content": "C) The host network card will crash."
+    },
+    {
+      "type": "p",
+      "content": "D) The container filesystem becomes read-only."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** 169.254.169.254 hosts the Cloud Metadata Service. If accessible, an agent can extract sensitive authentication credentials for the machine's cloud identity."
+    },
+    {
+      "type": "h3",
+      "content": "Question 2: How do you block access to the cloud metadata service from containerized processes on a Linux host?"
+    },
+    {
+      "type": "p",
+      "content": "A) By uninstalling curl inside the container."
+    },
+    {
+      "type": "p",
+      "content": "B) By setting up firewall rules (e.g., iptables or nftables) that REJECT outbound traffic directed to 169.254.169.254 from the container's network interface."
+    },
+    {
+      "type": "p",
+      "content": "C) By running the container as root."
+    },
+    {
+      "type": "p",
+      "content": "D) By disabling host DNS."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** Rejecting forwarding rules for the container network bridge interface to the IP 169.254.169.254 prevents packets from reaching the metadata daemon."
+    }
+  ]
+}

@@ -1,9 +1,29 @@
 {
-  "course_id": "AGY-201",
+  "course_id": "agy-201",
   "title": "AGY-201: Standalone Operations (L200)",
   "version": "0.1.0",
   "author": "Tridorian Labs & Google Cloud",
-  "target_audience": "Visual Learners, SAs, & Analysts",
-  "description": "Managing asynchronous agent boards, prompt engineering for document generation, and tracking web-scraper visual playback tapes inside antigravity.",
-  "status": "Draft"
+  "description": "An in-depth, hands-on guide to mastering Standalone Operations using the antigravity visual desktop board. Designed specifically for visual learners, solution architects, and technical business analysts, this course covers the configuration and management of asynchronous agent workflows, advanced prompt engineering techniques for structured document generation, and deep-dive troubleshooting of web-scraping agents via visual playback tapes. By the end of this course, you will be able to orchestrate complex multi-agent scraping pipelines, debug live selector issues, and compile clean markdown analytical dashboards with zero placeholders.",
+  "features": [
+    {
+      "icon": "🧭",
+      "title": "Asynchronous Coordination",
+      "description": "Master the visual management of multiple parallel agent cards, tracking progress, state transitions, and intermediate human-in-the-loop approvals."
+    },
+    {
+      "icon": "📄",
+      "title": "Zero-Placeholder Prompting",
+      "description": "Learn the specific prompt design rules and templates needed to coerce agentic workflows into producing publication-grade markdown documentation."
+    },
+    {
+      "icon": "📼",
+      "title": "Visual Browser Playback",
+      "description": "Acquire the skills to record, analyze, and step through browser automation playback tapes to resolve dynamic page loading and shifting DOM elements."
+    },
+    {
+      "icon": "🏆",
+      "title": "Specialist Badge Readiness",
+      "description": "Prepare for the AGY Certified Operations Specialist Capstone by building a three-source competitor monitor."
+    }
+  ]
 }

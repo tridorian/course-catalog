@@ -1,0 +1,468 @@
+{
+  "id": "3",
+  "title": "3. Context Arrays & Session Persistence",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [3. Context Arrays & Session Persistence]"
+    },
+    {
+      "type": "h2",
+      "content": "Workspace Security & Stateful Context Ingestion"
+    },
+    {
+      "type": "p",
+      "content": "For advanced scripting, agents must handle stateful histories and respect workspace boundaries. This module teaches how to seed conversations with context arrays, configure session directories, and override workspace storage locations securely."
+    },
+    {
+      "type": "h3",
+      "content": "Workspace Storage Boundaries"
+    },
+    {
+      "type": "p",
+      "content": "By default, the SDK writes files, logs, and generated artifacts under ~/.gemini/antigravity/brain/. You can override this using the app_data_dir configuration variable. The path must be absolute."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Relative paths or unexpanded tilde syntax (e.g. './logs' or '~/data') will fail validation checks and trigger an immediate startup error. Always expand paths or construct them programmatically."
+    },
+    {
+      "type": "h3",
+      "content": "Python Persistence Workflow"
+    },
+    {
+      "type": "p",
+      "content": "We use a temporary storage directory to isolate agent states and resume a conversation using a conversation_id across separate agent instances."
+    },
+    {
+      "type": "code",
+      "content": "import os",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "import tempfile",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "import asyncio",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from google.antigravity import Agent, LocalAgentConfig",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async def run_persistence_flow():",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Establish a local directory for testing",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "save_dir = tempfile.mkdtemp()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f'Workspace directory created at: {save_dir}')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# --- Session 1: Run interaction and store ID ---",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "config1 = LocalAgentConfig(",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "save_dir=save_dir,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "app_data_dir=os.path.join(save_dir, 'brain')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": ")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async with Agent(config1) as agent1:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent1.chat('Context: The target deployment server is server-omega.')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "conv_id = agent1.conversation_id",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f'Retrieved Conversation ID: {conv_id}')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# --- Session 2: Load second agent inside same workspace ---",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "config2 = LocalAgentConfig(",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "conversation_id=conv_id,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "save_dir=save_dir,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "app_data_dir=os.path.join(save_dir, 'brain')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": ")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async with Agent(config2) as agent2:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "response = await agent2.chat('What is the deployment server name?')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "text = await response.text()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f'Agent response on resumed session: {text}')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if __name__ == '__main__':",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "asyncio.run(run_persistence_flow())",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Node.js Persistence Workflow"
+    },
+    {
+      "type": "p",
+      "content": "Below is the equivalent implementation in Node.js, storing state data in a local folder structure and executing two separate session iterations."
+    },
+    {
+      "type": "code",
+      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "import path from 'path';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "import fs from 'fs';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async function runPersistenceWorkflow() {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const tempDir = path.resolve('./temp_session_data');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if (!fs.existsSync(tempDir)) {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "fs.mkdirSync(tempDir);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const appDataDir = path.join(tempDir, 'brain');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const saveDir = path.join(tempDir, 'save');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "let convId;",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// --- Session 1: Run and Store ---",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const config1 = new LocalAgentConfig({",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "saveDir: saveDir,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "appDataDir: appDataDir",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "});",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const agent1 = new Agent(config1);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent1.start();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent1.chat('Context: Database port is configured to 5432.');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "convId = agent1.conversationId;",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log(`Stored Conversation ID: ${convId}`);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "} finally {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent1.stop();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// --- Session 2: Load and Verify ---",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const config2 = new LocalAgentConfig({",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "conversationId: convId,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "saveDir: saveDir,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "appDataDir: appDataDir",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "});",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const agent2 = new Agent(config2);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent2.start();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const response = await agent2.chat('What port is the database on?');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const text = await response.text();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log(`Resumed Response: ${text}`);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "} finally {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent2.stop();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// Clean up local temp directory",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "fs.rmSync(tempDir, { recursive: true, force: true });",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "runPersistenceWorkflow().catch(console.error);",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What parameter inside LocalAgentConfig registers the directory containing the trajectory logs for resuming state?"
+    },
+    {
+      "type": "p",
+      "content": "- A) app_data_dir"
+    },
+    {
+      "type": "p",
+      "content": "- B) save_dir"
+    },
+    {
+      "type": "p",
+      "content": "- C) history_path"
+    },
+    {
+      "type": "p",
+      "content": "- D) output_dir"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. The save_dir configuration property designates where the conversation history and tracking state updates are saved."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What validation error occurs if app_data_dir is set to './output'?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The agent issues a warning but runs correctly."
+    },
+    {
+      "type": "p",
+      "content": "- B) The SDK raises a validation error because the path is not absolute."
+    },
+    {
+      "type": "p",
+      "content": "- C) The agent runs in memory without logging any data."
+    },
+    {
+      "type": "p",
+      "content": "- D) The SDK attempts to locate an OCI sandbox environment."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. The app_data_dir configuration must be defined as an absolute path, otherwise validation fails."
+    }
+  ]
+}

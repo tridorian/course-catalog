@@ -1,0 +1,244 @@
+{
+  "id": "3",
+  "title": "3. Local Workspace Sandboxing with Distrobox",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "3.1 Introduction to Distrobox"
+    },
+    {
+      "type": "p",
+      "content": "Distrobox uses Podman or Docker to create container environments that seamlessly integrate with your host system. While standard distrobox configurations mount your host home directory ($HOME) and share audio, graphics, and network namespaces to provide a native-feeling shell, this level of integration is highly insecure for running autonomous AI agents. In this module, we will learn how to configure an Isolated Distrobox Sandbox which redirects $HOME, limits network exposure, and restricts host socket sharing."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> The Isolation Strategy:"
+    },
+    {
+      "type": "p",
+      "content": "> To safely run an agent loop inside Distrobox, we must explicitly override default integrations. We do this by designating an empty workspace folder as the container's home directory."
+    },
+    {
+      "type": "h2",
+      "content": "3.2 Configuring distrobox.ini for Agent Loops"
+    },
+    {
+      "type": "p",
+      "content": "Instead of executing ad-hoc commands, we declare our sandbox configuration using a 'distrobox.ini' file. This file specifies our base 'agy-box' image, custom home folders, and drops integration features."
+    },
+    {
+      "type": "h3",
+      "content": "3.3 Production-Grade distrobox.ini Blueprint"
+    },
+    {
+      "type": "p",
+      "content": "Save the following configuration inside '/var/home/wtg/distrobox.ini':"
+    },
+    {
+      "type": "code",
+      "content": "[agy-sandbox]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "image=local/agy-box:latest",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "home=/var/home/wtg/sandbox_home",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "additional_packages=git python3-pip",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "start_now=true",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "init=false",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "nvidia=false",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "pull=false",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Restrict sharing host subsystems",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "unshare_netns=true",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "unshare_ipc=true",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "unshare_dev=true",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "volume=/var/home/wtg/workspace:/workspace:rw",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "3.4 Initializing and Entering the Isolated Distrobox"
+    },
+    {
+      "type": "p",
+      "content": "First, create the dedicated empty home folder to avoid permission errors. Then, initialize the container using the ini configuration file and enter the environment:"
+    },
+    {
+      "type": "code",
+      "content": "# Create dedicated sandbox home folder on host",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "mkdir -p /var/home/wtg/sandbox_home",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Create the distrobox container from the configuration file",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "distrobox assemble create --file /var/home/wtg/distrobox.ini",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Enter the isolated distrobox shell",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "distrobox enter agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "3.5 Inside the Sandbox: Verification"
+    },
+    {
+      "type": "p",
+      "content": "Once inside the distrobox, verify that you cannot access the host home directories or mount sockets. Execute the following validation commands inside the container:"
+    },
+    {
+      "type": "code",
+      "content": "# Check home directory path - it should be sandbox_home, not your host home",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo $HOME",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Verify write capabilities are restricted to the mapped workspace",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "touch /workspace/test.txt && rm /workspace/test.txt",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Verify host networking or sensitive routes are unreachable",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ping -c 3 192.168.1.1",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "3.6 Check Your Understanding Quiz"
+    },
+    {
+      "type": "h3",
+      "content": "Question 1: What is the primary difference between a default Distrobox container and our hardened agent Distrobox container?"
+    },
+    {
+      "type": "p",
+      "content": "A) The hardened container runs faster."
+    },
+    {
+      "type": "p",
+      "content": "B) The default container mounts the host's $HOME directory, whereas our hardened container redirects the home directory to a dedicated sandbox folder to protect host files."
+    },
+    {
+      "type": "p",
+      "content": "C) The default container uses Docker and the hardened container only uses Podman."
+    },
+    {
+      "type": "p",
+      "content": "D) The hardened container doesn't support bash."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** Overriding the default home directory configuration prevents the agent from reading, writing, or deleting sensitive configuration files (like .bashrc or SSH keys) on your host workstation."
+    },
+    {
+      "type": "h3",
+      "content": "Question 2: What is the role of the 'unshare_netns=true' configuration inside distrobox.ini?"
+    },
+    {
+      "type": "p",
+      "content": "A) To enable faster internet connections."
+    },
+    {
+      "type": "p",
+      "content": "B) To completely isolate the network namespace, preventing the container from accessing host loopback interfaces and local host networks."
+    },
+    {
+      "type": "p",
+      "content": "C) To encrypt container traffic."
+    },
+    {
+      "type": "p",
+      "content": "D) To share host sockets."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** Unsharing the network namespace ensures the container does not share the host's network interfaces, blocking it from communicating with services bound to 127.0.0.1 on the host."
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "id": "4",
+  "title": "4. The Workspace Editor (antigravity-ide) — Synchronous Editing",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Code Co-Authoring & Sidecar Collaboration"
+    },
+    {
+      "type": "p",
+      "content": "The antigravity-ide is a customized fork of VS Code. While the visual board is optimized for asynchronous, high-level task tracking, antigravity-ide is designed for synchronous, side-by-side cooperation. It brings the agent directly into your coding environment, allowing you to write code, compose documentation, and refactor text files with real-time feedback."
+    },
+    {
+      "type": "h3",
+      "content": "The Sidecar Panel"
+    },
+    {
+      "type": "p",
+      "content": "The core of the IDE interface is the Sidecar panel. This is an integrated agent chat window that automatically tracks your active editor state. It understands which file you have open, what code lines are highlighted, and what build errors are in the terminal output."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Context Isolation: The Sidecar respects standard workspace boundaries. It will never read or modify files outside the directory bounds configured in your .gemini.md firewall rules."
+    },
+    {
+      "type": "h3",
+      "content": "Step-by-Step Lab: Co-Authoring a Statement of Work (SOW)"
+    },
+    {
+      "type": "p",
+      "content": "- Step 1: Open antigravity-ide and select your active project directory."
+    },
+    {
+      "type": "p",
+      "content": "- Step 2: Create a new file named project_sow.md in the file explorer."
+    },
+    {
+      "type": "p",
+      "content": "- Step 3: Paste the following rough draft outline into the editor:"
+    },
+    {
+      "type": "p",
+      "content": "- Step 4: Highlight the draft text block and press Ctrl+I (or CMD+I on macOS) to invoke the inline agent prompt."
+    },
+    {
+      "type": "p",
+      "content": "- Step 5: In the prompt box, enter: 'Expand this draft into a professional Project SOW, including sections for Scope, Timeline, and Resource allocation, matching standard corporate style sheets.'"
+    },
+    {
+      "type": "p",
+      "content": "- Step 6: Review the proposed modifications displayed as an inline diff (green text for additions, red text for deletions) directly in your active editor tab."
+    },
+    {
+      "type": "p",
+      "content": "- Step 7: Click 'Accept' in the diff utility bar to overwrite the rough outline with the expanded professional copy."
+    },
+    {
+      "type": "code",
+      "content": "# Project Draft Outline",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Project Name: Cloud Infrastructure Setup",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Client: Acme Corp",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Timeline: 4 weeks",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Details: Setup native container sandboxes and establish local folder permissions.",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Verify your understanding of synchronous editing workflows:"
+    },
+    {
+      "type": "p",
+      "content": "- Question 1: How does the Sidecar panel in antigravity-ide retrieve context for its recommendations?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It scans your entire local hard drive for files."
+    },
+    {
+      "type": "p",
+      "content": "- B) It automatically reads the file you have open and matches the text you have highlighted."
+    },
+    {
+      "type": "p",
+      "content": "- C) It polls the visual board's active recordings folder."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The Sidecar is context-aware and uses your active tab and text highlights as context for prompt completions."
+    },
+    {
+      "type": "p",
+      "content": "- Question 2: What utility displays proposed modifications within antigravity-ide before you accept them?"
+    },
+    {
+      "type": "p",
+      "content": "- A) A command line log message."
+    },
+    {
+      "type": "p",
+      "content": "- B) An inline green-and-red diff overlay directly in the editor tab."
+    },
+    {
+      "type": "p",
+      "content": "- C) A separate visual card in the visual board."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Diff overlays display proposed changes directly in line with your code, letting you audit additions and deletions before committing them."
+    }
+  ]
+}

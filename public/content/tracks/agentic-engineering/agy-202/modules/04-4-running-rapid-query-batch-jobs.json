@@ -1,0 +1,181 @@
+{
+  "id": "4",
+  "title": "4. Running Rapid Query Batch Jobs",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [4. Running Rapid Query Batch Jobs]"
+    },
+    {
+      "type": "h2",
+      "content": "Batch Processing Files at Scale"
+    },
+    {
+      "type": "p",
+      "content": "In this module, you will learn how to orchestrate rapid query batch jobs. We will explore how to write scripts that loop through files, extract structured info using the agent, and compile them into reports without overwhelming context limits."
+    },
+    {
+      "type": "h3",
+      "content": "Writing Shell Loops for Batch Processing"
+    },
+    {
+      "type": "p",
+      "content": "Passing too many files to the agent at once can degrade reasoning quality or cause context window limits to be reached. A better strategy is to wrap the agy command inside a standard POSIX shell loop. This isolates each execution, processes files one by one, and gathers individual outputs."
+    },
+    {
+      "type": "code",
+      "content": "# Create an output file for results",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"=== API Schema Report ===\" > audit_report.txt",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Loop through JSON schema files and query the agent for deprecation details",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "for schema_file in src/schemas/*.json; do",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"Auditing $schema_file...\" >> audit_report.txt",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat \"$schema_file\" | agy run -p \"Read this schema file. List any field marked as 'deprecated'. Format output in a single line: [File] -> [Deprecated Fields].\" >> audit_report.txt",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "done",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Throttling Concurrency and Background Execution"
+    },
+    {
+      "type": "p",
+      "content": "To speed up batch jobs, you can run tasks in the background using the & shell operator. However, to prevent rate limits or system resource exhaustion, you must throttle the number of concurrent jobs."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Daemon Concurrency: The local agy daemon manages connection requests. Running parallel background tasks will utilize multiple slots. You can view running tasks by using agy status."
+    },
+    {
+      "type": "code",
+      "content": "# Run audit in parallel threads while maintaining a concurrency threshold of 3",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "for source_file in src/utils/*.py; do",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Run in background and pipe console logs to audit folder",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy run -p \"Check this file for unused helper functions. List them.\" < \"$source_file\" > \"logs/unused_$(basename \"$source_file\").txt\" &",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Throttle check: wait if 3 or more background jobs are running",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if [[ $(jobs -r | wc -l) -ge 3 ]]; then",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "wait -n",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "fi",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "done",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "wait",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"All parallel batch audits completed.\"",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Test your knowledge of batch execution patterns:"
+    },
+    {
+      "type": "p",
+      "content": "- Question 1: What is the primary reason to use a shell loop to process files individually rather than passing the entire source folder to the agent?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Shell loops execute on the GPU directly."
+    },
+    {
+      "type": "p",
+      "content": "- B) It prevents context window limits from being exceeded and limits reasoning failures to single files."
+    },
+    {
+      "type": "p",
+      "content": "- C) The agy CLI does not support folders as input parameters."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Processing files in a loop keeps the context window small, reduces latency, and ensures that a failure in one file doesn't impact the overall run."
+    },
+    {
+      "type": "p",
+      "content": "- Question 2: In a parallel batch script, what does the command wait -n do?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It waits for all background processes to terminate."
+    },
+    {
+      "type": "p",
+      "content": "- B) It pauses for a specified number of seconds before starting the next job."
+    },
+    {
+      "type": "p",
+      "content": "- C) It blocks execution until at least one background job finishes, preventing the system from starting too many parallel processes."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option C is correct. The wait -n command waits for the next single background process to finish, which is the standard bash pattern for throttling concurrency."
+    }
+  ]
+}

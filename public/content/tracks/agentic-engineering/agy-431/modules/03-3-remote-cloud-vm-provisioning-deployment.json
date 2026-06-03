@@ -1,0 +1,451 @@
+{
+  "id": "3",
+  "title": "3. Remote Cloud VM Provisioning & Deployment",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Automating Infrastructure for Agent Workloads"
+    },
+    {
+      "type": "p",
+      "content": "Scaling agent workflows requires automated VM provisioning. We use Terraform to define the target virtual machines, secure firewall rules, and metadata scripts that bootstrap the host, mount directories, configure systemd, and launch the agy-box container."
+    },
+    {
+      "type": "h3",
+      "content": "Terraform Configuration for VM Bootstrapping"
+    },
+    {
+      "type": "p",
+      "content": "The following Terraform manifest provisions a hardened GCE instance with metadata that automatically configures Podman and deploys the custom agy-box image."
+    },
+    {
+      "type": "code",
+      "content": "resource \"google_compute_instance\" \"agy_sandbox_vm\" {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "name         = \"agy-sandbox-vm-prod\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "machine_type = \"e2-standard-4\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "zone         = \"us-central1-a\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "boot_disk {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "initialize_params {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "image = \"cos-cloud/cos-stable\" # Container-Optimized OS",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "size  = 50",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "network_interface {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "network    = \"corp-vpc\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "subnetwork = \"secure-agents-subnet\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Omit access_config to ensure no public IP is assigned",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "metadata = {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "user-data = <<-EOF",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "#cloud-config",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "write_files:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- path: /etc/systemd/system/agy-box.service",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "permissions: \"0644\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "owner: root",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "content: |",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Unit]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Description=Google Antigravity Sandbox OCI Container",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "After=network-online.target",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Wants=network-online.target",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Service]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Restart=always",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStartPre=-/usr/bin/docker kill agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStartPre=-/usr/bin/docker rm agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStart=/usr/bin/docker run \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--name agy-sandbox \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--read-only \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "-v /var/opt/agy/workspace:/workspace:rw \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "-p 8080:8080 \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "gcr.io/tridorian-corp/agy-box:v1.2.0",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStop=/usr/bin/docker stop agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Install]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "WantedBy=multi-user.target",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "EOF",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "service_account {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "email  = \"agy-runner-sa@my-project.iam.gserviceaccount.com\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "scopes = [\"https://www.googleapis.com/auth/cloud-platform\"]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Configuring Host systemd Service Managers"
+    },
+    {
+      "type": "p",
+      "content": "In standard Linux distributions (like RedHat, Ubuntu, or Debian), we use systemd services to guarantee high availability of the sandboxed agent server. This setup ensures that if the agent process crashes or the VM reboots, the environment is automatically rebuilt in its clean, immutable state."
+    },
+    {
+      "type": "code",
+      "content": "# Location: /etc/systemd/system/agy-sandbox.service",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Unit]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Description=AGY Containerized Engine Service",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "After=network.target network-online.target podman.socket",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Requires=podman.socket",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Service]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Type=simple",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "User=agy_runner",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Group=agy_runner",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "WorkingDirectory=/opt/agy",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStartPre=-/usr/bin/podman kill agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStartPre=-/usr/bin/podman rm agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStart=/usr/bin/podman run \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--name agy-sandbox \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--cap-drop=ALL \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--read-only \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--tmpfs /tmp \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "-v /opt/agy/workspace:/workspace:z \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "-e AGY_SECRET_TOKEN_FILE=/etc/secrets/token.env \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "private-registry.corp.internal/agy/agy-box:latest",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ExecStop=/usr/bin/podman stop agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Restart=on-failure",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "RestartSec=5s",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Install]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "WantedBy=multi-user.target",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why is Container-Optimized OS (COS) or a similar minimal Linux OS used when deploying remote VMs for agy-box sandboxes?"
+    },
+    {
+      "type": "p",
+      "content": "A) It has graphical desktop environments pre-installed."
+    },
+    {
+      "type": "p",
+      "content": "B) It comes with standard python compilers out-of-the-box."
+    },
+    {
+      "type": "p",
+      "content": "C) It minimizes the host attack surface by running a stripped-down kernel and enforcing a read-only root partition."
+    },
+    {
+      "type": "p",
+      "content": "D) It automatically runs all bash files inside VM metadata."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: C. Minimal container operating systems limit the host attack surface, ensuring high security and making host compromise extremely difficult if the container is breached."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: In a systemd service file for an immutable sandbox, what is the purpose of running ExecStartPre=-/usr/bin/podman rm agy-sandbox?"
+    },
+    {
+      "type": "p",
+      "content": "A) To backup the previous workspace."
+    },
+    {
+      "type": "p",
+      "content": "B) To ensure any existing stopped container from a previous run is cleanly removed before starting a fresh instance."
+    },
+    {
+      "type": "p",
+      "content": "C) To download the latest image update from the registry."
+    },
+    {
+      "type": "p",
+      "content": "D) To update user namespace subuid maps."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: B. Prepending a hyphen (-) allows the systemd service to ignore errors if the container does not exist, ensuring a clean state by removing any lingering container instances."
+    }
+  ]
+}

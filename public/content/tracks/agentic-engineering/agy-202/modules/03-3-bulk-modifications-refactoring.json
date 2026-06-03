@@ -1,0 +1,179 @@
+{
+  "id": "3",
+  "title": "3. Bulk Modifications & Refactoring",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [3. Bulk Modifications & Refactoring]"
+    },
+    {
+      "type": "h2",
+      "content": "Safe Refactoring and Dry-Run Verifications"
+    },
+    {
+      "type": "p",
+      "content": "In this module, you will learn how to direct the agent to perform modifications across multiple files in your workspace. We will discuss safety habits such as running dry-runs, inspecting generated diff outputs, and maintaining a clean git repository for rollback capabilities."
+    },
+    {
+      "type": "h3",
+      "content": "Executing Dry-Runs for Code Changes"
+    },
+    {
+      "type": "p",
+      "content": "When you ask the agent to execute changes across a project, it computes the modifications and can display them in standard unified diff format. Using the --dry-run flag executes the task in memory and prints the diffs without writing any changes to your filesystem. This is crucial for verifying that the agent's changes match your guidelines."
+    },
+    {
+      "type": "code",
+      "content": "# Request a bulk update to code headers, checking the changes in memory first",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy run -p \"Scan all Python files in src/ and add standard author tags to the top of each file.\" --dry-run",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "A successful dry-run will print a preview diff similar to this:"
+    },
+    {
+      "type": "code",
+      "content": "--- src/utils.py",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "+++ src/utils.py",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "@@ -1,2 +1,4 @@",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "+# Author: Tridorian Labs",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "+# Date: 2026-06-03",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "def process_data(data):",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "return data.strip()",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Staging and Applying Bulk Refactoring Tasks"
+    },
+    {
+      "type": "p",
+      "content": "When you are ready to write changes, execute the command without the dry-run flag. Follow these guidelines to maintain a stable workspace:"
+    },
+    {
+      "type": "p",
+      "content": "- Ensure git status is clean before starting. If the agent makes a mistake, you can revert all modifications with a single command (git checkout . or git reset --hard)."
+    },
+    {
+      "type": "p",
+      "content": "- Review files side-by-side using standard Git differences before committing the modifications to version control."
+    },
+    {
+      "type": "p",
+      "content": "- Combine bulk refactoring with test suites. Run your test runner immediately after the agent completes to verify that no logical bugs were introduced."
+    },
+    {
+      "type": "code",
+      "content": "# 1. Check current branch state",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "git status",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# 2. Execute the modifications across the workspace",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy run -p \"Refactor the import statements in src/components to use absolute paths.\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# 3. Inspect changes and run test suite",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "git diff",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "npm test",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Answer the following questions to verify your comprehension of code refactoring safety:"
+    },
+    {
+      "type": "p",
+      "content": "- Question 1: Why should you run --dry-run before applying bulk modifications to a large workspace?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Dry-run speeds up the final execution by caching the files in the cloud."
+    },
+    {
+      "type": "p",
+      "content": "- B) It allows you to inspect the unified diffs of all proposed file mutations in your terminal to ensure accuracy before writing to disk."
+    },
+    {
+      "type": "p",
+      "content": "- C) It disables the agent's ability to read your repository file tree."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Dry-run allows you to inspect the changes in unified diff format in the terminal, ensuring that you don't overwrite files with incorrect logic."
+    },
+    {
+      "type": "p",
+      "content": "- Question 2: What is the recommended strategy to recover if an agentic bulk refactor command introduces a syntax error into your codebase?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Delete the sandbox folder and recreate it."
+    },
+    {
+      "type": "p",
+      "content": "- B) Run the command again with a prompt asking the agent to fix it."
+    },
+    {
+      "type": "p",
+      "content": "- C) Revert the unstaged changes using git reset --hard (assuming your workspace was clean before execution)."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option C is correct. Keeping a clean git working directory before running changes allows you to instantly recover the codebase state if an agent task fails."
+    }
+  ]
+}

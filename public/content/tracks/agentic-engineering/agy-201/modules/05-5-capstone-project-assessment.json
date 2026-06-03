@@ -1,0 +1,232 @@
+{
+  "id": "5",
+  "title": "5. Capstone Project & Assessment",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [5. Capstone Project & Assessment]"
+    },
+    {
+      "type": "h2",
+      "content": "Capstone Project Overview & Deliverables"
+    },
+    {
+      "type": "p",
+      "content": "The capstone project is the final challenge of the L200 Standalone Operations track. Completing this project qualifies you for the AGY Certified Operations Specialist badge."
+    },
+    {
+      "type": "p",
+      "content": "**Scenario**: You are tasked with analyzing the pricing models of three competitor services. You must orchestrate three parallel agent cards on your antigravity board to monitor three simulated competitor sites, scrape their pricing details using visual browser automation, resolve any dynamic rendering issues, and consolidate the output into a single, clean markdown card with zero placeholders."
+    },
+    {
+      "type": "p",
+      "content": "The capstone deliverables are:"
+    },
+    {
+      "type": "p",
+      "content": "1. Spawning three parallel scraper tasks on the board."
+    },
+    {
+      "type": "p",
+      "content": "2. Resolving a dynamic loader block on Competitor C's site using the playback tapes."
+    },
+    {
+      "type": "p",
+      "content": "3. Consolidating the HTML outputs into a single markdown comparison matrix."
+    },
+    {
+      "type": "h3",
+      "content": "Step-by-Step Implementation Blueprint"
+    },
+    {
+      "type": "p",
+      "content": "**Step 1**: Setup the workspace directory. Create files for target sources:"
+    },
+    {
+      "type": "code",
+      "content": "mkdir -p ~/agy-workspaces/competitive-tracker/data",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cd ~/agy-workspaces/competitive-tracker",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Create a mock competitors list configuration file",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat << 'EOF' > competitors.json",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "{\"id\": \"competitor_a\", \"url\": \"http://localhost:3000/comp-a\"},",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "{\"id\": \"competitor_b\", \"url\": \"http://localhost:3000/comp-b\"},",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "{\"id\": \"competitor_c\", \"url\": \"http://localhost:3000/comp-c\"}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "EOF",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "**Step 2**: Construct the core task execution prompt. Enter this prompt into the antigravity board prompt input field:"
+    },
+    {
+      "type": "code",
+      "content": "Task: Parallel Competitive Pricing Aggregator",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Instructions:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "1. Read the list of target websites from './competitors.json'.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "2. For each competitor, spawn a web scraping subagent.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "3. Navigate to each URL using the browser automation tools.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "4. Locate the pricing plans and features. On Competitor C's site, note that the pricing table loads dynamically after a 2-second delay. Ensure you wait for the selector 'div.pricing-card' to be visible.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "5. Save the scraped data for each source in JSON format under './data/'.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "6. Consolidate the findings into a single report in the root directory named 'pricing_matrix.md'.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "7. The report must contain a 3-paragraph summary and a GFM table comparing plans and pricing. Follow the Zero-Placeholder Rule.",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "**Step 3**: Launch the execution. Watch the agent cards on the Kanban board."
+    },
+    {
+      "type": "p",
+      "content": "**Step 4**: Debug Competitor C. During execution, the agent card for Competitor C might report a selector timeout because the content loaded slower than expected."
+    },
+    {
+      "type": "p",
+      "content": "- Step 4.1: Open the Playback Viewport for the Competitor C scraper card."
+    },
+    {
+      "type": "p",
+      "content": "- Step 4.2: Examine the visual recording under `.gemini/state/tapes/` to see that a loading spinner was active."
+    },
+    {
+      "type": "p",
+      "content": "- Step 4.3: Issue a redirect instruction to the agent card: 'Modify the script to wait for networkidle state and wait 3000ms before scraping the container.'"
+    },
+    {
+      "type": "p",
+      "content": "**Step 5**: Run the verification command to check the integrity of your project output."
+    },
+    {
+      "type": "code",
+      "content": "# Verify the workspace structure and outputs",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy verify --course agy-201 --target ./pricing_matrix.md",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Which command is used to run the automated verification script to check your capstone project results before submitting for certification?"
+    },
+    {
+      "type": "p",
+      "content": "A) `antigravity verify`"
+    },
+    {
+      "type": "p",
+      "content": "B) `agy verify --course agy-201 --target ./pricing_matrix.md`"
+    },
+    {
+      "type": "p",
+      "content": "C) `node scripts/populate-course-doc.js`"
+    },
+    {
+      "type": "p",
+      "content": "D) `playwright test`"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. The `agy verify` command evaluates your local workspace outputs against the certification criteria."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: When dynamic selectors load slowly, what redirect instruction should you send to the agent card after checking the visual playback tape?"
+    },
+    {
+      "type": "p",
+      "content": "A) Abort the task and flag it as failed"
+    },
+    {
+      "type": "p",
+      "content": "B) Instruct the agent to bypass the page and use placeholders"
+    },
+    {
+      "type": "p",
+      "content": "C) Tell the agent to wait for the network idle state and add a specific wait delay"
+    },
+    {
+      "type": "p",
+      "content": "D) Run the command line tool without approvals"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is C. Modifying the wait time or state target redirects the browser agent to correctly handle the dynamic content load."
+    }
+  ]
+}

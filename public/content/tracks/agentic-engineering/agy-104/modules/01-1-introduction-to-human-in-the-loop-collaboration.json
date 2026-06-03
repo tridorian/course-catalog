@@ -1,0 +1,83 @@
+{
+  "id": "1",
+  "title": "1. Introduction to Human-in-the-Loop Collaboration",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Welcome to **AGY-104: Agent-Human Collaboration Loops**. In the landscape of agentic engineering, autonomous agents are highly capable but operate under deterministic constraints and lack human contextual judgment. Human-in-the-loop (HITL) is a design pattern that inserts human oversight at critical validation junctions, ensuring that the agent does not execute destructive, insecure, or incorrect actions."
+    },
+    {
+      "type": "p",
+      "content": "For instance, when an agent runs commands that modify your local system or perform file deletion, standard safety protocols require the user to explicitly confirm before the command is sent to the shell. This course teaches you how to establish these safety gates, author instructions that set boundary lines, and control the agent's flow of execution."
+    },
+    {
+      "type": "p",
+      "content": "## Core Patterns of Agent-Human Collaboration"
+    },
+    {
+      "type": "p",
+      "content": "Collaboration between human operators and AI agents typically follows one of three distinct interaction styles:"
+    },
+    {
+      "type": "p",
+      "content": "- **Synchronous Steering:** The human works alongside the agent in real-time, providing ongoing chat guidance and refining goals as the task progresses."
+    },
+    {
+      "type": "p",
+      "content": "- **Asynchronous Checkpoints:** The agent runs independently in the background, pausing when it reaches a protected action or requires verification."
+    },
+    {
+      "type": "p",
+      "content": "- **State Inspection:** The user opens the current workspace state to verify files, run diagnostics, and confirm correctness before approving the next agent cycle."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> In AGY SDK systems, security is not a post-process; it is integrated directly into the runtime execution loop through permission controls and directory boundaries. This ensures that the agent always remains a helper rather than a hazard."
+    },
+    {
+      "type": "p",
+      "content": "## Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** What is the primary purpose of Human-in-the-Loop (HITL) design in agentic engineering?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To eliminate the need for autonomous agents entirely"
+    },
+    {
+      "type": "p",
+      "content": "- B) To run agents at maximum speed without safety constraints"
+    },
+    {
+      "type": "p",
+      "content": "- C) To place human checkpoints at critical junctions to verify actions, ensuring security and correctness"
+    },
+    {
+      "type": "p",
+      "content": "- D) To automate the collection of user keystrokes for training models"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> **Correct Answer: C**"
+    },
+    {
+      "type": "p",
+      "content": ">"
+    },
+    {
+      "type": "p",
+      "content": "> **Immediate Feedback:** Human-in-the-Loop validation is a safety-first architecture that inserts human review at critical boundaries (such as terminal executions or file writes) to prevent destructive actions and guide agents toward the correct outcome."
+    }
+  ]
+}

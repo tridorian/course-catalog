@@ -1,0 +1,169 @@
+{
+  "id": "1",
+  "title": "1. Introduction to antigravity-ide & Setup",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Welcome to Interactive Workspaces"
+    },
+    {
+      "type": "p",
+      "content": "The Google Antigravity IDE (antigravity-ide) is a customized, agent-first fork of VS Code. While standard extensions treat AI assistants as secondary chat panels, antigravity-ide integrates the Gemini engine as a first-class collaborative editor. The workspace environment allows for real-time synchronous side-by-side editing, active carets, and deep filesystem integration governed by security rules. This module covers the core environment architecture, the interface layout, and how to verify your setup before launching code sessions."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Design Pattern: Split-pane focus. In antigravity-ide, the primary draft document or code pane stays pinned to the left side, while the agentic chat and command sidecar panel runs on the right. This prevents context switching and allows the developer or writer to monitor the agent's keystrokes in real time."
+    },
+    {
+      "type": "h3",
+      "content": "Workspace Architecture Comparison"
+    },
+    {
+      "type": "p",
+      "content": "Understanding the difference between standard IDE configurations and interactive workspaces is critical for productivity. Below is a comparative matrix outlining the differences:"
+    },
+    {
+      "type": "p",
+      "content": "| Feature | Standard VS Code Extensions | antigravity-ide (Classic IDE) |"
+    },
+    {
+      "type": "p",
+      "content": "| :--- | :--- | :--- |"
+    },
+    {
+      "type": "p",
+      "content": "| **Session Model** | Chat window operates in isolation from the editor state. | Shared editor caret and synchronized multi-file workspace state. |"
+    },
+    {
+      "type": "p",
+      "content": "| **Caret Control** | Agent reads cursor position but cannot drive keyboard events. | Dual carets: Agent caret (green) and Human caret (blue) run in real time. |"
+    },
+    {
+      "type": "p",
+      "content": "| **Workspace Boundaries** | Open access to host files; easy to overwrite system files. | Directory-locking sandbox boundaries configured via `.gemini.md`. |"
+    },
+    {
+      "type": "p",
+      "content": "| **Diff Resolution** | Manual copy-paste or whole-file overrides. | Contiguous or multi-chunk inline replacements with rollback capability. |"
+    },
+    {
+      "type": "h3",
+      "content": "Verifying Dependencies & Environment Verification"
+    },
+    {
+      "type": "p",
+      "content": "The IDE relies on Google Chrome browser and the Chrome DevTools Protocol (CDP) for rendering web views and live preview canvases. Run the following terminal commands to check that your system is correctly configured with credentials and configuration files before starting the application."
+    },
+    {
+      "type": "code",
+      "content": "# Check system application default credentials location",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ls -l ~/.gcloud_config/application_default_credentials.json",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Inspect the configuration file settings for the Antigravity engine",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat ~/.config/Antigravity/settings.json 2>/dev/null || echo \"Settings file not found. Let's create one!\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Launch antigravity-ide targeting your workspace directory",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "antigravity-ide --workspace /var/home/wtg/my-antigravity-work",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Co-Authoring Guide: Launching a Collaborative Session"
+    },
+    {
+      "type": "p",
+      "content": "To initiate a collaborative writing session with the agent, follow these steps:"
+    },
+    {
+      "type": "p",
+      "content": "- Verify your environment credentials are active by running the easy-install verification diagnostics."
+    },
+    {
+      "type": "p",
+      "content": "- Open your terminal and run the launch command specifying your workspace folder path."
+    },
+    {
+      "type": "p",
+      "content": "- Check that the sidecar chat panel on the right side of the screen displays the status 'Connected to Gemini'."
+    },
+    {
+      "type": "p",
+      "content": "- Open a markdown file and type a Heading 1 line; the agent will immediately detect the active document context."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding Quiz"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: How does antigravity-ide differ from standard editor extensions when editing a file?"
+    },
+    {
+      "type": "p",
+      "content": "A) It runs in a separate terminal window and does not view active text."
+    },
+    {
+      "type": "p",
+      "content": "B) It features a synchronized dual-caret model (Human blue, Agent green) and respects directory-locking sandbox rules."
+    },
+    {
+      "type": "p",
+      "content": "C) It requires manual copy-pasting of all agent suggestions into the editor."
+    },
+    {
+      "type": "p",
+      "content": "D) It only allows one user or agent to edit at any given time."
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. antigravity-ide is custom-designed for agentic pair programming, featuring synchronized dual-carets and strict directory-locking sandbox boundaries to keep changes localized and safe."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: What terminal command is used to launch the IDE on a specific workspace directory?"
+    },
+    {
+      "type": "p",
+      "content": "A) `code --agentic-mode`"
+    },
+    {
+      "type": "p",
+      "content": "B) `antigravity-ide --workspace /path/to/dir`"
+    },
+    {
+      "type": "p",
+      "content": "C) `agy launch --ide`"
+    },
+    {
+      "type": "p",
+      "content": "D) `git-agent-run --dir`"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. Use `antigravity-ide --workspace /path/to/dir` to start the workspace editor."
+    }
+  ]
+}

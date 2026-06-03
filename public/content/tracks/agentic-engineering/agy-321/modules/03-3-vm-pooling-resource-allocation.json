@@ -1,0 +1,283 @@
+{
+  "id": "3",
+  "title": "3. VM Pooling & Resource Allocation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Efficient resource utilization is critical when scaling agentic builds. In this module, we will focus on VM pooling rules, which determine how instances are grouped, scaled, and allocated to incoming tasks. Solution Architects must design pooling rules that balance pipeline execution speed with infrastructure costs."
+    },
+    {
+      "type": "h2",
+      "content": "Understanding VM Pools"
+    },
+    {
+      "type": "p",
+      "content": "A VM Pool is a logical collection of virtual machines sharing identical hardware shapes, network settings, and security profiles. Instead of spawning a VM from scratch for every job (which takes minutes), jobs are instantly routed to warm standby instances in the appropriate pool (taking under 3 seconds)."
+    },
+    {
+      "type": "h2",
+      "content": "Defining Pooling Rules"
+    },
+    {
+      "type": "p",
+      "content": "VM pooling rules are codified in a JSON policy document, typically managed by the Pool Manager. The policy outlines the min/max limits, scaling policies, and priority classes. Below is an example pool configuration:"
+    },
+    {
+      "type": "code",
+      "content": "{",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"pool_id\": \"fast-testing-pool\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"display_name\": \"Isolated Fast Testing Pool\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"resource_limits\": {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"machine_type\": \"c2-standard-4\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"cpu_quota\": 64,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"memory_limit_gb\": 256",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "},",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"scaling_policy\": {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"min_warm_instances\": 2,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"max_instances\": 16,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"scale_out_threshold_percent\": 85,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"idle_timeout_seconds\": 300",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "},",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"routing_rules\": {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"allowed_job_tags\": [\"unit-test\", \"lint\", \"security-scan\"],",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"priority_weight\": 100,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"preemption_allowed\": true",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "Resource Quotas & Egress Rules"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Key Design Rule: Preemption mapping. Use preemptible VMs (or spot instances) for pools running quick testing and linting jobs to save up to 80% on compute costs. For deployment pipelines, always use non-preemptible dedicated pools."
+    },
+    {
+      "type": "p",
+      "content": "Architects must also implement strict VPC Firewall rules to protect the internal network from compromised VMs. Below is a gcloud command to create an egress-restricted rule for the Jules VM subnetwork."
+    },
+    {
+      "type": "code",
+      "content": "# Create a VPC firewall rule blocking all egress traffic from Jules VMs except to specific proxies",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "gcloud compute firewall-rules create deny-jules-egress \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--network=\"tridorian-vpc\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--action=\"DENY\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--rules=\"all\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--destination-ranges=\"0.0.0.0/0\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--target-tags=\"jules-sandbox-vm\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--priority=1000",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Allow proxy traffic for dependency installation",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "gcloud compute firewall-rules create allow-jules-proxy-egress \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--network=\"tridorian-vpc\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--action=\"ALLOW\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--rules=\"tcp:443\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--destination-ranges=\"10.128.0.50/32\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--target-tags=\"jules-sandbox-vm\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--priority=900",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** What is the primary purpose of maintaining `min_warm_instances` in a VM pool scaling policy?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To ensure there is always a backup server in case of a crash."
+    },
+    {
+      "type": "p",
+      "content": "- B) To completely eliminate VM boot cold-starts for incoming tasks by keeping instances pre-warmed."
+    },
+    {
+      "type": "p",
+      "content": "- C) To run local workspace validation scripts."
+    },
+    {
+      "type": "p",
+      "content": "- D) To guarantee maximum security isolation."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** Warm instances are already booted and running the Jules agent daemon. When a task is dispatched, the manager can route it to a warm instance immediately, bypassing the guest OS startup latency."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Which firewall configuration strategy is recommended to secure a Jules VM pool that runs third-party untrusted testing scripts?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Open all ports to make debugging easier."
+    },
+    {
+      "type": "p",
+      "content": "- B) Apply a default-deny egress firewall rule, allowing traffic only to designated internal repository proxies."
+    },
+    {
+      "type": "p",
+      "content": "- C) Route all traffic through a public NAT gateway with no restrictions."
+    },
+    {
+      "type": "p",
+      "content": "- D) Disable VPC peering on the main network."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** A default-deny egress rule prevents compromised code from exfiltrating data, scanning internal networks, or establishing reverse shells to unauthorized destinations."
+    }
+  ]
+}

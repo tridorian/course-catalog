@@ -1,0 +1,143 @@
+{
+  "id": "3",
+  "title": "3. Unix File Permissions & System-Level Hardening",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "While SDK-level policies provide a clean, declarative interface for restricting file operations, they are not a complete security boundary. If an agent is granted shell execution privileges via the `run_command` tool, it can execute commands directly on the host operating system. In this scenario, the agent's actions are governed by POSIX-level permissions. To ensure comprehensive safety, you must configure operating system-level restrictions."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> The Shell Bypass Vulnerability. If your agent is configured to run shell commands (`run_command`), the commands execute under your host user context. If the agent executes a shell command like `cat ~/.ssh/id_rsa`, it completely bypasses the Python interpreter and the SDK's file policies. OS-level security permissions are necessary to protect your files."
+    },
+    {
+      "type": "p",
+      "content": "To lock down files at the system level, you must configure ownership and permission settings using UNIX tools like `chown` and `chmod`. This prevents unauthorized processes from reading or writing to sensitive workspace directories."
+    },
+    {
+      "type": "code",
+      "content": "# Create a workspace directory specifically for the agent",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "mkdir -p /var/home/wtg/workspace_agy_project",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Assign ownership to the invoking user and set group ownership to a restricted group",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo chown -R $USER:nogroup /var/home/wtg/workspace_agy_project",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Apply restrictive permissions (Owner: read/write/execute, Group/Others: none)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chmod 700 /var/home/wtg/workspace_agy_project",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Verify that permissions are set correctly",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ls -ld /var/home/wtg/workspace_agy_project",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Expected output shows: drwx------",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "For production environments, the most secure configuration is running the agent within a dedicated, low-privilege operating system user account (e.g., `agy-sandbox`). By executing the agent under a restricted user profile, the host environment protects your primary user account's home folder."
+    },
+    {
+      "type": "code",
+      "content": "# Create a dedicated system user for running the agent",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo useradd -m -s /bin/bash agy-sandbox",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Secure your primary home directory from being read by the sandbox user",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chmod 700 /var/home/wtg",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Test access restrictions as the sandbox user",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo -u agy-sandbox ls -la /var/home/wtg",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Expected output: ls: cannot open directory '/var/home/wtg': Permission denied",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: If an agent is granted access to the `run_command` tool, why are Unix permissions like `chmod 700` required in addition to SDK policies?"
+    },
+    {
+      "type": "p",
+      "content": "A) The SDK policy checks only execute when a file is modified."
+    },
+    {
+      "type": "p",
+      "content": "B) Commands run via the shell bypass the Python SDK file-policy middleware and execute with the permissions of the invoking UNIX user."
+    },
+    {
+      "type": "p",
+      "content": "C) Running commands in the shell requires writing to a temp file in /tmp."
+    },
+    {
+      "type": "p",
+      "content": "D) Unix permissions speed up token processing."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Feedback: When an agent runs a command in the shell, it uses the host operating system's execution pipeline. This pipeline does not check Python-level middleware, meaning the agent can run any command your UNIX user can, unless system-level permissions block it."
+    }
+  ]
+}

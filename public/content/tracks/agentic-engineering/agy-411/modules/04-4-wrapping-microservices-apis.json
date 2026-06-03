@@ -1,0 +1,539 @@
+{
+  "id": "4",
+  "title": "4. Wrapping Microservices & APIs",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "## Exposing APIs and Microservices to Agents"
+    },
+    {
+      "type": "p",
+      "content": "AI agents frequently need to query external microservices, update records in CRMs, or interact with issue-tracking databases. MCP servers can act as proxies to these systems. The server handles authentication, constructs the requests, and returns sanitized data to the agent's context window."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Never send API authentication keys directly to the LLM. Keep authentication layers inside the MCP server process, drawing values from environment variables or vault systems."
+    },
+    {
+      "type": "p",
+      "content": "### Mapping API Endpoints to Tools"
+    },
+    {
+      "type": "p",
+      "content": "The following server maps contact information lookups from an internal CRM REST API to an MCP tool. It handles token propagation, processes API errors, and filters response payloads to optimize token usage:"
+    },
+    {
+      "type": "p",
+      "content": "```typescript"
+    },
+    {
+      "type": "p",
+      "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";"
+    },
+    {
+      "type": "p",
+      "content": "import { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";"
+    },
+    {
+      "type": "p",
+      "content": "import {"
+    },
+    {
+      "type": "p",
+      "content": "CallToolRequestSchema,"
+    },
+    {
+      "type": "p",
+      "content": "ListToolsRequestSchema"
+    },
+    {
+      "type": "p",
+      "content": "} from \"@modelcontextprotocol/sdk/types.js\";"
+    },
+    {
+      "type": "p",
+      "content": "// Fetch the API Token from local environment variables"
+    },
+    {
+      "type": "p",
+      "content": "const CRM_API_KEY = process.env.CRM_API_KEY;"
+    },
+    {
+      "type": "p",
+      "content": "const CRM_API_URL = process.env.CRM_API_URL || \"https://api.crm.internal/v1\";"
+    },
+    {
+      "type": "p",
+      "content": "if (!CRM_API_KEY) {"
+    },
+    {
+      "type": "p",
+      "content": "console.error(\"Warning: CRM_API_KEY environment variable is not defined\");"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "const server = new Server("
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "name: \"crm-gateway-mcp\","
+    },
+    {
+      "type": "p",
+      "content": "version: \"1.0.0\""
+    },
+    {
+      "type": "p",
+      "content": "},"
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "capabilities: {"
+    },
+    {
+      "type": "p",
+      "content": "tools: {}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": ");"
+    },
+    {
+      "type": "p",
+      "content": "// Register CRM tools"
+    },
+    {
+      "type": "p",
+      "content": "server.setRequestHandler(ListToolsRequestSchema, async () => {"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "tools: ["
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "name: \"get_crm_contact\","
+    },
+    {
+      "type": "p",
+      "content": "description: \"Retrieves details of a contact from CRM system by email. Exposes clean telemetry.\","
+    },
+    {
+      "type": "p",
+      "content": "inputSchema: {"
+    },
+    {
+      "type": "p",
+      "content": "type: \"object\","
+    },
+    {
+      "type": "p",
+      "content": "properties: {"
+    },
+    {
+      "type": "p",
+      "content": "email: {"
+    },
+    {
+      "type": "p",
+      "content": "type: \"string\","
+    },
+    {
+      "type": "p",
+      "content": "format: \"email\","
+    },
+    {
+      "type": "p",
+      "content": "description: \"The primary email address of the customer contact\""
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "},"
+    },
+    {
+      "type": "p",
+      "content": "required: [\"email\"]"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "// Execute API request and handle errors"
+    },
+    {
+      "type": "p",
+      "content": "server.setRequestHandler(CallToolRequestSchema, async (request) => {"
+    },
+    {
+      "type": "p",
+      "content": "if (request.params.name === \"get_crm_contact\") {"
+    },
+    {
+      "type": "p",
+      "content": "const email = request.params.arguments?.email;"
+    },
+    {
+      "type": "p",
+      "content": "try {"
+    },
+    {
+      "type": "p",
+      "content": "const response = await fetch(`${CRM_API_URL}/contacts?email=${encodeURIComponent(String(email))}`, {"
+    },
+    {
+      "type": "p",
+      "content": "method: \"GET\","
+    },
+    {
+      "type": "p",
+      "content": "headers: {"
+    },
+    {
+      "type": "p",
+      "content": "\"Authorization\": `Bearer ${CRM_API_KEY}`,"
+    },
+    {
+      "type": "p",
+      "content": "\"Accept\": \"application/json\","
+    },
+    {
+      "type": "p",
+      "content": "\"User-Agent\": \"agy-mcp-connector/1.0\""
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "// Handle common HTTP error statuses robustly"
+    },
+    {
+      "type": "p",
+      "content": "if (response.status === 401) {"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "isError: true,"
+    },
+    {
+      "type": "p",
+      "content": "content: [{ type: \"text\", text: \"Integration Authentication Error: Invalid CRM API Key configured.\" }]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "if (response.status === 404) {"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "isError: true,"
+    },
+    {
+      "type": "p",
+      "content": "content: [{ type: \"text\", text: `Contact record with email [${email}] not found in CRM.` }]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "if (!response.ok) {"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "isError: true,"
+    },
+    {
+      "type": "p",
+      "content": "content: [{ type: \"text\", text: `CRM API returned an error: Code ${response.status}.` }]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "const rawData = await response.json();"
+    },
+    {
+      "type": "p",
+      "content": "// Sanitizing and filtering fields to optimize LLM Context usage"
+    },
+    {
+      "type": "p",
+      "content": "const sanitizedContact = {"
+    },
+    {
+      "type": "p",
+      "content": "id: rawData.id,"
+    },
+    {
+      "type": "p",
+      "content": "name: rawData.display_name,"
+    },
+    {
+      "type": "p",
+      "content": "company: rawData.company_name,"
+    },
+    {
+      "type": "p",
+      "content": "lifecycle_stage: rawData.stage,"
+    },
+    {
+      "type": "p",
+      "content": "last_contact_date: rawData.last_interaction"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "content: ["
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "type: \"text\","
+    },
+    {
+      "type": "p",
+      "content": "text: JSON.stringify(sanitizedContact, null, 2)"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "} catch (networkError) {"
+    },
+    {
+      "type": "p",
+      "content": "console.error(\"Network request failed:\", networkError);"
+    },
+    {
+      "type": "p",
+      "content": "return {"
+    },
+    {
+      "type": "p",
+      "content": "isError: true,"
+    },
+    {
+      "type": "p",
+      "content": "content: [{ type: \"text\", text: \"Failed to contact CRM API Gateway. Check host resolution and routing.\" }]"
+    },
+    {
+      "type": "p",
+      "content": "};"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "throw new Error(\"Tool not found\");"
+    },
+    {
+      "type": "p",
+      "content": "});"
+    },
+    {
+      "type": "p",
+      "content": "async function main() {"
+    },
+    {
+      "type": "p",
+      "content": "const transport = new StdioServerTransport();"
+    },
+    {
+      "type": "p",
+      "content": "await server.connect(transport);"
+    },
+    {
+      "type": "p",
+      "content": "console.error(\"CRM Gateway MCP Server listening on stdio\");"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "main().catch(console.error);"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "### Context Windows Throttling & Truncation"
+    },
+    {
+      "type": "p",
+      "content": "When wrapping APIs, you must address constraints like API rate limits (HTTP 429) and context window limitations. If a remote API returns a massive payload (such as log outputs containing thousands of lines), the MCP server should parse and truncate the data to fit within the agent's context window. Always strip fields that do not relate to the agent's intent."
+    },
+    {
+      "type": "p",
+      "content": "## Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: In a secure enterprise environment, where should the API keys/auth tokens for a target microservice be stored?"
+    },
+    {
+      "type": "p",
+      "content": "A. Embedded inside the prompt parameters of the client application."
+    },
+    {
+      "type": "p",
+      "content": "B. Inside environment variables or secret vaults accessible only by the MCP server."
+    },
+    {
+      "type": "p",
+      "content": "C. Passed dynamically within the user inputs during execution."
+    },
+    {
+      "type": "p",
+      "content": "D. Saved inside git-tracked JSON configuration files."
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: B is correct. Secrets should always be stored in environment variables or specialized vaults (like GCP Secret Manager) to keep them away from the client application and out of the LLM context window."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What is the benefit of filtering and rewriting raw API JSON responses before sending them back to the client?"
+    },
+    {
+      "type": "p",
+      "content": "A. It ensures the API key remains encrypted during transport."
+    },
+    {
+      "type": "p",
+      "content": "B. It converts the data to JSON-RPC automatically."
+    },
+    {
+      "type": "p",
+      "content": "C. It minimizes token consumption by the model and prevents context window overflow."
+    },
+    {
+      "type": "p",
+      "content": "D. It bypasses HTTP CORS policies."
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: C is correct. Stripping irrelevant properties from large JSON payloads reduces the token load on the LLM, maintaining low latency and keeping resource usage within limits."
+    }
+  ]
+}

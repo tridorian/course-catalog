@@ -1,0 +1,147 @@
+{
+  "id": "3",
+  "title": "3. The Standalone Visual Board (antigravity) — Asynchronous Missions",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Visualizing Asynchronous Agent Workflows"
+    },
+    {
+      "type": "p",
+      "content": "The antigravity visual board is a desktop and web application designed for complex, asynchronous projects. Instead of monitoring a terminal stream line-by-line, the visual board uses a card-based interface (similar to Kanban) where users can create, queue, and dispatch tasks to multiple agents running in parallel."
+    },
+    {
+      "type": "h3",
+      "content": "Mission Cards and Agent Lanes"
+    },
+    {
+      "type": "p",
+      "content": "In antigravity, tasks are represented as 'Mission Cards'. Each card contains a prompt, execution parameters, maximum token allocations, and active output files. Cards move through status lanes (Queued, Running, Completed, Failed) as the backend engine executes the tasks."
+    },
+    {
+      "type": "p",
+      "content": "- Queued: The task is waiting for an engine execution slot or credential validation."
+    },
+    {
+      "type": "p",
+      "content": "- Running: The agent is active. Expanding the card displays real-time execution logs and terminal output streams."
+    },
+    {
+      "type": "p",
+      "content": "- Completed: The task finished successfully. The card displays a summary of the output files and direct links to the generated documents."
+    },
+    {
+      "type": "p",
+      "content": "- Failed: The task was interrupted by a compile error, safety violation, or budget limit. Detailed stack traces are displayed on the card."
+    },
+    {
+      "type": "h3",
+      "content": "Live Browser Automation & Playback Tapes"
+    },
+    {
+      "type": "p",
+      "content": "One of the most powerful capabilities of the visual board is its integrated browser viewport. When an agent is tasked with researching or scraping websites, the app spawns a headless browser session (via Playwright) and streams the visual output directly onto the dashboard. You can watch the agent click links, scroll pages, and compile data tables."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Diagnostics: If a web research task fails, you can open the 'Playback Tape' viewer from the card menu. This displays a frame-by-frame video of the browser's session, which is saved locally under .gemini/recordings/, helping you debug dynamic elements or login blockages."
+    },
+    {
+      "type": "h3",
+      "content": "Step-by-Step Lab: Launching a Visual Research Card"
+    },
+    {
+      "type": "p",
+      "content": "- Step 1: Launch the antigravity standalone application from your terminal or desktop environment."
+    },
+    {
+      "type": "p",
+      "content": "- Step 2: Connect the board to your local project directory by clicking 'Open Workspace' in the top toolbar."
+    },
+    {
+      "type": "p",
+      "content": "- Step 3: Click 'New Mission' in the top-right corner to open the card creator."
+    },
+    {
+      "type": "p",
+      "content": "- Step 4: Type your prompt: 'Search the web for the latest three security advisories regarding Python flask libraries, compile them, and output to advisories.md'."
+    },
+    {
+      "type": "p",
+      "content": "- Step 5: Under execution bounds, limit maximum tokens to 100,000 and select the 'Safe Web Search' toolset."
+    },
+    {
+      "type": "p",
+      "content": "- Step 6: Click 'Launch'. Observe the card moving into the 'Running' lane."
+    },
+    {
+      "type": "p",
+      "content": "- Step 7: Click on the running card to watch the live console logs. Observe the browser viewport opening as the agent navigates search portals."
+    },
+    {
+      "type": "p",
+      "content": "- Step 8: Once complete, click the link to advisories.md displayed inside the completed card to view the final compiled document."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Performance Impact: Running multiple concurrent visual browser playbacks consumes significant RAM and GPU resources. Ensure your local workstation has at least 16GB of RAM before spinning up more than three concurrent browser agents."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Review your comprehension of the standalone visual board features:"
+    },
+    {
+      "type": "p",
+      "content": "- Question 1: What is the primary purpose of the 'Playback Tape' in the antigravity visual board?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To play background music while the agent is running tasks."
+    },
+    {
+      "type": "p",
+      "content": "- B) To record and inspect the frame-by-frame visual browser actions of the agent for debugging and auditing."
+    },
+    {
+      "type": "p",
+      "content": "- C) To compile markdown text into slides."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The Playback Tape is a visual log of the browser automation session, allowing developers to audit how an agent interacted with websites."
+    },
+    {
+      "type": "p",
+      "content": "- Question 2: Which view paradigm does the standalone visual board use to manage multiple agent tasks?"
+    },
+    {
+      "type": "p",
+      "content": "- A) A code editor pane with side-by-side terminal tabs."
+    },
+    {
+      "type": "p",
+      "content": "- B) A command-line script editor with pipe structures."
+    },
+    {
+      "type": "p",
+      "content": "- C) A card-based board (Kanban) with status lanes."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option C is correct. The standalone board organizes tasks as Mission Cards that move through Queued, Running, Completed, and Failed lanes."
+    }
+  ]
+}

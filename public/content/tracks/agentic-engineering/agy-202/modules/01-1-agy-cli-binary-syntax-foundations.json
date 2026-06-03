@@ -1,0 +1,170 @@
+{
+  "id": "1",
+  "title": "1. agy CLI Binary & Syntax Foundations",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [1. agy CLI Binary & Syntax Foundations]"
+    },
+    {
+      "type": "h2",
+      "content": "Core Command Line Interface Architecture"
+    },
+    {
+      "type": "p",
+      "content": "The agy command line client is a compiled binary optimized for speed, piping, and integration into custom scripts. In this module, we will cover the core command structure, subcommand execution models, and how to verify environment readiness before triggering agentic runs."
+    },
+    {
+      "type": "h3",
+      "content": "Standard Command Syntax and Subcommands"
+    },
+    {
+      "type": "p",
+      "content": "The basic CLI command structure follows standard POSIX patterns: subcommands define the primary action, followed by local flags that customize behavior. The three most common commands you will use are:"
+    },
+    {
+      "type": "p",
+      "content": "- agy status: Displays the status of the local daemon connection, active cloud credentials (ADC), and target directories."
+    },
+    {
+      "type": "p",
+      "content": "- agy run --prompt \"<instruction>\": Executes a specific developer task or text processing job within your active workspace."
+    },
+    {
+      "type": "p",
+      "content": "- agy verify: Analyzes your current folder paths to check for the existence of required governance policies (.gemini.md) and verify file read/write permissions."
+    },
+    {
+      "type": "code",
+      "content": "# Check the version and installation details of the binary",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy --version",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Retrieve the state of the active workspace and credentials",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy status",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Execute a simple directory test run",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy run --prompt \"Verify that the build environment matches standard requirements.\"",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Global Flags and Precedence Rules"
+    },
+    {
+      "type": "p",
+      "content": "Global flags customize how the agent executes your tasks. The CLI evaluates inputs in the following order of precedence: explicit command-line flags override workspace environment variables, which override project configuration files."
+    },
+    {
+      "type": "p",
+      "content": "- -d, --workspace-dir: Overrides the target path for agent operations. If not supplied, it defaults to the current working directory."
+    },
+    {
+      "type": "p",
+      "content": "- --auto-approve: Bypasses the confirmation prompt before executing scripts or applying file modifications. Use with extreme care."
+    },
+    {
+      "type": "p",
+      "content": "- --verbose: Prints diagnostic tracing logs, daemon communications, and raw model token metrics to stderr."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Design Pattern: Always use the -d flag when executing commands from external directories. This ensures that the agent respects the boundaries of your target workspace regardless of where your active shell is located."
+    },
+    {
+      "type": "code",
+      "content": "# Setting environment variables for automated scripts",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "export AGY_TOKEN=\"agy_tkn_8f37b92cd\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "export AGY_WORKSPACE=\"/var/home/wtg/Repos/project-sandbox\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Override target directory using the -d flag",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy run -d /var/home/wtg/Repos/secure-project -p \"Document the configuration files\" --verbose",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Answer the following questions to verify your comprehension of CLI basics:"
+    },
+    {
+      "type": "p",
+      "content": "- Question 1: Which of the following commands correctly executes a task while providing a custom path override?"
+    },
+    {
+      "type": "p",
+      "content": "- A) agy start -p \"Check config\" --path /workspace"
+    },
+    {
+      "type": "p",
+      "content": "- B) agy run -d /workspace -p \"Check config\""
+    },
+    {
+      "type": "p",
+      "content": "- C) agy run --workspace-dir /workspace --task \"Check config\""
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The standard run subcommand uses the -d (or --workspace-dir) flag for directory overrides, and -p (or --prompt) for task instructions."
+    },
+    {
+      "type": "p",
+      "content": "- Question 2: What is the risk of using the --auto-approve flag outside of container sandboxes?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The connection to the authentication daemon will fail."
+    },
+    {
+      "type": "p",
+      "content": "- B) The agent can read and modify files, run scripts, and execute commands on your workstation without prompting you for confirmation."
+    },
+    {
+      "type": "p",
+      "content": "- C) The agent will execute files in read-only mode, ignoring your instructions."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Without the user prompt approval gate, the agent can execute changes instantly on your workstation. This makes a sandbox mandatory when auto-approve is active."
+    }
+  ]
+}

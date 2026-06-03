@@ -1,0 +1,218 @@
+{
+  "id": "4",
+  "title": "4. Folder Firewalls: Protecting Sensitive Personal Directories",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "A 'Folder Firewall' is a design pattern in the AGY SDK that uses custom policy predicates to block operations on paths containing sensitive keywords or pointing to system directories. By declaring specific block rules, you prevent the agent from reading private credentials or overwriting critical system files."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Dotfile and Config Security. Agents often attempt to read or write dotfiles (like `.bashrc`, `.zshrc`, or `.gitconfig`) to modify environment paths or configure utilities. However, modifying these files can introduce security risks, such as command hijacking or key leaks. These files should be explicitly blacklisted."
+    },
+    {
+      "type": "p",
+      "content": "To build a folder firewall in the AGY SDK, you can use the `when` parameter of a policy rule. This parameter takes a predicate function that inspects the arguments of a tool call (such as the target path) and applies restrictions if a match is found."
+    },
+    {
+      "type": "code",
+      "content": "from google.antigravity.hooks import policy",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Define the predicate to check for sensitive folders and files",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "def is_sensitive_target(args):",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Retrieve path argument from different tool schemas",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "path = args.get(\"AbsolutePath\") or args.get(\"TargetFile\") or args.get(\"SearchPath\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if not path:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "return False",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "path_str = str(path).lower()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Sensitive tokens to match and block",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "blacklist = [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\".ssh\", \"id_rsa\", \"id_dsa\", \"id_ed25519\", \"authorized_keys\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\".bashrc\", \".zshrc\", \".bash_history\", \".bash_profile\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\".aws\", \".gcloud_config\", \".gnupg\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"desktop\", \"documents\", \"/etc\", \"/var/run\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "return any(item in path_str for item in blacklist)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Apply policy rules with the predicate check",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "policies = [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "policy.deny(\"view_file\", when=is_sensitive_target, name=\"block_sensitive_reads\"),",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "policy.deny(\"edit_file\", when=is_sensitive_target, name=\"block_sensitive_writes\"),",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "policy.deny(\"create_file\", when=is_sensitive_target, name=\"block_sensitive_creates\"),",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "policy.deny(\"run_command\", when=lambda args: is_sensitive_target(args), name=\"block_shell_traversal\"),",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "policy.workspace_only([\"/var/home/wtg/workspace_agy_project\"])",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "]",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "In addition to custom policy predicates, you should restrict permissions on your SSH folder directly on the host operating system. This provides defense-in-depth protection for your credentials."
+    },
+    {
+      "type": "code",
+      "content": "# Secure the SSH directory and key files",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chmod 700 ~/.ssh",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chmod 600 ~/.ssh/id_*",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chmod 644 ~/.ssh/authorized_keys",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chmod 644 ~/.ssh/known_hosts",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Confirm your configurations are protected",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ls -la ~/.ssh",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the purpose of the `when` parameter in an AGY policy rule?"
+    },
+    {
+      "type": "p",
+      "content": "A) It configures a time-based scheduler for tool availability."
+    },
+    {
+      "type": "p",
+      "content": "B) It defines a predicate function that inspects tool arguments, allowing you to conditionally apply the policy rule."
+    },
+    {
+      "type": "p",
+      "content": "C) It determines which model is used to execute the tool."
+    },
+    {
+      "type": "p",
+      "content": "D) It specifies the order in which policies are evaluated."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Feedback: The `when` parameter accepts a predicate function that receives the tool's arguments as input. If the function returns True, the policy rule is triggered, allowing for conditional blocks based on specific target directories or command names."
+    }
+  ]
+}

@@ -3,8 +3,28 @@
   "modules": [
     {
       "id": "1",
-      "title": "1. Course Introduction",
-      "file": "modules/01-course-introduction.json"
+      "title": "1. Introduction to antigravity-ide & Setup",
+      "file": "modules/01-1-introduction-to-antigravity-ide-setup.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Workspace Markdown Navigation & Semantic Indexing",
+      "file": "modules/02-2-workspace-markdown-navigation-semantic-indexing.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Synchronous Side-by-Side Co-Authoring",
+      "file": "modules/03-3-synchronous-side-by-side-co-authoring.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Live Text Rewriting, Refactoring, & Code Co-Pilotry",
+      "file": "modules/04-4-live-text-rewriting-refactoring-code-co-pilotry.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Advanced Editing Operations & Capstone Prep",
+      "file": "modules/05-5-advanced-editing-operations-capstone-prep.json"
     }
   ]
 }

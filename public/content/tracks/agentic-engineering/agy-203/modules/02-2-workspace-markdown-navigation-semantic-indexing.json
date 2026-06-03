@@ -1,0 +1,172 @@
+{
+  "id": "2",
+  "title": "2. Workspace Markdown Navigation & Semantic Indexing",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "The Semantic Indexing Pipeline"
+    },
+    {
+      "type": "p",
+      "content": "When you open a workspace directory, antigravity-ide immediately runs a semantic indexing pipeline. This local process builds a lightweight knowledge graph of all text, markdown, and code files. By extracting structural elements (such as Markdown headings, table structures, and code function definitions), the agent sidecar can answer questions, find code blocks, and locate references using semantic search instead of simple keyword grep."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> High CPU Warn: Large build output directories (such as node_modules, dist, or .git folders) can trigger indexing loops. You must configure exclusions in the workspace settings to prevent the semantic parser from scanning compiled build assets."
+    },
+    {
+      "type": "code",
+      "content": "{",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"search.exclude\": {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"**/node_modules\": true,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"**/dist\": true,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"**/.git\": true",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "},",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"antigravity.index.depth\": 3,",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"antigravity.index.include\": [\"*.md\", \"*.py\", \"*.js\", \"*.json\"]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Markdown Navigation Capabilities"
+    },
+    {
+      "type": "p",
+      "content": "Within an active workspace, you can navigate documents and direct the agent using standardized markdown syntax and specialized URI patterns. These patterns let you cite specific files and lines inside your prompt. The table below outlines how navigation patterns resolve within the IDE:"
+    },
+    {
+      "type": "p",
+      "content": "| Navigation Feature | Markdown Syntax / Pattern | antigravity-ide Behavior |"
+    },
+    {
+      "type": "p",
+      "content": "| :--- | :--- | :--- |"
+    },
+    {
+      "type": "p",
+      "content": "| **Workspace Link** | `[Link Text](file:///absolute/path/to/file.md)` | Direct navigation to the target file; opens tab instantly. |"
+    },
+    {
+      "type": "p",
+      "content": "| **Line-Range Link** | `[Lines 10-25](file:///path/to/file.py#L10-L25)` | Opens file and highlights specific lines for agent reference. |"
+    },
+    {
+      "type": "p",
+      "content": "| **Rule Anchor** | `[Rule Key](rule://.gemini.md#security-rules)` | Resolves rule definition in the workspace security dictionary. |"
+    },
+    {
+      "type": "p",
+      "content": "| **Semantic Mention** | `@file:README.md` | Passes the file contents directly into the agent's context. |"
+    },
+    {
+      "type": "h3",
+      "content": "Co-Authoring Guide: Linking Files and References"
+    },
+    {
+      "type": "p",
+      "content": "When guiding the agent through a multi-file workspace, follow these best practices to maintain reference parity:"
+    },
+    {
+      "type": "p",
+      "content": "- Always write out relative paths explicitly: use './docs/architecture.md' rather than just 'architecture.md' to assist the indexing engine."
+    },
+    {
+      "type": "p",
+      "content": "- When referencing a bug or function, use the line-range hash anchor format (e.g. #L45-L60) to highlight the relevant code segment for the agent."
+    },
+    {
+      "type": "p",
+      "content": "- Mention workspace rules files using `@file:.gemini.md` in the chat sidecar to verify current compliance boundaries."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding Quiz"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Which markdown link syntax is recognized by antigravity-ide to jump to lines 50 to 75 of a script?"
+    },
+    {
+      "type": "p",
+      "content": "A) `[Script](script.py?lines=50-75)`"
+    },
+    {
+      "type": "p",
+      "content": "B) `[Script](file:///absolute/path/to/script.py#L50-L75)`"
+    },
+    {
+      "type": "p",
+      "content": "C) `[Script](file://script.py::50::75)`"
+    },
+    {
+      "type": "p",
+      "content": "D) `[Script](line-range:50-75:script.py)`"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. The IDE uses standard file:// URI syntax followed by the `#L<start>-L<end>` hash anchor to direct focus and highlight specific line ranges."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: How can you prevent antigravity-ide from indexing massive build directories like `node_modules`?"
+    },
+    {
+      "type": "p",
+      "content": "A) By deleting the folders completely."
+    },
+    {
+      "type": "p",
+      "content": "B) By configuring exclusions in the workspace configuration JSON under `search.exclude`."
+    },
+    {
+      "type": "p",
+      "content": "C) By running the command `agy stop-index`."
+    },
+    {
+      "type": "p",
+      "content": "D) By hiding the files in your OS file manager."
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. Adding folders to `search.exclude` in the configuration ensures the semantic indexing engine skips those directories."
+    }
+  ]
+}

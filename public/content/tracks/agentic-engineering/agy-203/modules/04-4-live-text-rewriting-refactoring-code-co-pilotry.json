@@ -1,0 +1,186 @@
+{
+  "id": "4",
+  "title": "4. Live Text Rewriting, Refactoring, & Code Co-Pilotry",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Minimal Change Engineering in Refactoring"
+    },
+    {
+      "type": "p",
+      "content": "Code refactoring and text rewriting require surgical precision. In standard AI integrations, the assistant often outputs an entire file, which consumes output tokens, increases latency, and risks introducing errors in unrelated parts of the file. antigravity-ide implements a design pattern called Minimal Change Engineering. When refactoring code or rewriting text, the engine targets specific lines and issues a minimal diff patch using localized tools."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Overwriting Warning: Never use the whole-file write_to_file tool on existing codebase files unless you explicitly intend to replace the entire document. Doing so will wipe out local variables, custom imports, and untracked comments."
+    },
+    {
+      "type": "h3",
+      "content": "Refactoring a Python Script"
+    },
+    {
+      "type": "p",
+      "content": "Let's look at a practical example where a developer wants to refactor an inefficient calculation function. The developer highlights the target block inside `src/utils.py` and initiates a refactoring prompt. Here is the original script file:"
+    },
+    {
+      "type": "code",
+      "content": "# src/utils.py",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "import os",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "import sys",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "def calculate_totals(hours_list, rate):",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Old inefficient loop to refactor",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "total = 0",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "for h in hours_list:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "total += h * rate",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "return total",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "def print_report(total_amount):",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Total Invoice Amount: ${total_amount:.2f}\")",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "The developer issues the command in the sidecar: `/refactor calculate_totals using list comprehension and add type hinting.` The agent will target lines 4-9 and perform a single contiguous edit using the `replace_file_content` tool. Below is the comparative matrix of replacement strategies used in the IDE:"
+    },
+    {
+      "type": "p",
+      "content": "| Edit Type | Tool Used | Best Suited For | Risk Level |"
+    },
+    {
+      "type": "p",
+      "content": "| :--- | :--- | :--- | :--- |"
+    },
+    {
+      "type": "p",
+      "content": "| **Contiguous Edit** | `replace_file_content` | Updating a single function or a continuous paragraph of text. | Low (easy to review) |"
+    },
+    {
+      "type": "p",
+      "content": "| **Non-Contiguous Edits** | `multi_replace_file_content` | Modifying multiple distinct functions or lines across a large file. | Medium (verify imports/variables) |"
+    },
+    {
+      "type": "p",
+      "content": "| **Whole File Overwrite** | `write_to_file` | Creating a brand new file or complete template rewrite. | High (overwrites existing work) |"
+    },
+    {
+      "type": "h3",
+      "content": "Co-Authoring Guide: Refactoring Safety Controls"
+    },
+    {
+      "type": "p",
+      "content": "To safely execute a code refactoring task, follow these guidelines:"
+    },
+    {
+      "type": "p",
+      "content": "- Select only the lines of code that need refactoring to narrow the agent's target block."
+    },
+    {
+      "type": "p",
+      "content": "- Verify that the agent identifies the correct line range in the proposed replacement chunk."
+    },
+    {
+      "type": "p",
+      "content": "- Run local tests (e.g. `pytest` or `npm run test`) in the integrated terminal to verify execution logic."
+    },
+    {
+      "type": "p",
+      "content": "- If tests pass, accept the changes; if they fail, revert using Ctrl+Backspace and revise your instruction."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding Quiz"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Which tool should the agent use to modify three separate, non-adjacent functions in a Python file?"
+    },
+    {
+      "type": "p",
+      "content": "A) `replace_file_content`"
+    },
+    {
+      "type": "p",
+      "content": "B) `multi_replace_file_content`"
+    },
+    {
+      "type": "p",
+      "content": "C) `write_to_file`"
+    },
+    {
+      "type": "p",
+      "content": "D) `git-commit`"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. `multi_replace_file_content` is specifically designed to perform multiple, non-adjacent edits in a single call, preventing file lock conflicts and maintaining revision consistency."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: What is the primary purpose of the \"Minimal Change Engineering\" design pattern?"
+    },
+    {
+      "type": "p",
+      "content": "A) To make sure the agent rewrite is as large as possible."
+    },
+    {
+      "type": "p",
+      "content": "B) To minimize edits to only what is requested, preventing scope creep and reducing the risk of introducing bugs."
+    },
+    {
+      "type": "p",
+      "content": "C) To force developers to write more comments in their code."
+    },
+    {
+      "type": "p",
+      "content": "D) To avoid running compiler tests."
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. Minimal Change Engineering focuses on minimal-viable diffs to preserve existing logic, prevent unrelated changes, and reduce bugs."
+    }
+  ]
+}

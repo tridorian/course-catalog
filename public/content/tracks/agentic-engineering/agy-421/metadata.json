@@ -1,9 +1,24 @@
 {
-  "course_id": "AGY-421",
+  "course_id": "agy-421",
   "title": "AGY-421: Enterprise Governance & Rules (L400)",
   "version": "0.1.0",
   "author": "Tridorian Labs & Google Cloud",
-  "target_audience": "Lead Architects & Delivery Directors",
-  "description": "Codifying compliance guidelines, security boundaries, and architectural patterns inside local workspace .gemini.md rules.",
-  "status": "Draft"
+  "description": "Welcome to AGY-421: Enterprise Governance & Rules. This L400 course is designed exclusively for Lead Architects and Delivery Directors who are responsible for establishing, monitoring, and enforcing development standards, compliance frameworks, and security boundaries across autonomous agentic teams. Throughout this course, you will learn to codify enterprise compliance, configure local workspace firewalls using .gemini.md, restrict execution commands, design multi-agent workflows, verify architectural patterns, and integrate governance audits directly into CI/CD pipelines to prevent rule drift and maintain immutable security boundaries.",
+  "features": [
+    {
+      "icon": "🛡️",
+      "title": "**Hardened Security Boundaries**",
+      "description": "Define strict firewalls, path locks, and never-touch files (.env, private keys) that agents cannot read or modify."
+    },
+    {
+      "icon": "🏗️",
+      "title": "**Architectural Enforcement**",
+      "description": "Codify architectural patterns (Hexagonal, DDD) and enforce strict test-driven development (TDD) validation cycles using Jules VM pools."
+    },
+    {
+      "icon": "🤖",
+      "title": "**Automated Governance & Auditing**",
+      "description": "Build GitHub Actions CI/CD checks and write drift detection scripts to ensure global rules remain unmodified and active across all repositories."
+    }
+  ]
 }

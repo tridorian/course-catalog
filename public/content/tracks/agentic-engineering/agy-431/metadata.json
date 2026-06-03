@@ -1,9 +1,24 @@
 {
-  "course_id": "AGY-431",
+  "course_id": "agy-431",
   "title": "AGY-431: Scale & Immutable DevOps (L400)",
   "version": "0.1.0",
   "author": "Tridorian Labs & Google Cloud",
-  "target_audience": "DevOps Leads & Platform Engineers",
-  "description": "Deploying agy-box images to remote cloud VMs, setting up private container registries under corporate proxies, and running headless pipeline runs.",
-  "status": "Draft"
+  "description": "An advanced, hands-on masterclass for DevOps Leads and Platform Engineers. Master the architecture, deployment, and orchestration of containerized Google Antigravity environments (agy-box) across remote cloud VMs. Learn how to configure private container registries behind restrictive corporate proxies, manage TLS/SSL certificate injection, and implement secure headless CI/CD execution loops with strict policy enforcement.",
+  "features": [
+    {
+      "icon": "🛡️",
+      "title": "Immutable Sandboxing",
+      "description": "Establish bulletproof isolation for autonomous agents using hardened OCI agy-box containers with read-only filesystems and capability drops."
+    },
+    {
+      "icon": "🌐",
+      "title": "Enterprise Proxy Integration",
+      "description": "Master certificate injection, HTTP/HTTPS proxy routing, and authentication bypass rules for air-gapped corporate environments."
+    },
+    {
+      "icon": "🤖",
+      "title": "Headless CI/CD Orchestration",
+      "description": "Build automated, non-interactive execution pipelines with the agy CLI, custom timeout handlers, and structural status checks."
+    }
+  ]
 }

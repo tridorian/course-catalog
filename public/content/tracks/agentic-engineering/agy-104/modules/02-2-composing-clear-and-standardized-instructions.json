@@ -1,0 +1,103 @@
+{
+  "id": "2",
+  "title": "2. Composing Clear and Standardized Instructions",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Agents are highly sensitive to prompt structure, context delimiters, and target outputs. Composing clear instructions is key to preventing agents from going down infinite loops or misinterpreting goals. The main tool for configuring local workspace boundaries and instructions is the local rule file, typically called `.gemini.md` or a customized `instructions.md` in the root workspace."
+    },
+    {
+      "type": "p",
+      "content": "When formatting instructions, you must define: (1) The precise objectives of the task, (2) The directory boundaries (the file system sandbox), (3) Allowed vs. prohibited CLI tools, and (4) The exact output expectations. Below is an example of a standardized workspace instruction file."
+    },
+    {
+      "type": "p",
+      "content": "```markdown"
+    },
+    {
+      "type": "p",
+      "content": "# Workspace Execution Rules & Guidelines"
+    },
+    {
+      "type": "p",
+      "content": "## 1. Directory Boundaries"
+    },
+    {
+      "type": "p",
+      "content": "- Primary Workspace: `/var/home/wtg/Repos/project-sandbox`"
+    },
+    {
+      "type": "p",
+      "content": "- PROHIBITED DIRECTORIES: Do NOT access directories outside the workspace (e.g., `/etc`, `/tmp`, `/home/wtg/.ssh`)."
+    },
+    {
+      "type": "p",
+      "content": "## 2. Command Permissions"
+    },
+    {
+      "type": "p",
+      "content": "- ALLOWED: `npm run build`, `npm test`, `git status`, `git diff`"
+    },
+    {
+      "type": "p",
+      "content": "- PROHIBITED: `rm -rf` on parent directories, `curl` executing remote scripts, `chmod` modifications."
+    },
+    {
+      "type": "p",
+      "content": "## 3. Execution Verification"
+    },
+    {
+      "type": "p",
+      "content": "- After making modifications to any code, the agent MUST run the test suite using `npm test` and output the test summary before requesting completion."
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "By establishing these boundaries in a structured format, the agent parses the rules as a system instruction before every step, reducing the risk of security violations or out-of-scope work."
+    },
+    {
+      "type": "p",
+      "content": "## Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Why is it critical to explicitly specify prohibited directories in workspace instructions?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It speeds up the agent's computation by narrowing the search space"
+    },
+    {
+      "type": "p",
+      "content": "- B) It prevents the agent from reading or writing sensitive files (like SSH keys or system configurations) if it encounters a path traversal bug"
+    },
+    {
+      "type": "p",
+      "content": "- C) It is a hard requirement for the agent to boot up"
+    },
+    {
+      "type": "p",
+      "content": "- D) It enables the agent to automatically gain administrator permissions"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> **Correct Answer: B**"
+    },
+    {
+      "type": "p",
+      "content": ">"
+    },
+    {
+      "type": "p",
+      "content": "> **Immediate Feedback:** Defining explicit boundary rules, such as folder exclusion lists, establishes a clear path-traversal barrier. If the agent is instructed to write files, it will check these rules to verify it does not access or overwrite sensitive personal configuration paths."
+    }
+  ]
+}

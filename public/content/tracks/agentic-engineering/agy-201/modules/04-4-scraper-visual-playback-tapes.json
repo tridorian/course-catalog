@@ -1,0 +1,264 @@
+{
+  "id": "4",
+  "title": "4. Scraper Visual Playback Tapes",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [4. Scraper Visual Playback Tapes]"
+    },
+    {
+      "type": "h2",
+      "content": "The Architecture of Visual Scraper Automations"
+    },
+    {
+      "type": "p",
+      "content": "One of the most powerful features of the antigravity standalone application is the ability to run browser automation tasks and watch them execute in real-time. When an agent is tasked with scraping a website, it leverages the local Playwright integration to launch a virtual browser."
+    },
+    {
+      "type": "p",
+      "content": "The browser runs in \"Headful Mode\" inside the visual interface, meaning that the agent's actions (navigating pages, clicking buttons, extracting tables) are mirrored inside the Playback Viewport. Additionally, the visual board records these actions as \"Visual Playback Tapes\" (represented as .webm screen recordings and step-by-step screenshots) stored inside the `.gemini/state/tapes/` folder."
+    },
+    {
+      "type": "h3",
+      "content": "Analyzing the Playback Viewport & Selector Debugging"
+    },
+    {
+      "type": "p",
+      "content": "For analysts and SAs, tracking these tapes is essential for debugging scraping runs. If a website uses dynamic loading (single-page applications like React or Angular) or contains bot-detection firewalls, the agent may get stuck or fail to extract the correct selector."
+    },
+    {
+      "type": "p",
+      "content": "By opening the visual playback tape, you can step through the agent's actions second-by-second to find precisely where the script failed."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> When debugging, use the Playback control buttons (Pause, Play, Step Forward, Step Backward) located beneath the Playback Viewport to isolate the moment of failure."
+    },
+    {
+      "type": "h3",
+      "content": "Playwright Scraper Configuration"
+    },
+    {
+      "type": "p",
+      "content": "Below is a robust Python script config that the agent executes to scrape dynamic elements. Note the custom viewport sizes, user agents, and network idle waits used to bypass basic scraping blocks:"
+    },
+    {
+      "type": "code",
+      "content": "import asyncio",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from playwright.async_api import async_playwright",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async def run_scraper(target_url, output_path):",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async with async_playwright() as p:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Launch headful browser to feed the Playback Viewport",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "browser = await p.chromium.launch(headless=False)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "context = await browser.new_context(",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "viewport={'width': 1280, 'height': 800},",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": ")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "page = await context.new_page()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Navigating to {target_url}...\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await page.goto(target_url, wait_until='networkidle')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Wait for the table to render dynamically",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await page.wait_for_selector('table.pricing-matrix', timeout=5000)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "table_html = await page.locator('table.pricing-matrix').inner_html()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "with open(output_path, 'w') as f:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "f.write(table_html)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Successfully saved data to {output_path}\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "except Exception as e:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Selector timeout failed: {e}\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Save screenshot for visual tape tracking",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await page.screenshot(path='./data/error_screenshot.png')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "raise e",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "finally:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await browser.close()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Run the scraper loop",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "asyncio.run(run_scraper('https://mock-competitor.com/pricing', './data/scraped_table.html'))",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Guidelines for Prompting Scraper Fallbacks"
+    },
+    {
+      "type": "p",
+      "content": "- Attempt to locate the pricing table using text-based matching (e.g., look for headers containing 'Pricing', 'Plans', or 'Cost') if the class selector fails."
+    },
+    {
+      "type": "p",
+      "content": "- Take a screenshot and output it to the `.gemini/state/tapes/` folder when a selector timeout occurs."
+    },
+    {
+      "type": "p",
+      "content": "- If the page is empty, wait 3 seconds for dynamic content hydration before retrying."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Where are the visual screen recordings and screenshots of the browser automation saved locally in your workspace?"
+    },
+    {
+      "type": "p",
+      "content": "A) In the root directory as text files"
+    },
+    {
+      "type": "p",
+      "content": "B) Inside the `.gemini/state/tapes/` folder"
+    },
+    {
+      "type": "p",
+      "content": "C) On the remote cloud dashboard only"
+    },
+    {
+      "type": "p",
+      "content": "D) Inside the local node_modules folder"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. AGY stores execution recordings and screenshots inside the `.gemini/state/tapes/` folder for local inspection and auditing."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: What is a recommended fallback strategy to include in your scraping prompt to handle dynamic loading failures?"
+    },
+    {
+      "type": "p",
+      "content": "A) Force the agent to immediately fail the task"
+    },
+    {
+      "type": "p",
+      "content": "B) Instruct the agent to wait for text-based matches and take a troubleshooting screenshot"
+    },
+    {
+      "type": "p",
+      "content": "C) Bypass all chromium dependency errors by executing curl commands instead"
+    },
+    {
+      "type": "p",
+      "content": "D) Restart the entire workstation automatically"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. Providing fallback instructions for text matching and screenshot capture helps the agent recover and provides debugging data if it fails."
+    }
+  ]
+}

@@ -1,0 +1,321 @@
+{
+  "id": "1",
+  "title": "1. SDK Architecture & Setup",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [1. SDK Architecture & Setup]"
+    },
+    {
+      "type": "h2",
+      "content": "Course Introduction & Setup"
+    },
+    {
+      "type": "p",
+      "content": "Welcome to AGY-311: Scripting with the SDK. This course is designed for software developers and tool builders looking to control autonomous agents programmatically. In this module, we introduce the core structural components of the Google Antigravity SDK and set up the local developer environment."
+    },
+    {
+      "type": "h3",
+      "content": "Installation & Requirements"
+    },
+    {
+      "type": "p",
+      "content": "The SDK is available as a native Python library ('google-antigravity') and a Node.js library ('@google/antigravity'). Install the appropriate package for your workflow and verify that your system is running Python 3.10+ or Node.js 18+."
+    },
+    {
+      "type": "code",
+      "content": "# Install Python SDK library",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "pip install google-antigravity",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Install Node.js SDK library",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "npm install @google/antigravity",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Authentication Setup"
+    },
+    {
+      "type": "p",
+      "content": "To execute agent cycles, you must establish a valid API key. Set the GEMINI_API_KEY environment variable on your local system or place it in a .env file in the root of your project directory. To generate a key, navigate to the Google AI Studio page: https://aistudio.google.com/app/api-keys"
+    },
+    {
+      "type": "code",
+      "content": "# Export the API Key in Linux/macOS terminal",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "export GEMINI_API_KEY=\"AIzaSyYourGeminiApiKeyHere\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Export the API Key in Windows PowerShell",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "$env:GEMINI_API_KEY=\"AIzaSyYourGeminiApiKeyHere\"",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> For local testing, you can explicitly pass credentials inside your configuration object (e.g., LocalAgentConfig(api_key='...')). However, standard production security mandates loading keys from the environment or secure secret managers."
+    },
+    {
+      "type": "h3",
+      "content": "The Three Architecture Pillars"
+    },
+    {
+      "type": "p",
+      "content": "The Antigravity SDK architecture decouples roles into three core classes:"
+    },
+    {
+      "type": "p",
+      "content": "- Agent: Handles agent initialization, capability configurations, custom tools, and session lifecycle hooks."
+    },
+    {
+      "type": "p",
+      "content": "- Conversation: Acts as the stateful session container, accumulating message turn history and performing context compaction when token limits are reached."
+    },
+    {
+      "type": "p",
+      "content": "- Connection: The abstract transport interface managing underlying API calls to Gemini backends."
+    },
+    {
+      "type": "h3",
+      "content": "Python Hello World Implementation"
+    },
+    {
+      "type": "p",
+      "content": "Let's create a minimal script to start a session, send a chat message, and print the output in Python using the async with pattern."
+    },
+    {
+      "type": "code",
+      "content": "import asyncio",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from google.antigravity import Agent, LocalAgentConfig",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async def main():",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Instantiate configuration (default model is gemini-3.5-flash)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "config = LocalAgentConfig()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Establish the agent context manager",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async with Agent(config) as agent:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Execute a chat turn",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "response = await agent.chat('Hello, World!')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Resolve and display the final text output",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "text_content = await response.text()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f'Agent response: {text_content}')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if __name__ == '__main__':",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "asyncio.run(main())",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Node.js Hello World Implementation"
+    },
+    {
+      "type": "p",
+      "content": "Below is the equivalent implementation in Node.js using standard ES Module syntax."
+    },
+    {
+      "type": "code",
+      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async function main() {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const config = new LocalAgentConfig();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const agent = new Agent(config);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// Start the agent lifecycle",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.start();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const response = await agent.chat('Hello, World!');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const textContent = await response.text();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log(`Agent response: ${textContent}`);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "} finally {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// Always invoke stop to terminate open connection pipelines",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.stop();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "main().catch(console.error);",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary role of the Conversation object in the SDK?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To handle HTTP and TCP socket connections directly to external cloud networks."
+    },
+    {
+      "type": "p",
+      "content": "- B) To manage agent configs, load libraries, and verify API token headers."
+    },
+    {
+      "type": "p",
+      "content": "- C) To serve as the stateful container that maintains the interaction history and handles context compaction."
+    },
+    {
+      "type": "p",
+      "content": "- D) To execute terminal build processes inside the Jules VM sandbox."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: C. The Conversation object acts as the state manager for a chat session, managing past turn history and tracking compaction policies."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which Gemini model is loaded by default if none is explicitly specified in LocalAgentConfig?"
+    },
+    {
+      "type": "p",
+      "content": "- A) gemini-2.0-pro"
+    },
+    {
+      "type": "p",
+      "content": "- B) gemini-3.5-flash"
+    },
+    {
+      "type": "p",
+      "content": "- C) gemini-1.5-pro"
+    },
+    {
+      "type": "p",
+      "content": "- D) gemini-3.0-ultra"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. The Google Antigravity SDK defaults to gemini-3.5-flash unless overridden in the agent configuration parameters."
+    }
+  ]
+}

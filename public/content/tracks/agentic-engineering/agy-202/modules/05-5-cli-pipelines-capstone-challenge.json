@@ -1,0 +1,199 @@
+{
+  "id": "5",
+  "title": "5. CLI Pipelines & Capstone Challenge",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [5. CLI Pipelines & Capstone Challenge]"
+    },
+    {
+      "type": "h2",
+      "content": "Assembling Pipelines and the Specialist Challenge"
+    },
+    {
+      "type": "p",
+      "content": "In this final module, you will learn how to chain commands together to form end-to-end agentic pipelines. We will combine standard UNIX utilities with agy inputs and outputs. You will then receive the instructions for the Terminal Specialist Capstone Challenge."
+    },
+    {
+      "type": "h3",
+      "content": "Command-Line Pipelines with UNIX Utilities"
+    },
+    {
+      "type": "p",
+      "content": "Because agy reads stdin and prints stdout, it integrates seamlessly with UNIX tools. You can instruct the agent to output text in structured JSON format, and then use tools like jq to parse the output and feed it to subsequent operations."
+    },
+    {
+      "type": "code",
+      "content": "# Extract errors, convert to JSON, and parse via jq",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat system.log | \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy run -p \"Find all database failures in this log. Format output as a JSON list containing 'db_ip' and 'error_code'.\" | \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "jq '.[] | select(.error_code > 500) | .db_ip'",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "The Specialist Capstone Challenge"
+    },
+    {
+      "type": "p",
+      "content": "To earn your AGY Certified Terminal Specialist badge, you must write a native terminal command pipeline using the agy CLI to parse an unorganized folder of text files and output a formatted markdown update sheet. Follow these requirements:"
+    },
+    {
+      "type": "p",
+      "content": "- Create a secure directory at /workspace/capstone and ensure a .gemini.md rules file is initialized."
+    },
+    {
+      "type": "p",
+      "content": "- Place the mock server log reports in the directory. You will have multiple files (e.g. node-1.log, node-2.log)."
+    },
+    {
+      "type": "p",
+      "content": "- Write a shell script generate_report.sh that iterates over each log, calls agy run to summarize critical failures, and appends the formatted output to summary_report.md."
+    },
+    {
+      "type": "p",
+      "content": "- Run your script and verify that summary_report.md is correctly populated with warnings and timestamps."
+    },
+    {
+      "type": "code",
+      "content": "#!/usr/bin/env bash",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# generate_report.sh template",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "set -euo pipefail",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "OUTPUT=\"summary_report.md\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"# System Diagnostic Summary\" > \"$OUTPUT\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"Date: $(date)\" >> \"$OUTPUT\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"===========================\" >> \"$OUTPUT\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Process each log file sequentially",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "for file in /workspace/capstone/*.log; do",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"Analyzing $(basename \"$file\")...\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"### Report for $(basename \"$file\")\" >> \"$OUTPUT\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Pass log context to agent",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat \"$file\" | agy run -p \"Summarize the critical warning logs in this stream. Keep it to 3 bullet points.\" >> \"$OUTPUT\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"\" >> \"$OUTPUT\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "done",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"Pipeline complete. Summary written to $OUTPUT.\"",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Verify your understanding of pipelines and scripting:"
+    },
+    {
+      "type": "p",
+      "content": "- Question 1: How can you ensure that an agent's output is safe to pass directly to a JSON parser like jq?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Use the --force-json flag on the CLI command."
+    },
+    {
+      "type": "p",
+      "content": "- B) Explicitly instruct the agent in the prompt to return only valid JSON without any markdown code fences or conversational text."
+    },
+    {
+      "type": "p",
+      "content": "- C) JSON parsing is handled automatically by the CLI terminal."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Designing prompts to ask for raw JSON outputs, without conversational markdown markers, allows utilities like jq to parse stdout cleanly."
+    },
+    {
+      "type": "p",
+      "content": "- Question 2: Why is set -euo pipefail critical in production pipeline scripts?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It improves connection speeds to cloud APIs."
+    },
+    {
+      "type": "p",
+      "content": "- B) It ensures that if any command in a pipe fails, or if a variable is unset, the shell script aborts immediately rather than continuing with broken data."
+    },
+    {
+      "type": "p",
+      "content": "- C) It is required for the agent to authenticate with local work folders."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The set -euo pipefail options are a defensive shell pattern that ensures script errors are caught immediately rather than running commands with empty or corrupted variables."
+    }
+  ]
+}

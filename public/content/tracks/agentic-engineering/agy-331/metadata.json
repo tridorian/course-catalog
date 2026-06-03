@@ -1,9 +1,24 @@
 {
-  "course_id": "AGY-331",
+  "course_id": "agy-331",
   "title": "AGY-331: Advanced Container Sandboxing (L300)",
   "version": "0.1.0",
   "author": "Tridorian Labs & Google Cloud",
-  "target_audience": "Power Devs, DevOps, & SysAdmins",
-  "description": "Configuring local distrobox or devcontainers environments using the portable agy-box OCI image to run high-autonomy agent loops.",
-  "status": "Draft"
+  "description": "Configuring local distrobox or devcontainers environments using the portable agy-box OCI image to run high-autonomy agent loops safely.",
+  "features": [
+    {
+      "icon": "ShieldAlert",
+      "title": "Host Isolation",
+      "description": "Lock down agent execution environments using rootless Podman and user namespaces to prevent host compromise."
+    },
+    {
+      "icon": "Terminal",
+      "title": "Distrobox Integration",
+      "description": "Configure distrobox for seamless terminal development while enforcing strict home directory isolation."
+    },
+    {
+      "icon": "Settings",
+      "title": "Devcontainers Spec",
+      "description": "Implement enterprise-grade .devcontainer.json configs to run agents safely in VS Code with limited permissions."
+    }
+  ]
 }

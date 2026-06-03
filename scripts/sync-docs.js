@@ -11,7 +11,13 @@ const SCOPES = ['https://www.googleapis.com/auth/documents.readonly'];
 async function getDocsClient() {
   const authKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!authKey) {
-    throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set');
+    console.log('GOOGLE_SERVICE_ACCOUNT_KEY not set, attempting to use application default credentials...');
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = '/var/home/wtg/.gcloud_config/application_default_credentials.json';
+    const auth = new google.auth.GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/documents.readonly', 'https://www.googleapis.com/auth/drive.readonly']
+    });
+    const authClient = await auth.getClient();
+    return google.docs({ version: 'v1', auth: authClient });
   }
 
   let credentials;
@@ -143,11 +149,19 @@ function parseConfigTab(content) {
     if (element.table) {
       element.table.tableRows.forEach(row => {
         if (row.tableCells.length >= 2) {
-          const key = row.tableCells[0].content.map(c => c.paragraph ? parseParagraph(c.paragraph).trim() : '').join('').replace(/:$/, '');
-          const value = row.tableCells[1].content.map(c => c.paragraph ? parseParagraph(c.paragraph).trim() : '').join('');
+          const key = row.tableCells[0].content.map(c => c.paragraph ? parseParagraph(c.paragraph).trim() : '').join('').replace(/:$/, '').trim();
+          const value = row.tableCells[1].content.map(c => c.paragraph ? parseParagraph(c.paragraph).trim() : '').join('').trim();
           if (key) config[key] = value;
         }
       });
+    } else if (element.paragraph) {
+      const text = parseParagraph(element.paragraph).trim();
+      const parts = text.split(':');
+      if (parts.length >= 2) {
+        const key = parts[0].trim();
+        const value = parts.slice(1).join(':').trim();
+        if (key) config[key] = value;
+      }
     }
   });
   return config;
@@ -157,6 +171,8 @@ function parseIntroTab(content) {
   let title = '';
   let description = '';
   const features = [];
+  let inHighlights = false;
+  let currentFeature = null;
 
   content.forEach(element => {
     if (element.paragraph) {
@@ -164,10 +180,28 @@ function parseIntroTab(content) {
       const text = parseParagraph(p).trim();
       const styleType = p.paragraphStyle?.namedStyleType;
 
-      if (styleType === 'HEADING_1' && !title) {
-        title = text;
+      if ((styleType === 'HEADING_1' || text.startsWith('#')) && !title) {
+        title = text.replace(/^#\s*/, '').replace(/^\[Intro\]/, '').trim();
+      } else if (text === 'Key Highlights:') {
+        inHighlights = true;
+      } else if (inHighlights && text) {
+        const tabIndex = text.indexOf('\t');
+        if (tabIndex !== -1) {
+          if (currentFeature) features.push(currentFeature);
+          currentFeature = {
+            icon: text.slice(0, tabIndex).trim(),
+            title: text.slice(tabIndex + 1).trim(),
+            description: ''
+          };
+        } else if (currentFeature) {
+          currentFeature.description = text;
+          features.push(currentFeature);
+          currentFeature = null;
+        }
       } else if (!styleType || styleType === 'NORMAL_TEXT') {
-        if (text && !description) description = text;
+        if (text && !text.startsWith('#') && !text.startsWith('[Intro') && !text.startsWith('Key Highlights') && !description) {
+          description = text;
+        }
       }
     } else if (element.table && element.table.columns === 2) {
       element.table.tableRows.forEach(row => {
@@ -180,6 +214,7 @@ function parseIntroTab(content) {
       });
     }
   });
+  if (currentFeature) features.push(currentFeature);
 
   return { title, description, features };
 }
@@ -292,7 +327,7 @@ async function syncCourse(docs, docId, targetTrackId, targetCourseId) {
 
   // Check if status is Draft
   const status = config.status || config.Status;
-  if (status && status.trim() === 'Draft') {
+  if (status && status.trim() === 'Draft' && !process.env.SYNC_DRAFT) {
     console.log(`Course [${targetCourseId}] is a draft; skipping sync`);
     return;
   }

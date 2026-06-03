@@ -1,9 +1,29 @@
 {
-  "course_id": "AGY-411",
+  "course_id": "agy-411",
   "title": "AGY-411: Custom MCP Servers (L400)",
   "version": "0.1.0",
   "author": "Tridorian Labs & Google Cloud",
-  "target_audience": "Systems Integrators & SAs",
-  "description": "Designing, hosting, and deploying custom Model Context Protocol (MCP) servers to let agents safely read custom databases and API endpoints.",
-  "status": "Draft"
+  "description": "A high-level systems integration and architecture course covering the design, hosting, implementation, and deployment of custom Model Context Protocol (MCP) servers. Students will master how to securely build and maintain MCP interfaces that allow autonomous AI agents to query database layers, REST microservices, and ticketing platforms under strict enterprise network boundaries, access constraints, and credential management standards.",
+  "features": [
+    {
+      "icon": "🔌",
+      "title": "**Protocol Specifications**",
+      "description": "Deep dive into JSON-RPC 2.0 message schemas, lifecycle dynamics, and stdio vs. SSE (Server-Sent Events) transports."
+    },
+    {
+      "icon": "🗄️",
+      "title": "**Secure DB Connectors**",
+      "description": "Design pattern implementation for relational databases (PostgreSQL/SQLite) using read-only roles, parameterized queries, and query count boundaries."
+    },
+    {
+      "icon": "🛡️",
+      "title": "**Enterprise API Gateways**",
+      "description": "Secure API credential management, token propagation, payload size throttling, and mapping REST endpoints to safe agent tools."
+    },
+    {
+      "icon": "🚀",
+      "title": "**Hardened Container Sandbox**",
+      "description": "Compile and bundle MCP servers in OCI-compliant containers, deploy behind SSE reverse proxies, and execute automated diagnostic scripts."
+    }
+  ]
 }

@@ -1,0 +1,196 @@
+{
+  "id": "3",
+  "title": "3. Prompting for Doc Generation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [3. Prompting for Doc Generation]"
+    },
+    {
+      "type": "h2",
+      "content": "Crafting Zero-Placeholder Prompts"
+    },
+    {
+      "type": "p",
+      "content": "In agentic workflows, prompt engineering is not just about choosing the right words; it is about establishing strict programmatic boundaries. When business analysts use agents to generate documents (like SOWs, competitive analyses, or executive summaries), the primary risk is the creation of generic placeholders (e.g., \"[Insert Date Here]\", \"Lorem Ipsum\", \"TODO\")."
+    },
+    {
+      "type": "p",
+      "content": "To prevent this, your prompts must follow the Zero-Placeholder Rule. This rule states that all outputs must be fully written, containing real-world data or contextual approximations, and structured using clean GFM (GitHub Flavored Markdown)."
+    },
+    {
+      "type": "h3",
+      "content": "The Blueprint of a Production-Grade Generation Prompt"
+    },
+    {
+      "type": "p",
+      "content": "A production prompt for document generation must consist of four distinct parts:"
+    },
+    {
+      "type": "p",
+      "content": "1. Persona & Role: Defining the agent's professional context."
+    },
+    {
+      "type": "p",
+      "content": "2. Context & Input Files: Pointing the agent to local data sources."
+    },
+    {
+      "type": "p",
+      "content": "3. Strict Constraints: Defining length, formatting, and the exclusion of placeholders."
+    },
+    {
+      "type": "p",
+      "content": "4. Output Target Format: Specifying the markdown headers and structures."
+    },
+    {
+      "type": "p",
+      "content": "Let's write a standard prompt template that you can copy and paste directly into antigravity's prompt input field when generating competitor analysis reports:"
+    },
+    {
+      "type": "code",
+      "content": "Role: Senior Competitive Intelligence Analyst",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Task: Generate a Competitive Pricing Summary from the scraped data files in './data/'.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Input Sources:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- File: './data/competitor_a.json'",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- File: './data/competitor_b.json'",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- File: './data/competitor_c.json'",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Constraints:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "1. NO PLACEHOLDERS: Do not use placeholders, brackets, or blank lines (e.g., no 'TODO', '[Insert Name]', or similar). If a value is missing, write 'Data Unavailable' based on the sources.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "2. Output format must be GitHub Flavored Markdown (GFM).",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "3. You must include a structured comparison table with columns: Competitor, Plan Name, Monthly Cost, Key Features, and Data Source.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "4. Write a 3-paragraph executive summary highlighting pricing gaps.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "Structure:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Competitive Pricing Analysis",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "## Executive Summary",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Your 3 paragraphs here]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "## Pricing Comparison Table",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "[Your GFM table here]",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Standard GFM tables are parsed natively by the antigravity Output Panel, displaying a clean, readable dashboard directly on the visual board interface."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: What is the core principle of the \"Zero-Placeholder Rule\" in prompt engineering?"
+    },
+    {
+      "type": "p",
+      "content": "A) The agent should only generate code, not text"
+    },
+    {
+      "type": "p",
+      "content": "B) The output must contain no generic filler text, bracketed variables, or TODOs"
+    },
+    {
+      "type": "p",
+      "content": "C) The prompt must not contain any punctuation"
+    },
+    {
+      "type": "p",
+      "content": "D) The agent must run in headless mode"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. The rule ensures that all generated documents are fully written and production-ready without requiring manual cleanup of placeholders."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: How does the antigravity Output Panel render standard GFM comparison tables?"
+    },
+    {
+      "type": "p",
+      "content": "A) It exports them directly as CSV files"
+    },
+    {
+      "type": "p",
+      "content": "B) It displays them as raw markdown strings"
+    },
+    {
+      "type": "p",
+      "content": "C) It renders them as clean, visually styled interactive tables on the board"
+    },
+    {
+      "type": "p",
+      "content": "D) It displays a warning to the user"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is C. The Output Panel is designed to render GFM elements like tables and headers into structured visual components."
+    }
+  ]
+}

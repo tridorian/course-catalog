@@ -1,7 +1,8 @@
 {
-  "course_id": "AGY-101 v0.2",
-  "title": "Secure Agentic Development: Installation & Setup (L100)",
-  "version": "0.2.0",
-  "author": "Tridorian Labs & Google Cloud",
-  "target_audience": "Developers & IT Staff in Secure Corporate Environments"
+  "course_id": "agy-101",
+  "title": "**Secure Agentic Development: Installation & Setup\n**",
+  "version": "1.0.0",
+  "author": "Unknown",
+  "description": "**Course Abstract:** Welcome to the foundational session of Google Antigravity (AGV). Before we can orchestrate AI agents to write code or execute terminal commands, we must establish a secure, working environment.",
+  "features": []
 }

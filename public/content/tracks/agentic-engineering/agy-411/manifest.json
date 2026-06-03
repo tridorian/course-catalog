@@ -3,8 +3,28 @@
   "modules": [
     {
       "id": "1",
-      "title": "1. Course Introduction",
-      "file": "modules/01-course-introduction.json"
+      "title": "1. Protocol Architecture & Lifecycle Spec",
+      "file": "modules/01-1-protocol-architecture-lifecycle-spec.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Developer Workspace & SDK Setup",
+      "file": "modules/02-2-developer-workspace-sdk-setup.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Secure Database Connectors",
+      "file": "modules/03-3-secure-database-connectors.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Wrapping Microservices & APIs",
+      "file": "modules/04-4-wrapping-microservices-apis.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Production Staging & Governance",
+      "file": "modules/05-5-production-staging-governance.json"
     }
   ]
 }

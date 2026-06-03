@@ -1,0 +1,261 @@
+{
+  "id": "1",
+  "title": "1. Course Introduction & OCI Architecture",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "1.1 Container Sandboxing for High-Autonomy Agents"
+    },
+    {
+      "type": "p",
+      "content": "High-autonomy agent loops represent a paradigm shift in software development. Unlike traditional static scripts or code compilers, an autonomous agent (such as the AGY CLI or SDK engine) can dynamically formulate commands, write scripts, and execute them. When granted auto-approve flags (--auto-approve) to perform operations on the file system or run external test suites, a runaway loop or an injection payload could result in catastrophic data loss, system configuration damage, or host network breach. Standard host virtualization is often too heavy, while standard local user isolation is easily bypassed. This course introduces Tier 3 container sandboxing using the portable 'agy-box' OCI image."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Why Sandboxing Matters:"
+    },
+    {
+      "type": "p",
+      "content": "> When an agent has command-execution permissions, any malicious prompt injection or unintended logic bug could result in commands like 'rm -rf /' or arbitrary remote access trojans being executed. A sandbox container serves as the primary firewall protecting the host developer's environment."
+    },
+    {
+      "type": "h2",
+      "content": "1.2 The agy-box OCI Image Design"
+    },
+    {
+      "type": "p",
+      "content": "The 'agy-box' OCI image is a custom-hardened container environment built on top of a secure, lightweight Linux base (such as Alpine Linux or Rocky Linux). It packages the Node.js and Python runtimes, standard software development utilities (like Git, Curl, and Bash), and the AGY execution engine dependencies. Crucially, the image implements security-first defaults: it locks down root access, disables shell compilation utilities outside defined paths, and sets up a non-privileged user named 'developer'."
+    },
+    {
+      "type": "h3",
+      "content": "1.3 Hardened Dockerfile Blueprint"
+    },
+    {
+      "type": "p",
+      "content": "Below is the production-ready Dockerfile blueprint for building the 'agy-box' container image. Observe how the root user is utilized solely to install packages and restrict shell permissions, followed by a transition to the 'developer' user account."
+    },
+    {
+      "type": "code",
+      "content": "FROM alpine:3.19",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Establish security configurations and system upgrades",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "RUN apk update && apk upgrade && \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "apk add --no-cache \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "bash \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "curl \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "git \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "nodejs \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "npm \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "python3 \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "py3-pip \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "shadow \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "sudo && \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "rm -rf /var/cache/apk/*",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Create developer group and user with UID/GID 1000 to prevent root mapping issues",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "RUN groupadd -g 1000 developer && \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "useradd -u 1000 -g developer -m -s /bin/bash developer",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Establish workspace directory and enforce strict permissions",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "RUN mkdir -p /workspace && \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chown -R developer:developer /workspace",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Restrict sudo access: developer cannot execute arbitrary commands as root",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "RUN echo \"developer ALL=(ALL) NOPASSWD: /usr/bin/git, /usr/bin/npm\" > /etc/sudoers.d/developer && \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "chmod 0440 /etc/sudoers.d/developer",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ENV HOME=/home/developer",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "ENV AGY_CONTAINER_SANDBOX=true",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "WORKDIR /workspace",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "USER developer",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Verify dependencies on build",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "RUN node --version && python3 --version && git --version",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "1.4 Building the agy-box Image"
+    },
+    {
+      "type": "p",
+      "content": "To build this image locally, save the code above to a file named 'Dockerfile' and run the following docker or podman build command:"
+    },
+    {
+      "type": "code",
+      "content": "podman build -t local/agy-box:latest -f Dockerfile .",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "1.5 Check Your Understanding Quiz"
+    },
+    {
+      "type": "h3",
+      "content": "Question 1: What is the primary security goal of running high-autonomy agent loops inside the 'agy-box' container?"
+    },
+    {
+      "type": "p",
+      "content": "A) To speed up execution loops."
+    },
+    {
+      "type": "p",
+      "content": "B) To isolate the host file system and prevent arbitrary agent commands from modifying or damaging host files."
+    },
+    {
+      "type": "p",
+      "content": "C) To enable the agent to run docker commands on the host."
+    },
+    {
+      "type": "p",
+      "content": "D) To bypass corporate firewalls."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** High-autonomy agents can run arbitrary commands. Sandboxing isolates the agent's filesystem changes inside the container, preventing unauthorized host access and protecting against destructive actions."
+    },
+    {
+      "type": "h3",
+      "content": "Question 2: In our custom Dockerfile, why do we transition to the 'developer' user instead of remaining as 'root'?"
+    },
+    {
+      "type": "p",
+      "content": "A) Root is deprecated in Docker."
+    },
+    {
+      "type": "p",
+      "content": "B) To comply with the principle of least privilege and mitigate container breakout vulnerability impacts."
+    },
+    {
+      "type": "p",
+      "content": "C) Because Node.js cannot run as root."
+    },
+    {
+      "type": "p",
+      "content": "D) To hide files from the host."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** Running as a non-root user ensures that even if an attacker or runaway agent code breaks execution boundaries, they only have unprivileged access within the container, making host compromise far more difficult."
+    }
+  ]
+}

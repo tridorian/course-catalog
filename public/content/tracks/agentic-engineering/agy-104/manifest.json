@@ -3,8 +3,28 @@
   "modules": [
     {
       "id": "1",
-      "title": "1. Course Introduction",
-      "file": "modules/01-course-introduction.json"
+      "title": "1. Introduction to Human-in-the-Loop Collaboration",
+      "file": "modules/01-1-introduction-to-human-in-the-loop-collaboration.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Composing Clear and Standardized Instructions",
+      "file": "modules/02-2-composing-clear-and-standardized-instructions.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Managing Terminal Execution Approvals",
+      "file": "modules/03-3-managing-terminal-execution-approvals.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Active Steering: Pausing, Redirecting, and Resuming",
+      "file": "modules/04-4-active-steering-pausing-redirecting-and-resuming.json"
+    },
+    {
+      "id": "5",
+      "title": "5. End-to-End Collaboration Lab & Loop Verification",
+      "file": "modules/05-5-end-to-end-collaboration-lab-loop-verification.json"
     }
   ]
 }

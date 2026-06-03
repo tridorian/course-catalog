@@ -1,0 +1,326 @@
+{
+  "id": "2",
+  "title": "2. Docker & Podman Setup for Secure Host Isolation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "2.1 Understanding Host Isolation Mechanics"
+    },
+    {
+      "type": "p",
+      "content": "Simply running in a container is not enough. If the container daemon runs as root (like standard default Docker configurations), any container breakout vulnerability allows immediate root access on the host. To mitigate this risk, L300 platform engineering mandates the use of rootless container runtimes (such as Rootless Podman or Rootless Docker) combined with strict user namespace mapping, seccomp filters, and capability dropping."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Rootless Container Runtimes:"
+    },
+    {
+      "type": "p",
+      "content": "> Rootless Podman runs entirely within the user's unprivileged user namespace. Even if a process runs as root inside the container, it maps to the unprivileged UID of the user on the host system, nullifying host root access."
+    },
+    {
+      "type": "h2",
+      "content": "2.2 User Namespaces and subuid/subgid Configurations"
+    },
+    {
+      "type": "p",
+      "content": "User namespaces map container UIDs/GIDs to host UIDs/GIDs. Ensure your subuid and subgid configurations are established properly. Verify them using the commands below:"
+    },
+    {
+      "type": "code",
+      "content": "# View the subordinate UID maps allocated to your host user",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat /etc/subuid",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Example output showing range allocation:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# wtg:100000:65536",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# View subordinate GID maps",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "cat /etc/subgid",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "2.3 Seccomp Profile Customization"
+    },
+    {
+      "type": "p",
+      "content": "Seccomp (Secure Computing Mode) restricts the system calls available to container processes. By default, containers permit many calls that are unnecessary for agentic tasks. We can apply a hardened custom seccomp profile JSON file to disable critical calls like ptrace, mount, and unshare."
+    },
+    {
+      "type": "h3",
+      "content": "2.4 Hardened Custom Seccomp Profile Blueprint (seccomp-agent.json)"
+    },
+    {
+      "type": "p",
+      "content": "Save this JSON snippet to a local workspace directory as 'seccomp-agent.json':"
+    },
+    {
+      "type": "code",
+      "content": "{",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"defaultAction\": \"SCMP_ACT_ALLOW\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"architectures\": [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"SCMP_ARCH_X86_64\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"SCMP_ARCH_X86\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"SCMP_ARCH_X32\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "],",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"syscalls\": [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "{",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"names\": [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"ptrace\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"syslog\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"sys_boot\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"sys_chroot\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"mount\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"umount2\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"unshare\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"kexec_load\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "],",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"action\": \"SCMP_ACT_ERRNO\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"args\": []",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "2.5 Executing a Hardened Container Run"
+    },
+    {
+      "type": "p",
+      "content": "Launch your agent loop inside the 'agy-box' using Podman with the seccomp profile applied, all capabilities dropped, and resource limits set:"
+    },
+    {
+      "type": "code",
+      "content": "# Execute the agent sandbox with strict capabilities and resource cgroups",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "podman run -d --name agy-sandbox-01 \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--cap-drop=ALL \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--security-opt seccomp=./seccomp-agent.json \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--security-opt no-new-privileges \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--cpus=2 \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--memory=1g \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "-v /var/home/wtg/workspace:/workspace:Z \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "local/agy-box:latest",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Beware of socket mounting:"
+    },
+    {
+      "type": "p",
+      "content": "> Do NOT mount '/var/run/docker.sock' or '/run/user/1000/podman/podman.sock' into the sandbox. Doing so permits the agent to run arbitrary container operations on the host, completely bypassing all container restrictions."
+    },
+    {
+      "type": "h2",
+      "content": "2.6 Check Your Understanding Quiz"
+    },
+    {
+      "type": "h3",
+      "content": "Question 1: What is the effect of the flag --cap-drop=ALL when starting a container?"
+    },
+    {
+      "type": "p",
+      "content": "A) It increases container memory allocation."
+    },
+    {
+      "type": "p",
+      "content": "B) It drops all kernel capabilities, preventing administrative commands from executing in the container."
+    },
+    {
+      "type": "p",
+      "content": "C) It disables container logs."
+    },
+    {
+      "type": "p",
+      "content": "D) It exposes host devices."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** Dropping all capabilities is a key hardening step, stripping the agent of privileges needed to manipulate networking, system clocks, or host mounts."
+    },
+    {
+      "type": "h3",
+      "content": "Question 2: Why should mounting docker.sock into the container be strictly avoided?"
+    },
+    {
+      "type": "p",
+      "content": "A) It causes memory leaks."
+    },
+    {
+      "type": "p",
+      "content": "B) It grants the containerized process direct root access to control the host container daemon, facilitating immediate container breakout."
+    },
+    {
+      "type": "p",
+      "content": "C) It prevents Podman from booting."
+    },
+    {
+      "type": "p",
+      "content": "D) It disables Git authentication."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Immediate Feedback:** If docker.sock is mounted, any process inside the container can command the host's Docker daemon to spawn new privileged containers, resulting in a host root exploit."
+    }
+  ]
+}

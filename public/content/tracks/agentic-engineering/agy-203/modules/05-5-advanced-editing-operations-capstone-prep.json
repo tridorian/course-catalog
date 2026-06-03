@@ -1,0 +1,161 @@
+{
+  "id": "5",
+  "title": "5. Advanced Editing Operations & Capstone Prep",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "CLI Coordination and Workspace Boundaries"
+    },
+    {
+      "type": "p",
+      "content": "Advanced operations in antigravity-ide are coordinated with the `agy` command line interface. This enables you to run git tracking, file system firewalls, and style verification checks directly from the integrated terminal panel. In addition, all edits made inside the IDE must comply with workspace boundaries. These boundaries are specified by workspace directory permissions and security settings configured in local `.gemini.md` governance files."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Security Rules: If you attempt to rewrite a file located outside the permitted workspace directory, the directory firewall will block the action and throw a write permission error."
+    },
+    {
+      "type": "code",
+      "content": "# Check workspace boundary logs",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy --verify-workspace /var/home/wtg/my-antigravity-work",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Run style validation check on your co-authored markdown files",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy --check-style sow_draft.md",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Perform a local rules compliance check",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy --validate-rules",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Preparing for the Specialist Capstone Challenge"
+    },
+    {
+      "type": "p",
+      "content": "To earn the **AGY Certified Workspace Specialist** credential, you must complete the capstone challenge 'The SOW Co-Pilot'. This challenge tests your ability to co-author, format, and align a project proposal with strict corporate rules. The workflow is summarized in the table below:"
+    },
+    {
+      "type": "p",
+      "content": "| Capstone Step | Task Description | Verification Command |"
+    },
+    {
+      "type": "p",
+      "content": "| :--- | :--- | :--- |"
+    },
+    {
+      "type": "p",
+      "content": "| **1. Create Spec File** | Create a markdown file named `sow_draft.md` in the workspace. | `ls -la sow_draft.md` |"
+    },
+    {
+      "type": "p",
+      "content": "| **2. Co-Author Sections** | Draft Scope, Milestones, and Financials using the sidecar. | `cat sow_draft.md` |"
+    },
+    {
+      "type": "p",
+      "content": "| **3. Format Table** | Formulate a rate card markdown table matching style rules. | `agy --check-style sow_draft.md` |"
+    },
+    {
+      "type": "p",
+      "content": "| **4. Apply Rule Check** | Validate SOW compliance with local `.gemini.md` security rules. | `agy --validate-rules` |"
+    },
+    {
+      "type": "h3",
+      "content": "Co-Authoring Guide: Finalizing the Workspace"
+    },
+    {
+      "type": "p",
+      "content": "Follow this procedure to finalize your workspace and submit your work for verification:"
+    },
+    {
+      "type": "p",
+      "content": "- Save all active document and code changes inside the editor panes."
+    },
+    {
+      "type": "p",
+      "content": "- Run the `agy --validate-rules` command to ensure no compliance policies are violated."
+    },
+    {
+      "type": "p",
+      "content": "- Execute `git status` in the terminal to verify all edited files are staged."
+    },
+    {
+      "type": "p",
+      "content": "- Commit and push your changes to your remote repository branch."
+    },
+    {
+      "type": "h3",
+      "content": "Final IDE Operations Quiz"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: How do you ensure your co-authored SOW complies with corporate rate cards and local rules before certification?"
+    },
+    {
+      "type": "p",
+      "content": "A) By sending an email to support."
+    },
+    {
+      "type": "p",
+      "content": "B) By verifying the document against the local `.gemini.md` security rules using the `agy --validate-rules` command."
+    },
+    {
+      "type": "p",
+      "content": "C) By copying the text into a web browser."
+    },
+    {
+      "type": "p",
+      "content": "D) By deleting all markdown files in the workspace."
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. Local rules configured in `.gemini.md` are evaluated using the validation command to ensure the co-authored draft complies with corporate specifications."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: What terminal action confirms that the workspace is initialized and secure for editing?"
+    },
+    {
+      "type": "p",
+      "content": "A) `agy --verify-workspace /path/to/work`"
+    },
+    {
+      "type": "p",
+      "content": "B) `antigravity-ide --install-all`"
+    },
+    {
+      "type": "p",
+      "content": "C) `docker run agy-box`"
+    },
+    {
+      "type": "p",
+      "content": "D) `npm run start-dev`"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is A. Running `agy --verify-workspace` performs diagnostic checks on boundaries and permissions."
+    }
+  ]
+}

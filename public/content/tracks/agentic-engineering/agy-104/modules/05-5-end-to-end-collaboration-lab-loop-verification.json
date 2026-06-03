@@ -1,0 +1,219 @@
+{
+  "id": "5",
+  "title": "5. End-to-End Collaboration Lab & Loop Verification",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Now that you have learned the concepts of instruction writing, execution approvals, and steering, you will perform a hands-on lab exercise. In this lab, we will simulate a project repair workflow. You will provide the initial instructions, review commands manually, pause and redirect the agent, and verify the final outcome."
+    },
+    {
+      "type": "p",
+      "content": "## Lab Objectives"
+    },
+    {
+      "type": "p",
+      "content": "- Initialize a simulated local workspace with target files."
+    },
+    {
+      "type": "p",
+      "content": "- Run a task with manual approval controls."
+    },
+    {
+      "type": "p",
+      "content": "- Approve standard commands and reject a dangerous command."
+    },
+    {
+      "type": "p",
+      "content": "- Pause, redirect, and resume execution to fix a code bug."
+    },
+    {
+      "type": "p",
+      "content": "- Verify task completion."
+    },
+    {
+      "type": "p",
+      "content": "## Step-by-Step Lab Guide"
+    },
+    {
+      "type": "p",
+      "content": "**Step 1: Set up the workspace**"
+    },
+    {
+      "type": "p",
+      "content": "Create a new folder and add a simple javascript file that contains a syntax bug. Also create an instructions file."
+    },
+    {
+      "type": "p",
+      "content": "```bash"
+    },
+    {
+      "type": "p",
+      "content": "# Create the workspace folder"
+    },
+    {
+      "type": "p",
+      "content": "mkdir -p /var/home/wtg/Repos/lab-collab-loop"
+    },
+    {
+      "type": "p",
+      "content": "cd /var/home/wtg/Repos/lab-collab-loop"
+    },
+    {
+      "type": "p",
+      "content": "# Create a javascript file with a syntax bug (missing parenthesis)"
+    },
+    {
+      "type": "p",
+      "content": "echo \"function calculateTotal(price) { return price * 1.08\" > calculator.js"
+    },
+    {
+      "type": "p",
+      "content": "# Create the workspace rules file"
+    },
+    {
+      "type": "p",
+      "content": "cat << 'EOF' > .gemini.md"
+    },
+    {
+      "type": "p",
+      "content": "# Workspace Rules"
+    },
+    {
+      "type": "p",
+      "content": "- Always run code tests via node command"
+    },
+    {
+      "type": "p",
+      "content": "- Do NOT delete calculator.js"
+    },
+    {
+      "type": "p",
+      "content": "EOF"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "**Step 2: Trigger the task with Manual approvals**"
+    },
+    {
+      "type": "p",
+      "content": "Start the agent task to refactor the code and verify its output, enabling manual approval prompts."
+    },
+    {
+      "type": "p",
+      "content": "```bash"
+    },
+    {
+      "type": "p",
+      "content": "agy task run --task \"Fix the syntax bug in calculator.js and run node calculator.js to test\" --approvals manual"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "**Step 3: Review and Approve/Reject Commands**"
+    },
+    {
+      "type": "p",
+      "content": "During execution, the agent will suggest a command to test the file. Review the prompt carefully. If it suggests a safe command, approve it. If it proposes to delete files, reject it."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> If the agent proposes `node calculator.js`, enter `y` (Yes). If the agent proposes a dangerous or non-compliant command, enter `n` (No) and type corrective feedback."
+    },
+    {
+      "type": "p",
+      "content": "**Step 4: Steering Interrupt**"
+    },
+    {
+      "type": "p",
+      "content": "Suppose the agent starts reading logs outside the workspace. Pause the agent, provide redirection, and resume execution:"
+    },
+    {
+      "type": "p",
+      "content": "```bash"
+    },
+    {
+      "type": "p",
+      "content": "# Pause the running task"
+    },
+    {
+      "type": "p",
+      "content": "agy task pause"
+    },
+    {
+      "type": "p",
+      "content": "# Redirect the agent"
+    },
+    {
+      "type": "p",
+      "content": "agy task feedback --message \"Do not read system logs. Use calculator.js directly.\""
+    },
+    {
+      "type": "p",
+      "content": "# Resume the task"
+    },
+    {
+      "type": "p",
+      "content": "agy task resume"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "Once the agent fixes the parenthesis in `calculator.js` and successfully tests it, verify the file contents to ensure the work matches instructions."
+    },
+    {
+      "type": "p",
+      "content": "## Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** If the agent proposes a command that you reject during manual approval, what should you do?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Press Ctrl+C to kill the engine and reinstall"
+    },
+    {
+      "type": "p",
+      "content": "- B) Reject the command, select the option to provide feedback, and explain why the command is rejected so the agent can propose an alternative"
+    },
+    {
+      "type": "p",
+      "content": "- C) Approve the command anyway and fix the damage afterward"
+    },
+    {
+      "type": "p",
+      "content": "- D) Ignore the prompt and wait for it to time out"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> **Correct Answer: B**"
+    },
+    {
+      "type": "p",
+      "content": ">"
+    },
+    {
+      "type": "p",
+      "content": "> **Immediate Feedback:** When you reject a command in manual approval mode, the system allows you to submit feedback. The agent receives this explanation, refines its reasoning, and proposes a corrected approach."
+    }
+  ]
+}

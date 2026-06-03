@@ -1,0 +1,163 @@
+{
+  "id": "3",
+  "title": "3. Managing Terminal Execution Approvals",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "AGY supports two primary terminal execution approval modes: manual approval and auto-approve mode. In manual approval mode, every command proposed by the agent is presented to the user with a prompt. The user must review the command line and approve or reject it. In auto-approve mode, commands run without manual prompt check-offs."
+    },
+    {
+      "type": "p",
+      "content": "The selection of these modes is governed by the environment. Tier 1 (Native Local Install) should ALWAYS use manual approvals, as the agent shares the user's host shell and environment variables. Tier 3 (agy-box Container Sandbox) isolates the agent in an OCI container, making `--auto-approve` safe because any command execution is firewalled inside the container."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Running the agent with the --auto-approve flag on a Tier 1 native installation grants full shell control to the LLM. If the model hallucinations lead to running a dangerous script, it can overwrite your local environment. Always use containerization for auto-approval workflows."
+    },
+    {
+      "type": "p",
+      "content": "## Configuring Execution Approvals"
+    },
+    {
+      "type": "p",
+      "content": "To configure execution approvals in your project workspace, you can define a `config.json` file inside the `.gemini` folder or pass parameters directly to the agy CLI tool. Let's look at the configuration payload structure:"
+    },
+    {
+      "type": "p",
+      "content": "```json"
+    },
+    {
+      "type": "p",
+      "content": "{"
+    },
+    {
+      "type": "p",
+      "content": "\"execution\": {"
+    },
+    {
+      "type": "p",
+      "content": "\"sandbox_tier\": 3,"
+    },
+    {
+      "type": "p",
+      "content": "\"firewall_rules\": {"
+    },
+    {
+      "type": "p",
+      "content": "\"outbound_network\": \"restricted\","
+    },
+    {
+      "type": "p",
+      "content": "\"allowed_domains\": [\"github.com\", \"npmjs.org\"]"
+    },
+    {
+      "type": "p",
+      "content": "},"
+    },
+    {
+      "type": "p",
+      "content": "\"approvals\": {"
+    },
+    {
+      "type": "p",
+      "content": "\"terminal_commands\": \"manual\","
+    },
+    {
+      "type": "p",
+      "content": "\"file_write\": \"auto\","
+    },
+    {
+      "type": "p",
+      "content": "\"network_access\": \"manual\""
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "}"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "Using the command line interface, the execution approval mode can be specified dynamically:"
+    },
+    {
+      "type": "p",
+      "content": "```bash"
+    },
+    {
+      "type": "p",
+      "content": "# Start the agent with manual approval gates (Safe default)"
+    },
+    {
+      "type": "p",
+      "content": "agy task run --task \"Refactor login validation\" --approvals manual"
+    },
+    {
+      "type": "p",
+      "content": "# Start the agent in auto-approve mode (Use ONLY inside containerized sandboxes like agy-box)"
+    },
+    {
+      "type": "p",
+      "content": "agy task run --task \"Run linting and format files\" --auto-approve"
+    },
+    {
+      "type": "p",
+      "content": "```"
+    },
+    {
+      "type": "p",
+      "content": "## Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Under what condition is it safe to use the `--auto-approve` execution flag?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Anytime the developer is too busy to click 'Approve'"
+    },
+    {
+      "type": "p",
+      "content": "- B) Only when running inside an isolated sandbox container (such as agy-box) protected by a strict container firewall"
+    },
+    {
+      "type": "p",
+      "content": "- C) Only when running as a superuser/root on a production host"
+    },
+    {
+      "type": "p",
+      "content": "- D) Never, under any circumstances"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> **Correct Answer: B**"
+    },
+    {
+      "type": "p",
+      "content": ">"
+    },
+    {
+      "type": "p",
+      "content": "> **Immediate Feedback:** Auto-approve mode eliminates human confirmation prompts. It should only be active inside containerized sandboxes (like agy-box) that insulate your host system from execution anomalies."
+    }
+  ]
+}

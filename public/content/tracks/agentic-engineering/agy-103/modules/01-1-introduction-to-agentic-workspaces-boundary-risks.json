@@ -1,0 +1,103 @@
+{
+  "id": "1",
+  "title": "1. Introduction to Agentic Workspaces & Boundary Risks",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Autonomous AI agents operating on the local filesystem present unique security challenges. When an agent is granted execution capabilities, it typically runs within the host shell session of the user who invoked it. This means the agent inherits all access privileges of that user account, including read, write, and execute permissions across the entire directory structure. Without clear restrictions, an agent can read sensitive system files, modify configuration directories, or leak critical authorization credentials."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Host Privileges Exposure. Running an agent directly on a local development machine without boundary containment exposes your entire home directory. If the agent makes a planning error, encounters a bug, or is targeted by a prompt injection attack, it can destroy or compromise vital system folders (such as ~/.ssh, ~/.bashrc, or ~/Documents)."
+    },
+    {
+      "type": "p",
+      "content": "To address this vulnerability, security engineering for AI agents relies on the Principle of Least Privilege (PoLP). In this context, PoLP dictates that an agent must only be granted access to the specific resources and directories necessary to execute its immediate task. Securing the filesystem is the first line of defense before executing any autonomous workflows."
+    },
+    {
+      "type": "p",
+      "content": "- Understand the risks of implicit shell user permissions inheritance."
+    },
+    {
+      "type": "p",
+      "content": "- Identify files most vulnerable to agent actions (SSH keys, config files, shell histories)."
+    },
+    {
+      "type": "p",
+      "content": "- Differentiate between SDK-level boundary checks and operating system-level enforcement."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary security risk of running an autonomous agent locally without configuring workspace boundaries?"
+    },
+    {
+      "type": "p",
+      "content": "A) The agent will experience API connection timeouts."
+    },
+    {
+      "type": "p",
+      "content": "B) The agent runs with your user credentials and can read or modify sensitive files like ~/.ssh/id_rsa or ~/.bashrc."
+    },
+    {
+      "type": "p",
+      "content": "C) The agent will write files in an invalid format."
+    },
+    {
+      "type": "p",
+      "content": "D) The agent will run too slowly."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Feedback: An agent inherits the privileges of the invoking user. If workspace boundaries are not configured, it can access any file your user accounts can access, posing a severe risk to private keys and configuration dotfiles."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which of the following describes the Principle of Least Privilege (PoLP) as applied to agent engineering?"
+    },
+    {
+      "type": "p",
+      "content": "A) Minimizing the number of files in the workspace to save hard disk space."
+    },
+    {
+      "type": "p",
+      "content": "B) Restricting the agent's tool execution access and file access strictly to what is required for its task."
+    },
+    {
+      "type": "p",
+      "content": "C) Restricting the agent to use only low-cost models."
+    },
+    {
+      "type": "p",
+      "content": "D) Forcing the agent to run in a single-threaded execution loop."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Feedback: The Principle of Least Privilege means granting the agent only the minimum level of access (workspace directory permissions, specific tools) required to perform its designated duties, reducing the blast radius of any potential failure."
+    }
+  ]
+}

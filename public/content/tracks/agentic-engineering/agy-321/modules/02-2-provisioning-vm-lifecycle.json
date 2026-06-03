@@ -1,0 +1,285 @@
+{
+  "id": "2",
+  "title": "2. Provisioning & VM Lifecycle",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "In this module, we will dive into the practical aspects of provisioning Jules VM instances and managing their lifecycles programmatically and via the CLI. As a Solutions Architect, you must understand how to translate pipeline requirements into concrete machine definitions."
+    },
+    {
+      "type": "h2",
+      "content": "Provisioning Configurations"
+    },
+    {
+      "type": "p",
+      "content": "Jules VM provisioning is defined using YAML or JSON manifest files. These manifests describe the machine shape (vCPUs, RAM), base disk image, network settings, and bootstrap shell scripts. Below is an example of a production-ready provisioning configuration for a build pipeline worker."
+    },
+    {
+      "type": "code",
+      "content": "instance:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "name: \"jules-worker-l300-{{uuid}}\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "zone: \"us-central1-a\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "machine_type: \"n2-standard-4\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "boot_disk:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "image: \"projects/tridorian-prod/global/images/jules-hardened-v3\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "size_gb: 100",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "type: \"pd-ssd\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "network_interfaces:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- network: \"projects/tridorian-vpc/global/networks/jules-internal\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "access_config: [] # No public IP for strict egress lock",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "metadata:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "items:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- key: \"jules-daemon-config\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "value: '{\"log_level\": \"info\", \"allowed_ports\": [80, 443], \"max_execution_time_sec\": 1800}'",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- key: \"startup-script\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "value: |",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "#!/bin/bash",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"Initializing Jules Daemon...\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "systemctl start jules-agent.service",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "CLI-Based Instance Orchestration"
+    },
+    {
+      "type": "p",
+      "content": "The agy CLI provides comprehensive commands for interacting with VM resources. Architects use the CLI to test machine configurations, inspect running instances, and manually trigger lifecycles."
+    },
+    {
+      "type": "p",
+      "content": "To provision an instance using the command line, run the following command:"
+    },
+    {
+      "type": "code",
+      "content": "# Spawn a new Jules VM instance using the specified template",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy vm spawn \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--pool \"default-developer-pool\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--config \"./specs/jules-worker.yaml\" \\",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "--tags \"owner=sa-training,project=isolated-build\"",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "To verify that the VM has been successfully provisioned and is ready to accept execution payloads, check the status and retrieve its metadata:"
+    },
+    {
+      "type": "code",
+      "content": "# List active instances in the pool",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy vm list --pool \"default-developer-pool\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Query detailed runtime telemetry for a specific instance",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "agy vm status --id \"jules-worker-l300-9b98efbd\"",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> Always run `agy vm destroy` when debugging to prevent orphaned resources in your cloud billing account. Although the Pool Manager automatically reclaims expired VMs, manual intervention is recommended during testing."
+    },
+    {
+      "type": "h2",
+      "content": "Hands-on Lab Exercise: Spawning Your First Instance"
+    },
+    {
+      "type": "p",
+      "content": "- 1. Navigate to your workspace directory and create a spec file named jules-test-spec.yaml."
+    },
+    {
+      "type": "p",
+      "content": "- 2. Copy the YAML provisioning config shown above and modify the machine_type to e2-medium for development testing."
+    },
+    {
+      "type": "p",
+      "content": "- 3. Authenticate with your GCP project using the gcloud command line tool."
+    },
+    {
+      "type": "p",
+      "content": "- 4. Execute the agy vm spawn command pointing to your spec file."
+    },
+    {
+      "type": "p",
+      "content": "- 5. Monitor the startup progress using agy vm logs --id <instance_id>."
+    },
+    {
+      "type": "p",
+      "content": "- 6. Verify that the agent daemon has connected by running agy vm status --id <instance_id>."
+    },
+    {
+      "type": "p",
+      "content": "- 7. Terminate the instance using agy vm destroy --id <instance_id>."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Which field in the network_interfaces configuration ensures that the provisioned VM has no external public IPv4 address assigned?"
+    },
+    {
+      "type": "p",
+      "content": "- A) subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\""
+    },
+    {
+      "type": "p",
+      "content": "- B) access_config: []"
+    },
+    {
+      "type": "p",
+      "content": "- C) network: \"projects/tridorian-vpc/global/networks/jules-internal\""
+    },
+    {
+      "type": "p",
+      "content": "- D) network_tier: \"STANDARD\""
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** Setting an empty list for `access_config` prevents the assignment of an external public IP, forcing all traffic to stay within the internal VPC subnet and routed via cloud NAT or proxy."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** If you need to watch live system logs during the startup sequence of a spawned Jules VM, which command should you run?"
+    },
+    {
+      "type": "p",
+      "content": "- A) agy vm list"
+    },
+    {
+      "type": "p",
+      "content": "- B) agy vm status --id <instance_id>"
+    },
+    {
+      "type": "p",
+      "content": "- C) agy vm logs --id <instance_id>"
+    },
+    {
+      "type": "p",
+      "content": "- D) agy vm monitor --id <instance_id>"
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** C"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** The `agy vm logs` command streams stdout/stderr from the virtual machine startup script and the Jules agent daemon, showing real-time initialization telemetry."
+    }
+  ]
+}

@@ -3,8 +3,28 @@
   "modules": [
     {
       "id": "1",
-      "title": "1. Course Introduction",
-      "file": "modules/01-course-introduction.json"
+      "title": "1. Intro & The antigravity Board",
+      "file": "modules/01-1-intro-the-antigravity-board.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Asynchronous Agent Boards",
+      "file": "modules/02-2-asynchronous-agent-boards.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Prompting for Doc Generation",
+      "file": "modules/03-3-prompting-for-doc-generation.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Scraper Visual Playback Tapes",
+      "file": "modules/04-4-scraper-visual-playback-tapes.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Capstone Project & Assessment",
+      "file": "modules/05-5-capstone-project-assessment.json"
     }
   ]
 }

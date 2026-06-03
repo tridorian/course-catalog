@@ -1,0 +1,206 @@
+{
+  "id": "2",
+  "title": "2. Asynchronous Agent Boards",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [2. Asynchronous Agent Boards]"
+    },
+    {
+      "type": "h2",
+      "content": "The Lifecycle of Asynchronous Agent Cards"
+    },
+    {
+      "type": "p",
+      "content": "Unlike synchronous operations where you wait for a command to finish in your terminal, the antigravity board is designed for long-running, asynchronous tasks. When you submit a task to the board, a new \"Agent Card\" is spawned. Each card acts as an independent execution thread. This enables you to dispatch multiple agents in parallel."
+    },
+    {
+      "type": "p",
+      "content": "The lifecycle of a task card spans several distinct states:"
+    },
+    {
+      "type": "p",
+      "content": "- Proposed: The task is defined, and the system is analyzing initial parameters."
+    },
+    {
+      "type": "p",
+      "content": "- Planning: The agent is generating an execution plan (a series of steps it intends to perform)."
+    },
+    {
+      "type": "p",
+      "content": "- Executing: The agent is running command lines, writing files, or scraping websites."
+    },
+    {
+      "type": "p",
+      "content": "- Awaiting Approval: The agent has hit a security checkpoint or interactive boundary and requires human input."
+    },
+    {
+      "type": "p",
+      "content": "- Completed: The task completed successfully, and the generated markdown card is displayed in the Output Panel."
+    },
+    {
+      "type": "p",
+      "content": "- Failed: The agent encountered an unrecoverable error and aborted."
+    },
+    {
+      "type": "p",
+      "content": "> [!WARNING]"
+    },
+    {
+      "type": "p",
+      "content": "> By default, terminal execution rules require explicit human approval for safety. Never run the desktop board with the command option --auto-approve on your native host. This bypasses the approval loop and allows autonomous agents to modify files or execute scripts unchecked. Only use --auto-approve within a hardened containerized sandbox environment like agy-box."
+    },
+    {
+      "type": "h3",
+      "content": "Building the Human-in-the-Loop Collaboration Loop"
+    },
+    {
+      "type": "p",
+      "content": "The collaboration loop is the core mechanism of antigravity. When an agent card transitions to the \"Awaiting Approval\" state, the user is presented with three actions:"
+    },
+    {
+      "type": "p",
+      "content": "- Approve: Let the agent run the proposed action."
+    },
+    {
+      "type": "p",
+      "content": "- Redirect: Instruct the agent to change its approach (e.g., \"Use a different class name to scrape the pricing table because this selector is empty\")."
+    },
+    {
+      "type": "p",
+      "content": "- Reject: Abort the execution step immediately."
+    },
+    {
+      "type": "p",
+      "content": "Below is an example configuration for establishing custom execution permissions in the `.gemini/permissions.json` file. This tells the visual board which commands require approval:"
+    },
+    {
+      "type": "code",
+      "content": "{",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"allowed_commands\": [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"cat\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"grep\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"python3 -m json.tool\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "],",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"blocked_commands\": [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"rm -rf /\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"curl *\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "],",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"require_approval\": [",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"node scripts/*\",",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "\"python3 scraper.py\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: What state does an agent card enter when it attempts to run a script specified in the `require_approval` list of the permissions file?"
+    },
+    {
+      "type": "p",
+      "content": "A) Planning"
+    },
+    {
+      "type": "p",
+      "content": "B) Executing"
+    },
+    {
+      "type": "p",
+      "content": "C) Awaiting Approval"
+    },
+    {
+      "type": "p",
+      "content": "D) Failed"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is C. The card transitions to the Awaiting Approval state, prompting the user for input before proceeding."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: When is it considered safe to bypass the human approval loop using `--auto-approve`?"
+    },
+    {
+      "type": "p",
+      "content": "A) During all production web-scraping runs"
+    },
+    {
+      "type": "p",
+      "content": "B) Only when the AGY engine is running within a hardened containerized sandbox (agy-box)"
+    },
+    {
+      "type": "p",
+      "content": "C) Whenever you are running a local native script"
+    },
+    {
+      "type": "p",
+      "content": "D) When you want to speed up document generation"
+    },
+    {
+      "type": "p",
+      "content": "*Feedback*: The correct answer is B. `--auto-approve` should only be enabled when the execution environment is safely containerized to prevent accidental host modifications."
+    }
+  ]
+}

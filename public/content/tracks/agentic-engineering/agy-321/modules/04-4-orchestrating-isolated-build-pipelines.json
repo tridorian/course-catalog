@@ -1,0 +1,295 @@
+{
+  "id": "4",
+  "title": "4. Orchestrating Isolated Build Pipelines",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "In this module, we will explore how to construct, trigger, and monitor isolated build pipelines running inside Jules VM instances. You will learn to use both the AGY command-line interface and the programmatic SDKs to run multi-stage execution flows."
+    },
+    {
+      "type": "h2",
+      "content": "Programmatic SDK Integration"
+    },
+    {
+      "type": "p",
+      "content": "Solution Architects often build custom CI/CD integrations using the Google Antigravity SDK. The SDK allows you to orchestrate VMs, upload workspace zip files, execute compilation commands, and download artifacts. Below is a complete Python SDK script that provisions a VM from the pool, runs a build pipeline, and monitors output."
+    },
+    {
+      "type": "code",
+      "content": "import time",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from antigravity import AGYClient",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from antigravity.exceptions import VMExecutionError",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Initialize the client with active credentials",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "client = AGYClient(credentials_path=\"/var/home/wtg/.gcloud_config/application_default_credentials.json\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(\"Requesting VM from testing pool...\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "vm = client.vm.lease(pool_id=\"fast-testing-pool\", timeout_seconds=180)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Acquired VM: {vm.id} at IP: {vm.ip_address}\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Step 1: Upload the local workspace context",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(\"Uploading workspace context...\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "vm.upload_workspace(local_dir=\"./src/my-app\", remote_path=\"/workspace\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Step 2: Run clean dependencies installation",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(\"Executing installation...\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "install_result = vm.execute(command=\"npm ci\", working_dir=\"/workspace\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Installation exit code: {install_result.exit_code}\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Step 3: Execute tests",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(\"Running test suite...\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "test_result = vm.execute(command=\"npm run test -- --coverage\", working_dir=\"/workspace\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Test Exit Code: {test_result.exit_code}\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if test_result.exit_code != 0:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "raise VMExecutionError(\"Test suite failed inside isolated environment.\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Step 4: Download compiled bundle",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(\"Downloading build artifacts...\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "vm.download_artifact(remote_path=\"/workspace/dist\", local_destination=\"./dist\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(\"Build successfully completed and verified.\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "except Exception as e:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f\"Error during pipeline execution: {str(e)}\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "raise",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "finally:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(\"Releasing VM back to pool...\")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "client.vm.release(vm.id)",
+      "language": "bash"
+    },
+    {
+      "type": "h2",
+      "content": "Workspace Governance (.gemini.md)"
+    },
+    {
+      "type": "p",
+      "content": "To ensure that agents running within the VMs adhere to safety limits and compliance constraints, architects place a `.gemini.md` file in the root of the workspace. This file defines execution boundaries, prohibited shell utilities, and manual approval triggers."
+    },
+    {
+      "type": "code",
+      "content": "# Workspace Governance & Execution Rules",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "## Security Guardrails",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- Network Egress: Local Proxy Only (10.128.0.50)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- Allowed Commands: ['npm', 'git', 'node', 'pytest']",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- Prohibited Utilities: ['curl', 'wget', 'nc', 'iptables', 'sudo']",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "## Human-in-the-Loop Thresholds",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- Critical Actions: Require manual approval before executing `npm publish` or modifying environment variables.",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "- Directory Lock: Read-only access to `/etc` and `/var/run` inside the VM.",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Compliance Tip: When the agent attempts to run a prohibited command like `curl` inside the VM, the Jules daemon instantly intercepts it, logs a policy violation, and aborts the task with a code 126 (Permission Denied)."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** What is the role of the `client.vm.release(vm.id)` block in the SDK script?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To delete the VM spec from the local disk."
+    },
+    {
+      "type": "p",
+      "content": "- B) To notify the Pool Manager that the task is finished so the instance can be sanitized, recycled, and returned to the warm pool."
+    },
+    {
+      "type": "p",
+      "content": "- C) To pause execution until human input is received."
+    },
+    {
+      "type": "p",
+      "content": "- D) To update the Git repository with the latest test coverage reports."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** Releasing the VM releases the lock, allowing the Pool Manager to recycle the VM instance (wiping modifications) so it is clean for the next task."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Which governance file enforces command permissions and human-in-the-loop approvals for an agent running inside a Jules VM?"
+    },
+    {
+      "type": "p",
+      "content": "- A) packages.json"
+    },
+    {
+      "type": "p",
+      "content": "- B) .gemini.md"
+    },
+    {
+      "type": "p",
+      "content": "- C) Dockerfile"
+    },
+    {
+      "type": "p",
+      "content": "- D) startup-script.sh"
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** The `.gemini.md` file acts as the configuration manifest for workspace governance, specifying allowed commands, restricted directories, and actions that require human validation."
+    }
+  ]
+}

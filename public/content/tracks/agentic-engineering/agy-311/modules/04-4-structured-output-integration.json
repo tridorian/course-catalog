@@ -1,0 +1,438 @@
+{
+  "id": "4",
+  "title": "4. Structured Output Integration",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [4. Structured Output Integration]"
+    },
+    {
+      "type": "h2",
+      "content": "Structured JSON & Response Verification Schema"
+    },
+    {
+      "type": "p",
+      "content": "Integrating agents into software projects requires structured, predictable outputs instead of generic text. This module covers enforcing structured responses matching Pydantic classes (Python) and JSON Schema structures (Node.js)."
+    },
+    {
+      "type": "h3",
+      "content": "Enforcing Response Schemas"
+    },
+    {
+      "type": "p",
+      "content": "By supplying a schema to response_schema (Python) or responseSchema (Node.js) inside LocalAgentConfig, the model is constrained to output structured JSON. We access the validated, formatted data using the structured_output() response handler."
+    },
+    {
+      "type": "h3",
+      "content": "Python Structured Output Script"
+    },
+    {
+      "type": "p",
+      "content": "This script utilizes a Pydantic model to extract data points into a Python dictionary."
+    },
+    {
+      "type": "code",
+      "content": "import asyncio",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "from google.antigravity import Agent, LocalAgentConfig",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "import pydantic",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Define the target schema structure using Pydantic",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "class SystemHealthReport(pydantic.BaseModel):",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "hostname: str",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "status: str",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "disk_utilization_pct: float",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "critical_warnings: list[str]",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async def structured_output_run():",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "config = LocalAgentConfig(",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "response_schema=SystemHealthReport",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": ")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async with Agent(config) as agent:",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "prompt = (",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "'Parse this status input: web-node-03 is running correctly. '",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "'Disk space utilization is currently at 78.4 percent. '",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "'Warnings: low_memory_warning detected.'",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": ")",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "response = await agent.chat(prompt)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Access the parsed JSON matching the Pydantic schema",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "data = await response.structured_output()",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print('Parsed Python Dictionary:')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(data)",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# Field verification",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f'Host: {data.get(\"hostname\")}')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "print(f'Disk utilization: {data.get(\"disk_utilization_pct\")}%')",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if __name__ == '__main__':",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "asyncio.run(structured_output_run())",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Node.js Structured Output Script"
+    },
+    {
+      "type": "p",
+      "content": "Below is the equivalent implementation in Node.js using JSON Schema to enforce structure."
+    },
+    {
+      "type": "code",
+      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "async function runStructuredOutput() {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// Define response validation schema using JSON Schema",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const reportSchema = {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "type: 'object',",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "properties: {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "hostname: { type: 'string' },",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "status: { type: 'string' },",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "disk_utilization_pct: { type: 'number' },",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "critical_warnings: {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "type: 'array',",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "items: { type: 'string' }",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "},",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "required: ['hostname', 'status', 'disk_utilization_pct', 'critical_warnings']",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "};",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const config = new LocalAgentConfig({",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "responseSchema: reportSchema",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "});",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const agent = new Agent(config);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.start();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "try {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const prompt =",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "'Parse this status input: web-node-03 is running correctly. ' +",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "'Disk space utilization is currently at 78.4 percent. ' +",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "'Warnings: low_memory_warning detected.';",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const response = await agent.chat(prompt);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "// Access validated JSON payload",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "const data = await response.structured_output();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log('Parsed Javascript Object:');",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log(data);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log(`Host: ${data.hostname}`);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "console.log(`Disk utilization: ${data.disk_utilization_pct}%`);",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "} finally {",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "await agent.stop();",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "}",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "runStructuredOutput().catch(console.error);",
+      "language": "bash"
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> If the model's output cannot be successfully parsed against the schema, response.structured_output() will return None (Python) or null (Node.js). Ensure your integrations validate outputs before passing data down the pipeline."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which method is invoked to retrieve the parsed JSON payload matching the configured schema?"
+    },
+    {
+      "type": "p",
+      "content": "- A) response.json()"
+    },
+    {
+      "type": "p",
+      "content": "- B) response.structured_output()"
+    },
+    {
+      "type": "p",
+      "content": "- C) response.to_dict()"
+    },
+    {
+      "type": "p",
+      "content": "- D) response.get_schema_output()"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. The structured_output() method parses, validates, and yields the matching JSON response structure."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: How do you register a validation schema in the Node.js SDK?"
+    },
+    {
+      "type": "p",
+      "content": "- A) By passing a Pydantic class imported from Python."
+    },
+    {
+      "type": "p",
+      "content": "- B) By writing a standard XML Schema document."
+    },
+    {
+      "type": "p",
+      "content": "- C) By defining a JSON Schema object under the responseSchema configuration parameter."
+    },
+    {
+      "type": "p",
+      "content": "- D) By using a regular expression filter string."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: C. In Node.js, the validation schema is registered as a standard JSON Schema object under the responseSchema parameter inside LocalAgentConfig."
+    }
+  ]
+}

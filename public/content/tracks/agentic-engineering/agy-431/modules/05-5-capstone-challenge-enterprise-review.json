@@ -1,0 +1,277 @@
+{
+  "id": "5",
+  "title": "5. Capstone Challenge & Enterprise Review",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "The Platform Engineer Capstone Challenge"
+    },
+    {
+      "type": "p",
+      "content": "The final assessment for the L400 Platform Engineer credential is a comprehensive, hands-on integration test. You must build, configure, deploy, and verify a complete, containerized agentic development pipeline. This capstone is designed to simulate a real-world enterprise infrastructure deployment under proxy and network constraints."
+    },
+    {
+      "type": "h3",
+      "content": "Overview of Capstone Deliverables"
+    },
+    {
+      "type": "p",
+      "content": "To successfully pass this challenge and earn the Certified AGY Platform Engineer badge, you must deliver:"
+    },
+    {
+      "type": "p",
+      "content": "- A custom agy-box Dockerfile containing corporate proxy settings and corporate CA certificates."
+    },
+    {
+      "type": "p",
+      "content": "- An automated deployment script using Podman and systemd on a mock remote cloud VM."
+    },
+    {
+      "type": "p",
+      "content": "- A functional GitLab CI/CD workflow YAML configuration that executes a headless agy execution run in --auto-approve mode."
+    },
+    {
+      "type": "p",
+      "content": "- A verified .gemini.md rules schema restricting the agent from running any commands matching destructive patterns (e.g., rm -rf /)."
+    },
+    {
+      "type": "h3",
+      "content": "Step-by-Step Verification Script"
+    },
+    {
+      "type": "p",
+      "content": "Use the following local shell script to verify your capstone components before submitting for grading. The verification tool checks container status, mounts, proxy variables, and runs a diagnostic CLI check."
+    },
+    {
+      "type": "code",
+      "content": "#!/usr/bin/env bash",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# verification.sh - L400 Capstone Validation Tool",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "set -euo pipefail",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"===========================================\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"🔍 Running AGY-431 Capstone Verification Script\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"===========================================\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# 1. Check container execution status",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if ! podman ps | grep -q \"agy-sandbox\"; then",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"❌ Error: Podman container 'agy-sandbox' is not running!\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "exit 1",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "else",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"✓ Container 'agy-sandbox' is running.\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "fi",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# 2. Check proxy settings in the container environment",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "PROXY_ENV=&quot;$(podman exec agy-sandbox env | grep -E \"HTTPS_PROXY|HTTPS_PROXY\" || true)&quot;",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if [ -z \"$PROXY_ENV\" ]; then",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"⚠️ Warning: No HTTP/HTTPS proxy configuration detected in the container!\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "else",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"✓ Proxy variables mapped: \"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"$PROXY_ENV\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "fi",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# 3. Check workspace directory mount",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "if ! podman exec agy-sandbox ls /workspace >/dev/null 2>&1; then",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"❌ Error: /workspace directory is not successfully mounted!\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "exit 1",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "else",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"✓ Workspace directory mount verified.\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "fi",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "# 4. Execute headless dry run check",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"⚙ Running diagnostic CLI dry run inside the container...\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "podman exec agy-sandbox agy --verify --headless",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"===========================================\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"🎉 Verification passed! Ready for certification submission.\"",
+      "language": "bash"
+    },
+    {
+      "type": "code",
+      "content": "echo \"===========================================\"",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the purpose of mapping the workspace folder to the container as a volume instead of copying files directly into the container image?"
+    },
+    {
+      "type": "p",
+      "content": "A) Volume mapping is faster than building images."
+    },
+    {
+      "type": "p",
+      "content": "B) Volume mapping allows files edited by the agent inside the container to persist on the host filesystem immediately, maintaining an immutable tool environment."
+    },
+    {
+      "type": "p",
+      "content": "C) To bypass SSL certificate validation."
+    },
+    {
+      "type": "p",
+      "content": "D) Docker requires all containers to map volumes."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: B. Decoupling the tool environment (immutable container image) from the work directory (dynamic host volume) allows the agent to safely edit files that persist on the host, without needing to rebuild the image."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What is checked by the capstone verification script to ensure pipeline security?"
+    },
+    {
+      "type": "p",
+      "content": "A) The presence of a graphics driver."
+    },
+    {
+      "type": "p",
+      "content": "B) Container running status, proxy environment variables, workspace volume mount, and successful dry-run validation."
+    },
+    {
+      "type": "p",
+      "content": "C) Snyk vulnerability scanning logs."
+    },
+    {
+      "type": "p",
+      "content": "D) Host root partition size."
+    },
+    {
+      "type": "p",
+      "content": "> [!NOTE]"
+    },
+    {
+      "type": "p",
+      "content": "> Correct Answer: B. The validation script checks container status, proxy mapping, workspace mounts, and CLI status checks to confirm environment readiness."
+    }
+  ]
+}

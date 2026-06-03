@@ -1,0 +1,58 @@
+{
+  "id": "3",
+  "title": "3. Lab - The Hardened Install (Tarball Method)",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "[3. Lab - The Hardened Install (AGV Easy Install)]"
+    },
+    {
+      "type": "h1",
+      "content": "**Lab 1: The Hardened Install\n**"
+    },
+    {
+      "type": "p",
+      "content": "**Learning Objective:** Successfully install Google Antigravity on a secure Linux VM using a 1-click interactive installation script, bypassing the need for Docker or restricted repositories."
+    },
+    {
+      "type": "p",
+      "content": "**Lab Steps:\n**"
+    },
+    {
+      "type": "p",
+      "content": "**1. Verify Cloudtop VM** Ensure your Cloudtop VM is provisioned and active. Open your local terminal."
+    },
+    {
+      "type": "p",
+      "content": "**2. Run the AGV Easy Install Script** We will use the unofficial AGV Easy Install manager by wtg-codes. This script auto-detects your environment and recommends the best method. Execute the following command in your terminal:"
+    },
+    {
+      "type": "p",
+      "content": "curl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agv-easy-install/main/antigravity-manager.sh\" | bash"
+    },
+    {
+      "type": "p",
+      "content": "💡 **Instructor Comment:** If curl fails, ensure you have an active internet connection. If the gum UI fails to download, the script will gracefully fall back to a plain text menu."
+    },
+    {
+      "type": "p",
+      "content": "**3. Navigate the Interactive Menu** Once the script launches, you will see a hierarchical menu system."
+    },
+    {
+      "type": "list",
+      "items": [
+        "Choose **Install** from the main menu.",
+        "When prompted for the installation method, select **Official Binary (.tar.gz)**."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "🛑 **Security Note:** While the script supports APT/DNF and Homebrew, selecting the Official Binary method is required for our corporate Cloudtop environment to bypass system repository restrictions."
+    },
+    {
+      "type": "p",
+      "content": "**4. Locate Application** Once the script successfully completes, it will map the binaries to ~/.local/bin/antigravity. Go back to the desktop, click on the app grid icon on the bottom left, and locate the new Antigravity icon."
+    }
+  ]
+}
