@@ -29,6 +29,7 @@ import GlobalControls from './components/GlobalControls';
 import { useTheme } from './hooks/useTheme';
 import * as themeAudio from './services/themeAudio';
 import BadgeCelebration from './components/BadgeCelebration';
+import { extractQuizQuestions } from './services/quizParser';
 
 // --- Main App Component ---
 
@@ -48,6 +49,7 @@ function AppContent({ theme, setTheme }) {
   const [showResetModal, setShowResetModal] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [activeStepQuizPassed, setActiveStepQuizPassed] = useState(true);
 
 
   const { trackId, courseId, moduleId } = useParams();
@@ -211,6 +213,27 @@ function AppContent({ theme, setTheme }) {
   const totalSteps = courseSteps.length;
   const progressPercentage = totalSteps > 0 ? (completedSteps.length / totalSteps) * 100 : 0;
 
+  // Re-evaluate quiz unlocking whenever module, step index, activeStep or completedSteps changes
+  useEffect(() => {
+    if (!activeStep) return;
+    
+    // Check if active step has an interactive quiz
+    const questions = extractQuizQuestions(activeStep.blocks);
+    const hasQuiz = questions && questions.length > 0;
+    
+    if (hasQuiz) {
+      // If the step is already marked as completed, it's unlocked
+      if (completedSteps.includes(activeStepIndex)) {
+        setActiveStepQuizPassed(true);
+      } else {
+        setActiveStepQuizPassed(false);
+      }
+    } else {
+      // If no quiz, progress is always unlocked
+      setActiveStepQuizPassed(true);
+    }
+  }, [moduleId, activeStepIndex, activeStep, completedSteps]);
+
   // Scroll to top when step changes
   useEffect(() => {
     if (activeStepIndex !== 0) {
@@ -262,6 +285,17 @@ function AppContent({ theme, setTheme }) {
 
   const handleToggleComplete = async (index, e) => {
     e.stopPropagation();
+
+    // Check if the step being completed has an unpassed quiz
+    const targetStep = courseSteps[index];
+    const questions = extractQuizQuestions(targetStep?.blocks);
+    const hasQuiz = questions && questions.length > 0;
+
+    if (!completedSteps.includes(index) && index === activeStepIndex && hasQuiz && !activeStepQuizPassed) {
+      alert("Comprehension check required. Please pass the module quiz first.");
+      return;
+    }
+
     let updated;
     if (completedSteps.includes(index)) {
       updated = completedSteps.filter(i => i !== index);
@@ -568,7 +602,7 @@ function AppContent({ theme, setTheme }) {
 
           {/* Inject Content */}
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} />
+            <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} onQuizPassed={() => setActiveStepQuizPassed(true)} />
           </div>
             </>
           )}
@@ -592,17 +626,28 @@ function AppContent({ theme, setTheme }) {
 
           {activeStepIndex === totalSteps - 1 ? (
             <button
+              disabled={!activeStepQuizPassed}
               onClick={completeCourse}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse"
+              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
+                activeStepQuizPassed
+                  ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse'
+                  : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
+              }`}
             >
-              <Trophy size={20} />
+              {activeStepQuizPassed ? <Trophy size={20} /> : <Lock size={20} />}
               Complete Course
             </button>
           ) : (
             <button
+              disabled={!activeStepQuizPassed}
               onClick={goToNext}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-accent text-accent-fg hover:brightness-110 shadow-accent"
+              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
+                activeStepQuizPassed
+                  ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent'
+                  : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
+              }`}
             >
+              {!activeStepQuizPassed && <Lock size={16} />}
               Next
               <ChevronRight size={20} />
             </button>

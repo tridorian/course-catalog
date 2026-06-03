@@ -4,8 +4,9 @@ import CodeBlock from './CodeBlock';
 import InfoBox from './InfoBox';
 import WarningBox from './WarningBox';
 import { VideoEmbed, SlideDeckEmbed } from './Embeds';
+import InteractiveQuiz from './InteractiveQuiz';
 
-const ContentRenderer = ({ blocks, sourceFile }) => {
+const ContentRenderer = ({ blocks, sourceFile, onQuizPassed }) => {
   if (!blocks) return null;
 
   return (
@@ -88,9 +89,9 @@ const ContentRenderer = ({ blocks, sourceFile }) => {
                           {item.prompt && (
                              <div className="bg-[#050805]/40 p-4 rounded-xl text-text-muted font-mono text-sm border border-border-main mt-2 mb-2 italic">
                               Prompt: "{item.prompt}"
-                            </div>
+                             </div>
                           )}
-                          {item.sub_blocks && <ContentRenderer blocks={item.sub_blocks} />}
+                          {item.sub_blocks && <ContentRenderer blocks={item.sub_blocks} onQuizPassed={onQuizPassed} sourceFile={sourceFile} />}
                         </>
                       )}
                     </div>
@@ -208,6 +209,9 @@ const ContentRenderer = ({ blocks, sourceFile }) => {
                 </ul>
               </div>
             );
+
+          case 'interactive_quiz':
+            return <InteractiveQuiz key={index} questions={block.questions} onPassed={onQuizPassed} />;
 
           default:
             return null;

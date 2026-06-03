@@ -153,4 +153,68 @@ describe('App Integration', () => {
     expect(screen.getByText('Numeric Content 1')).toBeInTheDocument();
     expect(screen.queryByText('Numeric Content 2')).not.toBeInTheDocument();
   });
+
+  it('locks progression if active module contains a quiz', async () => {
+    // Override test1.json mock to have a quiz
+    contentLoader.fetchModuleContent.mockImplementation((trackId, courseId, path) => {
+      if (path === 'test1.json') {
+        return Promise.resolve({
+          id: 'module-1',
+          title: 'Test Module 1',
+          type: 'lab',
+          blocks: [
+            { type: 'h1', content: 'Hello World 1' },
+            { type: 'h2', content: 'Check your understanding' },
+            { type: 'p', content: 'Question 1: Is this a test?' },
+            { type: 'list', items: ['A) Yes', 'B) No'] },
+            { type: 'p', content: 'Correct Answer: A' }
+          ]
+        });
+      }
+      return Promise.resolve({
+        id: 'module-2',
+        title: 'Test Module 2',
+        type: 'lab',
+        blocks: [{ type: 'h1', content: 'Hello World 2' }]
+      });
+    });
+
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    renderApp();
+
+    await waitFor(() => {
+      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+    });
+
+    // Check that quiz question is displayed
+    await waitFor(() => {
+      expect(screen.getByText('Is this a test?')).toBeInTheDocument();
+    });
+
+    // Next button should be disabled
+    const nextBtn = screen.getByRole('button', { name: /Next/i });
+    expect(nextBtn).toBeDisabled();
+
+    // Clicking completion checkbox in the sidebar for active step should show alert
+    const checkboxToggle = screen.getByTestId('toggle-complete-0');
+    fireEvent.click(checkboxToggle);
+    expect(alertMock).toHaveBeenCalledWith(expect.stringContaining("Comprehension check required"));
+
+    // Select the correct option: "Yes"
+    const optionBtn = screen.getByRole('button', { name: /Yes/i });
+    fireEvent.click(optionBtn);
+
+    // Submit answer
+    const submitBtn = screen.getByRole('button', { name: /Submit Answer/i });
+    fireEvent.click(submitBtn);
+
+    // Quiz passed, nextBtn should be enabled
+    await waitFor(() => {
+      expect(nextBtn).not.toBeDisabled();
+    });
+
+    // Clean up
+    alertMock.mockRestore();
+  });
 });

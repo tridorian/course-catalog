@@ -2,8 +2,9 @@ import React from 'react';
 import ContentRenderer from './ContentRenderer';
 import { SlideDeckEmbed, VideoEmbed } from './Embeds';
 import { FileText, ExternalLink } from 'lucide-react';
+import { replaceQuizWithWidget } from '../services/quizParser';
 
-const ModuleRenderer = ({ module, sourceFile }) => {
+const ModuleRenderer = ({ module, sourceFile, onQuizPassed }) => {
   if (!module) return null;
 
   switch (module.type) {
@@ -58,8 +59,10 @@ const ModuleRenderer = ({ module, sourceFile }) => {
       );
 
     case 'lab':
-    default:
-      return <ContentRenderer blocks={module.blocks} sourceFile={sourceFile} />;
+    default: {
+      const parsedBlocks = replaceQuizWithWidget(module.blocks);
+      return <ContentRenderer blocks={parsedBlocks} sourceFile={sourceFile} onQuizPassed={onQuizPassed} />;
+    }
   }
 };
 
