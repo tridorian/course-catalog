@@ -94,20 +94,20 @@ This roadmap outlines the phased development of the platform, following a strict
 
 ### 4.1 Sync Testing
 - [x] **Step 1:** Mock Google Drive API responses to test `ProgressService` save/load cycles.
-- [ ] **Step 2:** Implement a "Sync Status" indicator test (Idle, Syncing, Error, Success).
+- [x] **Step 2:** Implement a "Sync Status" indicator test (Idle, Syncing, Error, Success).
 
 ### 4.2 Progress Persistence
 - [x] **Sub-step:** Refine `src/services/googleDrive.js` to store `completedSteps` and `activeStep` in `appProperties`.
-- [ ] **Sub-step:** Implement "Resume from last session" prompt on course load.
+- [x] **Sub-step:** Implement "Resume from last session" prompt on course load.
 
 ### 4.3 Content Sync Engine (CI/CD)
-- [ ] **Sub-step:** Expand `scripts/sync-docs.js` to automatically create/update the `public/content/` folder structure based on the Google Doc tabs.
-- [ ] **Sub-step:** Integrate the sync script into GitHub Actions for automated content deployments.
+- [x] **Sub-step:** Expand `scripts/sync-docs.js` to automatically create/update the `public/content/` folder structure based on the Google Doc tabs.
+- [x] **Sub-step:** Integrate the sync script into GitHub Actions for automated content deployments.
 
 ### Exit Criteria
-- Progress is saved to Google Drive and survives page refreshes.
-- Changes in Google Docs are reflected in the app after a CI/CD run.
-- **PR 4:** "Cloud: Google Drive persistence and automated content sync."
+- [x] Progress is saved to Google Drive and survives page refreshes.
+- [x] Changes in Google Docs are reflected in the app after a CI/CD run.
+- [x] **PR 4:** "Cloud: Google Drive persistence and automated content sync."
 
 ---
 
