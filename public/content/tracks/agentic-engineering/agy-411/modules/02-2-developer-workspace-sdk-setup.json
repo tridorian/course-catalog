@@ -4,720 +4,209 @@
   "type": "lab",
   "blocks": [
     {
-      "type": "p",
-      "content": "## Prerequisites and Developer Environment Setup"
+      "type": "h2",
+      "content": "Prerequisites and Developer Environment Setup"
     },
     {
       "type": "p",
-      "content": "Building production-ready MCP servers requires setting up node runtimes and virtual environments. We support both Node.js (TypeScript) and Python SDKs. These SDKs handle the details of JSON-RPC schema validation and stdio streaming under the hood."
+      "content": "Building production-ready MCP servers requires setting up node runtimes and virtual environments. We support both Node.js (TypeScript) and Python SDKs. These SDKs handle the details of JSON-RPC schema validation and stdio streaming under the hood. In this section, we will first walk through setting up an official cloud-backed MCP server—the Google Developer Knowledge MCP—to understand configuration, and then build custom servers using Node.js and Python."
+    },
+    {
+      "type": "h2",
+      "content": "Hands-on Lab: Configuring the Google Developer Knowledge MCP"
     },
     {
       "type": "p",
-      "content": "### Initializing a Node.js TypeScript Workspace"
+      "content": "The Google Developer Knowledge MCP server provides real-time, canonical access to Google's public developer documentation. Rather than relying on outdated model training data or brittle web scraping, configuring this server connects the AI agent directly to live documentation. This is an essential step for building high-quality Integrator agent flows."
+    },
+    {
+      "type": "h3",
+      "content": "Step 1: Enabling the Developer Knowledge API"
     },
     {
       "type": "p",
-      "content": "To construct a TypeScript MCP server, initialize the npm environment and install the required compiler tools:"
+      "content": "To query Google's developer knowledge base, you must enable its API in the Google Cloud Console:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Navigate to the Google Cloud Console (console.cloud.google.com).",
+        "Select an existing Google Cloud project or create a new one (billing is not required).",
+        "Go to the API Library and search for 'Developer Knowledge API'.",
+        "Click 'Enable' and wait for the process to complete."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Step 2: Generating and Restricting the API Key"
     },
     {
       "type": "p",
-      "content": "```bash"
+      "content": "Authentication is performed using a Google Cloud API key. For security, you must restrict the API key so it only has permission to query the Developer Knowledge API:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "In the Google Cloud Console, navigate to 'APIs & Services' > 'Credentials'.",
+        "Click '+ Create credentials' at the top of the screen and select 'API key'.",
+        "Once created, click the three vertical dots next to the key to edit it.",
+        "Change the name of the key to 'Antigravity-DevKnowledge-Key'.",
+        "Under 'API restrictions', select 'Restrict key'.",
+        "Type 'Developer Knowledge API' in the filter box, select it, and click OK.",
+        "Click 'Save' and copy the generated API key string to your clipboard."
+      ]
+    },
+    {
+      "type": "warning",
+      "content": "API keys are sensitive credentials. Never expose them in public Git repositories, frontend client bundles, or share them in cleartext. Keep them stored in environment variables, secret managers, or local configuration files."
+    },
+    {
+      "type": "h3",
+      "content": "Step 3: Configuring the Central mcp_config.json"
     },
     {
       "type": "p",
-      "content": "# Create project folder"
+      "content": "All three Antigravity user interfaces (antigravity desktop app, antigravity-ide, and the agy CLI) share a central configuration file located at '~/.gemini/config/mcp_config.json'. Open this file in your text editor and declare the 'google-developer-knowledge' server:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"mcpServers\": {\n    \"google-developer-knowledge\": {\n      \"headers\": {\n        \"X-Goog-Api-Key\": \"<YOUR_API_KEY_HERE>\"\n      },\n      \"serverUrl\": \"https://developerknowledge.googleapis.com/mcp\"\n    }\n  }\n}"
     },
     {
       "type": "p",
-      "content": "mkdir -p ~/workspace/agy-mcp-server-ts"
+      "content": "Replace '<YOUR_API_KEY_HERE>' with the restricted API key you copied from the Google Cloud Console, then save the file."
+    },
+    {
+      "type": "h3",
+      "content": "Step 4: Validating Setup across the Decoupled Interfaces"
     },
     {
       "type": "p",
-      "content": "cd ~/workspace/agy-mcp-server-ts"
+      "content": "To ensure Antigravity has successfully loaded the Google Developer Knowledge MCP, use the validation paths corresponding to your active interface surface:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Antigravity 2.0 (Standalone Desktop UI): Navigate to Settings (gear icon) -> Customizations. Under Installed MCP Servers, click 'Refresh'. Look for 'google-developer-knowledge' to verify it is active.",
+        "Antigravity IDE: Open the VS Code-based editor, go to User Settings via the agent panel menu -> Customizations -> click Refresh under Installed MCP Servers.",
+        "Antigravity CLI (agy): Open a terminal, start the CLI session by running 'agy', then type the diagnostic command '/mcp' and press enter. You should see 'google-developer-knowledge' listed under configured servers."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Step 5: Testing with Natural Language Prompts"
     },
     {
       "type": "p",
-      "content": "# Initialize package"
+      "content": "To verify that the agent can actively query the developer knowledge base, start a session and execute a query. When you run a query using the developer knowledge base for the first time, Antigravity will display a prompt asking for approval. You must click 'Allow' to proceed."
+    },
+    {
+      "type": "info",
+      "content": "The approval flow is a critical security guardrail. Antigravity requires explicit user confirmation before executing third-party tools, preventing unvetted code execution in secure environments."
     },
     {
       "type": "p",
-      "content": "npm init -y"
+      "content": "Try testing the integration with the following natural language prompts:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "\"Based on the Google Developer Knowledge, does Google Workspace support MCP servers?\"",
+        "\"Give me a list of the Google Workspace and Cloud Run API names. Make it super short.\"",
+        "\"Based on the Google Developer Knowledge, create a new Python script to upload a file to Google Drive.\""
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Initializing a Node.js TypeScript Workspace"
     },
     {
       "type": "p",
-      "content": "# Install standard dependencies"
+      "content": "To construct a custom TypeScript MCP server from scratch, initialize the npm environment and install the required compiler tools:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Create project folder\nmkdir -p ~/workspace/agy-mcp-server-ts\ncd ~/workspace/agy-mcp-server-ts\n\n# Initialize package\nnpm init -y\n\n# Install standard dependencies\nnpm install @modelcontextprotocol/sdk\n\n# Install development dependencies\nnpm install -D typescript @types/node tsx\n\n# Generate default configuration\nnpx tsc --init"
     },
     {
       "type": "p",
-      "content": "npm install @modelcontextprotocol/sdk"
+      "content": "Edit the generated tsconfig.json file to utilize ESM imports and modern JS targets:"
     },
     {
-      "type": "p",
-      "content": "# Install development dependencies"
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"module\": \"NodeNext\",\n    \"moduleResolution\": \"NodeNext\",\n    \"esModuleInterop\": true,\n    \"strict\": true,\n    \"skipLibCheck\": true,\n    \"outDir\": \"./dist\"\n  },\n  \"include\": [\"src/**/*\"]\n}"
     },
     {
-      "type": "p",
-      "content": "npm install -D typescript @types/node tsx"
-    },
-    {
-      "type": "p",
-      "content": "# Generate default configuration"
-    },
-    {
-      "type": "p",
-      "content": "npx tsc --init"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "Edit the compiled tsconfig.json file to utilize ESM imports and modern JS targets:"
-    },
-    {
-      "type": "p",
-      "content": "```json"
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "\"compilerOptions\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"target\": \"ES2022\","
-    },
-    {
-      "type": "p",
-      "content": "\"module\": \"NodeNext\","
-    },
-    {
-      "type": "p",
-      "content": "\"moduleResolution\": \"NodeNext\","
-    },
-    {
-      "type": "p",
-      "content": "\"esModuleInterop\": true,"
-    },
-    {
-      "type": "p",
-      "content": "\"strict\": true,"
-    },
-    {
-      "type": "p",
-      "content": "\"skipLibCheck\": true,"
-    },
-    {
-      "type": "p",
-      "content": "\"outDir\": \"./dist\""
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "\"include\": [\"src/**/*\"]"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "### Writing the TypeScript Server"
+      "type": "h2",
+      "content": "Writing the TypeScript Server"
     },
     {
       "type": "p",
       "content": "Create 'src/index.ts'. This script instantiates a basic Server class registering a system resource URI and a diagnostic echo tool:"
     },
     {
-      "type": "p",
-      "content": "```typescript"
+      "type": "code",
+      "language": "typescript",
+      "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport {\n  CallToolRequestSchema,\n  ListResourcesRequestSchema,\n  ListToolsRequestSchema,\n  ReadResourceRequestSchema\n} from \"@modelcontextprotocol/sdk/types.js\";\n\n// Instantiate server\nconst server = new Server(\n  {\n    name: \"diagnostic-server\",\n    version: \"1.0.0\"\n  },\n  {\n    capabilities: {\n      resources: {},\n      tools: {}\n    }\n  }\n);\n\n// List resources handler\nserver.setRequestHandler(ListResourcesRequestSchema, async () => {\n  return {\n    resources: [\n      {\n        uri: \"diagnostic://metrics\",\n        name: \"System Performance Metrics\",\n        mimeType: \"application/json\",\n        description: \"Live system diagnostic statistics\"\n      }\n    ]\n  };\n});\n\n// Read resource handler\nserver.setRequestHandler(ReadResourceRequestSchema, async (request) => {\n  if (request.params.uri === \"diagnostic://metrics\") {\n    return {\n      contents: [\n        {\n          uri: request.params.uri,\n          mimeType: \"application/json\",\n          text: JSON.stringify({\n            status: \"HEALTHY\",\n            cpu_usage_pct: 12.5,\n            memory_free_gb: 8.4,\n            timestamp: new Date().toISOString()\n          })\n        }\n      ]\n    };\n  }\n  throw new Error(\"Resource not found\");\n});\n\n// List tools handler\nserver.setRequestHandler(ListToolsRequestSchema, async () => {\n  return {\n    tools: [\n      {\n        name: \"echo_diagnostics\",\n        description: \"Echoes back status metrics with custom user label\",\n        inputSchema: {\n          type: \"object\",\n          properties: {\n            label: {\n              type: \"string\",\n              description: \"A custom label for the audit logs\"\n            }\n          },\n          required: [\"label\"]\n        }\n      }\n    ]\n  };\n});\n\n// Call tool handler\nserver.setRequestHandler(CallToolRequestSchema, async (request) => {\n  if (request.params.name === \"echo_diagnostics\") {\n    const label = request.params.arguments?.label || \"default\";\n    return {\n      content: [\n        {\n          type: \"text\",\n          text: `Diagnostics generated with label: [${label}]. All systems nominal.`\n        }\n      ]\n    };\n  }\n  throw new Error(\"Tool not found\");\n});\n\n// Start the server\nasync function run() {\n  const transport = new StdioServerTransport();\n  await server.connect(transport);\n  console.error(\"Diagnostic MCP Server running on stdio\");\n}\n\nrun().catch((error) => {\n  console.error(\"Fatal error:\", error);\n  process.exit(1);\n});"
     },
     {
-      "type": "p",
-      "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";"
-    },
-    {
-      "type": "p",
-      "content": "import { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";"
-    },
-    {
-      "type": "p",
-      "content": "import {"
-    },
-    {
-      "type": "p",
-      "content": "CallToolRequestSchema,"
-    },
-    {
-      "type": "p",
-      "content": "ListResourcesRequestSchema,"
-    },
-    {
-      "type": "p",
-      "content": "ListToolsRequestSchema,"
-    },
-    {
-      "type": "p",
-      "content": "ReadResourceRequestSchema"
-    },
-    {
-      "type": "p",
-      "content": "} from \"@modelcontextprotocol/sdk/types.js\";"
-    },
-    {
-      "type": "p",
-      "content": "// Instantiate server"
-    },
-    {
-      "type": "p",
-      "content": "const server = new Server("
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "name: \"diagnostic-server\","
-    },
-    {
-      "type": "p",
-      "content": "version: \"1.0.0\""
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "capabilities: {"
-    },
-    {
-      "type": "p",
-      "content": "resources: {},"
-    },
-    {
-      "type": "p",
-      "content": "tools: {}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": ");"
-    },
-    {
-      "type": "p",
-      "content": "// List resources handler"
-    },
-    {
-      "type": "p",
-      "content": "server.setRequestHandler(ListResourcesRequestSchema, async () => {"
-    },
-    {
-      "type": "p",
-      "content": "return {"
-    },
-    {
-      "type": "p",
-      "content": "resources: ["
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "uri: \"diagnostic://metrics\","
-    },
-    {
-      "type": "p",
-      "content": "name: \"System Performance Metrics\","
-    },
-    {
-      "type": "p",
-      "content": "mimeType: \"application/json\","
-    },
-    {
-      "type": "p",
-      "content": "description: \"Live system diagnostic statistics\""
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "]"
-    },
-    {
-      "type": "p",
-      "content": "};"
-    },
-    {
-      "type": "p",
-      "content": "});"
-    },
-    {
-      "type": "p",
-      "content": "// Read resource handler"
-    },
-    {
-      "type": "p",
-      "content": "server.setRequestHandler(ReadResourceRequestSchema, async (request) => {"
-    },
-    {
-      "type": "p",
-      "content": "if (request.params.uri === \"diagnostic://metrics\") {"
-    },
-    {
-      "type": "p",
-      "content": "return {"
-    },
-    {
-      "type": "p",
-      "content": "contents: ["
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "uri: request.params.uri,"
-    },
-    {
-      "type": "p",
-      "content": "mimeType: \"application/json\","
-    },
-    {
-      "type": "p",
-      "content": "text: JSON.stringify({"
-    },
-    {
-      "type": "p",
-      "content": "status: \"HEALTHY\","
-    },
-    {
-      "type": "p",
-      "content": "cpu_usage_pct: 12.5,"
-    },
-    {
-      "type": "p",
-      "content": "memory_free_gb: 8.4,"
-    },
-    {
-      "type": "p",
-      "content": "timestamp: new Date().toISOString()"
-    },
-    {
-      "type": "p",
-      "content": "})"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "]"
-    },
-    {
-      "type": "p",
-      "content": "};"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "throw new Error(\"Resource not found\");"
-    },
-    {
-      "type": "p",
-      "content": "});"
-    },
-    {
-      "type": "p",
-      "content": "// List tools handler"
-    },
-    {
-      "type": "p",
-      "content": "server.setRequestHandler(ListToolsRequestSchema, async () => {"
-    },
-    {
-      "type": "p",
-      "content": "return {"
-    },
-    {
-      "type": "p",
-      "content": "tools: ["
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "name: \"echo_diagnostics\","
-    },
-    {
-      "type": "p",
-      "content": "description: \"Echoes back status metrics with custom user label\","
-    },
-    {
-      "type": "p",
-      "content": "inputSchema: {"
-    },
-    {
-      "type": "p",
-      "content": "type: \"object\","
-    },
-    {
-      "type": "p",
-      "content": "properties: {"
-    },
-    {
-      "type": "p",
-      "content": "label: {"
-    },
-    {
-      "type": "p",
-      "content": "type: \"string\","
-    },
-    {
-      "type": "p",
-      "content": "description: \"A custom label for the audit logs\""
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "required: [\"label\"]"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "]"
-    },
-    {
-      "type": "p",
-      "content": "};"
-    },
-    {
-      "type": "p",
-      "content": "});"
-    },
-    {
-      "type": "p",
-      "content": "// Call tool handler"
-    },
-    {
-      "type": "p",
-      "content": "server.setRequestHandler(CallToolRequestSchema, async (request) => {"
-    },
-    {
-      "type": "p",
-      "content": "if (request.params.name === \"echo_diagnostics\") {"
-    },
-    {
-      "type": "p",
-      "content": "const label = request.params.arguments?.label || \"default\";"
-    },
-    {
-      "type": "p",
-      "content": "return {"
-    },
-    {
-      "type": "p",
-      "content": "content: ["
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "type: \"text\","
-    },
-    {
-      "type": "p",
-      "content": "text: `Diagnostics generated with label: [${label}]. All systems nominal.`"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "]"
-    },
-    {
-      "type": "p",
-      "content": "};"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "throw new Error(\"Tool not found\");"
-    },
-    {
-      "type": "p",
-      "content": "});"
-    },
-    {
-      "type": "p",
-      "content": "// Start the server"
-    },
-    {
-      "type": "p",
-      "content": "async function run() {"
-    },
-    {
-      "type": "p",
-      "content": "const transport = new StdioServerTransport();"
-    },
-    {
-      "type": "p",
-      "content": "await server.connect(transport);"
-    },
-    {
-      "type": "p",
-      "content": "console.error(\"Diagnostic MCP Server running on stdio\");"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "run().catch((error) => {"
-    },
-    {
-      "type": "p",
-      "content": "console.error(\"Fatal error:\", error);"
-    },
-    {
-      "type": "p",
-      "content": "process.exit(1);"
-    },
-    {
-      "type": "p",
-      "content": "});"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "### Alternative Python SDK & FastMCP Setup"
+      "type": "h2",
+      "content": "Alternative Python SDK & FastMCP Setup"
     },
     {
       "type": "p",
       "content": "Python developers can deploy MCP servers with less boilerplate using the FastMCP framework. Run the terminal commands to install and verify dependencies:"
     },
     {
-      "type": "p",
-      "content": "```bash"
-    },
-    {
-      "type": "p",
-      "content": "# Setup virtual environment"
-    },
-    {
-      "type": "p",
-      "content": "mkdir -p ~/workspace/agy-mcp-server-py"
-    },
-    {
-      "type": "p",
-      "content": "cd ~/workspace/agy-mcp-server-py"
-    },
-    {
-      "type": "p",
-      "content": "python3 -m venv venv"
-    },
-    {
-      "type": "p",
-      "content": "source venv/bin/activate"
-    },
-    {
-      "type": "p",
-      "content": "# Install the Python SDK"
-    },
-    {
-      "type": "p",
-      "content": "pip install mcp mcp[cli]"
-    },
-    {
-      "type": "p",
-      "content": "```"
+      "type": "code",
+      "language": "bash",
+      "content": "# Setup virtual environment\nmkdir -p ~/workspace/agy-mcp-server-py\ncd ~/workspace/agy-mcp-server-py\npython3 -m venv venv\nsource venv/bin/activate\n\n# Install the Python SDK\npip install mcp mcp[cli]"
     },
     {
       "type": "p",
       "content": "Create 'server.py' to implement the python equivalent using standard decorators:"
     },
     {
-      "type": "p",
-      "content": "```python"
+      "type": "code",
+      "language": "python",
+      "content": "from mcp.server.fastmcp import FastMCP\n\n# Initialize FastMCP Server\nmcp = FastMCP(\"Calculators\")\n\n@mcp.tool()\ndef add_numbers(a: int, b: int) -> str:\n    \"\"\"Adds two integers and returns the formatted sum.\"\"\"\n    return f\"The sum of {a} and {b} is {a + b}\"\n\n@mcp.resource(\"config://app\")\ndef get_config() -> str:\n    \"\"\"Returns application configuration file data.\"\"\"\n    return \"app_version=1.0.0\\nenvironment=development\\ndebug_enabled=true\"\n\nif __name__ == \"__main__\":\n    mcp.run()"
     },
     {
-      "type": "p",
-      "content": "from mcp.server.fastmcp import FastMCP"
-    },
-    {
-      "type": "p",
-      "content": "# Initialize FastMCP Server"
-    },
-    {
-      "type": "p",
-      "content": "mcp = FastMCP(\"Calculators\")"
-    },
-    {
-      "type": "p",
-      "content": "@mcp.tool()"
-    },
-    {
-      "type": "p",
-      "content": "def add_numbers(a: int, b: int) -> str:"
-    },
-    {
-      "type": "p",
-      "content": "\"\"\"Adds two integers and returns the formatted sum.\"\"\""
-    },
-    {
-      "type": "p",
-      "content": "return f\"The sum of {a} and {b} is {a + b}\""
-    },
-    {
-      "type": "p",
-      "content": "@mcp.resource(\"config://app\")"
-    },
-    {
-      "type": "p",
-      "content": "def get_config() -> str:"
-    },
-    {
-      "type": "p",
-      "content": "\"\"\"Returns application configuration file data.\"\"\""
-    },
-    {
-      "type": "p",
-      "content": "return \"app_version=1.0.0\\nenvironment=development\\ndebug_enabled=true\""
-    },
-    {
-      "type": "p",
-      "content": "if __name__ == \"__main__\":"
-    },
-    {
-      "type": "p",
-      "content": "mcp.run()"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "### Verifying Setup with the Inspector CLI"
+      "type": "h2",
+      "content": "Verifying Setup with the Inspector CLI"
     },
     {
       "type": "p",
       "content": "Verify that the servers build and compile correctly, and run them through the official modelcontextprotocol inspector web tool to validate transport parsing:"
     },
     {
-      "type": "p",
-      "content": "```bash"
+      "type": "code",
+      "language": "bash",
+      "content": "# Compile TS to JS\nnpx tsc\n\n# Start the inspector interface locally\nnpx @modelcontextprotocol/inspector node dist/index.js"
     },
     {
-      "type": "p",
-      "content": "# Compile TS to JS"
+      "type": "warning",
+      "content": "Ensure console.log statements are removed from the server code before connecting to stdio. The inspector will fail if standard output receives unexpected data."
     },
     {
-      "type": "p",
-      "content": "npx tsc"
-    },
-    {
-      "type": "p",
-      "content": "# Start the inspector interface locally"
-    },
-    {
-      "type": "p",
-      "content": "npx @modelcontextprotocol/inspector node dist/index.js"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "> [!WARNING]"
-    },
-    {
-      "type": "p",
-      "content": "> Ensure console.log statements are removed from the server code before connecting to stdio. The inspector will fail if standard output receives unexpected data."
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
+      "type": "h2",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
       "content": "Question 1: Why must diagnostic logging inside an MCP server process run via console.error instead of console.log?"
     },
     {
-      "type": "p",
-      "content": "A. console.log is intercepted by OS security sandboxes."
-    },
-    {
-      "type": "p",
-      "content": "B. console.log output interferes with JSON-RPC communication on stdout, which crashes the transport parser."
-    },
-    {
-      "type": "p",
-      "content": "C. console.error executes synchronously, preventing memory leaks."
-    },
-    {
-      "type": "p",
-      "content": "D. The AGY client only parses standard error stream logs."
+      "type": "list",
+      "items": [
+        "A. console.log is intercepted by OS security sandboxes.",
+        "B. console.log output interferes with JSON-RPC communication on stdout, which crashes the transport parser.",
+        "C. console.error executes synchronously, preventing memory leaks.",
+        "D. The AGY client only parses standard error stream logs."
+      ]
     },
     {
       "type": "p",
@@ -725,27 +214,20 @@
     },
     {
       "type": "p",
-      "content": "Question 2: What is the purpose of the `@modelcontextprotocol/inspector` tool?"
+      "content": "Question 2: In mcp_config.json, which key is used to supply authentication keys to the server headers block?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. Authorization",
+        "B. X-Goog-Api-Key",
+        "C. api_key",
+        "D. Bearer-Token"
+      ]
     },
     {
       "type": "p",
-      "content": "A. To scan the server for security vulnerabilities and SQL injection paths."
-    },
-    {
-      "type": "p",
-      "content": "B. To deploy the server to production cloud environments automatically."
-    },
-    {
-      "type": "p",
-      "content": "C. To provide a CLI/Web GUI developer workspace to query, verify, and call tools on an active MCP server."
-    },
-    {
-      "type": "p",
-      "content": "D. To package the server into an OCI container image."
-    },
-    {
-      "type": "p",
-      "content": "Answer Feedback: C is correct. The inspector provides an interactive developer UI to inspect tools, resources, and triggers, allowing local testing without full agent integrations."
+      "content": "Answer Feedback: B is correct. For Google Cloud APIs exposed as MCP, the custom headers block requires the 'X-Goog-Api-Key' parameter to properly authenticate queries."
     }
   ]
 }

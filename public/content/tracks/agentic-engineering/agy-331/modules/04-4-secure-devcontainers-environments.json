@@ -9,278 +9,61 @@
     },
     {
       "type": "p",
-      "content": "VS Code and antigravity-ide support the Devcontainers standard, which allows developers to run their IDE workspace inside a containerized sandbox. When configuring devcontainers for AI agents, we must ensure the agent loop does not abuse IDE features. For instance, by default, VS Code devcontainers often mount host SSH agents, share the host's network, and mount the entire user configuration directory. This module covers how to craft a highly secure '.devcontainer.json' that locks down the environment."
+      "content": "VS Code and the Antigravity IDE support the Devcontainers standard, allowing developers to run their IDE workspace inside a containerized sandbox. While devcontainers provide excellent workspace parity, they present unique security challenges when integrating autonomous AI agents. By default, devcontainers often mount the host's active SSH agent, automatically mount global configuration folders (~/.gitconfig, ~/.aws, ~/.kube), share the host network namespace, and grant administrative root privileges. An agent executing inside this environment can access host credentials and authenticate to remote servers. We must apply strict containment boundaries."
     },
     {
-      "type": "p",
-      "content": "> [!NOTE]"
+      "type": "info",
+      "content": "Devcontainer Isolation: The goal is to establish a container boundary that allows you to write code side-by-side with the agent, while stripping the agent of any capability to access your host machine's secrets or communicate with external servers using your keys."
     },
     {
-      "type": "p",
-      "content": "> Agent IDE Integration:"
-    },
-    {
-      "type": "p",
-      "content": "> By using devcontainers, you can write and test code side-by-side with an agent inside the same container. Enforcing boundaries in '.devcontainer.json' ensures the agent's work remains fully sandbox-isolated."
-    },
-    {
-      "type": "h3",
+      "type": "h2",
       "content": "4.2 Hardened .devcontainer.json Configuration Blueprint"
     },
     {
       "type": "p",
-      "content": "Save this configuration inside your project directory as '.devcontainer/devcontainer.json':"
+      "content": "To secure the IDE workspace, save this hardened configuration file inside your project repository as '.devcontainer/devcontainer.json':"
     },
     {
       "type": "code",
-      "content": "{",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"name\": \"Hardened AGY Workspace\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"image\": \"local/agy-box:latest\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"remoteUser\": \"developer\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"workspaceMount\": \"source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"workspaceFolder\": \"/workspace\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"runArgs\": [",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"--cap-drop=ALL\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"--security-opt=no-new-privileges\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"--security-opt=seccomp=unconfined\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"--userns=keep-id:uid=1000,gid=1000\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "],",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"containerEnv\": {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"AGY_SANDBOX_LEVEL\": \"3\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"AGY_AUTO_APPROVE\": \"false\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "},",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"customizations\": {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"vscode\": {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"settings\": {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"terminal.integrated.defaultProfile.linux\": \"bash\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"security.workspace.trust.enabled\": true",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "},",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"extensions\": [",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"ms-python.python\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"dbaeumer.vscode-eslint\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "},",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"mounts\": [],",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"forwardPorts\": []",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
+      "language": "json",
+      "content": "{\n  \"name\": \"Hardened AGY Workspace\",\n  \"image\": \"ghcr.io/wtg-codes/agy-box-image:latest\",\n  \"remoteUser\": \"developer\",\n  \"workspaceMount\": \"source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached\",\n  \"workspaceFolder\": \"/workspace\",\n  \"runArgs\": [\n    \"--cap-drop=ALL\",\n    \"--security-opt=no-new-privileges\",\n    \"--userns=keep-id:uid=1000,gid=1000\"\n  ],\n  \"containerEnv\": {\n    \"AGY_SANDBOX_LEVEL\": \"3\",\n    \"AGY_AUTO_APPROVE\": \"false\"\n  },\n  \"customizations\": {\n    \"vscode\": {\n      \"settings\": {\n        \"terminal.integrated.defaultProfile.linux\": \"bash\",\n        \"security.workspace.trust.enabled\": true\n      },\n      \"extensions\": [\n        \"ms-python.python\",\n        \"dbaeumer.vscode-eslint\"\n      ]\n    }\n  },\n  \"mounts\": [],\n  \"forwardPorts\": []\n}"
     },
     {
       "type": "h2",
-      "content": "4.3 Key Configuration Hardening Analysis"
+      "content": "4.3 Analysis of Hardening Parameters"
     },
     {
       "type": "p",
-      "content": "Let's break down the critical configurations used in this blueprint:"
+      "content": "Let's review the critical configuration fields that enforce isolation in the blueprint:"
     },
     {
-      "type": "p",
-      "content": "- **workspaceMount:** Mounts only the specific local workspace directory rather than the entire home folder."
+      "type": "list",
+      "items": [
+        "remoteUser: Forces VS Code and the agent engine to execute all tasks under the unprivileged 'developer' account rather than defaulting to 'root'.",
+        "workspaceMount: Explicitly mounts only the active project directory, preventing the container from mapping parent directories on the host drive.",
+        "runArgs: Drops administrative kernel privileges (--cap-drop=ALL) and prevents the unprivileged user from escalating privileges inside the container via setuid binaries (--security-opt=no-new-privileges).",
+        "mounts: Leaving this array empty is critical. It overrides the default behavior of mounting host folders like ~/.ssh, ~/.aws, or ~/.kube, completely hiding host access credentials from the agent loop.",
+        "forwardPorts: Disables automatic port mapping, ensuring that development servers started by the agent are not exposed to the local network."
+      ]
     },
     {
-      "type": "p",
-      "content": "- **runArgs:** Drops all Linux kernel capabilities (`--cap-drop=ALL`) and prevents privilege escalation (`--security-opt=no-new-privileges`)."
-    },
-    {
-      "type": "p",
-      "content": "- **mounts:** An empty list ensures that no host credentials (such as ~/.ssh, ~/.kube, or ~/.gitconfig) are mounted into the container."
-    },
-    {
-      "type": "p",
-      "content": "- **forwardPorts:** Ports are not automatically forwarded to the host, protecting local listener services."
-    },
-    {
-      "type": "p",
-      "content": "> [!WARNING]"
-    },
-    {
-      "type": "p",
-      "content": "> SSH Agent Warning:"
-    },
-    {
-      "type": "p",
-      "content": "> Do NOT add extensions that forward SSH keys or configure SSH agent forwarding ('forwardPorts' or 'mounts' mapping to SSH sockets). An autonomous agent can misuse these keys to commit code changes, access private repositories, or authenticate to corporate systems."
+      "type": "warning",
+      "content": "SSH Agent Forwarding Warning: Do not add configurations that map host sockets to '/tmp/vscode-ssh-auth*' or configure SSH agent forwarding ('forwardPorts' or 'mounts' mapping to SSH sockets). An autonomous agent can use these forwarded sockets to sign commits, push code modifications to remote repositories, or connect to internal cloud servers under your identity."
     },
     {
       "type": "h2",
-      "content": "4.4 Check Your Understanding Quiz"
-    },
-    {
-      "type": "h3",
-      "content": "Question 1: Why is the 'mounts' array left empty inside the secure '.devcontainer.json' configuration?"
+      "content": "4.4 Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "A) To save disk space on the host."
+      "content": "Verify your comprehension of secure devcontainers configurations:"
     },
     {
-      "type": "p",
-      "content": "B) To prevent host directories containing SSH keys or Kubernetes configurations from being shared with the container."
-    },
-    {
-      "type": "p",
-      "content": "C) To disable package installation."
-    },
-    {
-      "type": "p",
-      "content": "D) Because containers cannot mount directories."
-    },
-    {
-      "type": "p",
-      "content": "**Correct Answer:** B"
-    },
-    {
-      "type": "p",
-      "content": "**Immediate Feedback:** An empty mounts list prevents exposing host credentials (~/.ssh, ~/.aws, etc.) to the container, isolating the agent from external access keys."
-    },
-    {
-      "type": "h3",
-      "content": "Question 2: Which parameter overrides the container user, running the development session under a non-privileged account?"
-    },
-    {
-      "type": "p",
-      "content": "A) \"remoteUser\": \"developer\""
-    },
-    {
-      "type": "p",
-      "content": "B) \"user\": \"root\""
-    },
-    {
-      "type": "p",
-      "content": "C) \"containerUser\": \"sudo\""
-    },
-    {
-      "type": "p",
-      "content": "D) \"runAs\": \"admin\""
-    },
-    {
-      "type": "p",
-      "content": "**Correct Answer:** A"
-    },
-    {
-      "type": "p",
-      "content": "**Immediate Feedback:** Specifying 'remoteUser': 'developer' ensures the IDE commands and agent tasks are executed under the low-privilege 'developer' account inside the container."
+      "type": "list",
+      "items": [
+        "Question 1: What is the primary purpose of setting the 'mounts' parameter to an empty array in the secure devcontainer blueprint?\n  - A) To increase directory read speed inside the container.\n  - B) To block VS Code from mounting host credentials folders like ~/.ssh, ~/.aws, and ~/.kube, isolating the agent from your host accounts.\n  - C) To disable package installations.\n\nFeedback: Option B is correct. By default, devcontainer systems mount host credentials so tools can access git repositories. Setting 'mounts' to empty blocks this, protecting your host credentials.",
+        "Question 2: Why do we specify '--security-opt=no-new-privileges' in runArgs?\n  - A) To prevent processes from executing administrative tasks or transitioning to root via setuid executables.\n  - B) To disable graphic rendering.\n  - C) To isolate local network sockets.\n\nFeedback: Option A is correct. This security parameter blocks the developer user from transitioning to root privilege inside the container, preventing a breakout exploit path."
+      ]
     }
   ]
 }

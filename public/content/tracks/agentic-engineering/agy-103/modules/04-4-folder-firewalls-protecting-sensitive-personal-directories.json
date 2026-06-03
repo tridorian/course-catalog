@@ -4,16 +4,16 @@
   "type": "lab",
   "blocks": [
     {
+      "type": "h2",
+      "content": "Folder Firewalls & Custom Predicates"
+    },
+    {
       "type": "p",
       "content": "A 'Folder Firewall' is a design pattern in the AGY SDK that uses custom policy predicates to block operations on paths containing sensitive keywords or pointing to system directories. By declaring specific block rules, you prevent the agent from reading private credentials or overwriting critical system files."
     },
     {
-      "type": "p",
-      "content": "> [!WARNING]"
-    },
-    {
-      "type": "p",
-      "content": "> Dotfile and Config Security. Agents often attempt to read or write dotfiles (like `.bashrc`, `.zshrc`, or `.gitconfig`) to modify environment paths or configure utilities. However, modifying these files can introduce security risks, such as command hijacking or key leaks. These files should be explicitly blacklisted."
+      "type": "warning",
+      "content": "Dotfile and Config Security. Agents often attempt to read or write dotfiles (like `.bashrc`, `.zshrc`, or `.gitconfig`) to modify environment paths or configure utilities. However, modifying these files can introduce security risks, such as command hijacking or key leaks. These files should be explicitly blacklisted."
     },
     {
       "type": "p",
@@ -21,123 +21,8 @@
     },
     {
       "type": "code",
-      "content": "from google.antigravity.hooks import policy",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Define the predicate to check for sensitive folders and files",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "def is_sensitive_target(args):",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Retrieve path argument from different tool schemas",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "path = args.get(\"AbsolutePath\") or args.get(\"TargetFile\") or args.get(\"SearchPath\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "if not path:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "return False",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "path_str = str(path).lower()",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Sensitive tokens to match and block",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "blacklist = [",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\".ssh\", \"id_rsa\", \"id_dsa\", \"id_ed25519\", \"authorized_keys\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\".bashrc\", \".zshrc\", \".bash_history\", \".bash_profile\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\".aws\", \".gcloud_config\", \".gnupg\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"desktop\", \"documents\", \"/etc\", \"/var/run\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "return any(item in path_str for item in blacklist)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Apply policy rules with the predicate check",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "policies = [",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "policy.deny(\"view_file\", when=is_sensitive_target, name=\"block_sensitive_reads\"),",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "policy.deny(\"edit_file\", when=is_sensitive_target, name=\"block_sensitive_writes\"),",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "policy.deny(\"create_file\", when=is_sensitive_target, name=\"block_sensitive_creates\"),",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "policy.deny(\"run_command\", when=lambda args: is_sensitive_target(args), name=\"block_shell_traversal\"),",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "policy.workspace_only([\"/var/home/wtg/workspace_agy_project\"])",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "]",
-      "language": "bash"
+      "language": "python",
+      "content": "from google.antigravity.hooks import policy\n\n# Define the predicate to check for sensitive folders and files\ndef is_sensitive_target(args):\n    # Retrieve path argument from different tool schemas\n    path = args.get(\"AbsolutePath\") or args.get(\"TargetFile\") or args.get(\"SearchPath\")\n    if not path:\n        return False\n    \n    path_str = str(path).lower()\n    # Sensitive tokens to match and block\n    blacklist = [\n        \".ssh\", \"id_rsa\", \"id_dsa\", \"id_ed25519\", \"authorized_keys\",\n        \".bashrc\", \".zshrc\", \".bash_history\", \".bash_profile\",\n        \".aws\", \".gcloud_config\", \".gnupg\",\n        \"desktop\", \"documents\", \"/etc\", \"/var/run\"\n    ]\n    return any(item in path_str for item in blacklist)\n\n# Apply policy rules with the predicate check\npolicies = [\n    policy.deny(\"view_file\", when=is_sensitive_target, name=\"block_sensitive_reads\"),\n    policy.deny(\"edit_file\", when=is_sensitive_target, name=\"block_sensitive_writes\"),\n    policy.deny(\"create_file\", when=is_sensitive_target, name=\"block_sensitive_creates\"),\n    policy.deny(\"run_command\", when=lambda args: is_sensitive_target(args), name=\"block_shell_traversal\"),\n    policy.workspace_only([\"/var/home/wtg/workspace_agy_project\"])\n]"
     },
     {
       "type": "p",
@@ -145,38 +30,28 @@
     },
     {
       "type": "code",
-      "content": "# Secure the SSH directory and key files",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Secure the SSH directory and key files\nchmod 700 ~/.ssh\nchmod 600 ~/.ssh/id_*\nchmod 644 ~/.ssh/authorized_keys\nchmod 644 ~/.ssh/known_hosts\n\n# Confirm your configurations are protected\nls -la ~/.ssh"
     },
     {
-      "type": "code",
-      "content": "chmod 700 ~/.ssh",
-      "language": "bash"
+      "type": "h3",
+      "content": "Agent Permissions Configuration & Custom Rules"
     },
     {
-      "type": "code",
-      "content": "chmod 600 ~/.ssh/id_*",
-      "language": "bash"
+      "type": "p",
+      "content": "Antigravity uses a unified permission system to control what actions the Agent can perform on your behalf. Every action is represented as a permission resource that can be placed into one of three lists: Allow, Deny, and Ask. The lists follow the format: action(target)."
     },
     {
-      "type": "code",
-      "content": "chmod 644 ~/.ssh/authorized_keys",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "Allow List (Positive Security Model): Represents a configuration where only whitelisted commands are permitted without prompts, and everything else is blocked or sent for review. For example, command(ls) or command(git) allows git commits and status checks.",
+        "Deny List (Negative Security Model): Defines safeguards where specified dangerous actions (e.g. command(rm) or write_file(/etc/)) are blocked, but everything else is allowed. This model is riskier as it requires anticipating every potential vulnerability.",
+        "Ask List: Commands or access directories that require interactive user approval. By default, any operation not in the Allow list behaves as Ask in Review-Driven Development mode."
+      ]
     },
     {
-      "type": "code",
-      "content": "chmod 644 ~/.ssh/known_hosts",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Confirm your configurations are protected",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ls -la ~/.ssh",
-      "language": "bash"
+      "type": "info",
+      "content": "Custom rules can also be codified into markdown rules files. Workspace-specific rules are defined in your-workspace/.agents/rules/ or in the project-level .gemini.md rules file, while global configurations reside in ~/.gemini/GEMINI.md. These files act as system instructions that guide the agent's behavior during a session."
     },
     {
       "type": "h3",
@@ -207,12 +82,36 @@
       "content": "Correct Answer: B"
     },
     {
-      "type": "p",
-      "content": "> [!NOTE]"
+      "type": "info",
+      "content": "Feedback: The `when` parameter accepts a predicate function that receives the tool's arguments as input. If the function returns True, the policy rule is triggered, allowing for conditional blocks based on specific target directories or command names."
     },
     {
       "type": "p",
-      "content": "> Feedback: The `when` parameter accepts a predicate function that receives the tool's arguments as input. If the function returns True, the policy rule is triggered, allowing for conditional blocks based on specific target directories or command names."
+      "content": "Question 2: Which permission syntax correctly blocks all write operations to the host's system configuration directory `/etc`?"
+    },
+    {
+      "type": "p",
+      "content": "A) deny_write_file(\"/etc/\")"
+    },
+    {
+      "type": "p",
+      "content": "B) write_file(/etc)"
+    },
+    {
+      "type": "p",
+      "content": "C) block:write(/etc)"
+    },
+    {
+      "type": "p",
+      "content": "D) write_file(\"/etc/*\")"
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "info",
+      "content": "Feedback: The target format for read and write file permission specifications is write_file(/path), using absolute literal paths (no wildcards or globs). Placing write_file(/etc) in the Deny list blocks all write operations targeting /etc."
     }
   ]
 }

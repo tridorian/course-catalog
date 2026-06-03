@@ -4,284 +4,98 @@
   "type": "lab",
   "blocks": [
     {
-      "type": "p",
-      "content": "## Understanding the Model Context Protocol (MCP)"
+      "type": "h2",
+      "content": "Understanding the Model Context Protocol (MCP)"
     },
     {
       "type": "p",
       "content": "The Model Context Protocol (MCP) is an open-standard, JSON-RPC 2.0 based transport protocol designed to establish a standardized interface between AI client applications (such as the AGY CLI or the antigravity dashboard) and target data sources, servers, or external development tooling. Rather than bundling custom API connections and database drivers into the core model wrappers, MCP provides a decoupled runtime interface. This allows AI agents to interact with third-party software securely and deterministically."
     },
     {
-      "type": "p",
-      "content": "### JSON-RPC 2.0 Transport Layers"
+      "type": "h3",
+      "content": "JSON-RPC 2.0 Transport Layers"
     },
     {
       "type": "p",
       "content": "MCP defines two main communication methods to run data transfers: Standard Input/Output (stdio) and Server-Sent Events (SSE) over HTTP/HTTPS. In local-first workstation architectures (like Tier 1 and Tier 2 setups), stdio transport is preferred. The client spawns the server process directly, communicating through pipes (stdin/stdout). This ensures no local network port is opened, drastically reducing the system's attack surface."
     },
     {
-      "type": "p",
-      "content": "> [!NOTE]"
+      "type": "info",
+      "content": "When writing custom stdio servers, remember that stdout is reserved for JSON-RPC 2.0 messages. Any extra logs, print statements, or console messages must go through stderr, or else the client's parser will fail and the session will crash."
     },
     {
-      "type": "p",
-      "content": "> When writing custom stdio servers, remember that stdout is reserved for JSON-RPC 2.0 messages. Any extra logs or console messages must go through stderr, or else the client's parser will fail."
-    },
-    {
-      "type": "p",
-      "content": "### The Session Lifecycle Flow"
+      "type": "h3",
+      "content": "The Session Lifecycle Flow"
     },
     {
       "type": "p",
       "content": "Every MCP session transitions through a set of defined protocol states. Standard clients and servers must adhere to this sequence to guarantee session integrity:"
     },
     {
-      "type": "p",
-      "content": "- Handshake Initialize: The client sends an 'initialize' request detailing the protocolVersion, clientInfo, and clientCapabilities."
+      "type": "list",
+      "items": [
+        "Handshake Initialize: The client sends an 'initialize' request detailing the protocolVersion, clientInfo, and clientCapabilities.",
+        "Handshake Result: The server responds with its serverCapabilities (resources, tools, prompts) and serverInfo (name, version).",
+        "Readiness Notification: The client sends an 'initialized' notification to finalize capabilities negotiations.",
+        "Resource/Tool Discovery: The client queries available assets using requests like 'tools/list' or 'resources/list'.",
+        "Runtime Loop: The agent triggers operations using 'tools/call' or 'resources/read' schemas.",
+        "Session Termination: The client triggers a 'shutdown' request, followed by an 'exit' notification to gracefully terminate the server process."
+      ]
     },
     {
-      "type": "p",
-      "content": "- Handshake Result: The server responds with its serverCapabilities (resources, tools, prompts) and serverInfo (name, version)."
-    },
-    {
-      "type": "p",
-      "content": "- Readiness Notification: The client sends an 'initialized' notification to finalize negotiations."
-    },
-    {
-      "type": "p",
-      "content": "- Resource/Tool Discovery: The client queries available assets using requests like 'tools/list' or 'resources/list'."
-    },
-    {
-      "type": "p",
-      "content": "- Runtime Loop: The agent triggers operations using 'tools/call' or 'resources/read' schemas."
-    },
-    {
-      "type": "p",
-      "content": "- Session Termination: The client triggers 'shutdown', followed by an 'exit' notification to gracefully terminate the server process."
-    },
-    {
-      "type": "p",
-      "content": "### Protocol JSON Schema Structures"
+      "type": "h3",
+      "content": "Protocol JSON Schema Structures"
     },
     {
       "type": "p",
       "content": "Here is the exact schema representation of a client's initialize request sent at the start of a session:"
     },
     {
-      "type": "p",
-      "content": "```json"
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "\"jsonrpc\": \"2.0\","
-    },
-    {
-      "type": "p",
-      "content": "\"id\": 1,"
-    },
-    {
-      "type": "p",
-      "content": "\"method\": \"initialize\","
-    },
-    {
-      "type": "p",
-      "content": "\"params\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"protocolVersion\": \"2024-11-05\","
-    },
-    {
-      "type": "p",
-      "content": "\"capabilities\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"roots\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"listChanged\": true"
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "\"sampling\": {}"
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "\"clientInfo\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"name\": \"antigravity-client\","
-    },
-    {
-      "type": "p",
-      "content": "\"version\": \"1.0.0\""
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "```"
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {\n      \"roots\": {\n        \"listChanged\": true\n      },\n      \"sampling\": {}\n    },\n    \"clientInfo\": {\n      \"name\": \"antigravity-client\",\n      \"version\": \"1.0.0\"\n    }\n  }\n}"
     },
     {
       "type": "p",
       "content": "The server returns its handshake response, declaring which operations it supports. In this case, the server registers resource read and list tools capabilities:"
     },
     {
-      "type": "p",
-      "content": "```json"
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"result\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {\n      \"resources\": {\n        \"subscribe\": true,\n        \"listChanged\": true\n      },\n      \"tools\": {\n        \"listChanged\": true\n      }\n    },\n    \"serverInfo\": {\n      \"name\": \"custom-postgres-connector\",\n      \"version\": \"0.1.0\"\n    }\n  }\n}"
     },
     {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "\"jsonrpc\": \"2.0\","
-    },
-    {
-      "type": "p",
-      "content": "\"id\": 1,"
-    },
-    {
-      "type": "p",
-      "content": "\"result\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"protocolVersion\": \"2024-11-05\","
-    },
-    {
-      "type": "p",
-      "content": "\"capabilities\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"resources\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"subscribe\": true,"
-    },
-    {
-      "type": "p",
-      "content": "\"listChanged\": true"
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "\"tools\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"listChanged\": true"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "\"serverInfo\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"name\": \"custom-postgres-connector\","
-    },
-    {
-      "type": "p",
-      "content": "\"version\": \"0.1.0\""
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "### The Three MCP Primitives"
+      "type": "h3",
+      "content": "The Three MCP Primitives"
     },
     {
       "type": "p",
       "content": "MCP structures all features into three base primitives to standardize how models digest contextual information:"
     },
     {
-      "type": "p",
-      "content": "- Resources: Read-only data schemas that are referenced via custom URIs (e.g., db://active_users). Think of them as file attachments for the LLM."
+      "type": "list",
+      "items": [
+        "Resources: Read-only data schemas that are referenced via custom URIs (e.g., db://active_users). Think of them as file attachments for the LLM.",
+        "Tools: Executable logic definitions that the model can request to execute with specific arguments. Tools represent active write/modify capabilities.",
+        "Prompts: Parameterized templates that help format prompt interactions or package complex workflows."
+      ]
     },
     {
-      "type": "p",
-      "content": "- Tools: Executable logic definitions that the model can request to execute with specific arguments. Tools represent active write/modify capabilities."
-    },
-    {
-      "type": "p",
-      "content": "- Prompts: Parameterized templates that help format prompt interactions or package complex workflows."
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
+      "type": "h2",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
       "content": "Question 1: What is the primary transport mechanism used by default in a secure, local-only workstation deployment of an MCP server?"
     },
     {
-      "type": "p",
-      "content": "A. WebSockets (ws://)"
-    },
-    {
-      "type": "p",
-      "content": "B. Standard Input/Output (stdio) pipes"
-    },
-    {
-      "type": "p",
-      "content": "C. Server-Sent Events (SSE) over public HTTP"
-    },
-    {
-      "type": "p",
-      "content": "D. gRPC over Unix Domain Sockets"
+      "type": "list",
+      "items": [
+        "A. WebSockets (ws://)",
+        "B. Standard Input/Output (stdio) pipes",
+        "C. Server-Sent Events (SSE) over public HTTP",
+        "D. gRPC over Unix Domain Sockets"
+      ]
     },
     {
       "type": "p",
@@ -292,20 +106,13 @@
       "content": "Question 2: Which JSON-RPC method initiates the capabilities negotiation between an MCP client and server?"
     },
     {
-      "type": "p",
-      "content": "A. tools/list"
-    },
-    {
-      "type": "p",
-      "content": "B. connection/negotiate"
-    },
-    {
-      "type": "p",
-      "content": "C. initialize"
-    },
-    {
-      "type": "p",
-      "content": "D. session/start"
+      "type": "list",
+      "items": [
+        "A. tools/list",
+        "B. connection/negotiate",
+        "C. initialize",
+        "D. session/start"
+      ]
     },
     {
       "type": "p",

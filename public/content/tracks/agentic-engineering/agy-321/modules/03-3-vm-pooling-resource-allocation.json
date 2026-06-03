@@ -25,103 +25,12 @@
     },
     {
       "type": "code",
-      "content": "{",
-      "language": "bash"
+      "language": "json",
+      "content": "{\n  \"pool_id\": \"fast-testing-pool\",\n  \"display_name\": \"Isolated Fast Testing Pool\",\n  \"resource_limits\": {\n    \"machine_type\": \"c2-standard-4\",\n    \"cpu_quota\": 64,\n    \"memory_limit_gb\": 256\n  },\n  \"scaling_policy\": {\n    \"min_warm_instances\": 2,\n    \"max_instances\": 16,\n    \"scale_out_threshold_percent\": 85,\n    \"idle_timeout_seconds\": 300\n  },\n  \"routing_rules\": {\n    \"allowed_job_tags\": [\"unit-test\", \"lint\", \"security-scan\"],\n    \"priority_weight\": 100,\n    \"preemption_allowed\": true\n  }\n}"
     },
     {
-      "type": "code",
-      "content": "\"pool_id\": \"fast-testing-pool\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"display_name\": \"Isolated Fast Testing Pool\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"resource_limits\": {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"machine_type\": \"c2-standard-4\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"cpu_quota\": 64,",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"memory_limit_gb\": 256",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "},",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"scaling_policy\": {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"min_warm_instances\": 2,",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"max_instances\": 16,",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"scale_out_threshold_percent\": 85,",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"idle_timeout_seconds\": 300",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "},",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"routing_rules\": {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"allowed_job_tags\": [\"unit-test\", \"lint\", \"security-scan\"],",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"priority_weight\": 100,",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "\"preemption_allowed\": true",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
+      "type": "info",
+      "content": "Key Design Rule: Preemption mapping. Use preemptible VMs (or spot instances) for pools running quick testing and linting jobs to save up to 80% on compute costs. For deployment pipelines, always use non-preemptible dedicated pools."
     },
     {
       "type": "h2",
@@ -129,95 +38,26 @@
     },
     {
       "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Key Design Rule: Preemption mapping. Use preemptible VMs (or spot instances) for pools running quick testing and linting jobs to save up to 80% on compute costs. For deployment pipelines, always use non-preemptible dedicated pools."
-    },
-    {
-      "type": "p",
-      "content": "Architects must also implement strict VPC Firewall rules to protect the internal network from compromised VMs. Below is a gcloud command to create an egress-restricted rule for the Jules VM subnetwork."
+      "content": "Architects must implement strict VPC Firewall rules to protect the internal network from compromised VMs. Below are the gcloud commands to create a default-deny egress rule for the Jules VM subnetwork, followed by a specific rule allowing egress only to a secure internal repository proxy."
     },
     {
       "type": "code",
-      "content": "# Create a VPC firewall rule blocking all egress traffic from Jules VMs except to specific proxies",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Create a VPC firewall rule blocking all egress traffic from Jules VMs\ngcloud compute firewall-rules create deny-jules-egress \\\n  --network=\"tridorian-vpc\" \\\n  --action=\"DENY\" \\\n  --rules=\"all\" \\\n  --destination-ranges=\"0.0.0.0/0\" \\\n  --target-tags=\"jules-sandbox-vm\" \\\n  --priority=1000\n\n# Allow egress only to the secure internal repository proxy for dependency installation\ngcloud compute firewall-rules create allow-jules-proxy-egress \\\n  --network=\"tridorian-vpc\" \\\n  --action=\"ALLOW\" \\\n  --rules=\"tcp:443\" \\\n  --destination-ranges=\"10.128.0.50/32\" \\\n  --target-tags=\"jules-sandbox-vm\" \\\n  --priority=900"
     },
     {
-      "type": "code",
-      "content": "gcloud compute firewall-rules create deny-jules-egress \\",
-      "language": "bash"
+      "type": "h2",
+      "content": "Hands-on Lab Exercise: Configuring Pool Policies & Firewalls"
     },
     {
-      "type": "code",
-      "content": "--network=\"tridorian-vpc\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--action=\"DENY\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--rules=\"all\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--destination-ranges=\"0.0.0.0/0\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--target-tags=\"jules-sandbox-vm\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--priority=1000",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Allow proxy traffic for dependency installation",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "gcloud compute firewall-rules create allow-jules-proxy-egress \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--network=\"tridorian-vpc\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--action=\"ALLOW\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--rules=\"tcp:443\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--destination-ranges=\"10.128.0.50/32\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--target-tags=\"jules-sandbox-vm\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--priority=900",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "1. Create a JSON file named `test-pool-policy.json` with a pool configuration similar to the example shown above, setting `min_warm_instances` to 1.",
+        "2. Apply the policy to the Jules VM Pool Manager using the CLI command: `agy pool apply --config test-pool-policy.json`.",
+        "3. Verify that the warm standby VM is provisioned: `agy pool status --id fast-testing-pool`.",
+        "4. Run the gcloud firewall commands in your GCP terminal to establish the default-deny and proxy-allow egress policies.",
+        "5. Spawn a test VM and verify that egress to `10.128.0.50` is allowed while all other public internet traffic is dropped."
+      ]
     },
     {
       "type": "h2",
@@ -229,19 +69,7 @@
     },
     {
       "type": "p",
-      "content": "- A) To ensure there is always a backup server in case of a crash."
-    },
-    {
-      "type": "p",
-      "content": "- B) To completely eliminate VM boot cold-starts for incoming tasks by keeping instances pre-warmed."
-    },
-    {
-      "type": "p",
-      "content": "- C) To run local workspace validation scripts."
-    },
-    {
-      "type": "p",
-      "content": "- D) To guarantee maximum security isolation."
+      "content": "- A) To ensure there is always a backup server in case of a crash.\n- B) To completely eliminate VM boot cold-starts for incoming tasks by keeping instances pre-warmed.\n- C) To run local workspace validation scripts.\n- D) To guarantee maximum security isolation."
     },
     {
       "type": "p",
@@ -257,19 +85,7 @@
     },
     {
       "type": "p",
-      "content": "- A) Open all ports to make debugging easier."
-    },
-    {
-      "type": "p",
-      "content": "- B) Apply a default-deny egress firewall rule, allowing traffic only to designated internal repository proxies."
-    },
-    {
-      "type": "p",
-      "content": "- C) Route all traffic through a public NAT gateway with no restrictions."
-    },
-    {
-      "type": "p",
-      "content": "- D) Disable VPC peering on the main network."
+      "content": "- A) Open all ports to make debugging easier.\n- B) Apply a default-deny egress firewall rule, allowing traffic only to designated internal repository proxies.\n- C) Route all traffic through a public NAT gateway with no restrictions.\n- D) Disable VPC peering on the main network."
     },
     {
       "type": "p",

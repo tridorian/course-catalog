@@ -1,88 +1,82 @@
 {
   "id": "4",
-  "title": "4. The Workspace Editor (antigravity-ide) — Synchronous Editing",
+  "title": "4. Workspace Editor (antigravity-ide)",
   "type": "lab",
   "blocks": [
     {
       "type": "h2",
-      "content": "Code Co-Authoring & Sidecar Collaboration"
+      "content": "Synchronous Co-Authoring & Editor Surface"
     },
     {
       "type": "p",
-      "content": "The antigravity-ide is a customized fork of VS Code. While the visual board is optimized for asynchronous, high-level task tracking, antigravity-ide is designed for synchronous, side-by-side cooperation. It brings the agent directly into your coding environment, allowing you to write code, compose documentation, and refactor text files with real-time feedback."
+      "content": "The workspace editor, antigravity-ide, is a customized fork of VS Code. While the visual board focuses on high-level asynchronous orchestration, the Editor is designed for synchronous, side-by-side co-authoring. It integrates agent capabilities directly into your editing workflows, ensuring that developer muscle memory for syntax styling, extensions, and file trees is fully preserved."
     },
     {
-      "type": "h3",
-      "content": "The Sidecar Panel"
-    },
-    {
-      "type": "p",
-      "content": "The core of the IDE interface is the Sidecar panel. This is an integrated agent chat window that automatically tracks your active editor state. It understands which file you have open, what code lines are highlighted, and what build errors are in the terminal output."
+      "type": "h2",
+      "content": "Active Editor Assistant Capabilities"
     },
     {
       "type": "p",
-      "content": "> [!NOTE]"
+      "content": "As you type or modify code, the agent-driven editor provides three core assisting behaviors:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Auto-complete: Context-aware suggestions appear inline as gray text; press Tab to accept.",
+        "Tab to Import: The editor detects missing dependencies or libraries and suggests importing them automatically.",
+        "Tab to Jump: Moves the cursor to the next logical location (such as block endings or argument spots) to maintain writing speed."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Interactive Agent Panels and Context Commands"
     },
     {
       "type": "p",
-      "content": "> Context Isolation: The Sidecar respects standard workspace boundaries. It will never read or modify files outside the directory bounds configured in your .gemini.md firewall rules."
+      "content": "The Editor interface offers several natural ways to collaborate with the agent:"
     },
     {
-      "type": "h3",
-      "content": "Step-by-Step Lab: Co-Authoring a Statement of Work (SOW)"
+      "type": "list",
+      "items": [
+        "Inline Commands (Cmd+I / Ctrl+I): Highlight a block of code or text in the editor or terminal and prompt the agent to modify, refactor, or explain it. Changes are shown as an inline green-and-red diff overlay.",
+        "Agent Side Panel (Cmd+L / Ctrl+L): Open the persistent agent chat panel to ask questions. Reference specific files, directories, or tools using '@'.",
+        "Explain and Fix: Hover over code diagnostics or build warnings, click 'Explain and Fix', and the agent automatically attempts to rewrite the line.",
+        "Send to Agent: Select compiler outputs, terminal errors, or test failures, and send them directly to the active agent context for diagnosis."
+      ]
     },
     {
-      "type": "p",
-      "content": "- Step 1: Open antigravity-ide and select your active project directory."
-    },
-    {
-      "type": "p",
-      "content": "- Step 2: Create a new file named project_sow.md in the file explorer."
-    },
-    {
-      "type": "p",
-      "content": "- Step 3: Paste the following rough draft outline into the editor:"
+      "type": "h2",
+      "content": "Workspace Customizations: Rules and Workflows"
     },
     {
       "type": "p",
-      "content": "- Step 4: Highlight the draft text block and press Ctrl+I (or CMD+I on macOS) to invoke the inline agent prompt."
+      "content": "Developers can customize agent behavior locally using two distinct concepts:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Rules: Workspace-wide guidelines (saved under .agents/rules/) that act as permanent system instructions. The agent reads these to ensure all output complies with styling (e.g. PEP 8) or architectural principles.",
+        "Workflows: User-defined prompts (saved under .agents/workflows/) that can be triggered on demand using '/' inside the chat side panel."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Step-by-Step Lab: Implementing Rules and Workflows"
     },
     {
       "type": "p",
-      "content": "- Step 5: In the prompt box, enter: 'Expand this draft into a professional Project SOW, including sections for Scope, Timeline, and Resource allocation, matching standard corporate style sheets.'"
+      "content": "This lab shows how to implement custom rules and workflows to build unit tests:"
     },
     {
-      "type": "p",
-      "content": "- Step 6: Review the proposed modifications displayed as an inline diff (green text for additions, red text for deletions) directly in your active editor tab."
-    },
-    {
-      "type": "p",
-      "content": "- Step 7: Click 'Accept' in the diff utility bar to overwrite the rough outline with the expanded professional copy."
-    },
-    {
-      "type": "code",
-      "content": "# Project Draft Outline",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Project Name: Cloud Infrastructure Setup",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Client: Acme Corp",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Timeline: 4 weeks",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Details: Setup native container sandboxes and establish local folder permissions.",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "1. Open antigravity-ide and select your active project directory.",
+        "2. Under Customizations, click 'Rules' and create a workspace rule named 'pep8-strict' to enforce PEP 8 guidelines and commenting on all files.",
+        "3. Create a workspace workflow named 'generate-unit-tests' with the instruction to generate unit tests prefixed with test_ for each file and method.",
+        "4. Create a main.py file and ask the agent (Cmd+I): 'Implement bubble sort and binary search.'",
+        "5. Review the inline diff overlay. Observe that the agent split the logic into separate modular files (bubble_sort.py, binary_search.py) matching the active rules. Click Accept.",
+        "6. In the Agent Side Panel, type '/generate-unit-tests' and submit. Verify that test_bubble_sort.py and test_binary_search.py are generated."
+      ]
     },
     {
       "type": "h3",
@@ -90,47 +84,43 @@
     },
     {
       "type": "p",
-      "content": "Verify your understanding of synchronous editing workflows:"
+      "content": "Question 1: What is the purpose of the inline diff overlay in the Editor when using Cmd+I?"
     },
     {
       "type": "p",
-      "content": "- Question 1: How does the Sidecar panel in antigravity-ide retrieve context for its recommendations?"
+      "content": "- A) To compile the active file in the background."
     },
     {
       "type": "p",
-      "content": "- A) It scans your entire local hard drive for files."
+      "content": "- B) To show proposed agent changes as red deletions and green additions directly in the editor tab before they are accepted."
     },
     {
       "type": "p",
-      "content": "- B) It automatically reads the file you have open and matches the text you have highlighted."
+      "content": "- C) To trace memory leaks in the active application."
     },
     {
       "type": "p",
-      "content": "- C) It polls the visual board's active recordings folder."
+      "content": "Feedback: Option B is correct. Inline diff overlays allow developers to audit exactly what code the agent plans to modify or add before committing to the file."
     },
     {
       "type": "p",
-      "content": "Feedback: Option B is correct. The Sidecar is context-aware and uses your active tab and text highlights as context for prompt completions."
+      "content": "Question 2: What is the main distinction between Rules and Workflows in workspace customization?"
     },
     {
       "type": "p",
-      "content": "- Question 2: What utility displays proposed modifications within antigravity-ide before you accept them?"
+      "content": "- A) Rules are saved globally, while Workflows can only be saved in the workspace."
     },
     {
       "type": "p",
-      "content": "- A) A command line log message."
+      "content": "- B) Rules act as persistent system instructions that the agent always follows, while Workflows are custom prompts triggered on demand using the '/' key."
     },
     {
       "type": "p",
-      "content": "- B) An inline green-and-red diff overlay directly in the editor tab."
+      "content": "- C) Rules control security bounds, while Workflows handle third-party library imports."
     },
     {
       "type": "p",
-      "content": "- C) A separate visual card in the visual board."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: Option B is correct. Diff overlays display proposed changes directly in line with your code, letting you audit additions and deletions before committing them."
+      "content": "Feedback: Option B is correct. Rules permanently guide style and architecture during all agent actions, whereas Workflows are on-demand shortcuts for specific tasks."
     }
   ]
 }

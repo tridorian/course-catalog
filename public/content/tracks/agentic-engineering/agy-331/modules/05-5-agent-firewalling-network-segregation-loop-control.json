@@ -1,196 +1,90 @@
 {
   "id": "5",
-  "title": "5. Agent Firewalling, Network Segregation & Loop Control",
+  "title": "5. Network Segregation & Loop Control",
   "type": "lab",
   "blocks": [
     {
       "type": "h2",
-      "content": "5.1 Network Security for Agent sandboxes"
+      "content": "5.1 The Cloud Metadata Service Vulnerability"
     },
     {
       "type": "p",
-      "content": "If an agent has unrestricted outbound network access, it can execute requests to retrieve malicious scripts, connect to command-and-control servers, or leak proprietary code. Furthermore, when running on cloud-hosted virtual machines (such as Google Cloudtops, Compute Engine, or AWS instances), containers can access the cloud metadata server by requesting '169.254.169.254'. This endpoint returns temporary access tokens for the machine's service account, allowing immediate privilege escalation to the entire cloud project. This module teaches how to implement container firewalls and network routing limits."
+      "content": "When executing developer agents on cloud-hosted workstations (such as Google Cloud Shell, Compute Engine VMs, or AWS instances), the sandbox container by default inherits access to host network interfaces. This includes access to the Cloud Metadata Service endpoint at '169.254.169.254'. This endpoint serves instance details, configuration settings, and temporary OAuth 2.0 credentials for the machine's service account. If an autonomous agent or a malicious prompt injection payload queries this endpoint, it can retrieve access tokens, granting immediate read/write access to your cloud project resources."
     },
     {
-      "type": "p",
-      "content": "> [!WARNING]"
-    },
-    {
-      "type": "p",
-      "content": "> The Metadata Risk:"
-    },
-    {
-      "type": "p",
-      "content": "> Cloud instance metadata endpoints (169.254.169.254) are a high-value target. If an agent executes 'curl http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token', it can extract tokens to access storage buckets, databases, and container clusters. You MUST block this IP."
+      "type": "warning",
+      "content": "Metadata Security Threat: If an agent runs 'curl -H \"Metadata-Flavor: Google\" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token', it can extract active security credentials. Blocking this endpoint on the host is a critical platform requirement."
     },
     {
       "type": "h2",
-      "content": "5.2 Configuring an Isolated Container Network with Podman"
+      "content": "5.2 Implementing Host-Level Firewall Segregation"
     },
     {
       "type": "p",
-      "content": "To secure container networks, we define an isolated network bridge in Podman that blocks local subnets and the metadata IP while allowing required internet access for dependency updates (e.g. npm or pip package downloads)."
-    },
-    {
-      "type": "h3",
-      "content": "5.3 Script: Setting Up Network Isolation Rules"
-    },
-    {
-      "type": "p",
-      "content": "Execute the following shell commands on the host system to establish firewall rules blocking link-local and internal network traffic from the container bridge network ('cni-podman0'):"
+      "content": "To prevent containerized agents from accessing the cloud metadata endpoint and corporate private subnets (RFC 1918), we configure forwarding firewall rules (using iptables) on the host workstation. This ensures the container retains standard public internet access for package updates (like npm or pip), while blocking internal traffic."
     },
     {
       "type": "code",
-      "content": "#!/usr/bin/env bash",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Define the target container subnet and interface",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "CONTAINER_INTERFACE=\"cni-podman0\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "METADATA_IP=\"169.254.169.254\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Block access to the cloud metadata endpoint",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d $METADATA_IP -j REJECT",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Block access to corporate private network subnets (RFC 1918)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 10.0.0.0/8 -j REJECT",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 172.16.0.0/12 -j REJECT",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 192.168.0.0/16 -j REJECT",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Verify the rule insertion",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo iptables -L FORWARD -v -n",
-      "language": "bash"
+      "language": "bash",
+      "content": "#!/usr/bin/env bash\n# configure-agent-firewall.sh - Run on the host system\nCONTAINER_INTERFACE=\"cni-podman0\"\nMETADATA_IP=\"169.254.169.254\"\n\n# Block access to the cloud metadata service IP\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d $METADATA_IP -j REJECT\n\n# Block access to private network subnets (RFC 1918)\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 10.0.0.0/8 -j REJECT\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 172.16.0.0/12 -j REJECT\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 192.168.0.0/16 -j REJECT\n\n# Save rules and print forward table rules\nsudo iptables -L FORWARD -v -n"
     },
     {
       "type": "h2",
-      "content": "5.4 Restricting Agent Loops via Auto-Approval Constraints"
+      "content": "5.3 Headless VDI Display Routing & noVNC"
     },
     {
       "type": "p",
-      "content": "In addition to network constraints, we must limit execution loops. When running headlessly, agents should be governed by execution thresholds. Configure execution timeouts, maximum token counts, and loop boundaries using system environment variables and execution flags."
+      "content": "When running agents on remote VMs or SSH sessions, host display forwarding (X11/Wayland sharing) is unavailable. The agy-box includes a built-in virtual desktop infrastructure (VDI) subsystem. Instead of compiling applications with a physical screen, display signals are routed in-memory using a Virtual Framebuffer (Xvfb) and streamed via noVNC to standard host browsers."
     },
     {
       "type": "code",
-      "content": "# Execute an agent task with execution timeouts and automatic loop termination",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Display routing pipeline steps:\n# 1. Start Xvfb (Virtual Framebuffer) on display :99\nXvfb :99 -screen 0 1920x1080x24 &\n\n# 2. Launch the IceWM Window Manager to handle window sizing\nDISPLAY=:99 icewm-session &\n\n# 3. Start x11vnc to stream framebuffer updates on port 5900\nx11vnc -display :99 -nopw -listen 127.0.0.1 -forever &\n\n# 4. Proxy the VNC stream to WebSockets on port 6080 via websockify\n/usr/share/novnc/utils/launch.sh --vnc 127.0.0.1:5900 --listen 6080"
     },
     {
-      "type": "code",
-      "content": "agy --run \"Clean build artifacts and run local tests\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--timeout=300 \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--max-iterations=10 \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--auto-approve=false",
-      "language": "bash"
+      "type": "info",
+      "content": "This configuration enables headless GUI interaction: open 'http://localhost:6080/vnc.html?autoconnect=true' in your host browser to view and control the agent's active Chrome browser session."
     },
     {
       "type": "h2",
-      "content": "5.5 Check Your Understanding Quiz"
-    },
-    {
-      "type": "h3",
-      "content": "Question 1: What is the primary risk of allowing an agent container to access 169.254.169.254?"
+      "content": "5.4 Resolving Chrome Singleton Locks"
     },
     {
       "type": "p",
-      "content": "A) The container will experience high network latency."
+      "content": "When recreating container sandboxes or swapping host environments, Google Chrome and Electron-based applications frequently crash at startup. This occurs because stale lock files named 'SingletonLock' are left inside Chrome profile folders, mapped to a host name that no longer exists. The agy-box entrypoint helper automatically audits and cleans these stale files:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Clean stale SingletonLock files from Chrome config directories\nfind $HOME/.config/google-chrome/ -name \"SingletonLock\" -type l -delete"
+    },
+    {
+      "type": "h2",
+      "content": "5.5 Execution Loop Constraints & Timeout Safeguards"
     },
     {
       "type": "p",
-      "content": "B) The agent can fetch cloud provider metadata and steal temporary API access tokens, compromising cloud infrastructure."
+      "content": "To prevent runaway execution loops, agents should always be governed by strict resource boundaries. You can define maximum execution timeouts and iteration counts when launching tasks through the AGY CLI:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Launch a command-line task with timeout, iteration bounds, and disabled auto-approval\nagy run --task \"Audit python security configurations and compile updates\" \\\n  --timeout=300 \\\n  --max-iterations=10 \\\n  --auto-approve=false"
+    },
+    {
+      "type": "h2",
+      "content": "5.6 Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "C) The host network card will crash."
+      "content": "Review your understanding of network segregation and execution boundaries:"
     },
     {
-      "type": "p",
-      "content": "D) The container filesystem becomes read-only."
-    },
-    {
-      "type": "p",
-      "content": "**Correct Answer:** B"
-    },
-    {
-      "type": "p",
-      "content": "**Immediate Feedback:** 169.254.169.254 hosts the Cloud Metadata Service. If accessible, an agent can extract sensitive authentication credentials for the machine's cloud identity."
-    },
-    {
-      "type": "h3",
-      "content": "Question 2: How do you block access to the cloud metadata service from containerized processes on a Linux host?"
-    },
-    {
-      "type": "p",
-      "content": "A) By uninstalling curl inside the container."
-    },
-    {
-      "type": "p",
-      "content": "B) By setting up firewall rules (e.g., iptables or nftables) that REJECT outbound traffic directed to 169.254.169.254 from the container's network interface."
-    },
-    {
-      "type": "p",
-      "content": "C) By running the container as root."
-    },
-    {
-      "type": "p",
-      "content": "D) By disabling host DNS."
-    },
-    {
-      "type": "p",
-      "content": "**Correct Answer:** B"
-    },
-    {
-      "type": "p",
-      "content": "**Immediate Feedback:** Rejecting forwarding rules for the container network bridge interface to the IP 169.254.169.254 prevents packets from reaching the metadata daemon."
+      "type": "list",
+      "items": [
+        "Question 1: What is the security risk associated with the IP address 169.254.169.254?\n  - A) It causes container resource exhaustion.\n  - B) It is the cloud metadata endpoint which houses temporary access tokens, potentially allowing the agent to compromise the entire cloud project.\n  - C) It is a public database port.\n\nFeedback: Option B is correct. 169.254.169.254 is the link-local metadata address. Blocking it blocks the container from extracting the machine's cloud credentials.",
+        "Question 2: How does the agy-box VDI stream graphical applications to a headless web browser?\n  - A) It runs a VNC server directly on the host machine.\n  - B) It maps Wayland compositor sockets using Docker volumes.\n  - C) It routes GUI signals to a Virtual Framebuffer (Xvfb), streams them via x11vnc, and proxies the frames via websockify (noVNC).\n\nFeedback: Option C is correct. The Xvfb-to-noVNC pipeline translates graphical signals into a WebSocket stream readable by standard host browsers."
+      ]
     }
   ]
 }

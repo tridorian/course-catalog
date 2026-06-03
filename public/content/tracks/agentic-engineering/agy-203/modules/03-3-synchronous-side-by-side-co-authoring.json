@@ -12,12 +12,16 @@
       "content": "In antigravity-ide, content creation is a collaborative, real-time process. When you ask the agent to write text or draft code, the system opens a split-editor view. The left pane shows the primary document in its current approved state. The right pane shows the proposed changes with diff styling. You can watch the agent generate, correct, and format text line-by-line in real time, showing the agent's green cursor working side-by-side with your blue cursor."
     },
     {
-      "type": "p",
-      "content": "> [!NOTE]"
+      "type": "info",
+      "content": "Review Mode: While the agent is typing, the editing canvas enters a temporary read-only state for the target line ranges. This ensures cursor collisions are avoided and the diff engine can compute changes accurately. Once the generation is complete, the accept/reject controls are activated."
+    },
+    {
+      "type": "h3",
+      "content": "Reviewing Plans & Walkthroughs"
     },
     {
       "type": "p",
-      "content": "> Review Mode: While the agent is typing, the editing canvas enters a temporary read-only state for the target line ranges. This ensures cursor collisions are avoided and the diff engine can compute changes accurately. Once the generation is complete, the accept/reject controls are activated."
+      "content": "Before writing code, the planning-mode agent creates an Implementation Plan and a Task List. You can add Google-Doc-style comments directly to these plan cards. For example, if you review the Implementation Plan and see that Flask is proposed as a tech stack, you can highlight it and write a comment suggesting FastAPI instead. After coding, the agent generates a Walkthrough file detailing verification steps, capturing terminal output, browser screenshots, or even video playback records."
     },
     {
       "type": "h3",
@@ -29,68 +33,8 @@
     },
     {
       "type": "code",
-      "content": "# Statement of Work: Cloud Migration Phase 1",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "## 1. Project Scope",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "[The agent will write a detailed scope explanation here regarding workstation setup]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "## 2. Deliverables & Milestones",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- [ ] Milestone 1: Environment Readiness Setup",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- [ ] Milestone 2: OCI-compliant Sandbox Build",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- [ ] Milestone 3: CI/CD Pipeline Migration",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "## 3. Financials & Rate Card",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "| Role | Hourly Rate (USD) | Estimated Hours |",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "| :--- | :--- | :--- |",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "| Principal Architect | $220.00 | 80 |",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "| DevOps Engineer | $160.00 | 120 |",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "| Technical Writer | $110.00 | 40 |",
-      "language": "bash"
+      "content": "# Statement of Work: Cloud Migration Phase 1\n\n## 1. Project Scope\n[The agent will write a detailed scope explanation here regarding workstation setup]\n\n## 2. Deliverables & Milestones\n- [ ] Milestone 1: Environment Readiness Setup\n- [ ] Milestone 2: OCI-compliant Sandbox Build\n- [ ] Milestone 3: CI/CD Pipeline Migration\n\n## 3. Financials & Rate Card\n| Role | Hourly Rate (USD) | Estimated Hours |\n| :--- | :--- | :--- |\n| Principal Architect | $220.00 | 80 |\n| DevOps Engineer | $160.00 | 120 |\n| Technical Writer | $110.00 | 40 |",
+      "language": "markdown"
     },
     {
       "type": "h3",
@@ -98,31 +42,19 @@
     },
     {
       "type": "p",
-      "content": "Follow this procedure to direct the agent sidecar during SOW generation:"
+      "content": "Follow this procedure to direct the agent sidecar during SOW generation and review changes:"
     },
     {
-      "type": "p",
-      "content": "- Create a new file named `sow_draft.md` in the workspace directory."
-    },
-    {
-      "type": "p",
-      "content": "- Insert the main headers: # Statement of Work, ## Project Scope, ## Deliverables, and ## Financials."
-    },
-    {
-      "type": "p",
-      "content": "- Select the Project Scope header and open the Chat Sidecar panel."
-    },
-    {
-      "type": "p",
-      "content": "- Issue a command: `/draft --insert \"Draft a detailed scope paragraph explaining how the native local install script will automate Node/Python setup.\"`"
-    },
-    {
-      "type": "p",
-      "content": "- Observe the agent green caret drafting the text directly inside the editor tab."
-    },
-    {
-      "type": "p",
-      "content": "- Review the resulting diff highlight. Press Ctrl+Enter to accept the text, or Ctrl+Backspace to reject it."
+      "type": "list",
+      "items": [
+        "Create a new file named `sow_draft.md` in the workspace directory.",
+        "Insert the main headers: # Statement of Work, ## Project Scope, ## Deliverables, and ## Financials.",
+        "Select the Project Scope header and open the Chat Sidecar panel (Cmd+L / Ctrl+L). Make sure it is in Planning mode.",
+        "Issue a command: `/draft --insert \"Draft a detailed scope paragraph explaining how the native local install script will automate Node/Python setup.\"`",
+        "Observe the agent green caret drafting the text directly inside the editor tab. Note the temporary canvas locking on the highlighted lines.",
+        "Review the resulting diff highlight. Press Ctrl+Enter to accept the text, or Ctrl+Backspace to reject it.",
+        "If not satisfied, use the Undo Changes up to this point button (↩️) in the chat sidecar to revert."
+      ]
     },
     {
       "type": "h3",
@@ -130,51 +62,11 @@
     },
     {
       "type": "p",
-      "content": "**Question 1**: What does the split-editor display during an active co-authoring session?"
+      "content": "**Question 1**: What does the split-editor display during an active co-authoring session?\n\nA) The left pane shows the prompt log, and the right pane shows the file explorer.\nB) The left pane contains the current approved document draft, and the right pane shows the incoming edits with live diff tracking.\nC) The left pane shows code, and the right pane shows terminal output.\nD) Both panes show the exact same file without any visual highlights.\n\n*Feedback*: The correct answer is B. The split-editor displays the base document on the left and the proposed changes with diff colors on the right."
     },
     {
       "type": "p",
-      "content": "A) The left pane shows the prompt log, and the right pane shows the file explorer."
-    },
-    {
-      "type": "p",
-      "content": "B) The left pane contains the current approved document draft, and the right pane shows the incoming edits with live diff tracking."
-    },
-    {
-      "type": "p",
-      "content": "C) The left pane shows code, and the right pane shows terminal output."
-    },
-    {
-      "type": "p",
-      "content": "D) Both panes show the exact same file without any visual highlights."
-    },
-    {
-      "type": "p",
-      "content": "*Feedback*: The correct answer is B. The split-editor displays the base document on the left and the proposed changes with diff colors on the right."
-    },
-    {
-      "type": "p",
-      "content": "**Question 2**: How do you commit proposed changes typed by the agent co-author?"
-    },
-    {
-      "type": "p",
-      "content": "A) Restart the IDE."
-    },
-    {
-      "type": "p",
-      "content": "B) Use the 'Accept' action (Ctrl+Enter) to merge the diff into the primary draft."
-    },
-    {
-      "type": "p",
-      "content": "C) Run `git push` in the terminal."
-    },
-    {
-      "type": "p",
-      "content": "D) The changes are committed automatically and cannot be rejected."
-    },
-    {
-      "type": "p",
-      "content": "*Feedback*: The correct answer is B. You review the proposed changes and press the 'Accept' key command (Ctrl+Enter) or click 'Accept' in the sidecar to merge them."
+      "content": "**Question 2**: How do you commit proposed changes typed by the agent co-author?\n\nA) Restart the IDE.\nB) Use the 'Accept' action (Ctrl+Enter) or click 'Accept' in the sidecar to merge the diff into the primary draft.\nC) Run `git push` in the terminal.\nD) The changes are committed automatically and cannot be rejected.\n\n*Feedback*: The correct answer is B. You review the proposed changes and press the 'Accept' key command (Ctrl+Enter) or click 'Accept' in the sidecar to merge them."
     }
   ]
 }

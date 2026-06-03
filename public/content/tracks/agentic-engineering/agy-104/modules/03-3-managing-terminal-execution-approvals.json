@@ -1,163 +1,107 @@
 {
   "id": "3",
-  "title": "3. Managing Terminal Execution Approvals",
+  "title": "3. Terminal Execution Approvals",
   "type": "lab",
   "blocks": [
     {
       "type": "p",
-      "content": "AGY supports two primary terminal execution approval modes: manual approval and auto-approve mode. In manual approval mode, every command proposed by the agent is presented to the user with a prompt. The user must review the command line and approve or reject it. In auto-approve mode, commands run without manual prompt check-offs."
+      "content": "Giving an AI agent access to your file system, terminal, and browser is a double-edged sword. It enables autonomous code generation, debugging, and deployment but also opens vectors for prompt injection and data exfiltration. Antigravity addresses this through a robust permissions and policy framework."
+    },
+    {
+      "type": "h2",
+      "content": "The Three Core Agent Policies"
     },
     {
       "type": "p",
-      "content": "The selection of these modes is governed by the environment. Tier 1 (Native Local Install) should ALWAYS use manual approvals, as the agent shares the user's host shell and environment variables. Tier 3 (agy-box Container Sandbox) isolates the agent in an OCI container, making `--auto-approve` safe because any command execution is firewalled inside the container."
+      "content": "Antigravity relies on three main policy dimensions configured in settings under the **Agent** section:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Artifact Review Policy:** Governs how artifacts (plans, diffs, results) are approved. Options are: *Always Proceed* (agent never asks for reviews, highest risk), *Agent Decides* (agent prompts for review based on task complexity), and *Request Review* (always prompts the user before executing changes - recommended).",
+        "**Terminal Command Auto Execution Policy:** Dictates whether shell commands are executed automatically. Options are: *Always Proceed* (commands execute immediately unless matching the Deny list), and *Request Review* (always asks for confirmation unless matching the Allow list).",
+        "**JavaScript Execution Policy:** Controls browser-based JS operations. Options are: *Always Proceed* (runs JS in visual scraper tests automatically), *Request Review* (stops for approval before running JS), and *Disabled* (never executes JS inside the agent browser)."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Unified Permissions System: action(target)"
     },
     {
       "type": "p",
-      "content": "> [!WARNING]"
+      "content": "Every agent action is evaluated against three priority lists: **Allow** (auto-approved), **Deny** (blocked immediately), and **Ask** (pauses for manual approval). Rules follow the format `action(target)` where:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "`command(prefix)`: Matches terminal commands by prefix. E.g. `command(git)` matches `git add`, `git commit`.",
+        "`read_file(/absolute/path)`: Matches files/directories under the absolute path. No globs or `~` are supported.",
+        "`write_file(/absolute/path)`: Matches file write targets (implicitly grants `read_file` for that path).",
+        "`read_url(domain)`: Matches specific domains and subdomains (e.g. `read_url(github.com)`).",
+        "`mcp(server/tool)`: Matches specific Model Context Protocol tools (e.g. `mcp(filesystem/*)`)."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Positive vs. Negative Security Models"
     },
     {
       "type": "p",
-      "content": "> Running the agent with the --auto-approve flag on a Tier 1 native installation grants full shell control to the LLM. If the model hallucinations lead to running a dangerous script, it can overwrite your local environment. Always use containerization for auto-approval workflows."
+      "content": "Using these policies, you can design two security postures:"
     },
     {
-      "type": "p",
-      "content": "## Configuring Execution Approvals"
+      "type": "list",
+      "items": [
+        "**Positive Security Model (Safe):** Set the terminal policy to *Request Review* and configure a whitelist in the Allow section (e.g. `command(ls)`, `command(git status)`). All other commands require explicit manual approval. This prevents catastrophic command executions.",
+        "**Negative Security Model (Risky):** Set the terminal policy to *Always Proceed* and configure a blacklist in the Deny section (e.g. `command(rm)`). While fast, this relies on you anticipating and pre-blocking every possible dangerous command. Use only inside a containerized sandbox."
+      ]
     },
     {
-      "type": "p",
-      "content": "To configure execution approvals in your project workspace, you can define a `config.json` file inside the `.gemini` folder or pass parameters directly to the agy CLI tool. Let's look at the configuration payload structure:"
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"execution\": {\n    \"sandbox_tier\": 3,\n    \"firewall_rules\": {\n      \"outbound_network\": \"restricted\",\n      \"allowed_domains\": [\"github.com\", \"npmjs.org\"]\n    },\n    \"approvals\": {\n      \"terminal_commands\": \"manual\",\n      \"file_write\": \"auto\",\n      \"network_access\": \"manual\"\n    }\n  }\n}"
     },
     {
-      "type": "p",
-      "content": "```json"
+      "type": "warning",
+      "content": "Running the agent with the --auto-approve flag on a Tier 1 native installation grants full shell control to the LLM. If the model hallucinates and runs a dangerous script, it can compromise your workstation. Always use containerized sandboxes like agy-box for auto-approve workflows."
     },
     {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "\"execution\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"sandbox_tier\": 3,"
-    },
-    {
-      "type": "p",
-      "content": "\"firewall_rules\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"outbound_network\": \"restricted\","
-    },
-    {
-      "type": "p",
-      "content": "\"allowed_domains\": [\"github.com\", \"npmjs.org\"]"
-    },
-    {
-      "type": "p",
-      "content": "},"
-    },
-    {
-      "type": "p",
-      "content": "\"approvals\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"terminal_commands\": \"manual\","
-    },
-    {
-      "type": "p",
-      "content": "\"file_write\": \"auto\","
-    },
-    {
-      "type": "p",
-      "content": "\"network_access\": \"manual\""
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "Using the command line interface, the execution approval mode can be specified dynamically:"
-    },
-    {
-      "type": "p",
-      "content": "```bash"
-    },
-    {
-      "type": "p",
-      "content": "# Start the agent with manual approval gates (Safe default)"
-    },
-    {
-      "type": "p",
-      "content": "agy task run --task \"Refactor login validation\" --approvals manual"
-    },
-    {
-      "type": "p",
-      "content": "# Start the agent in auto-approve mode (Use ONLY inside containerized sandboxes like agy-box)"
-    },
-    {
-      "type": "p",
-      "content": "agy task run --task \"Run linting and format files\" --auto-approve"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
+      "type": "h2",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
       "content": "**Question 1:** Under what condition is it safe to use the `--auto-approve` execution flag?"
     },
     {
-      "type": "p",
-      "content": "- A) Anytime the developer is too busy to click 'Approve'"
+      "type": "list",
+      "items": [
+        "A) Anytime the developer is too busy to click 'Approve'",
+        "B) Only when running inside an isolated sandbox container (such as agy-box) protected by a strict container firewall",
+        "C) Only when running as a superuser/root on a production host",
+        "D) Never, under any circumstances"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Auto-approve mode eliminates human confirmation prompts. It should only be active inside containerized sandboxes (like agy-box) that insulate your host system from execution anomalies."
     },
     {
       "type": "p",
-      "content": "- B) Only when running inside an isolated sandbox container (such as agy-box) protected by a strict container firewall"
+      "content": "**Question 2:** Which configuration represents a positive security model in Antigravity?"
     },
     {
-      "type": "p",
-      "content": "- C) Only when running as a superuser/root on a production host"
+      "type": "list",
+      "items": [
+        "A) Setting policies to 'Always Proceed' and adding 'command(rm)' to the Deny list",
+        "B) Disabling the agent completely",
+        "C) Setting policies to 'Request Review' and defining whitelisted commands in the Allow list",
+        "D) Granting the agent root access while disabling network interfaces"
+      ]
     },
     {
-      "type": "p",
-      "content": "- D) Never, under any circumstances"
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> **Correct Answer: B**"
-    },
-    {
-      "type": "p",
-      "content": ">"
-    },
-    {
-      "type": "p",
-      "content": "> **Immediate Feedback:** Auto-approve mode eliminates human confirmation prompts. It should only be active inside containerized sandboxes (like agy-box) that insulate your host system from execution anomalies."
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** A positive security model is based on whitelisting: we start by requesting review for everything and explicitly allow only verified, safe prefixes (e.g. `command(ls)` or `command(git)`)."
     }
   ]
 }

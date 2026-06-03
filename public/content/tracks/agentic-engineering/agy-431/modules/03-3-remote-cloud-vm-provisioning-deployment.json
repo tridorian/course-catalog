@@ -1,6 +1,6 @@
 {
   "id": "3",
-  "title": "3. Remote Cloud VM Provisioning & Deployment",
+  "title": "3. Remote Cloud VM Setup & Deployment",
   "type": "lab",
   "blocks": [
     {
@@ -21,238 +21,8 @@
     },
     {
       "type": "code",
-      "content": "resource \"google_compute_instance\" \"agy_sandbox_vm\" {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "name         = \"agy-sandbox-vm-prod\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "machine_type = \"e2-standard-4\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "zone         = \"us-central1-a\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "boot_disk {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "initialize_params {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "image = \"cos-cloud/cos-stable\" # Container-Optimized OS",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "size  = 50",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "network_interface {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "network    = \"corp-vpc\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "subnetwork = \"secure-agents-subnet\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Omit access_config to ensure no public IP is assigned",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "metadata = {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "user-data = <<-EOF",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "#cloud-config",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "write_files:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- path: /etc/systemd/system/agy-box.service",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "permissions: \"0644\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "owner: root",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "content: |",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "[Unit]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Description=Google Antigravity Sandbox OCI Container",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "After=network-online.target",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Wants=network-online.target",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "[Service]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Restart=always",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStartPre=-/usr/bin/docker kill agy-sandbox",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStartPre=-/usr/bin/docker rm agy-sandbox",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStart=/usr/bin/docker run \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--name agy-sandbox \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--read-only \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "-v /var/opt/agy/workspace:/workspace:rw \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "-p 8080:8080 \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "gcr.io/tridorian-corp/agy-box:v1.2.0",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStop=/usr/bin/docker stop agy-sandbox",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "[Install]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "WantedBy=multi-user.target",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "EOF",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "service_account {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "email  = \"agy-runner-sa@my-project.iam.gserviceaccount.com\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "scopes = [\"https://www.googleapis.com/auth/cloud-platform\"]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
+      "language": "bash",
+      "content": "resource \"google_compute_instance\" \"agy_sandbox_vm\" {\n  name         = \"agy-sandbox-vm-prod\"\n  machine_type = \"e2-standard-4\"\n  zone         = \"us-central1-a\"\n\n  boot_disk {\n    initialize_params {\n      image = \"cos-cloud/cos-stable\" # Container-Optimized OS\n      size  = 50\n    }\n  }\n\n  network_interface {\n    network    = \"corp-vpc\"\n    subnetwork = \"secure-agents-subnet\"\n    # Omit access_config to ensure no public IP is assigned\n  }\n\n  metadata = {\n    user-data = <<-EOF\n      #cloud-config\n      write_files:\n      - path: /etc/systemd/system/agy-box.service\n        permissions: \"0644\"\n        owner: root\n        content: |\n          [Unit]\n          Description=Google Antigravity Sandbox OCI Container\n          After=network-online.target\n          Wants=network-online.target\n          [Service]\n          Restart=always\n          ExecStartPre=-/usr/bin/docker kill agy-sandbox\n          ExecStartPre=-/usr/bin/docker rm agy-sandbox\n          ExecStart=/usr/bin/docker run \\\n            --name agy-sandbox \\\n            --read-only \\\n            -v /var/opt/agy/workspace:/workspace:rw \\\n            -p 8080:8080 \\\n            gcr.io/tridorian-corp/agy-box:v1.2.0\n          ExecStop=/usr/bin/docker stop agy-sandbox\n          [Install]\n          WantedBy=multi-user.target\n    EOF\n  }\n\n  service_account {\n    email  = \"agy-runner-sa@my-project.iam.gserviceaccount.com\"\n    scopes = [\"https://www.googleapis.com/auth/cloud-platform\"]\n  }\n}"
     },
     {
       "type": "h3",
@@ -264,128 +34,70 @@
     },
     {
       "type": "code",
-      "content": "# Location: /etc/systemd/system/agy-sandbox.service",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Location: /etc/systemd/system/agy-sandbox.service\n[Unit]\nDescription=AGY Containerized Engine Service\nAfter=network.target network-online.target podman.socket\nRequires=podman.socket\n\n[Service]\nType=simple\nUser=agy_runner\nGroup=agy_runner\nWorkingDirectory=/opt/agy\nExecStartPre=-/usr/bin/podman kill agy-sandbox\nExecStartPre=-/usr/bin/podman rm agy-sandbox\nExecStart=/usr/bin/podman run \\\n  --name agy-sandbox \\\n  --cap-drop=ALL \\\n  --read-only \\\n  --tmpfs /tmp \\\n  -v /opt/agy/workspace:/workspace:z \\\n  -e AGY_SECRET_TOKEN_FILE=/etc/secrets/token.env \\\n  private-registry.corp.internal/agy/agy-box:latest\nExecStop=/usr/bin/podman stop agy-sandbox\nRestart=on-failure\nRestartSec=5s\n\n[Install]\nWantedBy=multi-user.target"
+    },
+    {
+      "type": "h3",
+      "content": "Workspace MCP Server Setup in mcp_config.json"
+    },
+    {
+      "type": "p",
+      "content": "Antigravity 2.0, the IDE, and the CLI share a central configuration file at ~/.gemini/config/mcp_config.json. Modify this configuration file to register the five Google Workspace MCP servers. Replace client ID and client secret placeholders with the Web client credentials created in Module 2:"
     },
     {
       "type": "code",
-      "content": "[Unit]",
-      "language": "bash"
+      "language": "json",
+      "content": "{\n  \"mcpServers\": {\n    \"gws-calendar\": {\n      \"serverUrl\": \"https://calendarmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-chat\": {\n      \"serverUrl\": \"https://chatmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-drive\": {\n      \"serverUrl\": \"https://drivemcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-gmail\": {\n      \"serverUrl\": \"https://gmailmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-people\": {\n      \"serverUrl\": \"https://people.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    }\n  }\n}"
     },
     {
-      "type": "code",
-      "content": "Description=AGY Containerized Engine Service",
-      "language": "bash"
+      "type": "h3",
+      "content": "Authenticating Custom MCP Servers Across Interfaces"
     },
     {
-      "type": "code",
-      "content": "After=network.target network-online.target podman.socket",
-      "language": "bash"
+      "type": "p",
+      "content": "Once mcp_config.json is saved, the configured servers will show as installed. Since OAuth tokens are managed locally on each surface, you must authenticate the servers on each interface you use:"
     },
     {
-      "type": "code",
-      "content": "Requires=podman.socket",
-      "language": "bash"
+      "type": "h3",
+      "content": "Surface 1: Antigravity 2.0 (Mission Control GUI)"
     },
     {
-      "type": "code",
-      "content": "[Service]",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "Click Settings in the bottom-left corner of the window.",
+        "Navigate to the Customizations tab.",
+        "Under Installed MCP Servers, click Refresh.",
+        "For each server (gws-calendar, gws-chat, gws-drive, gws-gmail, gws-people), click Authenticate.",
+        "In the browser window that opens, sign in and accept scopes, click \"Copy to Clipboard\", then paste the auth code back into Antigravity 2.0 settings and click Submit. A \"Sign out\" button will appear."
+      ]
     },
     {
-      "type": "code",
-      "content": "Type=simple",
-      "language": "bash"
+      "type": "h3",
+      "content": "Surface 2: Antigravity IDE (VS Code Fork)"
     },
     {
-      "type": "code",
-      "content": "User=agy_runner",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "Open MCP Servers via the \"...\" dropdown at the top of the side agent panel, or click \"Manage MCP Servers\".",
+        "Open Antigravity User Settings via the Editor-Specific settings menu dropdown at the top of the window.",
+        "Go to Customizations, click Refresh under Installed MCP Servers.",
+        "Click Authenticate for each server, complete the browser authorization flow, copy the auth code, paste it into the IDE settings field, and click Submit."
+      ]
     },
     {
-      "type": "code",
-      "content": "Group=agy_runner",
-      "language": "bash"
+      "type": "h3",
+      "content": "Surface 3: Antigravity CLI (agy)"
     },
     {
-      "type": "code",
-      "content": "WorkingDirectory=/opt/agy",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStartPre=-/usr/bin/podman kill agy-sandbox",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStartPre=-/usr/bin/podman rm agy-sandbox",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStart=/usr/bin/podman run \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--name agy-sandbox \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--cap-drop=ALL \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--read-only \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--tmpfs /tmp \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "-v /opt/agy/workspace:/workspace:z \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "-e AGY_SECRET_TOKEN_FILE=/etc/secrets/token.env \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "private-registry.corp.internal/agy/agy-box:latest",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ExecStop=/usr/bin/podman stop agy-sandbox",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Restart=on-failure",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "RestartSec=5s",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "[Install]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "WantedBy=multi-user.target",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "In your terminal, execute the command: /mcp",
+        "Use the up/down arrows to select a server (e.g., gws-gmail) and press Enter.",
+        "Use the left/right arrows to select Authenticate and press Enter.",
+        "Open the displayed OAuth URL in your browser, log in and consent, copy the authorization code.",
+        "Paste the code directly into the terminal prompt next to the \"Enter code:\" text field and press Enter. Verify the status updates to \"Authed\"."
+      ]
     },
     {
       "type": "h3",
@@ -393,59 +105,51 @@
     },
     {
       "type": "p",
-      "content": "Question 1: Why is Container-Optimized OS (COS) or a similar minimal Linux OS used when deploying remote VMs for agy-box sandboxes?"
+      "content": "Question 1: Why must we run the authentication flow separately on the CLI, the IDE, and the Standalone GUI interfaces?"
     },
     {
       "type": "p",
-      "content": "A) It has graphical desktop environments pre-installed."
+      "content": "A) The redirect URI is different for each interface."
     },
     {
       "type": "p",
-      "content": "B) It comes with standard python compilers out-of-the-box."
+      "content": "B) OAuth tokens are stored in the local application storage directories unique to each execution surface."
     },
     {
       "type": "p",
-      "content": "C) It minimizes the host attack surface by running a stripped-down kernel and enforcing a read-only root partition."
+      "content": "C) Google Cloud allows only one active connection per application type."
     },
     {
       "type": "p",
-      "content": "D) It automatically runs all bash files inside VM metadata."
+      "content": "D) The client credentials must be refreshed manually every time."
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: B. Although the client credentials are the same, the actual OAuth access/refresh tokens are stored in separate directories managed by the CLI, IDE, and Standalone GUI."
     },
     {
       "type": "p",
-      "content": "> [!NOTE]"
+      "content": "Question 2: Which file stores the OAuth client ID and secret required for Workspace MCP integration?"
     },
     {
       "type": "p",
-      "content": "> Correct Answer: C. Minimal container operating systems limit the host attack surface, ensuring high security and making host compromise extremely difficult if the container is breached."
+      "content": "A) /etc/secrets/token.env"
     },
     {
       "type": "p",
-      "content": "Question 2: In a systemd service file for an immutable sandbox, what is the purpose of running ExecStartPre=-/usr/bin/podman rm agy-sandbox?"
+      "content": "B) ~/.gemini/config/mcp_config.json"
     },
     {
       "type": "p",
-      "content": "A) To backup the previous workspace."
+      "content": "C) ~/.config/antigravity/tokens.json"
     },
     {
       "type": "p",
-      "content": "B) To ensure any existing stopped container from a previous run is cleanly removed before starting a fresh instance."
+      "content": "D) .gemini.md"
     },
     {
-      "type": "p",
-      "content": "C) To download the latest image update from the registry."
-    },
-    {
-      "type": "p",
-      "content": "D) To update user namespace subuid maps."
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Correct Answer: B. Prepending a hyphen (-) allows the systemd service to ignore errors if the container does not exist, ensuring a clean state by removing any lingering container instances."
+      "type": "info",
+      "content": "Correct Answer: B. The ~/.gemini/config/mcp_config.json file configures all MCP servers and their matching client ID and client secret fields."
     }
   ]
 }

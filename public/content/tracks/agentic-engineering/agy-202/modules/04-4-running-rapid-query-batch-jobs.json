@@ -9,173 +9,96 @@
     },
     {
       "type": "h2",
-      "content": "Batch Processing Files at Scale"
+      "content": "Batch Executions and MCP Integrations"
     },
     {
       "type": "p",
-      "content": "In this module, you will learn how to orchestrate rapid query batch jobs. We will explore how to write scripts that loop through files, extract structured info using the agent, and compile them into reports without overwhelming context limits."
+      "content": "To scale agent operations across hundreds of files or integrate external corporate databases and Google Workspace data, you must master CLI batch loops and Model Context Protocol (MCP) servers. In this module, we cover how to process files sequentially and in parallel using standard Unix shell loops, manage stdio and HTTP MCP servers, and run OAuth authentications for secure cloud tool extensions."
     },
     {
       "type": "h3",
-      "content": "Writing Shell Loops for Batch Processing"
+      "content": "The Shell Loop Pattern for Batch Operations"
     },
     {
       "type": "p",
-      "content": "Passing too many files to the agent at once can degrade reasoning quality or cause context window limits to be reached. A better strategy is to wrap the agy command inside a standard POSIX shell loop. This isolates each execution, processes files one by one, and gathers individual outputs."
+      "content": "When auditing or parsing a directory with many files, passing the entire folder to the agent at once leads to high token consumption, increased response latency, and reasoning degradation. A more robust pattern is to process files one-by-one inside a shell loop. This isolates each execution context, keeps the active context window minimal, and prevents a single file error from failing the entire batch run."
     },
     {
       "type": "code",
-      "content": "# Create an output file for results",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "echo \"=== API Schema Report ===\" > audit_report.txt",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Loop through JSON schema files and query the agent for deprecation details",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "for schema_file in src/schemas/*.json; do",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "echo \"Auditing $schema_file...\" >> audit_report.txt",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "cat \"$schema_file\" | agy run -p \"Read this schema file. List any field marked as 'deprecated'. Format output in a single line: [File] -> [Deprecated Fields].\" >> audit_report.txt",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "done",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Create a report folder and baseline file\nmkdir -p logs/audit\necho \"=== Security Audit Report ===\" > logs/audit/summary.txt\n\n# Run sequential checks over all config files in the project\nfor file in config/*.json; do\n  echo \"Auditing $(basename \"$file\")...\" >> logs/audit/summary.txt\n  cat \"$file\" | agy -p \"Audit this JSON structure. List any keys containing 'token', 'key', or 'password'. Format output as: [File] -> [Sensitive Keys].\" >> logs/audit/summary.txt\ndone\n\n# View the consolidated summary\ncat logs/audit/summary.txt"
     },
     {
       "type": "h3",
-      "content": "Throttling Concurrency and Background Execution"
+      "content": "Throttling Parallel Execution Threads"
     },
     {
       "type": "p",
-      "content": "To speed up batch jobs, you can run tasks in the background using the & shell operator. However, to prevent rate limits or system resource exhaustion, you must throttle the number of concurrent jobs."
+      "content": "To accelerate large batch runs, you can execute individual agy commands in the background using the standard shell `&` operator. However, to prevent model rate limit blocks or workstation resource exhaustion, you must throttle the number of concurrent executions."
     },
     {
       "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Daemon Concurrency: The local agy daemon manages connection requests. Running parallel background tasks will utilize multiple slots. You can view running tasks by using agy status."
+      "content": "By combining background jobs with the bash `wait -n` utility, you can maintain a fixed concurrency window (for example, limiting execution to 3 parallel jobs)."
     },
     {
       "type": "code",
-      "content": "# Run audit in parallel threads while maintaining a concurrency threshold of 3",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "for source_file in src/utils/*.py; do",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Run in background and pipe console logs to audit folder",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy run -p \"Check this file for unused helper functions. List them.\" < \"$source_file\" > \"logs/unused_$(basename \"$source_file\").txt\" &",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Throttle check: wait if 3 or more background jobs are running",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "if [[ $(jobs -r | wc -l) -ge 3 ]]; then",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "wait -n",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "fi",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "done",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "wait",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "echo \"All parallel batch audits completed.\"",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Process utility scripts in parallel threads with a throttle limit of 3\nfor script in src/utils/*.js; do\n  # Run in background and redirect output to individual log files\n  agy -p \"Check this file for unused import statements. List them.\" < \"$script\" > \"logs/audit/unused_$(basename \"$script\").txt\" &\n  \n  # Throttling gate: Wait if 3 or more background jobs are active\n  if [[ $(jobs -r | wc -l) -ge 3 ]]; then\n    wait -n\n  fi\ndone\n\n# Wait for any remaining background processes to complete\nwait\necho \"Parallel batch audit finished successfully.\""
     },
     {
       "type": "h3",
+      "content": "The Model Context Protocol (MCP) Command Suite"
+    },
+    {
+      "type": "p",
+      "content": "Model Context Protocol (MCP) servers allow you to extend the agent's capabilities with custom tools and databases. The agy CLI client manages these servers via the `agy mcp` command suite. All registered servers are stored globally in `~/.gemini/antigravity-cli/settings.json` under the `mcpServers` block."
+    },
+    {
+      "type": "list",
+      "items": [
+        "agy mcp list: Displays all registered MCP servers and their current connection status.",
+        "agy mcp add <name> <command> [args...]: Registers a stdio-based MCP server (e.g. adding a local Node script or Docker container running as a subprocess).",
+        "agy mcp add <name> <url> --transport http: Registers a remote HTTP/SSE-based MCP server.",
+        "agy mcp remove <name>: Deletes an MCP server configuration from settings.json."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Register a local file system MCP server running via Node.js\nagy mcp add filesystem npx -y @modelcontextprotocol/server-filesystem /var/home/wtg/Repos/secure-sandbox\n\n# Register a remote HTTP/SSE database query server\nagy mcp add database-service http://localhost:8000/mcp --transport http\n\n# List all active registrations and verify connection\nagy mcp list"
+    },
+    {
+      "type": "h3",
+      "content": "Running OAuth Authentications for Cloud MCP Servers"
+    },
+    {
+      "type": "p",
+      "content": "When connecting to Google Workspace APIs (such as Google Drive, Gmail, Docs, or Calendar), the MCP server requires user authentication. You configure these servers in `~/.gemini/antigravity-cli/settings.json` with your Google Cloud project's Client ID and Client Secret, then run the CLI authentication command to obtain OAuth tokens."
+    },
+    {
+      "type": "warning",
+      "content": "Browser Redirection: Running the `agy mcp auth` command opens a default browser window to authenticate with your Google account. Ensure you authorize the scopes requested by the MCP client to enable the agent to query your cloud resources."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Authenticate a Google Drive MCP server\nagy mcp auth google-drive\n\n# Authenticate a Gmail MCP server\nagy mcp auth gmail\n\n# Authenticate a Calendar MCP server\nagy mcp auth google-calendar"
+    },
+    {
+      "type": "info",
+      "content": "Once authenticated, you can query your Google Drive or Calendar directly from the agy CLI: `agy -p \"Search my Google Drive for files named SOW\"` or `agy -p \"List my calendar events for tomorrow\"`."
+    },
+    {
+      "type": "h2",
       "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "Test your knowledge of batch execution patterns:"
+      "content": "**Question 1**: Which agy subcommand registers a new stdio-based Model Context Protocol server in settings.json?\n\nA) `agy plugin add`\nB) `agy mcp add <name> <command>`\nC) `agy install mcp`\nD) `agy mcp auth`\n\n*Feedback*: The correct answer is B. `agy mcp add` registers new stdio-based or HTTP-based MCP servers into the global settings configuration file."
     },
     {
       "type": "p",
-      "content": "- Question 1: What is the primary reason to use a shell loop to process files individually rather than passing the entire source folder to the agent?"
-    },
-    {
-      "type": "p",
-      "content": "- A) Shell loops execute on the GPU directly."
-    },
-    {
-      "type": "p",
-      "content": "- B) It prevents context window limits from being exceeded and limits reasoning failures to single files."
-    },
-    {
-      "type": "p",
-      "content": "- C) The agy CLI does not support folders as input parameters."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: Option B is correct. Processing files in a loop keeps the context window small, reduces latency, and ensures that a failure in one file doesn't impact the overall run."
-    },
-    {
-      "type": "p",
-      "content": "- Question 2: In a parallel batch script, what does the command wait -n do?"
-    },
-    {
-      "type": "p",
-      "content": "- A) It waits for all background processes to terminate."
-    },
-    {
-      "type": "p",
-      "content": "- B) It pauses for a specified number of seconds before starting the next job."
-    },
-    {
-      "type": "p",
-      "content": "- C) It blocks execution until at least one background job finishes, preventing the system from starting too many parallel processes."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: Option C is correct. The wait -n command waits for the next single background process to finish, which is the standard bash pattern for throttling concurrency."
+      "content": "**Question 2**: Where does the agy CLI store global user settings and MCP server registrations?\n\nA) `~/.gemini/antigravity-cli/settings.json`\nB) `/etc/agy.conf`\nC) `.gemini.md`\nD) `~/.gemini/trustedFolders.json`\n\n*Feedback*: The correct answer is A. Global user settings and MCP server blocks are stored in `~/.gemini/antigravity-cli/settings.json`."
     }
   ]
 }

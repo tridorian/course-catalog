@@ -8,7 +8,7 @@
     },
     {
       "id": "2",
-      "title": "2. Docker & Podman Setup for Secure Host Isolation",
+      "title": "2. Docker & Podman Setup for Host Isolation",
       "file": "modules/02-2-docker-podman-setup-for-secure-host-isolation.json"
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "id": "5",
-      "title": "5. Agent Firewalling, Network Segregation & Loop Control",
+      "title": "5. Network Segregation & Loop Control",
       "file": "modules/05-5-agent-firewalling-network-segregation-loop-control.json"
     }
   ]

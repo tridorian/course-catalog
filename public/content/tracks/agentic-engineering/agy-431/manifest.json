@@ -3,27 +3,27 @@
   "modules": [
     {
       "id": "1",
-      "title": "1. Enterprise Sandbox Architecture & Host Isolation",
+      "title": "1. Enterprise Sandbox & Host Isolation",
       "file": "modules/01-1-enterprise-sandbox-architecture-host-isolation.json"
     },
     {
       "id": "2",
-      "title": "2. Private Container Registries & Corporate Proxy Integration",
+      "title": "2. Private Registry & Proxy Integration",
       "file": "modules/02-2-private-container-registries-corporate-proxy-integration.json"
     },
     {
       "id": "3",
-      "title": "3. Remote Cloud VM Provisioning & Deployment",
+      "title": "3. Remote Cloud VM Setup & Deployment",
       "file": "modules/03-3-remote-cloud-vm-provisioning-deployment.json"
     },
     {
       "id": "4",
-      "title": "4. Headless Pipeline Runs & CI/CD Orchestration",
+      "title": "4. Headless Pipeline Runs & CI/CD",
       "file": "modules/04-4-headless-pipeline-runs-ci-cd-orchestration.json"
     },
     {
       "id": "5",
-      "title": "5. Capstone Challenge & Enterprise Review",
+      "title": "5. Capstone Challenge & Review",
       "file": "modules/05-5-capstone-challenge-enterprise-review.json"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "id": "4",
-  "title": "4. Live Text Rewriting, Refactoring, & Code Co-Pilotry",
+  "title": "4. Rewriting, Refactoring & Co-Pilotry",
   "type": "lab",
   "blocks": [
     {
@@ -12,12 +12,20 @@
       "content": "Code refactoring and text rewriting require surgical precision. In standard AI integrations, the assistant often outputs an entire file, which consumes output tokens, increases latency, and risks introducing errors in unrelated parts of the file. antigravity-ide implements a design pattern called Minimal Change Engineering. When refactoring code or rewriting text, the engine targets specific lines and issues a minimal diff patch using localized tools."
     },
     {
-      "type": "p",
-      "content": "> [!WARNING]"
+      "type": "warning",
+      "content": "Overwriting Warning: Never use the whole-file write_to_file tool on existing codebase files unless you explicitly intend to replace the entire document. Doing so will wipe out local variables, custom imports, and untracked comments."
+    },
+    {
+      "type": "h3",
+      "content": "Contiguous vs. Non-Contiguous Replacements"
     },
     {
       "type": "p",
-      "content": "> Overwriting Warning: Never use the whole-file write_to_file tool on existing codebase files unless you explicitly intend to replace the entire document. Doing so will wipe out local variables, custom imports, and untracked comments."
+      "content": "The IDE selects the appropriate editing tool depending on whether the changes are localized to one function or scattered across multiple files. The comparative matrix below outlines the replacement strategies used in the IDE:"
+    },
+    {
+      "type": "p",
+      "content": "| Edit Type | Tool Used | Best Suited For | Risk Level |\n| :--- | :--- | :--- | :--- |\n| **Contiguous Edit** | `replace_file_content` | Updating a single function or a continuous paragraph of text. | Low (easy to review) |\n| **Non-Contiguous Edits** | `multi_replace_file_content` | Modifying multiple distinct functions or lines across a large file. | Medium (verify imports/variables) |\n| **Whole File Overwrite** | `write_to_file` | Creating a brand new file or complete template rewrite. | High (overwrites existing work) |"
     },
     {
       "type": "h3",
@@ -29,82 +37,20 @@
     },
     {
       "type": "code",
-      "content": "# src/utils.py",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "import os",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "import sys",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "def calculate_totals(hours_list, rate):",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Old inefficient loop to refactor",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "total = 0",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "for h in hours_list:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "total += h * rate",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "return total",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "def print_report(total_amount):",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Total Invoice Amount: ${total_amount:.2f}\")",
-      "language": "bash"
+      "content": "# src/utils.py\nimport os\nimport sys\n\ndef calculate_totals(hours_list, rate):\n    # Old inefficient loop to refactor\n    total = 0\n    for h in hours_list:\n        total += h * rate\n    return total\n\ndef print_report(total_amount):\n    print(f\"Total Invoice Amount: ${total_amount:.2f}\")",
+      "language": "python"
     },
     {
       "type": "p",
-      "content": "The developer issues the command in the sidecar: `/refactor calculate_totals using list comprehension and add type hinting.` The agent will target lines 4-9 and perform a single contiguous edit using the `replace_file_content` tool. Below is the comparative matrix of replacement strategies used in the IDE:"
+      "content": "The developer highlights the `calculate_totals` function, presses Cmd+I or Ctrl+I, and enters the command: `/refactor calculate_totals using list comprehension and add type hinting.` The agent will target lines 4-9 and perform a single contiguous edit using the `replace_file_content` tool, showing the proposed changes as green additions and red deletions inline."
+    },
+    {
+      "type": "h3",
+      "content": "Diagnostic Hovers & Terminal Integration"
     },
     {
       "type": "p",
-      "content": "| Edit Type | Tool Used | Best Suited For | Risk Level |"
-    },
-    {
-      "type": "p",
-      "content": "| :--- | :--- | :--- | :--- |"
-    },
-    {
-      "type": "p",
-      "content": "| **Contiguous Edit** | `replace_file_content` | Updating a single function or a continuous paragraph of text. | Low (easy to review) |"
-    },
-    {
-      "type": "p",
-      "content": "| **Non-Contiguous Edits** | `multi_replace_file_content` | Modifying multiple distinct functions or lines across a large file. | Medium (verify imports/variables) |"
-    },
-    {
-      "type": "p",
-      "content": "| **Whole File Overwrite** | `write_to_file` | Creating a brand new file or complete template rewrite. | High (overwrites existing work) |"
+      "content": "In addition to inline editing, developers can trigger refactoring loops via IDE diagnostics. Hovering over a syntax error, build warning, or linting issue displays the 'Explain and Fix' option. Clicking this allows the agent to automatically suggest corrections. Similarly, in the Problems panel, you can click 'Send all to Agent' to batch-fix lint issues, or highlight a compiler error in the terminal and press Cmd+L / Ctrl+L to send it to the agent panel for troubleshooting."
     },
     {
       "type": "h3",
@@ -115,20 +61,14 @@
       "content": "To safely execute a code refactoring task, follow these guidelines:"
     },
     {
-      "type": "p",
-      "content": "- Select only the lines of code that need refactoring to narrow the agent's target block."
-    },
-    {
-      "type": "p",
-      "content": "- Verify that the agent identifies the correct line range in the proposed replacement chunk."
-    },
-    {
-      "type": "p",
-      "content": "- Run local tests (e.g. `pytest` or `npm run test`) in the integrated terminal to verify execution logic."
-    },
-    {
-      "type": "p",
-      "content": "- If tests pass, accept the changes; if they fail, revert using Ctrl+Backspace and revise your instruction."
+      "type": "list",
+      "items": [
+        "Select only the lines of code that need refactoring to narrow the agent's target block.",
+        "Trigger inline commands with Cmd+I / Ctrl+I to keep edits targeted.",
+        "Verify that the agent identifies the correct line range in the proposed replacement chunk.",
+        "Before clicking Accept (Ctrl+Enter), run local tests (e.g. pytest or npm run test) in the integrated terminal to verify execution logic.",
+        "If tests pass, accept the changes; if they fail, reject using Ctrl+Backspace and revise your instruction."
+      ]
     },
     {
       "type": "h3",
@@ -136,51 +76,11 @@
     },
     {
       "type": "p",
-      "content": "**Question 1**: Which tool should the agent use to modify three separate, non-adjacent functions in a Python file?"
+      "content": "**Question 1**: Which tool should the agent use to modify three separate, non-adjacent functions in a Python file?\n\nA) `replace_file_content`\nB) `multi_replace_file_content`\nC) `write_to_file`\nD) `git-commit`\n\n*Feedback*: The correct answer is B. `multi_replace_file_content` is specifically designed to perform multiple, non-adjacent edits in a single call, preventing file lock conflicts and maintaining revision consistency."
     },
     {
       "type": "p",
-      "content": "A) `replace_file_content`"
-    },
-    {
-      "type": "p",
-      "content": "B) `multi_replace_file_content`"
-    },
-    {
-      "type": "p",
-      "content": "C) `write_to_file`"
-    },
-    {
-      "type": "p",
-      "content": "D) `git-commit`"
-    },
-    {
-      "type": "p",
-      "content": "*Feedback*: The correct answer is B. `multi_replace_file_content` is specifically designed to perform multiple, non-adjacent edits in a single call, preventing file lock conflicts and maintaining revision consistency."
-    },
-    {
-      "type": "p",
-      "content": "**Question 2**: What is the primary purpose of the \"Minimal Change Engineering\" design pattern?"
-    },
-    {
-      "type": "p",
-      "content": "A) To make sure the agent rewrite is as large as possible."
-    },
-    {
-      "type": "p",
-      "content": "B) To minimize edits to only what is requested, preventing scope creep and reducing the risk of introducing bugs."
-    },
-    {
-      "type": "p",
-      "content": "C) To force developers to write more comments in their code."
-    },
-    {
-      "type": "p",
-      "content": "D) To avoid running compiler tests."
-    },
-    {
-      "type": "p",
-      "content": "*Feedback*: The correct answer is B. Minimal Change Engineering focuses on minimal-viable diffs to preserve existing logic, prevent unrelated changes, and reduce bugs."
+      "content": "**Question 2**: What is the primary purpose of the 'Minimal Change Engineering' design pattern?\n\nA) To make sure the agent rewrite is as large as possible.\nB) To minimize edits to only what is requested, preventing scope creep and reducing the risk of introducing bugs.\nC) To force developers to write more comments in their code.\nD) To avoid running compiler tests.\n\n*Feedback*: The correct answer is B. Minimal Change Engineering focuses on minimal-viable diffs to preserve existing logic, prevent unrelated changes, and reduce bugs."
     }
   ]
 }

@@ -3,27 +3,27 @@
   "modules": [
     {
       "id": "1",
-      "title": "1. SDK Architecture & Setup",
+      "title": "1. SDK Architecture & OAuth Setup",
       "file": "modules/01-1-sdk-architecture-setup.json"
     },
     {
       "id": "2",
-      "title": "2. Streaming & Chat Cycles",
+      "title": "2. Streaming & Prompt Structuring",
       "file": "modules/02-2-streaming-chat-cycles.json"
     },
     {
       "id": "3",
-      "title": "3. Context Arrays & Session Persistence",
+      "title": "3. Google Drive & Docs Integration",
       "file": "modules/03-3-context-arrays-session-persistence.json"
     },
     {
       "id": "4",
-      "title": "4. Structured Output Integration",
+      "title": "4. Google Sheets & Structured Outputs",
       "file": "modules/04-4-structured-output-integration.json"
     },
     {
       "id": "5",
-      "title": "5. Subagents, Tools & Lifecycle Hooks",
+      "title": "5. Context Persistence, Tools & Hooks",
       "file": "modules/05-5-subagents-tools-lifecycle-hooks.json"
     }
   ]

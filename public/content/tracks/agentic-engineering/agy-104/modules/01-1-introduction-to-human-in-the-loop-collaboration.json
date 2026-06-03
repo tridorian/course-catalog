@@ -1,83 +1,74 @@
 {
   "id": "1",
-  "title": "1. Introduction to Human-in-the-Loop Collaboration",
+  "title": "1. Intro to Human-in-the-Loop",
   "type": "lab",
   "blocks": [
     {
       "type": "p",
-      "content": "Welcome to **AGY-104: Agent-Human Collaboration Loops**. In the landscape of agentic engineering, autonomous agents are highly capable but operate under deterministic constraints and lack human contextual judgment. Human-in-the-loop (HITL) is a design pattern that inserts human oversight at critical validation junctions, ensuring that the agent does not execute destructive, insecure, or incorrect actions."
+      "content": "Welcome to **AGY-104: Agent-Human Collaboration Loops**. In the landscape of agentic engineering, autonomous agents are highly capable but operate under deterministic constraints and lack human contextual judgment. Human-in-the-loop (HITL) is a core design pattern that inserts human oversight at critical validation junctions, ensuring that the agent does not execute destructive, insecure, or incorrect actions."
     },
     {
       "type": "p",
-      "content": "For instance, when an agent runs commands that modify your local system or perform file deletion, standard safety protocols require the user to explicitly confirm before the command is sent to the shell. This course teaches you how to establish these safety gates, author instructions that set boundary lines, and control the agent's flow of execution."
+      "content": "Unlike traditional chat-based AI assistants that act synchronously and line-by-line, Google Antigravity uses an agent-first architecture. It assumes the agent is an autonomous actor that can plan, browse the web, write code, and run tests independently. However, giving an AI agent free access to your filesystem and shell requires strict safety boundaries."
+    },
+    {
+      "type": "h2",
+      "content": "Core Security Presets in Antigravity"
     },
     {
       "type": "p",
-      "content": "## Core Patterns of Agent-Human Collaboration"
+      "content": "When initializing a workspace or launching Antigravity, you must choose how much autonomy to grant. These configurations are grouped into four security presets:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Secure Mode:** Enforces strict execution limits, blocks external network requests, and requires approval for almost all filesystem and terminal operations. Ideal for untrusted repositories or sensitive files.",
+        "**Review-Driven Development (Recommended):** The optimal balance for day-to-day work. The agent has execution capabilities but stops frequently to request human approval for critical milestones, plan updates, and terminal commands.",
+        "**Agent-Driven Development:** The agent operates with high autonomy, executing actions and commands without stopping for manual approvals. This preset is highly efficient but carries severe risks if run outside a sandbox.",
+        "**Custom Configuration:** Allows you to micro-configure individual policies for artifacts, terminal execution, file system access, and browser capabilities."
+      ]
+    },
+    {
+      "type": "info",
+      "content": "Preserving local workstation safety is the highest priority. When operating in Review-Driven Development mode, the agent creates a shared context where you act as the architect and supervisor, confirming plans before they run."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "Collaboration between human operators and AI agents typically follows one of three distinct interaction styles:"
+      "content": "**Question 1:** Which security preset is recommended for standard development work to balance automation speed with safety?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Agent-Driven Development",
+        "B) Secure Mode",
+        "C) Review-Driven Development",
+        "D) Custom Configuration"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Review-Driven Development is the recommended preset because it frequently prompts the user for review at critical checkpoints (such as terminal commands or plan changes), allowing developers to steer the agent while preventing unauthorized actions."
     },
     {
       "type": "p",
-      "content": "- **Synchronous Steering:** The human works alongside the agent in real-time, providing ongoing chat guidance and refining goals as the task progresses."
+      "content": "**Question 2:** What is the fundamental difference between traditional AI chat assistants and agent-first platforms like Antigravity?"
     },
     {
-      "type": "p",
-      "content": "- **Asynchronous Checkpoints:** The agent runs independently in the background, pausing when it reaches a protected action or requires verification."
+      "type": "list",
+      "items": [
+        "A) Traditional assistants do not use LLMs, while agentic platforms do.",
+        "B) Agentic platforms run synchronously line-by-line, whereas chat assistants run asynchronously.",
+        "C) Agentic platforms run autonomous, asynchronous loops to plan and execute tasks, necessitating security gates.",
+        "D) Traditional assistants require containerization, while agentic platforms always run on the host."
+      ]
     },
     {
-      "type": "p",
-      "content": "- **State Inspection:** The user opens the current workspace state to verify files, run diagnostics, and confirm correctness before approving the next agent cycle."
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> In AGY SDK systems, security is not a post-process; it is integrated directly into the runtime execution loop through permission controls and directory boundaries. This ensures that the agent always remains a helper rather than a hazard."
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
-    },
-    {
-      "type": "p",
-      "content": "**Question 1:** What is the primary purpose of Human-in-the-Loop (HITL) design in agentic engineering?"
-    },
-    {
-      "type": "p",
-      "content": "- A) To eliminate the need for autonomous agents entirely"
-    },
-    {
-      "type": "p",
-      "content": "- B) To run agents at maximum speed without safety constraints"
-    },
-    {
-      "type": "p",
-      "content": "- C) To place human checkpoints at critical junctions to verify actions, ensuring security and correctness"
-    },
-    {
-      "type": "p",
-      "content": "- D) To automate the collection of user keystrokes for training models"
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> **Correct Answer: C**"
-    },
-    {
-      "type": "p",
-      "content": ">"
-    },
-    {
-      "type": "p",
-      "content": "> **Immediate Feedback:** Human-in-the-Loop validation is a safety-first architecture that inserts human review at critical boundaries (such as terminal executions or file writes) to prevent destructive actions and guide agents toward the correct outcome."
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Agent-first platforms execute autonomous loops (planning, writing, testing, browsing) asynchronously, meaning they require built-in checkpoints and permission lists to keep the host secure."
     }
   ]
 }

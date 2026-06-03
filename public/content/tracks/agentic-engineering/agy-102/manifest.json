@@ -3,27 +3,27 @@
   "modules": [
     {
       "id": "1",
-      "title": "1. Multi-Interface Architecture & Selection Philosophy",
+      "title": "1. Multi-Interface Selection Philosophy",
       "file": "modules/01-1-multi-interface-architecture-selection-philosophy.json"
     },
     {
       "id": "2",
-      "title": "2. The CLI Client (agy) — High-Velocity Tasks",
+      "title": "2. CLI Client (agy) — High-Velocity",
       "file": "modules/02-2-the-cli-client-agy-high-velocity-tasks.json"
     },
     {
       "id": "3",
-      "title": "3. The Standalone Visual Board (antigravity) — Asynchronous Missions",
+      "title": "3. Standalone Visual Board (antigravity)",
       "file": "modules/03-3-the-standalone-visual-board-antigravity-asynchronous-missions.json"
     },
     {
       "id": "4",
-      "title": "4. The Workspace Editor (antigravity-ide) — Synchronous Editing",
+      "title": "4. Workspace Editor (antigravity-ide)",
       "file": "modules/04-4-the-workspace-editor-antigravity-ide-synchronous-editing.json"
     },
     {
       "id": "5",
-      "title": "5. Cross-Interface Interoperability & Selection Workflows",
+      "title": "5. Cross-Interface Interoperability",
       "file": "modules/05-5-cross-interface-interoperability-selection-workflows.json"
     }
   ]

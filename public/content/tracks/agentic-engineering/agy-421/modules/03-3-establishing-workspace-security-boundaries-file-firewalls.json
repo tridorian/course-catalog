@@ -1,11 +1,11 @@
 {
   "id": "3",
-  "title": "3. Establishing Workspace Security Boundaries & File Firewalls",
+  "title": "3. Security Boundaries & Firewalls",
   "type": "lab",
   "blocks": [
     {
-      "type": "p",
-      "content": "## Securing the Workspace Environment"
+      "type": "h2",
+      "content": "Securing the Workspace Environment"
     },
     {
       "type": "p",
@@ -13,167 +13,48 @@
     },
     {
       "type": "p",
-      "content": "Path locking uses canonical path resolution. The AGY agent engine checks the target path of any tool call against the security patterns. If the target path resolves to an excluded file or falls outside the allowed directory, the tool call is blocked before it reaches the file system."
+      "content": "Path locking uses canonical path resolution. The AGY agent engine checks the target path of any tool call against the security patterns. If the target path resolves to an excluded file or falls outside the allowed directory, the tool call is blocked before it reaches the file system. To prevent directory traversal bypass attempts (such as using `../../`), the runtime engine converts all references into absolute canonical paths before validation."
     },
     {
-      "type": "p",
-      "content": "### Lab: Hardening the Workspace Security Configurations"
+      "type": "warning",
+      "content": "Always resolve paths to their absolute canonical form. Agents can try to bypass directory limits using relative syntax (e.g., ../../etc/passwd). The AGY runtime engine must be configured to resolve symlinks and relative references before performing the path authorization checks."
+    },
+    {
+      "type": "h3",
+      "content": "Lab: Hardening the Workspace Security Configurations"
     },
     {
       "type": "p",
       "content": "We will configure a security policy in .gemini.md that prevents reading environmental variables, private credentials, and ssh keys. It also defines a terminal command blocklist to block remote data extraction. Add this section to your .gemini.md file:"
     },
     {
-      "type": "p",
-      "content": "```markdown"
-    },
-    {
-      "type": "p",
-      "content": "## Security Boundaries & Execution Policies"
-    },
-    {
-      "type": "p",
-      "content": "- Allowed Directories: `/workspace/src`, `/workspace/tests`"
-    },
-    {
-      "type": "p",
-      "content": "- Restricted Paths (Never-Read, Never-Write):"
-    },
-    {
-      "type": "p",
-      "content": "* `**/.env`"
-    },
-    {
-      "type": "p",
-      "content": "* `**/.git`"
-    },
-    {
-      "type": "p",
-      "content": "* `~/.ssh/**`"
-    },
-    {
-      "type": "p",
-      "content": "* `/etc/**`"
-    },
-    {
-      "type": "p",
-      "content": "* `**/credentials.json`"
-    },
-    {
-      "type": "p",
-      "content": "- CLI Command Blocklist (Never Execute):"
-    },
-    {
-      "type": "p",
-      "content": "* `curl`"
-    },
-    {
-      "type": "p",
-      "content": "* `wget`"
-    },
-    {
-      "type": "p",
-      "content": "* `nc` (netcat)"
-    },
-    {
-      "type": "p",
-      "content": "* `sh` or `bash` scripts from external URLs"
-    },
-    {
-      "type": "p",
-      "content": "* `gcloud auth print-access-token`"
-    },
-    {
-      "type": "p",
-      "content": "- Terminal Execution Approval Policy:"
-    },
-    {
-      "type": "p",
-      "content": "* Read-only commands (e.g., `ls`, `git diff`): Auto-approve."
-    },
-    {
-      "type": "p",
-      "content": "* Write or execute commands (e.g., `pytest`, `npm test`): Require manual developer approval."
-    },
-    {
-      "type": "p",
-      "content": "```"
+      "type": "code",
+      "language": "markdown",
+      "content": "## Security Boundaries & Execution Policies\n- Allowed Directories: `/workspace/src`, `/workspace/tests`\n- Restricted Paths (Never-Read, Never-Write):\n  * `**/.env`\n  * `**/.git`\n  * `~/.ssh/**`\n  * `/etc/**`\n  * `**/credentials.json`\n- CLI Command Blocklist (Never Execute):\n  * `curl`\n  * `wget`\n  * `nc` (netcat)\n  * `sh` or `bash` scripts from external URLs\n  * `gcloud auth print-access-token`\n- Terminal Execution Approval Policy:\n  * Read-only commands (e.g., `ls`, `git diff`): Auto-approve.\n  * Write or execute commands (e.g., `pytest`, `npm test`): Require manual developer approval."
     },
     {
       "type": "p",
       "content": "Test the security boundaries by trying to query the workspace config with a mock command that attempts to read blocked pathways. Run the command below to test the agent engine's reaction to restricted paths:"
     },
     {
-      "type": "p",
-      "content": "```bash"
-    },
-    {
-      "type": "p",
+      "type": "code",
+      "language": "bash",
       "content": "agy run \"cat ../../.env\" --workspace-rule-check"
     },
     {
-      "type": "p",
-      "content": "```"
+      "type": "h3",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "> [!WARNING]"
+      "content": "Answer the following questions to verify your comprehension of security boundaries:"
     },
     {
-      "type": "p",
-      "content": "> Always resolve paths to their absolute canonical form. Agents can try to bypass directory limits using relative syntax (e.g., ../../etc/passwd). The AGY runtime engine must be configured to resolve symlinks and relative references before performing the path authorization checks."
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
-    },
-    {
-      "type": "p",
-      "content": "Question 1: Which technique prevents an agent from using directory traversal (e.g., ../../) to read sensitive operating system files?"
-    },
-    {
-      "type": "p",
-      "content": "A) Running the agent in an encrypted terminal session."
-    },
-    {
-      "type": "p",
-      "content": "B) Resolving all path parameters to their absolute canonical form before checking them against the allowed/restricted path lists."
-    },
-    {
-      "type": "p",
-      "content": "C) Renaming all system folders to hide them from the agent."
-    },
-    {
-      "type": "p",
-      "content": "D) Restricting the model token size."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: The correct answer is B. Resolving the absolute canonical path ensures that any relative references or symlinks are evaluated to their true file location, allowing the security engine to block unauthorized reads."
-    },
-    {
-      "type": "p",
-      "content": "Question 2: What is the primary purpose of a CLI command blocklist in .gemini.md?"
-    },
-    {
-      "type": "p",
-      "content": "A) To speed up terminal execution times."
-    },
-    {
-      "type": "p",
-      "content": "B) To block command utilities (like curl or netcat) that could be used by an agent to exfiltrate private source code or credentials to an external server."
-    },
-    {
-      "type": "p",
-      "content": "C) To force developers to type commands manually."
-    },
-    {
-      "type": "p",
-      "content": "D) To automate SSH key generation."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: The correct answer is B. Restricting data exfiltration utilities protects the workspace from leaking intellectual property or access tokens during agent execution loops."
+      "type": "list",
+      "items": [
+        "Question 1: Which technique prevents an agent from using directory traversal (e.g., ../../) to read sensitive operating system files?\n  - A) Running the agent in an encrypted terminal session.\n  - B) Resolving all path parameters to their absolute canonical form before checking them against the allowed/restricted path lists.\n  - C) Renaming all system folders to hide them from the agent.\n  - D) Restricting the model token size.\n\nFeedback: Option B is correct. Resolving the absolute canonical path ensures that any relative references or symlinks are evaluated to their true file location, allowing the security engine to block unauthorized reads.",
+        "Question 2: What is the primary purpose of a CLI command blocklist in .gemini.md?\n  - A) To speed up terminal execution times.\n  - B) To block command utilities (like curl or netcat) that could be used by an agent to exfiltrate private source code or credentials to an external server.\n  - C) To force developers to type commands manually.\n  - D) To automate SSH key generation.\n\nFeedback: Option B is correct. Restricting data exfiltration utilities protects the workspace from leaking intellectual property or access tokens during agent execution loops."
+      ]
     }
   ]
 }

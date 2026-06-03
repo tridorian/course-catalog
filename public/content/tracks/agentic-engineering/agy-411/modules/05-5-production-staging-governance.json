@@ -4,328 +4,77 @@
   "type": "lab",
   "blocks": [
     {
-      "type": "p",
-      "content": "## Staging, Deploying, and Hardening MCP Servers"
-    },
-    {
-      "type": "p",
-      "content": "Once development is completed, custom MCP servers must be securely deployed to production. This module details local sandbox deployments using Docker containers, remote HTTP/SSE deployments with secure proxies, and continuous integration/continuous delivery (CI/CD) orchestration."
-    },
-    {
-      "type": "p",
-      "content": "### Multi-Stage Dockerfile Packaging"
-    },
-    {
-      "type": "p",
-      "content": "To run stdio-based servers locally within isolated containers, package your Node.js application using a multi-stage Dockerfile. This reduces image size and minimizes security vulnerabilities:"
-    },
-    {
-      "type": "p",
-      "content": "```dockerfile"
-    },
-    {
-      "type": "p",
-      "content": "# Stage 1: Build stage"
-    },
-    {
-      "type": "p",
-      "content": "FROM node:20-alpine AS builder"
-    },
-    {
-      "type": "p",
-      "content": "WORKDIR /app"
-    },
-    {
-      "type": "p",
-      "content": "COPY package*.json tsconfig.json ./"
-    },
-    {
-      "type": "p",
-      "content": "RUN npm ci"
-    },
-    {
-      "type": "p",
-      "content": "COPY src ./src"
-    },
-    {
-      "type": "p",
-      "content": "RUN npm run build"
-    },
-    {
-      "type": "p",
-      "content": "# Stage 2: Production execution environment"
-    },
-    {
-      "type": "p",
-      "content": "FROM node:20-alpine"
-    },
-    {
-      "type": "p",
-      "content": "WORKDIR /app"
-    },
-    {
-      "type": "p",
-      "content": "ENV NODE_ENV=production"
-    },
-    {
-      "type": "p",
-      "content": "COPY package*.json ./"
-    },
-    {
-      "type": "p",
-      "content": "RUN npm ci --only=production"
-    },
-    {
-      "type": "p",
-      "content": "COPY --from=builder /app/dist ./dist"
-    },
-    {
-      "type": "p",
-      "content": "# Create standard unprivileged system user"
-    },
-    {
-      "type": "p",
-      "content": "RUN addgroup -S appgroup && adduser -S appuser -G appgroup"
-    },
-    {
-      "type": "p",
-      "content": "USER appuser"
-    },
-    {
-      "type": "p",
-      "content": "# Run stdio execution command"
-    },
-    {
-      "type": "p",
-      "content": "ENTRYPOINT [\"node\", \"dist/index.js\"]"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "### Registering the Dockerized Server inside AGY"
-    },
-    {
-      "type": "p",
-      "content": "Register your dockerized MCP server in the AGY client settings. This file configuration maps variables and binds the stdio transport layer:"
-    },
-    {
-      "type": "p",
-      "content": "```json"
-    },
-    {
-      "type": "p",
-      "content": "{"
-    },
-    {
-      "type": "p",
-      "content": "\"mcpServers\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"secure-postgres-mcp\": {"
-    },
-    {
-      "type": "p",
-      "content": "\"command\": \"docker\","
-    },
-    {
-      "type": "p",
-      "content": "\"args\": ["
-    },
-    {
-      "type": "p",
-      "content": "\"run\","
-    },
-    {
-      "type": "p",
-      "content": "\"-i\","
-    },
-    {
-      "type": "p",
-      "content": "\"--rm\","
-    },
-    {
-      "type": "p",
-      "content": "\"-e\","
-    },
-    {
-      "type": "p",
-      "content": "\"DATABASE_URL=postgresql://mcp_reader:SecureReadOnlyPassword123@db.internal:5432/enterprise_db\","
-    },
-    {
-      "type": "p",
-      "content": "\"custom-mcp-postgres:latest\""
-    },
-    {
-      "type": "p",
-      "content": "]"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "### Remote Deployments via Server-Sent Events (SSE)"
-    },
-    {
-      "type": "p",
-      "content": "For remote hosting, MCP supports Server-Sent Events (SSE) over HTTPS. This architecture allows the server to run as a persistent daemon. The client posts messages to `/message` endpoints and listens for events on `/sse`. Nginx handles SSL termination and enforces access controls:"
-    },
-    {
-      "type": "p",
-      "content": "```nginx"
-    },
-    {
-      "type": "p",
-      "content": "server {"
-    },
-    {
-      "type": "p",
-      "content": "listen 443 ssl http2;"
-    },
-    {
-      "type": "p",
-      "content": "server_name mcp.enterprise.internal;"
-    },
-    {
-      "type": "p",
-      "content": "ssl_certificate /etc/ssl/certs/mcp.crt;"
-    },
-    {
-      "type": "p",
-      "content": "ssl_certificate_key /etc/ssl/private/mcp.key;"
-    },
-    {
-      "type": "p",
-      "content": "location /sse {"
-    },
-    {
-      "type": "p",
-      "content": "proxy_pass http://localhost:3000/sse;"
-    },
-    {
-      "type": "p",
-      "content": "proxy_set_header Connection '';"
-    },
-    {
-      "type": "p",
-      "content": "proxy_http_version 1.1;"
-    },
-    {
-      "type": "p",
-      "content": "chunked_transfer_encoding off;"
-    },
-    {
-      "type": "p",
-      "content": "proxy_buffering off;"
+      "type": "h2",
+      "content": "Staging & Deploying Custom MCP Servers"
     },
     {
       "type": "p",
-      "content": "proxy_cache off;"
+      "content": "Deploying MCP servers in production requires strict sandboxing, containerized runtimes, and clear configuration rules. Moving from local development (stdio pipes on a developer workspace) to enterprise-wide staging involves compiling the code into an immutable Docker image, locking permissions, and configuring registry accesses."
     },
     {
-      "type": "p",
-      "content": "proxy_read_timeout 24h;"
-    },
-    {
-      "type": "p",
-      "content": "}"
-    },
-    {
-      "type": "p",
-      "content": "location /message {"
+      "type": "h3",
+      "content": "Dockerfile Setup for TypeScript Servers"
     },
     {
       "type": "p",
-      "content": "proxy_pass http://localhost:3000/message;"
+      "content": "Create a Dockerfile in the project root to build your server inside a container sandbox. This configures a multi-stage build that excludes development source files and limits execution to a non-privileged system user:"
     },
     {
-      "type": "p",
-      "content": "proxy_set_header Host $host;"
+      "type": "code",
+      "language": "dockerfile",
+      "content": "FROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json tsconfig.json ./\nRUN npm ci\nCOPY src ./src\nRUN npm run build\n\nFROM node:18-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\nCOPY --from=builder /app/dist ./dist\n\n# Run container process as non-root user for security\nUSER node\nENTRYPOINT [\"node\", \"dist/index.js\"]"
     },
     {
-      "type": "p",
-      "content": "proxy_set_header X-Real-IP $remote_addr;"
+      "type": "h3",
+      "content": "Staging Dockerized Servers in mcp_config.json"
     },
     {
       "type": "p",
-      "content": "}"
+      "content": "Once the server is packaged as a container image, configure Antigravity to run it by calling the docker CLI directly. This isolates database connections and credentials within the container filesystem:"
     },
     {
-      "type": "p",
-      "content": "}"
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"mcpServers\": {\n    \"secure-postgres-mcp\": {\n      \"command\": \"docker\",\n      \"args\": [\n        \"run\",\n        \"-i\",\n        \"--rm\",\n        \"--network=host\",\n        \"-e\",\n        \"DATABASE_URL=postgresql://readonly:password@db.internal:5432/production\",\n        \"custom-mcp-postgres:latest\"\n      ]\n    }\n  }\n}"
     },
     {
-      "type": "p",
-      "content": "```"
+      "type": "warning",
+      "content": "Always pass the '-i' (interactive) flag to docker run to ensure the standard input stream remains open, allowing JSON-RPC communication pipes to operate. Include the '--rm' flag to clean up container filesystems on exit and prevent system memory leak accumulation."
     },
     {
-      "type": "p",
-      "content": "### Hands-on Capstone Lab: Registering & Verifying the Server"
+      "type": "h2",
+      "content": "Hands-on Capstone Lab: Registering & Verifying the Server"
     },
     {
       "type": "p",
       "content": "This capstone lab walks through testing the custom MCP postgres server in the AGY sandbox. The developer registers the server, starts an AGY CLI session, and triggers a query through the agent to verify performance."
     },
     {
-      "type": "p",
-      "content": "- Build the docker image: Run 'docker build -t custom-mcp-postgres:latest .'"
+      "type": "list",
+      "items": [
+        "Build the docker image: Run 'docker build -t custom-mcp-postgres:latest .'",
+        "Add the server config: Open '~/.gemini/config/mcp_config.json' and copy the config block above.",
+        "Verify the installation: Start an agy session and check if the server is active by running '/mcp'.",
+        "Execute agent query: Run 'agy query --prompt \"Retrieve table schema customer_summary using secure-postgres-mcp server and show columns.\"'",
+        "Inspect the run log: Check terminal logs to verify JSON-RPC 2.0 initialize sequence succeeded and that credentials remained hidden."
+      ]
     },
     {
-      "type": "p",
-      "content": "- Add the server config: Open '~/.config/antigravity/mcp_config.json' and copy the config block above."
-    },
-    {
-      "type": "p",
-      "content": "- Verify the installation: Run the command 'agy mcp verify --server secure-postgres-mcp' to trigger the capabilities check."
-    },
-    {
-      "type": "p",
-      "content": "- Execute agent query: Run 'agy query --prompt \"Retrieve table schema customer_summary using secure-postgres-mcp server and show columns.\"'"
-    },
-    {
-      "type": "p",
-      "content": "- Inspect the run log: Check terminal logs to verify JSON-RPC 2.0 initialize sequence succeeded and that credentials remained hidden."
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
+      "type": "h2",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
       "content": "Question 1: When deploying a local stdio MCP server inside a Docker container, why are the docker run arguments '-i --rm' critical?"
     },
     {
-      "type": "p",
-      "content": "A. They compile-check the TypeScript source code."
-    },
-    {
-      "type": "p",
-      "content": "B. '-i' (interactive) keeps stdin open for communication, and '--rm' ensures clean container destruction when the agent terminates the session."
-    },
-    {
-      "type": "p",
-      "content": "C. They route network traffic through the container firewall."
-    },
-    {
-      "type": "p",
-      "content": "D. They enable SSL validation over the standard output stream."
+      "type": "list",
+      "items": [
+        "A. They compile-check the TypeScript source code.",
+        "B. '-i' (interactive) keeps stdin open for communication, and '--rm' ensures clean container destruction when the agent terminates the session.",
+        "C. They route network traffic through the container firewall.",
+        "D. They enable SSL validation over the standard output stream."
+      ]
     },
     {
       "type": "p",
@@ -333,27 +82,20 @@
     },
     {
       "type": "p",
-      "content": "Question 2: What is the main security purpose of configuring an unprivileged user (e.g. USER appuser) inside the Dockerfile of an MCP server?"
+      "content": "Question 2: What is the main security purpose of configuring an unprivileged user (e.g. USER node) inside the Dockerfile of an MCP server?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. It guarantees OAuth tokens are encrypted automatically.",
+        "B. It restricts the process execution boundary, protecting host files and avoiding potential container escape vulnerabilities.",
+        "C. It forces the server to use SSE instead of stdio.",
+        "D. It compiles the JavaScript compiler modules."
+      ]
     },
     {
       "type": "p",
-      "content": "A. It guarantees OAuth tokens are encrypted automatically."
-    },
-    {
-      "type": "p",
-      "content": "B. It restricts the process execution boundary, protecting host files and avoiding potential container escape vulnerabilities."
-    },
-    {
-      "type": "p",
-      "content": "C. It forces the server to use SSE instead of stdio."
-    },
-    {
-      "type": "p",
-      "content": "D. It limits the API query output to 10 lines."
-    },
-    {
-      "type": "p",
-      "content": "Answer Feedback: B is correct. Adhering to the principle of least privilege ensures that even if an agent is tricked into attempting shell command executions on the server, the process lacks root permissions to damage the filesystem."
+      "content": "Answer Feedback: B is correct. Limiting server process privileges ensures that even if a prompt injection exploit compromises the server runtime, the attacker cannot access the host machine filesystem or run root system calls."
     }
   ]
 }

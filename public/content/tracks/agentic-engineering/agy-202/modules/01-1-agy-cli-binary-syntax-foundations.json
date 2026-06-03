@@ -13,7 +13,7 @@
     },
     {
       "type": "p",
-      "content": "The agy command line client is a compiled binary optimized for speed, piping, and integration into custom scripts. In this module, we will cover the core command structure, subcommand execution models, and how to verify environment readiness before triggering agentic runs."
+      "content": "The agy command line client is a compiled binary optimized for speed, terminal piping, and seamless integration into automated scripting workflows. It decouples the operational interface from the core execution engine and user interfaces (such as antigravity or antigravity-ide). In this module, we will explore the core command structure, global execution flags, interactive REPL mode, slash commands, and diagnostic logging configuration."
     },
     {
       "type": "h3",
@@ -21,150 +21,101 @@
     },
     {
       "type": "p",
-      "content": "The basic CLI command structure follows standard POSIX patterns: subcommands define the primary action, followed by local flags that customize behavior. The three most common commands you will use are:"
+      "content": "Executing commands in agy follows standard POSIX patterns where global options modify binary behaviors and subcommands trigger specific operational utilities. The syntax structure is: `agy [global flags] <subcommand> [subcommand arguments]`."
     },
     {
       "type": "p",
-      "content": "- agy status: Displays the status of the local daemon connection, active cloud credentials (ADC), and target directories."
+      "content": "The primary administrative subcommands of the agy CLI are:"
     },
     {
-      "type": "p",
-      "content": "- agy run --prompt \"<instruction>\": Executes a specific developer task or text processing job within your active workspace."
-    },
-    {
-      "type": "p",
-      "content": "- agy verify: Analyzes your current folder paths to check for the existence of required governance policies (.gemini.md) and verify file read/write permissions."
-    },
-    {
-      "type": "code",
-      "content": "# Check the version and installation details of the binary",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "agy help: Displays usage guidelines and options for all subcommands.",
+        "agy install: Configures environment shell parameters, autocomplete features, and workstation paths.",
+        "agy update: Upgrades the local agy binary to the latest weekly release.",
+        "agy plugin: Manages local tool extensions (commands include list, install, uninstall, enable, disable).",
+        "agy changelog: Prints recent release highlights, bug fixes, and feature additions."
+      ]
     },
     {
       "type": "code",
-      "content": "agy --version",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Retrieve the state of the active workspace and credentials",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy status",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Execute a simple directory test run",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy run --prompt \"Verify that the build environment matches standard requirements.\"",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Display the current client version\nagy --version\n\n# Configure shell settings and update paths\nagy install\n\n# List all currently installed plugin extensions\nagy plugin list"
     },
     {
       "type": "h3",
-      "content": "Global Flags and Precedence Rules"
+      "content": "Execution Modes and Option Flags"
     },
     {
       "type": "p",
-      "content": "Global flags customize how the agent executes your tasks. The CLI evaluates inputs in the following order of precedence: explicit command-line flags override workspace environment variables, which override project configuration files."
+      "content": "The CLI supports both interactive and non-interactive execution modes, customized via global flags:"
     },
     {
-      "type": "p",
-      "content": "- -d, --workspace-dir: Overrides the target path for agent operations. If not supplied, it defaults to the current working directory."
+      "type": "list",
+      "items": [
+        "Interactive REPL (Default TTY): Initiated by running agy without execution flags. Starts a live connection loop, checks cloud tokens, and displays the command prompt >.",
+        "Print Non-Interactive Mode (-p, --print, --prompt): Runs a single prompt, outputs the result directly to stdout, and exits. Ideal for automated shell scripts.",
+        "Interactive Prompt Mode (-i, --prompt-interactive): Runs the initial prompt, then leaves the REPL open for further interactive queries.",
+        "Continue Previous Session (-c, --continue): Resumes the most recent local execution thread.",
+        "Resume Specific Session (--conversation <session-id>): Reloads the context, chat history, and variables of a specific session by ID."
+      ]
     },
     {
-      "type": "p",
-      "content": "- --auto-approve: Bypasses the confirmation prompt before executing scripts or applying file modifications. Use with extreme care."
-    },
-    {
-      "type": "p",
-      "content": "- --verbose: Prints diagnostic tracing logs, daemon communications, and raw model token metrics to stderr."
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Design Pattern: Always use the -d flag when executing commands from external directories. This ensures that the agent respects the boundaries of your target workspace regardless of where your active shell is located."
+      "type": "info",
+      "content": "Design Pattern: Always use the -p or --print flag when integrating agy within CI/CD pipelines or bash scripts. This prevents the CLI from opening an interactive prompt and waiting for user input, ensuring the script runs headlessly to completion."
     },
     {
       "type": "code",
-      "content": "# Setting environment variables for automated scripts",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "export AGY_TOKEN=\"agy_tkn_8f37b92cd\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "export AGY_WORKSPACE=\"/var/home/wtg/Repos/project-sandbox\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Override target directory using the -d flag",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy run -d /var/home/wtg/Repos/secure-project -p \"Document the configuration files\" --verbose",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Run a prompt in non-interactive print mode\nagy -p \"Summarize the current working directory\"\n\n# Start a session with a query and continue interactively\nagy -i \"Examine the package.json. What is the entry point?\"\n\n# Resume the last conversation session\nagy -c"
     },
     {
       "type": "h3",
+      "content": "Interactive REPL Slash Commands"
+    },
+    {
+      "type": "p",
+      "content": "When working inside the interactive REPL shell (indicated by the > prompt), standard input is evaluated by the agent. To perform client commands without sending queries to the model, use slash commands:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "/help: Prints descriptions and usage examples for all interactive commands.",
+        "/quit or /exit: Exits the current REPL session safely.",
+        "/mcp list: Lists all configured Model Context Protocol servers and their connection statuses.",
+        "/mcp reload: Restarts and re-queries active MCP servers to refresh tool capabilities.",
+        "/memory reload: Reloads workspace context guidelines (such as .gemini.md files).",
+        "/skills reload: Re-scans and loads discovered local agent skills."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Diagnostic Logging and the --log-file Flag"
+    },
+    {
+      "type": "p",
+      "content": "All agy operations write tracing logs, daemon communications, and error details to disk. By default, these log files are saved to `~/.gemini/antigravity-cli/log/` with names formatted as `cli-YYYYMMDD_HHMMSS.log`."
+    },
+    {
+      "type": "p",
+      "content": "To redirect log outputs for a specific run, use the `--log-file` flag followed by an absolute file path. This is useful for writing test logs or keeping audit trails in automated environments."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Execute a query and write diagnostics to a dedicated log file\nagy -p \"Audit the workspace packages\" --log-file /var/home/wtg/Repos/course-catalog/logs/audit_run.log\n\n# Inspect the log file for warning or error indicators\ngrep -E \"WARN|ERROR\" /var/home/wtg/Repos/course-catalog/logs/audit_run.log"
+    },
+    {
+      "type": "h2",
       "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "Answer the following questions to verify your comprehension of CLI basics:"
+      "content": "**Question 1**: Which of the following flags runs a single prompt non-interactively and outputs the result directly to the terminal standard output?\n\nA) `agy -i \"prompt\"`\nB) `agy -c`\nC) `agy -p \"prompt\"`\nD) `agy --sandbox`\n\n*Feedback*: The correct answer is C. The `-p` (or `--print` / `--prompt`) flag runs the query non-interactively in print mode."
     },
     {
       "type": "p",
-      "content": "- Question 1: Which of the following commands correctly executes a task while providing a custom path override?"
-    },
-    {
-      "type": "p",
-      "content": "- A) agy start -p \"Check config\" --path /workspace"
-    },
-    {
-      "type": "p",
-      "content": "- B) agy run -d /workspace -p \"Check config\""
-    },
-    {
-      "type": "p",
-      "content": "- C) agy run --workspace-dir /workspace --task \"Check config\""
-    },
-    {
-      "type": "p",
-      "content": "Feedback: Option B is correct. The standard run subcommand uses the -d (or --workspace-dir) flag for directory overrides, and -p (or --prompt) for task instructions."
-    },
-    {
-      "type": "p",
-      "content": "- Question 2: What is the risk of using the --auto-approve flag outside of container sandboxes?"
-    },
-    {
-      "type": "p",
-      "content": "- A) The connection to the authentication daemon will fail."
-    },
-    {
-      "type": "p",
-      "content": "- B) The agent can read and modify files, run scripts, and execute commands on your workstation without prompting you for confirmation."
-    },
-    {
-      "type": "p",
-      "content": "- C) The agent will execute files in read-only mode, ignoring your instructions."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: Option B is correct. Without the user prompt approval gate, the agent can execute changes instantly on your workstation. This makes a sandbox mandatory when auto-approve is active."
+      "content": "**Question 2**: What is the default path where agy CLI session diagnostics and error logs are stored on standard Unix systems?\n\nA) `/var/log/agy/`\nB) `~/.gemini/antigravity-cli/log/`\nC) `./logs/`\nD) `/tmp/agy/`\n\n*Feedback*: The correct answer is B. The default path for client session logs is `~/.gemini/antigravity-cli/log/`."
     }
   ]
 }

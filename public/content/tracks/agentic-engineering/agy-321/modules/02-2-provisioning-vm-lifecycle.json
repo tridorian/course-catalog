@@ -9,7 +9,7 @@
     },
     {
       "type": "h2",
-      "content": "Provisioning Configurations"
+      "content": "VM Provisioning Configurations"
     },
     {
       "type": "p",
@@ -17,108 +17,8 @@
     },
     {
       "type": "code",
-      "content": "instance:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "name: \"jules-worker-l300-{{uuid}}\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "zone: \"us-central1-a\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "machine_type: \"n2-standard-4\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "boot_disk:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "image: \"projects/tridorian-prod/global/images/jules-hardened-v3\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "size_gb: 100",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "type: \"pd-ssd\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "network_interfaces:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- network: \"projects/tridorian-vpc/global/networks/jules-internal\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "access_config: [] # No public IP for strict egress lock",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "metadata:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "items:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- key: \"jules-daemon-config\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "value: '{\"log_level\": \"info\", \"allowed_ports\": [80, 443], \"max_execution_time_sec\": 1800}'",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- key: \"startup-script\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "value: |",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "#!/bin/bash",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "echo \"Initializing Jules Daemon...\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "systemctl start jules-agent.service",
-      "language": "bash"
+      "language": "yaml",
+      "content": "instance:\n  name: \"jules-worker-l300-{{uuid}}\"\n  zone: \"us-central1-a\"\n  machine_type: \"n2-standard-4\"\n  boot_disk:\n    image: \"projects/tridorian-prod/global/images/jules-hardened-v3\"\n    size_gb: 100\n    type: \"pd-ssd\"\n  network_interfaces:\n    - network: \"projects/tridorian-vpc/global/networks/jules-internal\"\n      subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"\n      access_config: [] # No public IP for strict egress lock\n  metadata:\n    items:\n      - key: \"jules-daemon-config\"\n        value: '{\"log_level\": \"info\", \"allowed_ports\": [80, 443], \"max_execution_time_sec\": 1800}'\n      - key: \"startup-script\"\n        value: |\n          #!/bin/bash\n          echo \"Initializing Jules Daemon...\"\n          systemctl start jules-agent.service"
     },
     {
       "type": "h2",
@@ -134,28 +34,8 @@
     },
     {
       "type": "code",
-      "content": "# Spawn a new Jules VM instance using the specified template",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy vm spawn \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--pool \"default-developer-pool\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--config \"./specs/jules-worker.yaml\" \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--tags \"owner=sa-training,project=isolated-build\"",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Spawn a new Jules VM instance using the specified template\nagy vm spawn \\\n  --pool \"default-developer-pool\" \\\n  --config \"./specs/jules-worker.yaml\" \\\n  --tags \"owner=sa-training,project=isolated-build\""
     },
     {
       "type": "p",
@@ -163,63 +43,28 @@
     },
     {
       "type": "code",
-      "content": "# List active instances in the pool",
-      "language": "bash"
+      "language": "bash",
+      "content": "# List active instances in the pool\nagy vm list --pool \"default-developer-pool\"\n\n# Query detailed runtime telemetry for a specific instance\nagy vm status --id \"jules-worker-l300-9b98efbd\"\n\n# Stream guest logs in real time\nagy vm logs --id \"jules-worker-l300-9b98efbd\""
     },
     {
-      "type": "code",
-      "content": "agy vm list --pool \"default-developer-pool\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Query detailed runtime telemetry for a specific instance",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy vm status --id \"jules-worker-l300-9b98efbd\"",
-      "language": "bash"
-    },
-    {
-      "type": "p",
-      "content": "> [!WARNING]"
-    },
-    {
-      "type": "p",
-      "content": "> Always run `agy vm destroy` when debugging to prevent orphaned resources in your cloud billing account. Although the Pool Manager automatically reclaims expired VMs, manual intervention is recommended during testing."
+      "type": "warning",
+      "content": "Always run `agy vm destroy --id <instance_id>` when debugging to prevent orphaned resources in your cloud billing account. Although the Pool Manager automatically reclaims expired VMs, manual intervention is recommended during testing."
     },
     {
       "type": "h2",
       "content": "Hands-on Lab Exercise: Spawning Your First Instance"
     },
     {
-      "type": "p",
-      "content": "- 1. Navigate to your workspace directory and create a spec file named jules-test-spec.yaml."
-    },
-    {
-      "type": "p",
-      "content": "- 2. Copy the YAML provisioning config shown above and modify the machine_type to e2-medium for development testing."
-    },
-    {
-      "type": "p",
-      "content": "- 3. Authenticate with your GCP project using the gcloud command line tool."
-    },
-    {
-      "type": "p",
-      "content": "- 4. Execute the agy vm spawn command pointing to your spec file."
-    },
-    {
-      "type": "p",
-      "content": "- 5. Monitor the startup progress using agy vm logs --id <instance_id>."
-    },
-    {
-      "type": "p",
-      "content": "- 6. Verify that the agent daemon has connected by running agy vm status --id <instance_id>."
-    },
-    {
-      "type": "p",
-      "content": "- 7. Terminate the instance using agy vm destroy --id <instance_id>."
+      "type": "list",
+      "items": [
+        "1. Navigate to your workspace directory and create a spec file named `jules-test-spec.yaml`.",
+        "2. Copy the YAML provisioning config shown above and modify the machine_type to `e2-medium` for development testing.",
+        "3. Authenticate with your GCP project using the gcloud command line tool: `gcloud auth application-default login`.",
+        "4. Execute the agy vm spawn command pointing to your spec file: `agy vm spawn --pool dev-pool --config jules-test-spec.yaml`.",
+        "5. Monitor the startup progress using `agy vm logs --id <instance_id>`.",
+        "6. Verify that the agent daemon has connected by running `agy vm status --id <instance_id>`.",
+        "7. Clean up and terminate the instance using `agy vm destroy --id <instance_id>`."
+      ]
     },
     {
       "type": "h2",
@@ -231,19 +76,7 @@
     },
     {
       "type": "p",
-      "content": "- A) subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\""
-    },
-    {
-      "type": "p",
-      "content": "- B) access_config: []"
-    },
-    {
-      "type": "p",
-      "content": "- C) network: \"projects/tridorian-vpc/global/networks/jules-internal\""
-    },
-    {
-      "type": "p",
-      "content": "- D) network_tier: \"STANDARD\""
+      "content": "- A) subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"\n- B) access_config: []\n- C) network: \"projects/tridorian-vpc/global/networks/jules-internal\"\n- D) network_tier: \"STANDARD\""
     },
     {
       "type": "p",
@@ -259,19 +92,7 @@
     },
     {
       "type": "p",
-      "content": "- A) agy vm list"
-    },
-    {
-      "type": "p",
-      "content": "- B) agy vm status --id <instance_id>"
-    },
-    {
-      "type": "p",
-      "content": "- C) agy vm logs --id <instance_id>"
-    },
-    {
-      "type": "p",
-      "content": "- D) agy vm monitor --id <instance_id>"
+      "content": "- A) agy vm list\n- B) agy vm status --id <instance_id>\n- C) agy vm logs --id <instance_id>\n- D) agy vm monitor --id <instance_id>"
     },
     {
       "type": "p",

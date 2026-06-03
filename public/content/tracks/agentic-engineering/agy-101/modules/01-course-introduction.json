@@ -5,20 +5,121 @@
   "blocks": [
     {
       "type": "h1",
-      "content": "Secure Agentic Development: Installation & Setup"
-    },
-    {
-      "type": "slides",
-      "url": "https://docs.google.com/presentation/d/1c8zD7lFmKGSpn6KfE00VNdYGLDw9DbOXDxVasWMXwQk/edit?slide=id.g3df944c6a48_1_1061#slide=id.g3df944c6a48_1_1061",
-      "title": "AGY Concept Walkthrough"
+      "content": "Course Introduction: Secure Agentic Development"
     },
     {
       "type": "p",
-      "content": "**Course Abstract:** Welcome to the foundational session of Google Antigravity (AGY), the next-generation AI developer tool announced at Google I/O. Before we can orchestrate AI agents to write code or execute terminal commands, we must establish a secure, working environment."
+      "content": "Instructor Note: Use this outline to present the core concepts of Google Antigravity before beginning the hands-on labs. Emphasize that agent-first development is a paradigm shift from traditional auto-complete coding assistants."
+    },
+    {
+      "type": "h2",
+      "content": "Slide 1: Welcome to Secure Agentic Development (L100)"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Visual:** Antigravity branding showing the transition from IDE extensions to autonomous execution environments.",
+        "**Talking Track:** \"Welcome to AGY-101: Setup & Initialization. Today, we establish the foundation for your agentic development environment. We are focused on installing, securing, and validating the Antigravity engine under strict enterprise policies.\""
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Slide 2: Evolving to the Agent-First Era"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Visual:** Diagram contrasting traditional autocomplete (which suggests a line of code) with Antigravity agents (which accept a high-level goal, plan a path, write files, run tests, and check browser behavior).",
+        "**Talking Track:** \"Antigravity is not just a coding assistant. It is a Mission Control for managing autonomous agents. The AI behaves as an active developer that plans, writes, executes, and validates code under user-defined guidelines.\""
+      ]
+    },
+    {
+      "type": "info",
+      "content": "An agent-first platform presupposes that the AI is an autonomous actor. Instead of a linear chatbot where you wait for generation, Antigravity lets you dispatch multiple agents asynchronously to handle different workspace tasks simultaneously."
+    },
+    {
+      "type": "h2",
+      "content": "Slide 3: Version Constraints & Parity"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Visual:** Warning banner highlighting the strict version boundary between Antigravity v1.x and v2.x.",
+        "**Talking Track:** \"We have a critical constraint: you must use Antigravity version v1.23.2 or lower. Version v2.0.0 and higher represent a different product model and are incompatible with the policies, local execution targets, and browser subagents configured in this course.\""
+      ]
+    },
+    {
+      "type": "warning",
+      "content": "Always check your version before installing. Standard workstation packages that automatically update may push you to v2.0.0+, breaking your workspace boundaries and local verification toolchains."
+    },
+    {
+      "type": "h2",
+      "content": "Slide 4: The Three Installation Surfaces (Tiers)"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Tier 1: Native Local Workstation:** Standard developer workstations using the interactive `agy-easy-install` helper script (v0.2.12+) to configure dependencies.",
+        "**Tier 2: Hardened Workstation Flow:** A manual local Standalone Tarball extraction method tailored for highly secure, air-gapped corporate environments (such as internal Linux Cloudtops) where curl-to-bash execution is blocked.",
+        "**Tier 3: Containerized OCI Sandbox (agy-box):** Running the entire toolchain inside an OCI container (Docker, Podman, Distrobox) for maximum host isolation and risk mitigation."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Slide 5: Autonomy Profiles and Policies"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Terminal Execution Policy:** Controls whether the agent can execute commands in your terminal (Always proceed vs Request review).",
+        "**Review Policy:** Determines when the agent pauses to request approval for plans and artifacts (Always proceed, Agent decides, or Request review).",
+        "**JavaScript Execution Policy:** Restricts browser agent JavaScript capabilities (Always proceed, Request review, or Disabled).",
+        "**Profiles:** Secure Mode (highest restriction), Review-Driven Development (balanced/recommended), and Agent-Driven Development (maximum autonomy)."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "Based on our enterprise pilot sessions, **AGY-101 v0.2** focuses *exclusively* on getting Antigravity successfully installed and initialized within a restricted corporate IT environment. We will bypass Docker and external repository blocks by utilizing a secure Tarball method on a provisioned Cloudtop VM. As we like to say: *\"No install, no magic.\"*"
+      "content": "Question 1: Why must learners ensure their Antigravity version is v1.23.2 or lower for this course?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Version v1.23.2 is the only version that supports Python and Node.js dependencies."
+    },
+    {
+      "type": "p",
+      "content": "- B) Newer versions (v2.0.0+) introduce a different architecture, interface model, and set of capabilities that are incompatible with this curriculum's exercises."
+    },
+    {
+      "type": "p",
+      "content": "- C) v1.23.2 is a lightweight command-line-only tool while v2.0.0+ is a graphical-only application."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Antigravity v1.23.2 or lower contains the specific local execution agent, browser subagent, and workspace policies taught in this curriculum."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which installation tier is appropriate for highly secure, air-gapped corporate workstations where interactive online scripts are blocked?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Tier 1: Native Local Workstation"
+    },
+    {
+      "type": "p",
+      "content": "- B) Tier 2: Hardened Workstation Flow (Standalone Tarball)"
+    },
+    {
+      "type": "p",
+      "content": "- C) Tier 3: Containerized Sandbox (agy-box)"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Tier 2 uses manual standalone tarball extraction to bypass script execution and download blocks in restricted/air-gapped environments."
     }
   ]
 }

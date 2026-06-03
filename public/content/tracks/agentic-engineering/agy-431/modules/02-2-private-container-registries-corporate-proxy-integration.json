@@ -1,6 +1,6 @@
 {
   "id": "2",
-  "title": "2. Private Container Registries & Corporate Proxy Integration",
+  "title": "2. Private Registry & Proxy Integration",
   "type": "lab",
   "blocks": [
     {
@@ -12,12 +12,8 @@
       "content": "Enterprise environments route all external traffic through forward proxies (such as Squid or Zscaler) that perform SSL interception. To deploy agy-box reliably, you must configure the container runtime to trust corporate certificates and route image pull and push requests through the appropriate proxies."
     },
     {
-      "type": "p",
-      "content": "> [!WARNING]"
-    },
-    {
-      "type": "p",
-      "content": "> Failing to inject corporate Root CA certificates into both the host container daemon and the agy-box image itself will result in immediate SSL handshake failures (x509: certificate signed by unknown authority) when communicating with public or private APIs."
+      "type": "warning",
+      "content": "Failing to inject corporate Root CA certificates into both the host container daemon and the agy-box image itself will result in immediate SSL handshake failures (x509: certificate signed by unknown authority) when communicating with public or private APIs."
     },
     {
       "type": "h3",
@@ -29,58 +25,8 @@
     },
     {
       "type": "code",
-      "content": "# Custom Dockerfile extending the base agy-box image",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "FROM gcr.io/tridorian-corp/agy-box:v1.2.0",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Switch to root to import certificates",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "USER root",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Copy corporate ROOT CA certificate",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "COPY certs/corp-root-ca.crt /usr/local/share/ca-certificates/corp-root-ca.crt",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Update certificates database",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "RUN chmod 644 /usr/local/share/ca-certificates/corp-root-ca.crt && \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "update-ca-certificates",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Revert to unprivileged runner user",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "USER agy_runner",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Custom Dockerfile extending the base agy-box image\nFROM gcr.io/tridorian-corp/agy-box:v1.2.0\n\n# Switch to root to import certificates\nUSER root\n\n# Copy corporate ROOT CA certificate\nCOPY certs/corp-root-ca.crt /usr/local/share/ca-certificates/corp-root-ca.crt\n\n# Update certificates database\nRUN chmod 644 /usr/local/share/ca-certificates/corp-root-ca.crt && \\\n    update-ca-certificates\n\n# Revert to unprivileged runner user\nUSER agy_runner"
     },
     {
       "type": "h3",
@@ -92,83 +38,68 @@
     },
     {
       "type": "code",
-      "content": "# Create systemd override directory for Podman/Docker",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Create systemd override directory for Podman/Docker\nsudo mkdir -p /etc/systemd/system/podman.service.d/\n\n# Define proxy environment variables in systemd override configuration\ncat <<EOF | sudo tee /etc/systemd/system/podman.service.d/http-proxy.conf\n[Service]\nEnvironment=\"HTTP_PROXY=http://proxy.corp.internal:8080\"\nEnvironment=\"HTTPS_PROXY=http://proxy.corp.internal:8080\"\nEnvironment=\"NO_PROXY=localhost,127.0.0.1,private-registry.corp.internal,169.254.169.254\"\nEOF\n\n# Reload systemd daemon and restart the container service\nsudo systemctl daemon-reload\nsudo systemctl restart podman\n\n# Authenticate to the private registry using corporate credentials\npodman login private-registry.corp.internal \\\n  --username agy-deployer \\\n  --password-stdin < /etc/secrets/registry-token.txt"
+    },
+    {
+      "type": "h3",
+      "content": "Google Chat App Setup"
+    },
+    {
+      "type": "p",
+      "content": "To enable the Google Chat MCP server to search and read messages, you must register a Google Chat app configuration in your GCP project:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Search for \"Google Chat API\" in the GCP Console search bar, and select Manage > Configuration.",
+        "Set the App Name field to \"Chat MCP\".",
+        "Set the Avatar URL field to \"https://developers.google.com/chat/images/quickstart-app-avatar.png\".",
+        "Set the Description field to \"Chat MCP server\".",
+        "Under Functionality, turn off \"Enable interactive features\" (as our agents run as background services).",
+        "Under Logs, select \"Log errors to Logging\" and click Save."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "OAuth Consent branding and Granular Scopes"
+    },
+    {
+      "type": "p",
+      "content": "Google Workspace MCP servers require OAuth 2.0. In the Google Auth Platform portal, configure the OAuth Consent Screen and add the necessary scopes for each Workspace server:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Navigate to Google Auth Platform > Branding, and click Get Started.",
+        "Set App Name to \"Google Workspace MCP Servers\" and select your user support email.",
+        "Configure the Audience to Internal (restricts access to users in your organization) or External (requires adding your email under Test Users).",
+        "Under Contact Information, enter your developer email, then review and click Create.",
+        "Navigate to Data Access > Add or Remove Scopes, scroll to the bottom, and manually add the following scopes under \"Manually add scopes\":"
+      ]
     },
     {
       "type": "code",
-      "content": "sudo mkdir -p /etc/systemd/system/podman.service.d/",
-      "language": "bash"
+      "language": "text",
+      "content": "Google Calendar:\nhttps://www.googleapis.com/auth/calendar.calendarlist.readonly\nhttps://www.googleapis.com/auth/calendar.events.freebusy\nhttps://www.googleapis.com/auth/calendar.events.readonly\n\nGoogle Chat:\nhttps://www.googleapis.com/auth/chat.spaces.readonly\nhttps://www.googleapis.com/auth/chat.memberships.readonly\nhttps://www.googleapis.com/auth/chat.messages.readonly\nhttps://www.googleapis.com/auth/chat.users.readstate.readonly\n\nGoogle Drive:\nhttps://www.googleapis.com/auth/drive.readonly\nhttps://www.googleapis.com/auth/drive.file\n\nGmail:\nhttps://www.googleapis.com/auth/gmail.readonly\nhttps://www.googleapis.com/auth/gmail.compose\n\nPeople API:\nhttps://www.googleapis.com/auth/directory.readonly\nhttps://www.googleapis.com/auth/userinfo.profile\nhttps://www.googleapis.com/auth/contacts.readonly"
     },
     {
-      "type": "code",
-      "content": "# Define proxy environment variables in systemd override configuration",
-      "language": "bash"
+      "type": "h3",
+      "content": "Creating Web Application Client Credentials"
     },
     {
-      "type": "code",
-      "content": "cat <<EOF | sudo tee /etc/systemd/system/podman.service.d/http-proxy.conf",
-      "language": "bash"
+      "type": "p",
+      "content": "With scopes registered, you must generate credentials. Since Antigravity interfaces coordinate the login flow on behalf of the developer, you must create a Web application client with an exact authorized redirect URI:"
     },
     {
-      "type": "code",
-      "content": "[Service]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Environment=\"HTTP_PROXY=http://proxy.corp.internal:8080\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Environment=\"HTTPS_PROXY=http://proxy.corp.internal:8080\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "Environment=\"NO_PROXY=localhost,127.0.0.1,private-registry.corp.internal,169.254.169.254\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "EOF",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Reload systemd daemon and restart the container service",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo systemctl daemon-reload",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo systemctl restart podman",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Authenticate to the private registry using corporate credentials",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "podman login private-registry.corp.internal \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--username agy-deployer \\",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "--password-stdin < /etc/secrets/registry-token.txt",
-      "language": "bash"
+      "type": "list",
+      "items": [
+        "Go to Google Auth Platform > Clients > Create Client.",
+        "Select Web application as the application type.",
+        "Name the client \"Antigravity\".",
+        "Under Authorized redirect URIs, click \"+ Add URI\" and enter exactly: https://antigravity.google/oauth-callback",
+        "Click Create, and copy the generated Client ID and Client Secret to a secure configuration repository."
+      ]
     },
     {
       "type": "h3",
@@ -176,59 +107,51 @@
     },
     {
       "type": "p",
-      "content": "Question 1: What is the primary cause of the error 'x509: certificate signed by unknown authority' during an agy-box deploy run inside a corporate environment?"
+      "content": "Question 1: What is the exact redirect URI that must be registered under the Web application credentials for Antigravity Workspace MCP integration?"
     },
     {
       "type": "p",
-      "content": "A) The agent API key is invalid."
+      "content": "A) https://antigravity.google/oauth-callback"
     },
     {
       "type": "p",
-      "content": "B) The container runtime lacks the enterprise's custom SSL Root CA certificate in its trusted store."
+      "content": "B) http://localhost:8080/callback"
     },
     {
       "type": "p",
-      "content": "C) The system timezone is out of sync with the cloud provider."
+      "content": "C) https://developers.google.com/oauth-callback"
     },
     {
       "type": "p",
-      "content": "D) Podman is running in rootful instead of rootless mode."
+      "content": "D) urn:ietf:wg:oauth:2.0:oob"
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: A. The authorized redirect URI must be set exactly to https://antigravity.google/oauth-callback to align with Antigravity's OAuth flow."
     },
     {
       "type": "p",
-      "content": "> [!NOTE]"
+      "content": "Question 2: Which scope allows the Google Chat MCP server to search and read messages in space chats?"
     },
     {
       "type": "p",
-      "content": "> Correct Answer: B. Corporate proxies intercept SSL traffic and resign certificates. The container will reject these connection attempts unless the custom enterprise Root CA certificate is injected and trusted."
+      "content": "A) https://www.googleapis.com/auth/chat.spaces.readonly"
     },
     {
       "type": "p",
-      "content": "Question 2: How do you configure a container daemon to bypass corporate proxies for a local private registry?"
+      "content": "B) https://www.googleapis.com/auth/chat.messages.readonly"
     },
     {
       "type": "p",
-      "content": "A) By setting the proxy IP in HTTPS_PROXY."
+      "content": "C) https://www.googleapis.com/auth/chat.bot"
     },
     {
       "type": "p",
-      "content": "B) By deleting the docker daemon configuration."
+      "content": "D) https://www.googleapis.com/auth/chat.admin"
     },
     {
-      "type": "p",
-      "content": "C) By adding the private registry hostname or IP to the NO_PROXY environment variable list."
-    },
-    {
-      "type": "p",
-      "content": "D) By running the registry on port 80 without SSL."
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Correct Answer: C. The NO_PROXY environment variable lists hostnames and IP addresses that must be accessed directly, bypassing the proxy."
+      "type": "info",
+      "content": "Correct Answer: B. The https://www.googleapis.com/auth/chat.messages.readonly scope is required to search and read messages within space chats."
     }
   ]
 }

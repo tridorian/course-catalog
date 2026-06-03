@@ -4,16 +4,16 @@
   "type": "lab",
   "blocks": [
     {
+      "type": "h2",
+      "content": "Operating System Boundaries"
+    },
+    {
       "type": "p",
       "content": "While SDK-level policies provide a clean, declarative interface for restricting file operations, they are not a complete security boundary. If an agent is granted shell execution privileges via the `run_command` tool, it can execute commands directly on the host operating system. In this scenario, the agent's actions are governed by POSIX-level permissions. To ensure comprehensive safety, you must configure operating system-level restrictions."
     },
     {
-      "type": "p",
-      "content": "> [!WARNING]"
-    },
-    {
-      "type": "p",
-      "content": "> The Shell Bypass Vulnerability. If your agent is configured to run shell commands (`run_command`), the commands execute under your host user context. If the agent executes a shell command like `cat ~/.ssh/id_rsa`, it completely bypasses the Python interpreter and the SDK's file policies. OS-level security permissions are necessary to protect your files."
+      "type": "warning",
+      "content": "The Shell Bypass Vulnerability. If your agent is configured to run shell commands (`run_command`), the commands execute under your host user context. If the agent executes a shell command like `cat ~/.ssh/id_rsa`, it completely bypasses the Python interpreter and the SDK's file policies. OS-level security permissions are necessary to protect your files."
     },
     {
       "type": "p",
@@ -21,48 +21,8 @@
     },
     {
       "type": "code",
-      "content": "# Create a workspace directory specifically for the agent",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "mkdir -p /var/home/wtg/workspace_agy_project",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Assign ownership to the invoking user and set group ownership to a restricted group",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo chown -R $USER:nogroup /var/home/wtg/workspace_agy_project",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Apply restrictive permissions (Owner: read/write/execute, Group/Others: none)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "chmod 700 /var/home/wtg/workspace_agy_project",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Verify that permissions are set correctly",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "ls -ld /var/home/wtg/workspace_agy_project",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Expected output shows: drwx------",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Create a workspace directory specifically for the agent\nmkdir -p /var/home/wtg/workspace_agy_project\n\n# Assign ownership to the invoking user and set group ownership to a restricted group\nsudo chown -R $USER:nogroup /var/home/wtg/workspace_agy_project\n\n# Apply restrictive permissions (Owner: read/write/execute, Group/Others: none)\nchmod 700 /var/home/wtg/workspace_agy_project\n\n# Verify that permissions are set correctly\nls -ld /var/home/wtg/workspace_agy_project\n# Expected output shows: drwx------"
     },
     {
       "type": "p",
@@ -70,38 +30,8 @@
     },
     {
       "type": "code",
-      "content": "# Create a dedicated system user for running the agent",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo useradd -m -s /bin/bash agy-sandbox",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Secure your primary home directory from being read by the sandbox user",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "chmod 700 /var/home/wtg",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Test access restrictions as the sandbox user",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "sudo -u agy-sandbox ls -la /var/home/wtg",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Expected output: ls: cannot open directory '/var/home/wtg': Permission denied",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Create a dedicated system user for running the agent\nsudo useradd -m -s /bin/bash agy-sandbox\n\n# Secure your primary home directory from being read by the sandbox user\nchmod 700 /var/home/wtg\n\n# Test access restrictions as the sandbox user\nsudo -u agy-sandbox ls -la /var/home/wtg\n# Expected output: ls: cannot open directory '/var/home/wtg': Permission denied"
     },
     {
       "type": "h3",
@@ -132,12 +62,36 @@
       "content": "Correct Answer: B"
     },
     {
-      "type": "p",
-      "content": "> [!NOTE]"
+      "type": "info",
+      "content": "Feedback: When an agent runs a command in the shell, it uses the host operating system's execution pipeline. This pipeline does not check Python-level middleware, meaning the agent can run any command your UNIX user can, unless system-level permissions block it."
     },
     {
       "type": "p",
-      "content": "> Feedback: When an agent runs a command in the shell, it uses the host operating system's execution pipeline. This pipeline does not check Python-level middleware, meaning the agent can run any command your UNIX user can, unless system-level permissions block it."
+      "content": "Question 2: What is the primary purpose of running the AGY engine under a dedicated system user account like `agy-sandbox`?"
+    },
+    {
+      "type": "p",
+      "content": "A) It enables the agent to execute commands with administrator privileges."
+    },
+    {
+      "type": "p",
+      "content": "B) It isolates the agent process, preventing it from reading your primary user's SSH keys, dotfiles, or document folders even if it escapes the SDK boundary."
+    },
+    {
+      "type": "p",
+      "content": "C) It allows the agent to bypass network firewall rules."
+    },
+    {
+      "type": "p",
+      "content": "D) It keeps a cached copy of the model weights on the filesystem."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "info",
+      "content": "Feedback: A dedicated unprivileged system user restricts the agent's system-level access. Even if the agent executes arbitrary shell scripts, standard UNIX DAC (Discretionary Access Control) prevents it from reading files in directories owned by other users (like your primary home directory with permissions `700`)."
     }
   ]
 }

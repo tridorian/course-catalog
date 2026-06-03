@@ -4,55 +4,103 @@
   "type": "lab",
   "blocks": [
     {
-      "type": "p",
-      "content": "[3. Lab - The Hardened Install (AGV Easy Install)]"
-    },
-    {
       "type": "h1",
-      "content": "**Lab 1: The Hardened Install\n**"
+      "content": "Lab 1: The Hardened Install"
     },
     {
       "type": "p",
-      "content": "**Learning Objective:** Successfully install Google Antigravity on a secure Linux VM using a 1-click interactive installation script, bypassing the need for Docker or restricted repositories."
+      "content": "In this lab, you will deploy the Antigravity v1.23.2 binary on your system. Depending on your corporate security limits, you can choose between Tier 1 (Interactive Scripted) or Tier 2 (Manual Hardened Tarball extraction)."
+    },
+    {
+      "type": "h2",
+      "content": "🚀 Option A: Tier 1 - Interactive script install (Standard Workstations)"
     },
     {
       "type": "p",
-      "content": "**Lab Steps:\n**"
+      "content": "For workstations with direct outbound internet access and policy clearance for executing script installations, use the interactive helper. Run the following command in your terminal:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "curl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agy-easy-install/main/antigravity-manager.sh\" | bash"
+    },
+    {
+      "type": "info",
+      "content": "The interactive helper script auto-detects your operating system, verifies Python and Node.js dependencies, and presents a text menu. Select **Install** and choose the **Official Binary (.tar.gz)** method to bypass system package manager overrides."
+    },
+    {
+      "type": "h2",
+      "content": "🔒 Option B: Tier 2 - Hardened manual tarball install (Restricted/Cloudtop VM)"
     },
     {
       "type": "p",
-      "content": "**1. Verify Cloudtop VM** Ensure your Cloudtop VM is provisioned and active. Open your local terminal."
+      "content": "For air-gapped VMs or systems where external curl-to-bash execution is blocked, download and extract the official package manually. Run this sequence:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Create a dedicated application directory\nmkdir -p ~/.local/antigravity\n\n# Download the official package (v1.23.2 or lower)\nwget https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz -O /tmp/antigravity.tar.gz\n\n# Extract to the application folder\ntar -xzf /tmp/antigravity.tar.gz -C ~/.local/antigravity\n\n# Create a symlink to user binary folder\nmkdir -p ~/.local/bin\nln -sf ~/.local/antigravity/bin/antigravity ~/.local/bin/antigravity\nln -sf ~/.local/antigravity/bin/agy ~/.local/bin/agy"
+    },
+    {
+      "type": "warning",
+      "content": "Corporate firewall proxy configuration: If your wget command fails with a connection timeout, verify that you have exported your corporate proxy variables (`http_proxy` and `https_proxy`) in your active shell before running the download."
+    },
+    {
+      "type": "h2",
+      "content": "🛠️ Option C: Tier 3 - Containerized Sandbox (agy-box)"
     },
     {
       "type": "p",
-      "content": "**2. Run the AGV Easy Install Script** We will use the unofficial AGV Easy Install manager by wtg-codes. This script auto-detects your environment and recommends the best method. Execute the following command in your terminal:"
+      "content": "To run in an completely isolated sandboxed environment with Docker or Podman, deploy using the official container image. This isolates agent commands entirely from your host workstation files:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Pull the container image\ndocker pull github.com/wtg-codes/agy-box:v1.23.2\n\n# Run the sandboxed workspace, mounting your local project folder\ndocker run -it -v $(pwd):/workspace github.com/wtg-codes/agy-box:v1.23.2 /bin/bash"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "curl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agv-easy-install/main/antigravity-manager.sh\" | bash"
+      "content": "Question 1: What is the primary benefit of the Tier 2 Standalone Tarball installation method?"
     },
     {
       "type": "p",
-      "content": "💡 **Instructor Comment:** If curl fails, ensure you have an active internet connection. If the gum UI fails to download, the script will gracefully fall back to a plain text menu."
+      "content": "- A) It runs twice as fast as the Tier 1 native installation."
     },
     {
       "type": "p",
-      "content": "**3. Navigate the Interactive Menu** Once the script launches, you will see a hierarchical menu system."
-    },
-    {
-      "type": "list",
-      "items": [
-        "Choose **Install** from the main menu.",
-        "When prompted for the installation method, select **Official Binary (.tar.gz)**."
-      ]
+      "content": "- B) It allows installation on air-gapped, highly restricted corporate workstations without executing external installer shell scripts that might be blocked by IT."
     },
     {
       "type": "p",
-      "content": "🛑 **Security Note:** While the script supports APT/DNF and Homebrew, selecting the Official Binary method is required for our corporate Cloudtop environment to bypass system repository restrictions."
+      "content": "- C) It automatically installs the containerized Docker sandbox."
     },
     {
       "type": "p",
-      "content": "**4. Locate Application** Once the script successfully completes, it will map the binaries to ~/.local/bin/antigravity. Go back to the desktop, click on the app grid icon on the bottom left, and locate the new Antigravity icon."
+      "content": "Feedback: Option B is correct. The Standalone Tarball method is a manual extraction process, meaning it bypasses network-dependent installer scripts and respects air-gapped security policies."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Where are the user binaries typically placed after a successful manual extraction or script install to ensure they can be executed without root permissions?"
+    },
+    {
+      "type": "p",
+      "content": "- A) `/usr/bin/`"
+    },
+    {
+      "type": "p",
+      "content": "- B) `/etc/antigravity/`"
+    },
+    {
+      "type": "p",
+      "content": "- C) `~/.local/bin/`"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option C is correct. Local user binaries are best stored in `~/.local/bin` to avoid requiring administrative (`sudo`) privileges for system folders."
     }
   ]
 }

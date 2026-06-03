@@ -1,11 +1,11 @@
 {
   "id": "4",
-  "title": "4. Architectural Patterns & Multi-Agent Execution Flow",
+  "title": "4. Workflows & Multi-Agent Flow",
   "type": "lab",
   "blocks": [
     {
-      "type": "p",
-      "content": "## Managing Multi-Agent Development Workflows"
+      "type": "h2",
+      "content": "Managing Multi-Agent Development Workflows"
     },
     {
       "type": "p",
@@ -13,155 +13,52 @@
     },
     {
       "type": "p",
-      "content": "To make verification secure and reliable, developers utilize Jules VM Pools. Jules is an isolated virtual machine runner that allows test executions to run in a clean, remote sandbox. Rather than executing tests directly on a developer's workstation, the local agent packages the change, invokes a Jules VM container to build and test the software, and reads the status payload before committing."
+      "content": "To organize these multi-agent pipelines without writing complex code, Antigravity 2.0 introduces a zero-code configuration architecture under the `.agents/` folder. First, developers define the team in `agents.md` to declare specialized personas (such as Product Manager, Frontend Engineer, and QA) and their respective responsibilities. Second, modular skills and artifact handover rules are saved as markdown documents in `skills/` (for example, specifying technical limits and code review policies). Third, automated handovers are structured in `workflows/` as custom slash commands (like `/startcycle`), channelling requirements from initial specification to testing and deployment."
     },
     {
       "type": "p",
-      "content": "### Lab: Defining Multi-Agent Workflows and Jules VM Integrations"
+      "content": "To make verification secure and reliable, developers utilize Jules VM Pools. Jules is an isolated virtual machine runner that allows test executions to run in a clean, remote sandbox. Rather than executing tests directly on a developer's workstation, the local agent packages the change, invokes a Jules VM container to build and test the software, and reads the status payload before committing."
+    },
+    {
+      "type": "info",
+      "content": "By isolating test executions inside remote Jules VMs, you protect your local workspace from shell code injection. Additionally, this pattern guarantees environment parity, as every test runs in an identical clean environment, preventing the classic 'works on my machine' bug."
+    },
+    {
+      "type": "h3",
+      "content": "Lab: Defining Multi-Agent Workflows and Jules VM Integrations"
     },
     {
       "type": "p",
       "content": "Let's update our .gemini.md file to configure a multi-agent development and testing workflow. Copy the following workflow specification block into your configuration:"
     },
     {
-      "type": "p",
-      "content": "```markdown"
-    },
-    {
-      "type": "p",
-      "content": "## Architectural Workflows & Verification Loops"
-    },
-    {
-      "type": "p",
-      "content": "- Task Execution Sequence:"
-    },
-    {
-      "type": "p",
-      "content": "1. Read requirements and write corresponding unit tests inside `tests/` folder."
-    },
-    {
-      "type": "p",
-      "content": "2. Execute test runner. Confirm tests fail (Red phase)."
-    },
-    {
-      "type": "p",
-      "content": "3. Implement code changes inside `src/` to satisfy the tests (Green phase)."
-    },
-    {
-      "type": "p",
-      "content": "4. Re-run tests. Confirm all tests pass."
-    },
-    {
-      "type": "p",
-      "content": "5. Execute test coverage tool. Confirm coverage is >= 90%."
-    },
-    {
-      "type": "p",
-      "content": "6. Submit diff to Lead Architect agent for code review."
-    },
-    {
-      "type": "p",
-      "content": "- Jules VM Verification Integration:"
-    },
-    {
-      "type": "p",
-      "content": "* Environment: Python 3.11 with pytest"
-    },
-    {
-      "type": "p",
-      "content": "* Build Command: `pip install -r requirements.txt`"
-    },
-    {
-      "type": "p",
-      "content": "* Verification Command: `pytest --cov=src/ tests/`"
-    },
-    {
-      "type": "p",
-      "content": "* Target Pool: `jules-testing-pool-04`"
-    },
-    {
-      "type": "p",
-      "content": "* Action: Execute test script inside remote Jules VM container. Do not execute test commands locally on the workstation host."
-    },
-    {
-      "type": "p",
-      "content": "```"
+      "type": "code",
+      "language": "markdown",
+      "content": "## Architectural Workflows & Verification Loops\n- Task Execution Sequence:\n  1. Read requirements and write corresponding unit tests inside `tests/` folder.\n  2. Execute test runner. Confirm tests fail (Red phase).\n  3. Implement code changes inside `src/` to satisfy the tests (Green phase).\n  4. Re-run tests. Confirm all tests pass.\n  5. Execute test coverage tool. Confirm coverage is >= 90%.\n  6. Submit diff to Lead Architect agent for code review.\n- Jules VM Verification Integration:\n  * Environment: Python 3.11 with pytest\n  * Build Command: `pip install -r requirements.txt`\n  * Verification Command: `pytest --cov=src/ tests/`\n  * Target Pool: `jules-testing-pool-04`\n  * Action: Execute test script inside remote Jules VM container. Do not execute test commands locally on the workstation host."
     },
     {
       "type": "p",
       "content": "To launch this multi-agent workflow and delegate the test validation to a Jules VM instance, use the CLI command below:"
     },
     {
-      "type": "p",
-      "content": "```bash"
-    },
-    {
-      "type": "p",
+      "type": "code",
+      "language": "bash",
       "content": "agy task run --task \"Implement user registration validator\" --jules-pool jules-testing-pool-04 --verify-flow tdd"
     },
     {
-      "type": "p",
-      "content": "```"
+      "type": "h3",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "> [!NOTE]"
+      "content": "Answer the following questions to verify your comprehension of workflow architecture:"
     },
     {
-      "type": "p",
-      "content": "> By isolating test executions inside remote Jules VMs, you protect your local workspace from shell code injection. Additionally, this pattern guarantees environment parity, as every test runs in an identical clean environment, preventing the classic 'works on my machine' bug."
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
-    },
-    {
-      "type": "p",
-      "content": "Question 1: Why is executing test runs in a remote Jules VM rather than locally on the developer's workstation preferred in L400 enterprise setups?"
-    },
-    {
-      "type": "p",
-      "content": "A) It reduces local CPU usage and isolates potential code injection vulnerabilities or malicious code inside a containerized sandbox."
-    },
-    {
-      "type": "p",
-      "content": "B) It speeds up linter checks by running them on a central cluster."
-    },
-    {
-      "type": "p",
-      "content": "C) It allows the agent to bypass authentication tokens."
-    },
-    {
-      "type": "p",
-      "content": "D) It enables the agent to write more complex code."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: The correct answer is A. Running builds and test commands on remote, ephemeral Jules VMs provides a sandbox that isolates developer machines from malicious or destructive scripts that models might write or execute."
-    },
-    {
-      "type": "p",
-      "content": "Question 2: What are the phases of the TDD loop defined in the workflow rules?"
-    },
-    {
-      "type": "p",
-      "content": "A) Design, Commit, Deploy."
-    },
-    {
-      "type": "p",
-      "content": "B) Red (fail tests), Green (pass tests), Refactor (improve structure and check coverage)."
-    },
-    {
-      "type": "p",
-      "content": "C) Write code, Compile, Lint."
-    },
-    {
-      "type": "p",
-      "content": "D) Fetch dependencies, Write docs, Approve."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: The correct answer is B. Enforcing the Red-Green-Refactor cycle prevents agents from writing untested code and guarantees code quality through continuous automated verification."
+      "type": "list",
+      "items": [
+        "Question 1: Why is executing test runs in a remote Jules VM rather than locally on the developer's workstation preferred in L400 enterprise setups?\n  - A) It reduces local CPU usage and isolates potential code injection vulnerabilities or malicious code inside a containerized sandbox.\n  - B) It speeds up linter checks by running them on a central cluster.\n  - C) It allows the agent to bypass authentication tokens.\n  - D) It enables the agent to write more complex code.\n\nFeedback: Option A is correct. Running builds and test commands on remote, ephemeral Jules VMs provides a sandbox that isolates developer machines from malicious or destructive scripts that models might write or execute.",
+        "Question 2: What are the phases of the TDD loop defined in the workflow rules?\n  - A) Design, Commit, Deploy.\n  - B) Red (fail tests), Green (pass tests), Refactor (improve structure and check coverage).\n  - C) Write code, Compile, Lint.\n  - D) Fetch dependencies, Write docs, Approve.\n\nFeedback: Option B is correct. Enforcing the Red-Green-Refactor cycle prevents agents from writing untested code and guarantees code quality through continuous automated verification."
+      ]
     }
   ]
 }

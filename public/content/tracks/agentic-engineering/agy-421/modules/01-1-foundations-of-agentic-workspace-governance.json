@@ -1,179 +1,80 @@
 {
   "id": "1",
-  "title": "1. Foundations of Agentic Workspace Governance",
+  "title": "1. Foundations of Agentic Governance",
   "type": "lab",
   "blocks": [
     {
-      "type": "p",
-      "content": "## Introduction to Agentic Governance"
+      "type": "h2",
+      "content": "Introduction to Agentic Governance"
     },
     {
       "type": "p",
-      "content": "In an autonomous agentic engineering environment, agents operate with direct access to file systems, terminals, and external networks. Without strict, machine-readable boundaries, autonomous agents can inadvertently access sensitive credentials, introduce architectural drift, or run destructive shell commands. AGY-421 provides Lead Architects and Delivery Directors with the tools to write, distribute, and enforce immutable boundaries at the directory level using .gemini.md rules."
+      "content": "In an autonomous agentic engineering environment, AI agents operate with direct access to file systems, command line terminals, and network gateways. While this enables high-velocity task execution, it also exposes the workspace to significant risks. Without strict, machine-readable boundaries, autonomous agents can inadvertently access sensitive credentials, introduce architectural drift, or execute destructive shell commands. AGY-421 provides Lead Architects and Delivery Directors with the tools to write, distribute, and enforce immutable boundaries at the directory level using workspace-specific rules."
     },
     {
       "type": "p",
-      "content": "The .gemini.md file is a special Markdown-based rules file placed in a workspace. At runtime, the AGY execution engine (CLI agy and IDE extension antigravity-ide) checks for these rules before starting any LLM execution context. The engine compiles these rules directly into the agent's system instructions, creating a binding contract that the LLM must follow during its reasoning and tool-execution loops."
+      "content": "The .gemini.md file is a special Markdown-based rules file placed in a workspace. At runtime, the AGY execution engine (which powers the CLI agy and the IDE extension antigravity-ide) checks for these rules before starting any LLM execution context. The engine compiles these rules directly into the agent's system instructions, creating a binding contract that the LLM must follow during its reasoning and tool-execution loops."
     },
     {
-      "type": "p",
-      "content": "### Workspace Directory Hierarchy & Rule Precedence"
+      "type": "info",
+      "content": "Always keep your .gemini.md files committed to version control. This ensures that every developer and agent operating on the codebase uses the exact same ruleset, and prevents individual developers or agents from relaxing security boundaries locally."
+    },
+    {
+      "type": "h3",
+      "content": "Workspace Directory Hierarchy & Rule Precedence"
     },
     {
       "type": "p",
       "content": "Rules follow a standard hierarchy where parent directory rules apply to all children folders unless explicitly overridden. The resolution order is:"
     },
     {
-      "type": "p",
-      "content": "- 1. Global rules (~/.config/antigravity/rules.md)"
+      "type": "list",
+      "items": [
+        "1. Global rules (located in ~/.config/antigravity/rules.md or ~/.gemini/GEMINI.md)",
+        "2. Workspace root rules (located in /workspace/.gemini.md)",
+        "3. Subdirectory rules (located in /workspace/src/.gemini.md)"
+      ]
     },
     {
       "type": "p",
-      "content": "- 2. Workspace root rules (/workspace/.gemini.md)"
+      "content": "To maintain integrity, enterprise policies typically block subdirectories from relaxing constraints defined at the workspace root. If a root policy declares a boundary as immutable, any attempt by a subdirectory rules file to override it will be rejected by the execution engine."
     },
     {
-      "type": "p",
-      "content": "- 3. Subdirectory rules (/workspace/src/.gemini.md)"
-    },
-    {
-      "type": "p",
-      "content": "To maintain integrity, enterprise policies typically block subdirectories from relaxing constraints defined at the workspace root."
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Always keep your .gemini.md files committed to version control. This ensures that every developer and agent operating on the codebase uses the exact same ruleset, and prevents individual developers from relaxing security boundaries locally."
-    },
-    {
-      "type": "p",
-      "content": "### Lab: Initializing a Governed Workspace"
+      "type": "h3",
+      "content": "Lab: Initializing a Governed Workspace"
     },
     {
       "type": "p",
       "content": "Let's set up a standard workspace structure and create our first root-level governance rules file. Execute the following terminal commands to prepare the workspace:"
     },
     {
-      "type": "p",
-      "content": "```bash"
-    },
-    {
-      "type": "p",
-      "content": "mkdir -p enterprise-workspace/src"
-    },
-    {
-      "type": "p",
-      "content": "cd enterprise-workspace"
-    },
-    {
-      "type": "p",
-      "content": "touch .gemini.md"
-    },
-    {
-      "type": "p",
-      "content": "touch src/main.py"
-    },
-    {
-      "type": "p",
-      "content": "```"
+      "type": "code",
+      "language": "bash",
+      "content": "mkdir -p enterprise-workspace/src\ncd enterprise-workspace\ntouch .gemini.md\ntouch src/main.py"
     },
     {
       "type": "p",
       "content": "Next, open .gemini.md and write a baseline configuration defining the environment parameters, identity context, and the allowed tools. A typical enterprise baseline configuration looks as follows:"
     },
     {
-      "type": "p",
-      "content": "```markdown"
+      "type": "code",
+      "language": "markdown",
+      "content": "# Workspace Identity & Rules\n- Workspace Name: Enterprise Core Module\n- Language Stack: Python 3.11+, TypeScript 5.0+\n- Architecture Pattern: Clean Architecture\n\n## Mandatory Rules\n1. All source changes must reside inside the `src/` directory.\n2. Do not install any external Python dependencies without permission.\n3. The developer or agent must not use shell scripts to bypass safety checks."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "# Workspace Identity & Rules"
+      "content": "Answer the following questions to verify your comprehension of the decoupled model:"
     },
     {
-      "type": "p",
-      "content": "- Workspace Name: Enterprise Core Module"
-    },
-    {
-      "type": "p",
-      "content": "- Language Stack: Python 3.11+, TypeScript 5.0+"
-    },
-    {
-      "type": "p",
-      "content": "- Architecture Pattern: Clean Architecture"
-    },
-    {
-      "type": "p",
-      "content": "## Mandatory Rules"
-    },
-    {
-      "type": "p",
-      "content": "1. All source changes must reside inside the `src/` directory."
-    },
-    {
-      "type": "p",
-      "content": "2. Do not install any external Python dependencies without permission."
-    },
-    {
-      "type": "p",
-      "content": "3. The developer or agent must not use shell scripts to bypass safety checks."
-    },
-    {
-      "type": "p",
-      "content": "```"
-    },
-    {
-      "type": "p",
-      "content": "## Check Your Understanding"
-    },
-    {
-      "type": "p",
-      "content": "Question 1: What is the correct order of precedence for .gemini.md rules execution at runtime?"
-    },
-    {
-      "type": "p",
-      "content": "A) Subdirectory overrides Workspace Root, which overrides Global rules."
-    },
-    {
-      "type": "p",
-      "content": "B) Global rules override all directory-level rules."
-    },
-    {
-      "type": "p",
-      "content": "C) Workspace Root rules override Subdirectory rules in all circumstances."
-    },
-    {
-      "type": "p",
-      "content": "D) Rules are resolved in alphabetical order."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: The correct answer is A. Rules are evaluated hierarchically from the global configuration down to the deepest subdirectory containing a .gemini.md rules file, allowing local directories to define specific patterns or overrides unless globally prohibited."
-    },
-    {
-      "type": "p",
-      "content": "Question 2: Why should .gemini.md files be committed to version control?"
-    },
-    {
-      "type": "p",
-      "content": "A) To compile them into binary execution engines."
-    },
-    {
-      "type": "p",
-      "content": "B) To ensure team-wide consistency, audit trails, and automatic enforcement across developer environments and CI pipelines."
-    },
-    {
-      "type": "p",
-      "content": "C) To enable formatting features in VS Code."
-    },
-    {
-      "type": "p",
-      "content": "D) To translate them to python files."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: The correct answer is B. Committing governance rule files ensures that they are distributed to all developers and CI pipelines, providing an audit trail for policy modifications and preventing local rules evasion."
+      "type": "list",
+      "items": [
+        "Question 1: What is the correct order of precedence for .gemini.md rules execution at runtime?\n  - A) Subdirectory overrides Workspace Root, which overrides Global rules.\n  - B) Global rules override all directory-level rules.\n  - C) Workspace Root rules override Subdirectory rules in all circumstances.\n  - D) Rules are resolved in alphabetical order.\n\nFeedback: Option A is correct. Rules are evaluated hierarchically from the global configuration down to the deepest subdirectory containing a .gemini.md rules file, allowing local directories to define specific patterns or overrides unless globally prohibited.",
+        "Question 2: Why should .gemini.md files be committed to version control?\n  - A) To compile them into binary execution engines.\n  - B) To ensure team-wide consistency, audit trails, and automatic enforcement across developer environments and CI pipelines.\n  - C) To enable formatting features in VS Code.\n  - D) To translate them to python files.\n\nFeedback: Option B is correct. Committing governance rule files ensures that they are distributed to all developers and CI pipelines, providing an audit trail for policy modifications and preventing local rules evasion."
+      ]
     }
   ]
 }

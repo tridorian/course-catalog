@@ -1,79 +1,55 @@
 {
   "id": "2",
-  "title": "2. The CLI Client (agy) — High-Velocity Tasks",
+  "title": "2. CLI Client (agy) — High-Velocity",
   "type": "lab",
   "blocks": [
     {
       "type": "h2",
-      "content": "Rapid Terminal Operations"
+      "content": "The High-Velocity Terminal Surface"
     },
     {
       "type": "p",
-      "content": "The agy command line interface is the fastest way to communicate with the AGY engine. It requires zero graphical rendering, has minimal memory footprint, and integrates directly with standard Unix shell utilities. It is designed for terminal-first developers, DevOps engineers, and system administrators who want to perform immediate tasks without switching environments."
+      "content": "The agy command line interface is a lightweight, terminal-first client that communicates directly with the local execution engine. With a zero-GUI footprint, it is designed for developers, systems administrators, and DevOps pipelines. It enables high-speed workspace validation, codebase querying, and batch task automation without the overhead of rendering graphical windows or web viewports."
     },
     {
-      "type": "h3",
-      "content": "Core Commands & CLI Syntax"
-    },
-    {
-      "type": "p",
-      "content": "When you run a command via agy, the engine processes it within the active directory. The CLI runs in either interactive mode (prompting you for permissions on files and directories) or non-interactive mode (using flags to bypass approvals)."
-    },
-    {
-      "type": "code",
-      "content": "# Verify local system dependencies, cloud credentials, and directory locking",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy --verify",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Run a basic diagnostics query on files in the current folder",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy query \"Find all active configuration files\"",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Execute a text processing task in the local workspace directory",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "agy run --task \"Parse the log files in ./logs, extract error messages, and save to errors.md\"",
-      "language": "bash"
-    },
-    {
-      "type": "h3",
-      "content": "Automation and Shell Piping"
+      "type": "h2",
+      "content": "Core Command Syntax and Usage"
     },
     {
       "type": "p",
-      "content": "Because agy outputs text and accepts standard arguments, you can easily pipe output from other tools into it. This is useful for automated scraping, mass text replacements, and code auditing."
+      "content": "The agy CLI operates within the context of the user's active directory. Security policies, directory lockouts, and credentials configured for the workspace are automatically respected."
     },
     {
       "type": "code",
-      "content": "# Find all Python files modified within the last 2 days and pass them to agy for audit",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Run system and environment diagnostics to verify configuration parity\nagy --verify"
     },
     {
       "type": "code",
-      "content": "find ./src -name \"*.py\" -mtime -2 | xargs agy run --task \"Scan these files for exposed secrets or credentials\"",
-      "language": "bash"
+      "language": "bash",
+      "content": "# Execute a semantic query across files in the active directory\nagy query \"Locate all files that set environment variables or establish API endpoints\""
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Dispatch a direct modification task to the agent\nagy run --task \"Find all script files in ./bin, change permissions to executable, and document dependencies\""
+    },
+    {
+      "type": "h2",
+      "content": "Shell Integration and Pipeline Piping"
     },
     {
       "type": "p",
-      "content": "> [!WARNING]"
+      "content": "Because the CLI outputs structured text, it integrates seamlessly with standard Unix utilities (like find, grep, and xargs) to construct automated development loops."
     },
     {
-      "type": "p",
-      "content": "> Safety Guardrails: Running agy with the --auto-approve flag executes all actions without pausing for manual human approvals. Use this option only inside isolated development containers (such as agy-box) to protect your host system from accidental modifications."
+      "type": "code",
+      "language": "bash",
+      "content": "# Find modified code files and pipe them directly into agy for automated review\nfind ./src -name \"*.py\" -mtime -1 | xargs agy run --task \"Audit these files for credentials or syntax violations\""
+    },
+    {
+      "type": "warning",
+      "content": "Safety Warning: Running tasks using the --auto-approve flag executes all file operations, terminal command suggestions, and network tools without pausing for human permission. To prevent accidental host directory corruption or data leaks, always run auto-approve tasks inside a dedicated, containerized sandbox (agy-box)."
     },
     {
       "type": "h3",
@@ -81,47 +57,43 @@
     },
     {
       "type": "p",
-      "content": "Test your knowledge of terminal-first workflows:"
+      "content": "Question 1: Which agy command is used to ensure the local workstation has valid credentials and complies with active workspace rules?"
     },
     {
       "type": "p",
-      "content": "- Question 1: What does the 'agy --verify' command do?"
+      "content": "- A) agy run --task"
     },
     {
       "type": "p",
-      "content": "- A) It uploads local project directories to a public repository for scanning."
+      "content": "- B) agy --verify"
     },
     {
       "type": "p",
-      "content": "- B) It verifies local system prerequisites, checks active cloud credentials, and diagnostics the workspace integrity."
+      "content": "- C) agy query --status"
     },
     {
       "type": "p",
-      "content": "- C) It compiles all Python code into binary executable files."
+      "content": "Feedback: Option B is correct. The --verify command validates system prerequisites, checks active cloud tokens, and ensures the workspace lock state is sound."
     },
     {
       "type": "p",
-      "content": "Feedback: Option B is correct. The verify flag is used to check setup readiness, active credential configurations, and security directory locks."
+      "content": "Question 2: What is the recommended safety measure when using the --auto-approve flag on agy commands?"
     },
     {
       "type": "p",
-      "content": "- Question 2: What is a key safety risk when running the CLI with the '--auto-approve' flag?"
+      "content": "- A) Run the command with root user permissions on the host OS."
     },
     {
       "type": "p",
-      "content": "- A) The agent will consume all your local memory."
+      "content": "- B) Execute the command exclusively inside an isolated container sandbox like agy-box."
     },
     {
       "type": "p",
-      "content": "- B) The agent will execute file mutations and shell commands without pausing to request human authorization."
+      "content": "- C) Disable local workspace folder locking rules."
     },
     {
       "type": "p",
-      "content": "- C) The CLI will crash due to network latency."
-    },
-    {
-      "type": "p",
-      "content": "Feedback: Option B is correct. Bypassing approval checks allows the agent to execute actions instantly, which can modify local folders without your oversight if not run inside a safe sandbox container."
+      "content": "Feedback: Option B is correct. Auto-approval runs commands without pausing for human reviews; running inside a container sandbox protects host directories from unintended modifications."
     }
   ]
 }

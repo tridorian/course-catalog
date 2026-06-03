@@ -4,93 +4,33 @@
   "type": "lab",
   "blocks": [
     {
+      "type": "h2",
+      "content": "Logical Boundaries via the AGY SDK"
+    },
+    {
       "type": "p",
       "content": "The Google Antigravity (AGY) SDK provides native support for restricting file access to defined directories. By configuring the `workspaces` parameter in the agent configuration, you apply an implicit workspace boundary. This boundary is enforced by a built-in policy middleware called `policy.workspace_only()`, which inspects all file operations and rejects those pointing outside the allowed paths."
     },
     {
-      "type": "code",
-      "content": "import os",
-      "language": "bash"
+      "type": "p",
+      "content": "To set up workspace locking in Python, you define the absolute path to your project workspace folder and pass it as a list to the `workspaces` argument of `LocalAgentConfig`."
     },
     {
       "type": "code",
-      "content": "from google.antigravity import Agent, LocalAgentConfig, CapabilitiesConfig",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Define the absolute path to your project workspace",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "project_dir = os.path.abspath(\"/var/home/wtg/workspace_agy_project\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Ensure the directory exists",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "os.makedirs(project_dir, exist_ok=True)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Initialize the agent configuration with a workspace lock",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "config = LocalAgentConfig(",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "system_instructions=\"You are a filesystem helper agent.\",",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "capabilities=CapabilitiesConfig(),",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "workspaces=[project_dir] # Explicit list of allowed directories",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": ")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Workspace lock set to: {project_dir}\")",
-      "language": "bash"
+      "language": "python",
+      "content": "import os\nfrom google.antigravity import Agent, LocalAgentConfig, CapabilitiesConfig\n\n# Define the absolute path to your project workspace\nproject_dir = os.path.abspath(\"/var/home/wtg/workspace_agy_project\")\nos.makedirs(project_dir, exist_ok=True)\n\n# Initialize the agent configuration with a workspace lock\nconfig = LocalAgentConfig(\n    system_instructions=\"You are a filesystem helper agent.\",\n    capabilities=CapabilitiesConfig(file_management=True, terminal_execution=False),\n    workspaces=[project_dir] # Explicit list of allowed directories\n)\n\n# Instantiate the agent\nagent = Agent(config=config)\nprint(f\"Workspace lock set to: {project_dir}\")"
     },
     {
       "type": "p",
       "content": "When the `workspaces` list is populated, the AGY SDK will block file-related tools (such as `view_file`, `create_file`, and `edit_file`) from reading or writing to files outside those paths. It enforces this by resolving target file paths to their absolute canonical form. This prevents directory traversal attacks, where an agent might try to access restricted files using relative references (e.g., `../../etc/passwd`)."
     },
     {
-      "type": "p",
-      "content": "> [!WARNING]"
+      "type": "warning",
+      "content": "Symlink Directory Traversal. Symlinks (symbolic links) placed inside a workspace can point to files outside the boundary. The `workspace_only()` policy resolves symlinks to their absolute canonical targets before comparing them to the workspace path. If a symlink points to a file outside the workspace, the SDK will block access to the target path. Avoid creating symlinks to external directories within your workspaces."
     },
     {
-      "type": "p",
-      "content": "> Symlink Directory Traversal. Symlinks (symbolic links) placed inside a workspace can point to files outside the boundary. The `workspace_only()` policy resolves symlinks to their absolute canonical targets before comparing them to the workspace path. If a symlink points to a file outside the workspace, the SDK will block access to the target path. Avoid creating symlinks to external directories within your workspaces."
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Under the hood, if `LocalAgentConfig.workspaces` is defined, the SDK prepends the `policy.workspace_only()` checker to the policy evaluation list. This ensures path resolution happens first before any other tool permissions are evaluated."
+      "type": "info",
+      "content": "Under the hood, if `LocalAgentConfig.workspaces` is defined, the SDK prepends the `policy.workspace_only()` checker to the policy evaluation list. This ensures path resolution happens first before any other tool permissions are evaluated."
     },
     {
       "type": "h3",
@@ -121,12 +61,36 @@
       "content": "Correct Answer: C"
     },
     {
-      "type": "p",
-      "content": "> [!NOTE]"
+      "type": "info",
+      "content": "Feedback: The SDK resolves all relative and symlinked paths to their absolute canonical targets. This ensures that any attempt to break out of the workspace boundary using path traversal sequences (like `..`) is detected and blocked before the tool executes."
     },
     {
       "type": "p",
-      "content": "> Feedback: The SDK resolves all relative and symlinked paths to their absolute canonical targets. This ensures that any attempt to break out of the workspace boundary using path traversal sequences (like `..`) is detected and blocked before the tool executes."
+      "content": "Question 2: What is the behavior of the AGY SDK workspace policy when it encounters a symlink pointing to an external directory?"
+    },
+    {
+      "type": "p",
+      "content": "A) It allows access as long as the symlink file itself is physically located in the workspace."
+    },
+    {
+      "type": "p",
+      "content": "B) It resolves the symlink to its target, identifies that the target path lies outside the allowed workspace, and blocks execution."
+    },
+    {
+      "type": "p",
+      "content": "C) It deletes the symlink file automatically."
+    },
+    {
+      "type": "p",
+      "content": "D) It converts the symlink into a regular text file containing the target path."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "info",
+      "content": "Feedback: The SDK canonicalizes target paths (resolving symlinks to their actual destination folders). If the resolved destination resides outside the allowed workspace directories, the SDK blocks the tool call."
     }
   ]
 }

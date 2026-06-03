@@ -1,438 +1,116 @@
 {
   "id": "4",
-  "title": "4. Structured Output Integration",
+  "title": "4. Google Sheets & Structured Outputs",
   "type": "lab",
   "blocks": [
     {
       "type": "p",
-      "content": "# [4. Structured Output Integration]"
+      "content": "Spreadsheets are central to database manipulation and data collection. An agent can serve as an automated analyst, reading unstructured records from a sheet, parsing them into structured JSON schema payloads, and logging verified values back into specific spreadsheet columns. In this module, we cover Google Sheets values API manipulation and structured output configuration."
     },
     {
       "type": "h2",
-      "content": "Structured JSON & Response Verification Schema"
+      "content": "Google Sheets API: Reading and Appending Ranges"
     },
     {
       "type": "p",
-      "content": "Integrating agents into software projects requires structured, predictable outputs instead of generic text. This module covers enforcing structured responses matching Pydantic classes (Python) and JSON Schema structures (Node.js)."
+      "content": "The Sheets API addresses grids using standard A1 notation (e.g. 'Sheet1!A1:D10'). To retrieve spreadsheet values, use values.get. To write data, values.append is used to find the last occupied row in a table and append new rows dynamically."
     },
     {
-      "type": "h3",
+      "type": "info",
+      "content": "Value Input Options: Always set valueInputOption to 'USER_ENTERED' if your values contain dates, numbers, or Excel/Sheets formulas (e.g. '=SUM(A1:A5)'). If set to 'RAW', the API writes values as raw strings, disabling cell logic evaluation."
+    },
+    {
+      "type": "h2",
       "content": "Enforcing Response Schemas"
     },
     {
       "type": "p",
-      "content": "By supplying a schema to response_schema (Python) or responseSchema (Node.js) inside LocalAgentConfig, the model is constrained to output structured JSON. We access the validated, formatted data using the structured_output() response handler."
+      "content": "To guarantee that the Antigravity agent outputs a format compatible with databases or sheets, configure response schemas. This prevents conversational filler ('Here is your JSON:') and forces the response body to match the registered fields."
     },
     {
-      "type": "h3",
-      "content": "Python Structured Output Script"
+      "type": "list",
+      "items": [
+        "In Python: Pass a Pydantic class to the response_schema configuration parameter inside LocalAgentConfig.",
+        "In Node.js: Define a standard JSON Schema object structure and pass it to the responseSchema parameter inside LocalAgentConfig."
+      ]
     },
     {
-      "type": "p",
-      "content": "This script utilizes a Pydantic model to extract data points into a Python dictionary."
-    },
-    {
-      "type": "code",
-      "content": "import asyncio",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "from google.antigravity import Agent, LocalAgentConfig",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "import pydantic",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Define the target schema structure using Pydantic",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "class SystemHealthReport(pydantic.BaseModel):",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "hostname: str",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "status: str",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "disk_utilization_pct: float",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "critical_warnings: list[str]",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "async def structured_output_run():",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "config = LocalAgentConfig(",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "response_schema=SystemHealthReport",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": ")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "async with Agent(config) as agent:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "prompt = (",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "'Parse this status input: web-node-03 is running correctly. '",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "'Disk space utilization is currently at 78.4 percent. '",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "'Warnings: low_memory_warning detected.'",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": ")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "response = await agent.chat(prompt)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Access the parsed JSON matching the Pydantic schema",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "data = await response.structured_output()",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print('Parsed Python Dictionary:')",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(data)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Field verification",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f'Host: {data.get(\"hostname\")}')",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f'Disk utilization: {data.get(\"disk_utilization_pct\")}%')",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "if __name__ == '__main__':",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "asyncio.run(structured_output_run())",
-      "language": "bash"
-    },
-    {
-      "type": "h3",
-      "content": "Node.js Structured Output Script"
+      "type": "h2",
+      "content": "Spreadsheet Analyzer Pipeline (Python)"
     },
     {
       "type": "p",
-      "content": "Below is the equivalent implementation in Node.js using JSON Schema to enforce structure."
+      "content": "This Python script reads rows from a Google Sheet, processes unformatted ticket details through the agent using Pydantic validation, and appends the structured results as a log entry."
     },
     {
       "type": "code",
-      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';",
-      "language": "bash"
+      "language": "python",
+      "content": "import asyncio\nimport os\nimport pydantic\nfrom google.oauth2.credentials import Credentials\nfrom googleapiclient.discovery import build\nfrom google.antigravity import Agent, LocalAgentConfig\n\n# 1. Define the Pydantic schema for structured output validation\nclass TicketAnalysis(pydantic.BaseModel):\n    category: str\n    priority_level: str\n    urgency_reason: str\n    assigned_team: str\n\nasync def run_sheets_pipeline():\n    if not os.path.exists('token.json'):\n        print(\"token.json not found! Run Module 1 first.\")\n        return\n    creds = Credentials.from_authorized_user_file('token.json')\n    sheets = build('sheets', 'v4', credentials=creds)\n    \n    # Create a mock spreadsheet if none is specified\n    spreadsheet_body = {\n        'properties': {'title': 'AGY-311 Support Log'}\n    }\n    print(\"Creating analysis spreadsheet...\")\n    sheet_file = sheets.spreadsheets().create(body=spreadsheet_body, fields='spreadsheetId').execute()\n    sheet_id = sheet_file.get('spreadsheetId')\n    \n    # Setup sheet headers\n    setup_body = {\n        'values': [\n            ['Ticket Description', 'Category', 'Priority', 'Reason', 'Assigned Team'],\n            ['Database connection timed out when loading user profile page.', '', '', '', '']\n        ]\n    }\n    sheets.spreadsheets().values().update(\n        spreadsheetId=sheet_id,\n        range=\"Sheet1!A1:E2\",\n        valueInputOption=\"USER_ENTERED\",\n        body=setup_body\n    ).execute()\n    \n    # 2. Read raw tickets from Sheet\n    print(\"Reading data rows from Sheet...\")\n    data_range = sheets.spreadsheets().values().get(spreadsheetId=sheet_id, range=\"Sheet1!A2:A2\").execute()\n    rows = data_range.get('values', [])\n    \n    if not rows:\n        print(\"No tickets found to process.\")\n        return\n    raw_ticket = rows[0][0]\n    \n    # 3. Configure Agent with Pydantic Schema\n    print(\"Invoking Antigravity Agent with response_schema...\")\n    system_instruction = \"Analyze support tickets. Categorize them and assign to Database, Frontend, Backend, or Security.\"\n    config = LocalAgentConfig(\n        system_instruction=system_instruction,\n        response_schema=TicketAnalysis\n    )\n    \n    async with Agent(config) as agent:\n        prompt = f\"Classify this ticket:\\n{raw_ticket}\"\n        response = await agent.chat(prompt)\n        \n        # Retrieve the validated data object\n        structured_data = await response.structured_output()\n        \n    # 4. Write verified values back to Google Sheet\n    print(\"Logging analysis results back to Sheet...\")\n    analysis_row = [\n        structured_data.get('category'),\n        structured_data.get('priority_level'),\n        structured_data.get('urgency_reason'),\n        structured_data.get('assigned_team')\n    ]\n    \n    sheets.spreadsheets().values().update(\n        spreadsheetId=sheet_id,\n        range=\"Sheet1!B2:E2\",\n        valueInputOption=\"USER_ENTERED\",\n        body={'values': [analysis_row]}\n    ).execute()\n    \n    print(f\"Spreadsheet updated! View at https://docs.google.com/spreadsheets/d/{sheet_id}/edit\")\n\nif __name__ == '__main__':\n    asyncio.run(run_sheets_pipeline())"
     },
     {
-      "type": "code",
-      "content": "async function runStructuredOutput() {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "// Define response validation schema using JSON Schema",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "const reportSchema = {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "type: 'object',",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "properties: {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "hostname: { type: 'string' },",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "status: { type: 'string' },",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "disk_utilization_pct: { type: 'number' },",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "critical_warnings: {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "type: 'array',",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "items: { type: 'string' }",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "},",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "required: ['hostname', 'status', 'disk_utilization_pct', 'critical_warnings']",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "};",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "const config = new LocalAgentConfig({",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "responseSchema: reportSchema",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "});",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "const agent = new Agent(config);",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "await agent.start();",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "try {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "const prompt =",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "'Parse this status input: web-node-03 is running correctly. ' +",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "'Disk space utilization is currently at 78.4 percent. ' +",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "'Warnings: low_memory_warning detected.';",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "const response = await agent.chat(prompt);",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "// Access validated JSON payload",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "const data = await response.structured_output();",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "console.log('Parsed Javascript Object:');",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "console.log(data);",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "console.log(`Host: ${data.hostname}`);",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "console.log(`Disk utilization: ${data.disk_utilization_pct}%`);",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "} finally {",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "await agent.stop();",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "}",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "runStructuredOutput().catch(console.error);",
-      "language": "bash"
+      "type": "h2",
+      "content": "Spreadsheet Analyzer Pipeline (Node.js)"
     },
     {
       "type": "p",
-      "content": "> [!NOTE]"
+      "content": "Below is the equivalent implementation in Node.js, showing how to pass a JSON Schema definition to validate outputs and update the spreadsheet cells."
     },
     {
-      "type": "p",
-      "content": "> If the model's output cannot be successfully parsed against the schema, response.structured_output() will return None (Python) or null (Node.js). Ensure your integrations validate outputs before passing data down the pipeline."
+      "type": "code",
+      "language": "javascript",
+      "content": "import fs from 'fs';\nimport { google } from 'googleapis';\nimport { Agent, LocalAgentConfig } from '@google/antigravity';\n\n// 1. Define JSON Schema\nconst ticketSchema = {\n  type: 'object',\n  properties: {\n    category: { type: 'string' },\n    priority_level: { type: 'string' },\n    urgency_reason: { type: 'string' },\n    assigned_team: { type: 'string' }\n  },\n  required: ['category', 'priority_level', 'urgency_reason', 'assigned_team']\n};\n\nasync function runSheetsPipeline() {\n  if (!fs.existsSync('token.json')) {\n    console.error(\"token.json not found! Run Module 1 first.\");\n    return;\n  }\n  const tokenData = JSON.parse(fs.readFileSync('token.json', 'utf8'));\n  const auth = google.auth.fromJSON(tokenData);\n  const sheets = google.sheets({ version: 'v4', auth });\n  \n  // Create sheet\n  console.log(\"Creating sheet...\");\n  const spreadsheet = await sheets.spreadsheets.create({\n    requestBody: {\n      properties: { title: 'AGY-311 Support Log' }\n    }\n  });\n  const sheetId = spreadsheet.data.spreadsheetId;\n  \n  // Setup headers\n  await sheets.spreadsheets.values.update({\n    spreadsheetId: sheetId,\n    range: 'Sheet1!A1:E2',\n    valueInputOption: 'USER_ENTERED',\n    requestBody: {\n      values: [\n        ['Ticket Description', 'Category', 'Priority', 'Reason', 'Assigned Team'],\n        ['Database connection timed out when loading user profile page.', '', '', '', '']\n      ]\n    }\n  });\n  \n  // Read ticket description\n  const responseRange = await sheets.spreadsheets.values.get({\n    spreadsheetId: sheetId,\n    range: 'Sheet1!A2:A2'\n  });\n  const rawTicket = responseRange.data.values[0][0];\n  \n  // Execute Agent with JSON Schema\n  console.log(\"Calling agent with schema...\");\n  const config = new LocalAgentConfig({\n    systemInstruction: \"Analyze support tickets. Categorize them and assign to Database, Frontend, Backend, or Security.\",\n    responseSchema: ticketSchema\n  });\n  const agent = new Agent(config);\n  await agent.start();\n  \n  let structuredData;\n  try {\n    const response = await agent.chat(`Classify this ticket:\\n${rawTicket}`);\n    structuredData = await response.structured_output();\n  } finally {\n    await agent.stop();\n  }\n  \n  // Update Sheet cells with structured data\n  console.log(\"Updating analysis columns...\");\n  const analysisRow = [\n    structuredData.category,\n    structuredData.priority_level,\n    structuredData.urgency_reason,\n    structuredData.assigned_team\n  ];\n  \n  await sheets.spreadsheets.values.update({\n    spreadsheetId: sheetId,\n    range: 'Sheet1!B2:E2',\n    valueInputOption: 'USER_ENTERED',\n    requestBody: {\n      values: [analysisRow]\n    }\n  });\n  console.log(`Spreadsheet complete! View at https://docs.google.com/spreadsheets/d/${sheetId}/edit`);\n}\n\nrunSheetsPipeline().catch(console.error);"
     },
     {
-      "type": "h3",
+      "type": "h2",
       "content": "Check Your Understanding"
     },
     {
       "type": "p",
-      "content": "Question 1: Which method is invoked to retrieve the parsed JSON payload matching the configured schema?"
+      "content": "Question 1: What does valueInputOption='USER_ENTERED' indicate to the Google Sheets API?"
     },
     {
       "type": "p",
-      "content": "- A) response.json()"
+      "content": "- A) The sheet requires manual human confirmation in a browser window before saving."
     },
     {
       "type": "p",
-      "content": "- B) response.structured_output()"
+      "content": "- B) Input strings are processed as if they were entered directly by a user into the UI, ensuring formatting is parsed and formula codes are evaluated."
     },
     {
       "type": "p",
-      "content": "- C) response.to_dict()"
+      "content": "- C) The spreadsheet restricts editing capabilities to only registered OAuth users."
     },
     {
       "type": "p",
-      "content": "- D) response.get_schema_output()"
+      "content": "- D) Cell changes are kept in memory and are discarded when the script terminates."
     },
     {
       "type": "p",
-      "content": "Feedback: Correct Answer: B. The structured_output() method parses, validates, and yields the matching JSON response structure."
+      "content": "Feedback: Correct Answer: B. USER_ENTERED allows dates to convert, numbers to float, and formula expressions starting with '=' to execute."
     },
     {
       "type": "p",
-      "content": "Question 2: How do you register a validation schema in the Node.js SDK?"
+      "content": "Question 2: What happens if the Antigravity agent output violates the configured Pydantic or JSON schema?"
     },
     {
       "type": "p",
-      "content": "- A) By passing a Pydantic class imported from Python."
+      "content": "- A) The SDK automatically retries the query infinitely."
     },
     {
       "type": "p",
-      "content": "- B) By writing a standard XML Schema document."
+      "content": "- B) The response.structured_output() method returns None (Python) or null (Node.js) due to parsing errors."
     },
     {
       "type": "p",
-      "content": "- C) By defining a JSON Schema object under the responseSchema configuration parameter."
+      "content": "- C) The script deletes the target Google Sheet."
     },
     {
       "type": "p",
-      "content": "- D) By using a regular expression filter string."
+      "content": "- D) The model falls back to formatting the output as an HTML file."
     },
     {
       "type": "p",
-      "content": "Feedback: Correct Answer: C. In Node.js, the validation schema is registered as a standard JSON Schema object under the responseSchema parameter inside LocalAgentConfig."
+      "content": "Feedback: Correct Answer: B. Schema validation mismatches yield null, and developers must design scripts to catch empty structured responses."
     }
   ]
 }

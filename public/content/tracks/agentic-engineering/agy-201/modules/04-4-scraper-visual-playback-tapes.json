@@ -5,208 +5,52 @@
   "blocks": [
     {
       "type": "p",
-      "content": "# [4. Scraper Visual Playback Tapes]"
+      "content": "When scraping data from modern websites, agents often face obstacles like single-page applications (React, Angular) that load contents dynamically, or firewalls that block programmatic access. To troubleshoot these issues, `antigravity` uses a visual browser execution model."
+    },
+    {
+      "type": "p",
+      "content": "When an agent starts a web scraping task, it runs a virtual browser in **Headful Mode** (using Playwright). This mirrors the agent's actions directly inside the **Playback Viewport**. Furthermore, the dashboard records these actions as **Visual Playback Tapes** (saved as `.webm` video recordings and step-by-step screenshots) under the `.gemini/state/tapes/` workspace directory."
     },
     {
       "type": "h2",
-      "content": "The Architecture of Visual Scraper Automations"
+      "content": "Isolating Failures using the Playback Viewport"
     },
     {
       "type": "p",
-      "content": "One of the most powerful features of the antigravity standalone application is the ability to run browser automation tasks and watch them execute in real-time. When an agent is tasked with scraping a website, it leverages the local Playwright integration to launch a virtual browser."
+      "content": "If a scraping run fails due to a locator timeout or dynamic content shift, you can open the playback tape in the dashboard. Using the control panel (Play, Pause, Step Forward, Step Backward), you can inspect the agent's actions second-by-second. This lets you see precisely why it failed (e.g. a loading spinner was still active, or a modal pop-up blocked the button click)."
+    },
+    {
+      "type": "info",
+      "content": "Troubleshooting screenshots are automatically captured and saved under `.gemini/state/tapes/` whenever a scraper command exits with a non-zero code or times out on a DOM selector."
+    },
+    {
+      "type": "h2",
+      "content": "Standard Playwright Scraper Script"
     },
     {
       "type": "p",
-      "content": "The browser runs in \"Headful Mode\" inside the visual interface, meaning that the agent's actions (navigating pages, clicking buttons, extracting tables) are mirrored inside the Playback Viewport. Additionally, the visual board records these actions as \"Visual Playback Tapes\" (represented as .webm screen recordings and step-by-step screenshots) stored inside the `.gemini/state/tapes/` folder."
+      "content": "Below is the robust Python scraper configuration executed by the agent. It sets custom viewports, overrides the user agent, and waits for network idle states to ensure dynamic elements load:"
     },
     {
-      "type": "h3",
-      "content": "Analyzing the Playback Viewport & Selector Debugging"
+      "type": "code",
+      "language": "python",
+      "content": "import asyncio\nfrom playwright.async_api import async_playwright\n\nasync def run_scraper(target_url, output_path):\n    async with async_playwright() as p:\n        # Launch headful browser to integrate with the Playback Viewport\n        browser = await p.chromium.launch(headless=False)\n        context = await browser.new_context(\n            viewport={'width': 1280, 'height': 800},\n            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'\n        )\n        page = await context.new_page()\n        \n        print(f\"Navigating to {target_url}...\")\n        await page.goto(target_url, wait_until='networkidle')\n        \n        # Wait for the target table to render dynamically\n        try:\n            await page.wait_for_selector('table.pricing-matrix', timeout=5000)\n            table_html = await page.locator('table.pricing-matrix').inner_html()\n            with open(output_path, 'w') as f:\n                f.write(table_html)\n            print(f\"Successfully saved data to {output_path}\")\n        except Exception as e:\n            print(f\"Selector timeout occurred: {e}\")\n            # Capture screenshot for visual tape troubleshooting\n            await page.screenshot(path='./data/error_screenshot.png')\n            raise e\n        finally:\n            await browser.close()\n\n# Execute scraper\nasyncio.run(run_scraper('https://mock-competitor.com/pricing', './data/scraped_table.html'))"
+    },
+    {
+      "type": "h2",
+      "content": "Fallback Strategies for Scraper Prompts"
     },
     {
       "type": "p",
-      "content": "For analysts and SAs, tracking these tapes is essential for debugging scraping runs. If a website uses dynamic loading (single-page applications like React or Angular) or contains bot-detection firewalls, the agent may get stuck or fail to extract the correct selector."
+      "content": "When writing scraping commands, include these standard fallbacks in your agent instructions:"
     },
     {
-      "type": "p",
-      "content": "By opening the visual playback tape, you can step through the agent's actions second-by-second to find precisely where the script failed."
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> When debugging, use the Playback control buttons (Pause, Play, Step Forward, Step Backward) located beneath the Playback Viewport to isolate the moment of failure."
-    },
-    {
-      "type": "h3",
-      "content": "Playwright Scraper Configuration"
-    },
-    {
-      "type": "p",
-      "content": "Below is a robust Python script config that the agent executes to scrape dynamic elements. Note the custom viewport sizes, user agents, and network idle waits used to bypass basic scraping blocks:"
-    },
-    {
-      "type": "code",
-      "content": "import asyncio",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "from playwright.async_api import async_playwright",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "async def run_scraper(target_url, output_path):",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "async with async_playwright() as p:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Launch headful browser to feed the Playback Viewport",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "browser = await p.chromium.launch(headless=False)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "context = await browser.new_context(",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "viewport={'width': 1280, 'height': 800},",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": ")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "page = await context.new_page()",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Navigating to {target_url}...\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "await page.goto(target_url, wait_until='networkidle')",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Wait for the table to render dynamically",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "try:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "await page.wait_for_selector('table.pricing-matrix', timeout=5000)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "table_html = await page.locator('table.pricing-matrix').inner_html()",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "with open(output_path, 'w') as f:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "f.write(table_html)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Successfully saved data to {output_path}\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "except Exception as e:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Selector timeout failed: {e}\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Save screenshot for visual tape tracking",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "await page.screenshot(path='./data/error_screenshot.png')",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "raise e",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "finally:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "await browser.close()",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Run the scraper loop",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "asyncio.run(run_scraper('https://mock-competitor.com/pricing', './data/scraped_table.html'))",
-      "language": "bash"
-    },
-    {
-      "type": "h3",
-      "content": "Guidelines for Prompting Scraper Fallbacks"
-    },
-    {
-      "type": "p",
-      "content": "- Attempt to locate the pricing table using text-based matching (e.g., look for headers containing 'Pricing', 'Plans', or 'Cost') if the class selector fails."
-    },
-    {
-      "type": "p",
-      "content": "- Take a screenshot and output it to the `.gemini/state/tapes/` folder when a selector timeout occurs."
-    },
-    {
-      "type": "p",
-      "content": "- If the page is empty, wait 3 seconds for dynamic content hydration before retrying."
+      "type": "list",
+      "items": [
+        "**Text-Based Matching:** If the class selector (e.g. `table.pricing-matrix`) is not found, attempt to locate containers using text headers (e.g. searching for 'Pricing' or 'Subscription Plans').",
+        "**State Hydration Wait:** If the scraped container returns empty, instruct the agent to pause for 3 seconds to let dynamic content hydrate before retrying.",
+        "**Error Capture:** Direct the agent to save a diagnostic screenshot to the `.gemini/state/tapes/` folder whenever a selector fails."
+      ]
     },
     {
       "type": "h2",
@@ -214,51 +58,37 @@
     },
     {
       "type": "p",
-      "content": "**Question 1**: Where are the visual screen recordings and screenshots of the browser automation saved locally in your workspace?"
+      "content": "**Question 1:** Why does the AGY browser execute in headful mode (headless=False) during visual scraping operations?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) To decrease CPU and memory consumption during executions",
+        "B) To allow the browser window to render inside the Playback Viewport so the user can inspect the live interaction",
+        "C) To bypass basic local network proxy setups",
+        "D) Because Chromium cannot run headlessly on Linux servers"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Running in headful mode is required to project the browser GUI into the Playback Viewport, enabling visual tracking and recording of the agent's actions."
     },
     {
       "type": "p",
-      "content": "A) In the root directory as text files"
+      "content": "**Question 2:** Where does the agent save troubleshooting screenshots when a Playwright selector timeout occurs?"
     },
     {
-      "type": "p",
-      "content": "B) Inside the `.gemini/state/tapes/` folder"
+      "type": "list",
+      "items": [
+        "A) Inside the host's `Downloads` folder",
+        "B) In the remote cloud database",
+        "C) Under the `.gemini/state/tapes/` folder in the active workspace",
+        "D) In the project's node_modules directory"
+      ]
     },
     {
-      "type": "p",
-      "content": "C) On the remote cloud dashboard only"
-    },
-    {
-      "type": "p",
-      "content": "D) Inside the local node_modules folder"
-    },
-    {
-      "type": "p",
-      "content": "*Feedback*: The correct answer is B. AGY stores execution recordings and screenshots inside the `.gemini/state/tapes/` folder for local inspection and auditing."
-    },
-    {
-      "type": "p",
-      "content": "**Question 2**: What is a recommended fallback strategy to include in your scraping prompt to handle dynamic loading failures?"
-    },
-    {
-      "type": "p",
-      "content": "A) Force the agent to immediately fail the task"
-    },
-    {
-      "type": "p",
-      "content": "B) Instruct the agent to wait for text-based matches and take a troubleshooting screenshot"
-    },
-    {
-      "type": "p",
-      "content": "C) Bypass all chromium dependency errors by executing curl commands instead"
-    },
-    {
-      "type": "p",
-      "content": "D) Restart the entire workstation automatically"
-    },
-    {
-      "type": "p",
-      "content": "*Feedback*: The correct answer is B. Providing fallback instructions for text matching and screenshot capture helps the agent recover and provides debugging data if it fails."
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Diagnostics, screenshots, and visual recordings are centralized inside the `.gemini/state/tapes/` folder for easy inspection."
     }
   ]
 }

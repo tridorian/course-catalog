@@ -17,163 +17,8 @@
     },
     {
       "type": "code",
-      "content": "import time",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "from antigravity import AGYClient",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "from antigravity.exceptions import VMExecutionError",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Initialize the client with active credentials",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "client = AGYClient(credentials_path=\"/var/home/wtg/.gcloud_config/application_default_credentials.json\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(\"Requesting VM from testing pool...\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "vm = client.vm.lease(pool_id=\"fast-testing-pool\", timeout_seconds=180)",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Acquired VM: {vm.id} at IP: {vm.ip_address}\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "try:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Step 1: Upload the local workspace context",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(\"Uploading workspace context...\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "vm.upload_workspace(local_dir=\"./src/my-app\", remote_path=\"/workspace\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Step 2: Run clean dependencies installation",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(\"Executing installation...\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "install_result = vm.execute(command=\"npm ci\", working_dir=\"/workspace\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Installation exit code: {install_result.exit_code}\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Step 3: Execute tests",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(\"Running test suite...\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "test_result = vm.execute(command=\"npm run test -- --coverage\", working_dir=\"/workspace\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Test Exit Code: {test_result.exit_code}\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "if test_result.exit_code != 0:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "raise VMExecutionError(\"Test suite failed inside isolated environment.\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "# Step 4: Download compiled bundle",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(\"Downloading build artifacts...\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "vm.download_artifact(remote_path=\"/workspace/dist\", local_destination=\"./dist\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(\"Build successfully completed and verified.\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "except Exception as e:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(f\"Error during pipeline execution: {str(e)}\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "raise",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "finally:",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "print(\"Releasing VM back to pool...\")",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "client.vm.release(vm.id)",
-      "language": "bash"
+      "language": "python",
+      "content": "import time\nfrom antigravity import AGYClient\nfrom antigravity.exceptions import VMExecutionError\n\n# Initialize the client with active credentials\nclient = AGYClient(credentials_path=\"/var/home/wtg/.gcloud_config/application_default_credentials.json\")\n\nprint(\"Requesting VM from testing pool...\")\nvm = client.vm.lease(pool_id=\"fast-testing-pool\", timeout_seconds=180)\nprint(f\"Acquired VM: {vm.id} at IP: {vm.ip_address}\")\n\ntry:\n    # Step 1: Upload the local workspace context\n    print(\"Uploading workspace context...\")\n    vm.upload_workspace(local_dir=\"./src/my-app\", remote_path=\"/workspace\")\n\n    # Step 2: Run clean dependencies installation\n    print(\"Executing installation...\")\n    install_result = vm.execute(command=\"npm ci\", working_dir=\"/workspace\")\n    print(f\"Installation exit code: {install_result.exit_code}\")\n    if install_result.exit_code != 0:\n        raise VMExecutionError(\"Dependency installation failed.\")\n\n    # Step 3: Execute tests\n    print(\"Running test suite...\")\n    test_result = vm.execute(command=\"npm run test -- --coverage\", working_dir=\"/workspace\")\n    print(f\"Test Exit Code: {test_result.exit_code}\")\n    if test_result.exit_code != 0:\n        raise VMExecutionError(\"Test suite failed inside isolated environment.\")\n\n    # Step 4: Download compiled bundle\n    print(\"Downloading build artifacts...\")\n    vm.download_artifact(remote_path=\"/workspace/dist\", local_destination=\"./dist\")\n    print(\"Build successfully completed and verified.\")\n\nexcept Exception as e:\n    print(f\"Error during pipeline execution: {str(e)}\")\n    raise\nfinally:\n    print(\"Releasing VM back to pool...\")\n    client.vm.release(vm.id)"
     },
     {
       "type": "h2",
@@ -185,51 +30,26 @@
     },
     {
       "type": "code",
-      "content": "# Workspace Governance & Execution Rules",
-      "language": "bash"
+      "language": "markdown",
+      "content": "# Workspace Governance & Execution Rules\n\n## Security Guardrails\n- Network Egress: Local Proxy Only (10.128.0.50)\n- Allowed Commands: ['npm', 'git', 'node', 'pytest']\n- Prohibited Utilities: ['curl', 'wget', 'nc', 'iptables', 'sudo']\n\n## Human-in-the-Loop Thresholds\n- Critical Actions: Require manual approval before executing `npm publish` or modifying environment variables.\n- Directory Lock: Read-only access to `/etc` and `/var/run` inside the VM."
     },
     {
-      "type": "code",
-      "content": "## Security Guardrails",
-      "language": "bash"
+      "type": "warning",
+      "content": "Compliance Interception: When the agent attempts to run a prohibited command like `curl` inside the VM, the Jules daemon instantly intercepts it, logs a policy violation, and aborts the task with exit code 126 (Permission Denied)."
     },
     {
-      "type": "code",
-      "content": "- Network Egress: Local Proxy Only (10.128.0.50)",
-      "language": "bash"
+      "type": "h2",
+      "content": "Hands-on Lab Exercise: Running an Isolated Pipeline"
     },
     {
-      "type": "code",
-      "content": "- Allowed Commands: ['npm', 'git', 'node', 'pytest']",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- Prohibited Utilities: ['curl', 'wget', 'nc', 'iptables', 'sudo']",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "## Human-in-the-Loop Thresholds",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- Critical Actions: Require manual approval before executing `npm publish` or modifying environment variables.",
-      "language": "bash"
-    },
-    {
-      "type": "code",
-      "content": "- Directory Lock: Read-only access to `/etc` and `/var/run` inside the VM.",
-      "language": "bash"
-    },
-    {
-      "type": "p",
-      "content": "> [!NOTE]"
-    },
-    {
-      "type": "p",
-      "content": "> Compliance Tip: When the agent attempts to run a prohibited command like `curl` inside the VM, the Jules daemon instantly intercepts it, logs a policy violation, and aborts the task with a code 126 (Permission Denied)."
+      "type": "list",
+      "items": [
+        "1. Create a workspace folder named `my-sandbox-build` and initialize it with a basic project and a `.gemini.md` file containing the security rules listed above.",
+        "2. Write a Python script `trigger_pipeline.py` implementing the SDK code block shown in this module.",
+        "3. Run the script: `python3 trigger_pipeline.py`.",
+        "4. Intentionally add a step to run `curl https://example.com` inside the VM, execute the pipeline, and verify that the build fails with exit code 126.",
+        "5. Observe the agent daemon blocking the command in `agy vm logs`."
+      ]
     },
     {
       "type": "h2",
@@ -241,19 +61,7 @@
     },
     {
       "type": "p",
-      "content": "- A) To delete the VM spec from the local disk."
-    },
-    {
-      "type": "p",
-      "content": "- B) To notify the Pool Manager that the task is finished so the instance can be sanitized, recycled, and returned to the warm pool."
-    },
-    {
-      "type": "p",
-      "content": "- C) To pause execution until human input is received."
-    },
-    {
-      "type": "p",
-      "content": "- D) To update the Git repository with the latest test coverage reports."
+      "content": "- A) To delete the VM spec from the local disk.\n- B) To notify the Pool Manager that the task is finished so the instance can be sanitized, recycled, and returned to the warm pool.\n- C) To pause execution until human input is received.\n- D) To update the Git repository with the latest test coverage reports."
     },
     {
       "type": "p",
@@ -269,19 +77,7 @@
     },
     {
       "type": "p",
-      "content": "- A) packages.json"
-    },
-    {
-      "type": "p",
-      "content": "- B) .gemini.md"
-    },
-    {
-      "type": "p",
-      "content": "- C) Dockerfile"
-    },
-    {
-      "type": "p",
-      "content": "- D) startup-script.sh"
+      "content": "- A) packages.json\n- B) .gemini.md\n- C) Dockerfile\n- D) startup-script.sh"
     },
     {
       "type": "p",

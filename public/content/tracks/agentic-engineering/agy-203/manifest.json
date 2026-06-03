@@ -8,7 +8,7 @@
     },
     {
       "id": "2",
-      "title": "2. Workspace Markdown Navigation & Semantic Indexing",
+      "title": "2. Navigation & Semantic Indexing",
       "file": "modules/02-2-workspace-markdown-navigation-semantic-indexing.json"
     },
     {
@@ -18,7 +18,7 @@
     },
     {
       "id": "4",
-      "title": "4. Live Text Rewriting, Refactoring, & Code Co-Pilotry",
+      "title": "4. Rewriting, Refactoring & Co-Pilotry",
       "file": "modules/04-4-live-text-rewriting-refactoring-code-co-pilotry.json"
     },
     {
