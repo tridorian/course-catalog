@@ -321,7 +321,17 @@ const GlobalControls = ({ theme, setTheme }) => {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-mono uppercase text-text-muted mb-1">Gemini API Key</label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[10px] font-mono uppercase text-text-muted">Gemini API Key</label>
+                  <a
+                    href="https://aistudio.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-accent-text hover:underline"
+                  >
+                    Get a Key
+                  </a>
+                </div>
                 <input
                   type="password"
                   placeholder="Enter API Key (pre-fills if saved)"
