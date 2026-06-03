@@ -29,7 +29,11 @@ const GlobalControls = ({ theme, setTheme }) => {
   // AI Theme Generator state
   const [showGenerator, setShowGenerator] = useState(false);
   const [prompt, setPrompt] = useState('');
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('tridorian_gemini_api_key') || '');
+  const [apiKey, setApiKey] = useState(() => 
+    localStorage.getItem('tridorian_gemini_api_key') || 
+    (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') || 
+    ''
+  );
   const [isGenerating, setIsGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
 

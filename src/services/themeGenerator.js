@@ -2,7 +2,10 @@
 // Integrates with Gemini API to generate custom color theme JSON variables.
 
 export async function generateThemeWithGemini(promptText, userApiKey = '') {
-  const apiKey = userApiKey || localStorage.getItem('tridorian_gemini_api_key') || '';
+  const apiKey = userApiKey || 
+                 localStorage.getItem('tridorian_gemini_api_key') || 
+                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') || 
+                 '';
   if (!apiKey) {
     throw new Error('API_KEY_REQUIRED');
   }

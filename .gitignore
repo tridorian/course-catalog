@@ -5,3 +5,6 @@ dist/
 cache/
 *.json.bak
 *.log
+.env
+.env.*
+!.env.example
