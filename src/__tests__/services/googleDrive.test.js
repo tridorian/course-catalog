@@ -58,13 +58,13 @@ describe('googleDrive service', () => {
 
       expect(result.progress).toEqual(mockContent);
       expect(result.fileId).toBe('file-123');
-      expect(JSON.parse(localStorage.getItem('agv_local_progress'))).toEqual(mockContent);
+      expect(JSON.parse(localStorage.getItem('agy_local_progress'))).toEqual(mockContent);
     });
 
     it('should use local storage if Drive fetch fails', async () => {
       getAccessToken.mockReturnValue('fake-token');
       const localData = { 'track-1_course-1': { activeModuleId: 'step-3', completedIndices: ['0', '1', '2'], lastUpdated: '2023-01-02T00:00:00.000Z' } };
-      localStorage.setItem('agv_local_progress', JSON.stringify(localData));
+      localStorage.setItem('agy_local_progress', JSON.stringify(localData));
 
       fetch.mockRejectedValue(new Error('Drive unreachable'));
 
@@ -103,7 +103,7 @@ describe('googleDrive service', () => {
 
       await saveCourseProgress('track-1', 'course-1', 'step-5', [0, 1, 2, 3, 4]);
 
-      const localProgress = JSON.parse(localStorage.getItem('agv_local_progress'));
+      const localProgress = JSON.parse(localStorage.getItem('agy_local_progress'));
       expect(localProgress['track-1_course-1'].activeModuleId).toBe('step-5');
       expect(localProgress['track-1_course-1'].completedIndices).toEqual(['0', '1', '2', '3', '4']);
 
@@ -126,7 +126,7 @@ describe('googleDrive service', () => {
 
       await saveCourseProgress('track-1', 'course-1', 'step-5', [0, 1, 2]);
 
-      const queue = JSON.parse(localStorage.getItem('agv_offline_queue'));
+      const queue = JSON.parse(localStorage.getItem('agy_offline_queue'));
       expect(queue).toHaveLength(1);
       expect(queue[0].trackId).toBe('track-1');
       expect(queue[0].update.activeModuleId).toBe('step-5');
@@ -144,12 +144,12 @@ describe('googleDrive service', () => {
           update: { activeModuleId: 'step-2', completedIndices: ['0', '1'], lastUpdated: '2023-01-02T00:00:00.000Z' }
         }
       ];
-      localStorage.setItem('agv_offline_queue', JSON.stringify(offlineQueue));
+      localStorage.setItem('agy_offline_queue', JSON.stringify(offlineQueue));
 
       const localData = {
         'track-1_course-1': { activeModuleId: 'step-1', completedIndices: ['0'], lastUpdated: '2023-01-01T00:00:00.000Z' }
       };
-      localStorage.setItem('agv_local_progress', JSON.stringify(localData));
+      localStorage.setItem('agy_local_progress', JSON.stringify(localData));
 
       // Mock loadProgress calls
       // 1. getProgressFile
@@ -170,10 +170,10 @@ describe('googleDrive service', () => {
 
       await syncOfflineQueue();
 
-      const mergedProgress = JSON.parse(localStorage.getItem('agv_local_progress'));
+      const mergedProgress = JSON.parse(localStorage.getItem('agy_local_progress'));
       expect(mergedProgress['track-1_course-1'].activeModuleId).toBe('step-2');
       expect(mergedProgress['track-1_course-1'].completedIndices).toEqual(['0', '1']);
-      expect(localStorage.getItem('agv_offline_queue')).toBeNull();
+      expect(localStorage.getItem('agy_offline_queue')).toBeNull();
     });
   });
 
