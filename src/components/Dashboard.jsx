@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
 import * as googleAuth from '../services/googleAuth';
+import { checkUserRole } from '../services/roleManager';
 
 const Dashboard = () => {
   const [catalog, setCatalog] = useState(null);
@@ -10,13 +11,18 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [trackProgress, setTrackProgress] = useState({});
   const [isConnected, setIsConnected] = useState(!!googleAuth.getAccessToken());
+  const [role, setRole] = useState('student');
   const navigate = useNavigate();
 
   useEffect(() => {
     async function loadCatalog() {
       try {
-        const data = await fetchCatalog();
+        const [data, userRole] = await Promise.all([
+          fetchCatalog(),
+          checkUserRole()
+        ]);
         setCatalog(data);
+        setRole(userRole);
 
         const localProgress = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
         const progressStats = {};
@@ -116,7 +122,18 @@ const Dashboard = () => {
         </div>
 
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 relative">
+          {role === 'admin' && (
+            <div className="absolute top-0 right-0">
+              <Link 
+                to="/admin" 
+                className="flex items-center gap-2 px-3 py-1 bg-[#132617] text-[#4ade80] border border-[#4ade80]/30 rounded-full text-[10px] font-mono hover:bg-[#4ade80]/10 transition-all uppercase tracking-widest"
+              >
+                <Icons.Shield size={12} />
+                Admin Control Panel
+              </Link>
+            </div>
+          )}
           <div className="font-extrabold text-2xl text-[#4ade80] tracking-[0.3em] mb-4">TRIDORIAN</div>
           <h1 className="text-5xl font-extrabold text-white mb-4">Course Catalog</h1>
           <p className="text-lg text-[#86efac] max-w-2xl mx-auto">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { fetchTrackManifest } from '../services/contentLoader';
+import { checkUserRole } from '../services/roleManager';
 
 const TrackPage = () => {
   const { trackId } = useParams();
@@ -10,14 +11,19 @@ const TrackPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [courseProgress, setCourseProgress] = useState({});
+  const [role, setRole] = useState('student');
 
   useEffect(() => {
     async function loadTrack() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchTrackManifest(trackId);
+        const [data, userRole] = await Promise.all([
+          fetchTrackManifest(trackId),
+          checkUserRole()
+        ]);
         setTrack(data);
+        setRole(userRole);
 
         // Load local progress
         const localProgress = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
@@ -99,7 +105,9 @@ const TrackPage = () => {
 
         {/* Course Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {track.courses.map((course, index) => {
+          {track.courses
+            .filter(course => role === 'admin' || course.status !== 'Draft')
+            .map((course, index) => {
             const CourseIcon = Icons[course.icon] || Icons.BookOpen;
             const progress = courseProgress[course.id];
             const isCompleted = progress && progress.completed === progress.total;

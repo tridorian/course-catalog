@@ -13,7 +13,7 @@ export const initGoogleAuth = (clientId) => {
       try {
         tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: clientId,
-          scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
+          scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email',
           callback: (response) => {
             if (response.error !== undefined) {
               reject(response);

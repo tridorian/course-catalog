@@ -18,6 +18,7 @@ import ModuleRenderer from './components/ModuleRenderer';
 import SyncStatus from './components/SyncStatus';
 import Dashboard from './components/Dashboard';
 import TrackPage from './components/TrackPage';
+import AdminPanel from './components/AdminPanel';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
 import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/googleDrive';
 import { getAccessToken } from './services/googleAuth';
@@ -573,6 +574,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
+      <Route path="/admin" element={<AdminPanel />} />
       <Route path="/:trackId" element={<TrackPage />} />
       <Route path="/:trackId/:courseId" element={<AppContent />} />
       <Route path="/:trackId/:courseId/:moduleId" element={<AppContent />} />
