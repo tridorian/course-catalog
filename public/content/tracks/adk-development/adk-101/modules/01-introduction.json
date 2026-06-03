@@ -1,0 +1,102 @@
+{
+  "id": "1",
+  "title": "1. Course Introduction & Architecture",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "ADK Foundations: Introduction & Architecture"
+    },
+    {
+      "type": "p",
+      "content": "Welcome to ADK Foundations. Google's Agent Development Kit (ADK) is a modular, language-independent framework built to run autonomous AI agents in production. ADK structures agent loops, standardizes tool invocation formats, manages session memory boundaries, and facilitates integration with enterprise services."
+    },
+    {
+      "type": "h2",
+      "content": "Core Architectural Components"
+    },
+    {
+      "type": "p",
+      "content": "Before writing code, it is critical to understand the four primary pillars of the ADK system architecture:"
+    },
+    {
+      "type": "grid",
+      "items": [
+        {
+          "icon": "Cpu",
+          "title": "Agent Engine",
+          "content": "The central core that coordinates semantic routing, planning, and task execution sequences using LLM backends.",
+          "border": "#4ade80"
+        },
+        {
+          "icon": "Wrench",
+          "title": "Tool Registry",
+          "content": "A structured library of functions that the agent can execute, configured with exact JSON Schemas.",
+          "border": "#4ade80"
+        },
+        {
+          "icon": "FolderLock",
+          "title": "Workspace Boundary",
+          "content": "A localized sandboxed folder structure restricting the agent's file system read, write, and execute permissions.",
+          "border": "#ef4444"
+        },
+        {
+          "icon": "History",
+          "title": "Session Store",
+          "content": "A stateful ledger tracking model requests, response steps, token consumption, and variables.",
+          "border": "#3b82f6"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Pre-requisites and Environment Check"
+    },
+    {
+      "type": "p",
+      "content": "Verify that your developer machine meets the minimum system dependencies before installing the SDK CLI tool:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Python 3.10 or higher (required for Python tool bindings and scripts)",
+        "Node.js 18.x or higher (required for TypeScript tool decoration and local web tooling)",
+        "Go 1.20 or higher (optional, required if building high-throughput native extensions)",
+        "Docker, Podman, or Distrobox (strongly recommended for sandboxed workspace containment)"
+      ]
+    },
+    {
+      "type": "info",
+      "title": "Pro-Tip: Runtime Verification",
+      "content": "Ensure Python and Node are in your system PATH by running 'python --version' and 'node --version' in your active shell prior to bootstrapping."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary role of the Session Store in the ADK architecture?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It compiles custom Go binaries into OCI container images.\n- B) It acts as a stateful ledger tracking conversational state, token counts, and execution traces.\n- C) It is a firewall that blocks external HTTP traffic."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The Session Store tracks the step-by-step state of the agent run, including token usage and conversation memory."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which runtime engines are officially supported for writing custom ADK tool decorations?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Python, TypeScript/Node.js, and Go.\n- B) Only Ruby on Rails.\n- C) Bash shell scripts exclusively."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option A is correct. ADK provides official language bindings and decorators for Python, Node.js/TypeScript, and Go."
+    }
+  ]
+}

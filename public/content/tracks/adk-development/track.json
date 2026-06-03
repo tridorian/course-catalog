@@ -1,0 +1,54 @@
+{
+  "track_id": "adk-development",
+  "title": "ADK Development",
+  "description": "Build and deploy production-grade multi-agent systems using Google's Agent Development Kit (ADK), adk-web debugging tools, A2A protocols, and interactive A2UI layouts.",
+  "courses": [
+    {
+      "id": "adk-101",
+      "title": "ADK-101: ADK Foundations",
+      "description": "Master the basics of Google's Agent Development Kit (ADK). Setup your local environment, install the CLI, configure agent.yaml, and run your first agent.",
+      "modules": 5,
+      "icon": "Download",
+      "level": "L100",
+      "duration": 60,
+      "tags": ["Foundations", "Setup", "CLI"]
+    },
+    {
+      "id": "adk-201",
+      "title": "ADK-201: Developer Tooling & adk-web",
+      "description": "Inspect and debug active agent runs using the adk-web developer console. Review execution traces, memory states, transaction logs, and step playbacks.",
+      "modules": 5,
+      "icon": "Layout",
+      "level": "L200",
+      "duration": 75,
+      "tags": ["Debugging", "adk-web", "Observability"]
+    },
+    {
+      "id": "adk-301",
+      "title": "ADK-301: Agent-to-Agent (A2A) Orchestration",
+      "description": "Design and orchestrate multi-agent collaboration environments. Configure A2AServer routing, launch remote agents, and write discovery card manifests.",
+      "icon": "GitMerge",
+      "level": "L300",
+      "duration": 90,
+      "tags": ["A2A", "Orchestration", "Networking"]
+    },
+    {
+      "id": "adk-401",
+      "title": "ADK-401: Dynamic Interfaces with A2UI",
+      "description": "Create interactive user interfaces generated dynamically by agents. Learn the A2UI schema format to build cards, forms, tables, and secure callbacks.",
+      "icon": "Code",
+      "level": "L400",
+      "duration": 105,
+      "tags": ["A2UI", "Frontend", "Interactive"]
+    },
+    {
+      "id": "adk-402",
+      "title": "ADK-402: Enterprise Integration & MCP",
+      "description": "Deploy production agents connected to Model Context Protocol (MCP) servers, configure OAuth2 integrations, and execute securely inside virtualized sandboxes.",
+      "icon": "Server",
+      "level": "L400",
+      "duration": 120,
+      "tags": ["Enterprise", "MCP", "Security"]
+    }
+  ]
+}

@@ -11,7 +11,8 @@ import {
   AlertTriangle,
   Trophy,
   History,
-  CheckCircle
+  CheckCircle,
+  HelpCircle
 } from 'lucide-react';
 
 import ModuleRenderer from './components/ModuleRenderer';
@@ -19,6 +20,7 @@ import SyncStatus from './components/SyncStatus';
 import Dashboard from './components/Dashboard';
 import TrackPage from './components/TrackPage';
 import AdminPanel from './components/AdminPanel';
+import HelpSection from './components/HelpSection';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
 import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/googleDrive';
 import { getAccessToken } from './services/googleAuth';
@@ -378,6 +380,13 @@ function AppContent() {
           >
             Reset Progress
           </button>
+          <button
+            onClick={() => navigate('/help')}
+            className="w-full mt-2 py-2 text-[10px] font-mono text-gray-500 hover:text-[#4ade80] border border-[#1f3d25] hover:border-[#4ade80]/30 rounded transition-all uppercase tracking-tighter flex items-center justify-center gap-1.5"
+          >
+            <HelpCircle size={10} />
+            Help & Troubleshooting
+          </button>
         </div>
       </div>
 
@@ -575,6 +584,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/admin" element={<AdminPanel />} />
+      <Route path="/help" element={<HelpSection />} />
       <Route path="/:trackId" element={<TrackPage />} />
       <Route path="/:trackId/:courseId" element={<AppContent />} />
       <Route path="/:trackId/:courseId/:moduleId" element={<AppContent />} />

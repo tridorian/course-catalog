@@ -21,6 +21,19 @@
       "content": "By establishing these boundaries in a structured format, the agent parses the rules as a system instruction before every step, reducing the risk of security violations or out-of-scope work."
     },
     {
+      "type": "h2",
+      "content": "🛡️ Git Version Control for Workspace Rules"
+    },
+    {
+      "type": "p",
+      "content": "To prevent unauthorized local modifications, shell overrides, or prompt injection tampering, workspace rule files (`.gemini.md`) MUST be tracked in Git. Treating rules as code ensures that every boundary alteration goes through a rigorous peer-review and CI/CD validation process. Commits that modify rules should be cryptographically signed using GPG."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# 1. Initialize git tracking for workspace instructions\ngit init\ngit add .gemini.md\n\n# 2. Commit the peer-reviewed rules using a GPG signed commit\ngit commit -S -m \"security: enforce approved agent workspace rules\"\n\n# 3. Use pre-commit hooks to verify .gemini.md has not been altered without review\ncat << 'EOF' > .git/hooks/pre-commit\n#!/bin/sh\n# Check if .gemini.md matches approved security hash\nAPPROVED_HASH=\"a6d34e9e0...\"\nCURRENT_HASH=$(sha256sum .gemini.md | awk '{print $1}')\nif [ \"$CURRENT_HASH\" != \"$APPROVED_HASH\" ]; then\n  echo \"[ERROR] Unauthorized modification to .gemini.md rules detected!\"\n  exit 1\nfi\nEOF\nchmod +x .git/hooks/pre-commit"
+    },
+    {
       "type": "warning",
       "content": "If you write instructions that allow file writing or command execution outside the workspace, you bypass the default security boundaries. Only use absolute, literal paths in folder rule definitions to avoid path traversal bugs."
     },
@@ -30,20 +43,20 @@
     },
     {
       "type": "p",
-      "content": "**Question 1:** Why is it critical to explicitly specify prohibited directories in workspace instructions?"
+      "content": "**Question 1:** Why is it critical to explicitly specify prohibited directories in workspace instructions and track the rules file in Git?"
     },
     {
       "type": "list",
       "items": [
         "A) It speeds up the agent's computation by narrowing the search space",
-        "B) It prevents the agent from reading or writing sensitive files (like SSH keys or system configurations) if it encounters a path traversal bug",
+        "B) It prevents the agent from accessing sensitive files, and Git tracking prevents unauthorized local overrides or malicious rule modifications",
         "C) It is a hard requirement for the agent to boot up",
         "D) It enables the agent to automatically gain administrator permissions"
       ]
     },
     {
       "type": "info",
-      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Defining explicit boundary rules, such as folder exclusion lists, establishes a clear path-traversal barrier. If the agent is instructed to write files, it will check these rules to verify it does not access or overwrite sensitive personal configuration paths."
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Explicit folder rules prevent path traversal, and tracking these rules under Git version control ensures auditability and peer reviews, preventing malicious local modifications or prompt-based bypasses."
     }
   ]
 }

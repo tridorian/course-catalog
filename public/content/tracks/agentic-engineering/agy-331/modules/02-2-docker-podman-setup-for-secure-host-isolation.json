@@ -9,7 +9,12 @@
     },
     {
       "type": "p",
-      "content": "Running containers as root is a significant vulnerability for agent deployments. If the container engine runs with root privileges (as is common with default Docker configurations), any container breakout vulnerability instantly yields root control over the host. L300 platform engineering mandates rootless container execution. Under Podman or rootless Docker, the container engine runs entirely within the unprivileged user's namespace, mapping the container's virtual root user to a standard unprivileged user ID on the host."
+      "content": "Running containers as root is a significant vulnerability for agent deployments. If the container engine runs with root privileges (as is common with default Docker configurations), any container breakout vulnerability instantly yields root control over the host. L300 platform engineering mandates rootless container execution. Under Podman, the container engine runs entirely within the unprivileged user's namespace, mapping the container's virtual root user to a standard unprivileged user ID on the host. This prevents host filesystem takeover and root privilege escalation."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# 1. Install Podman on the host workstation\nsudo apt-get update && sudo apt-get install -y podman\n\n# 2. Verify Podman is running in rootless mode for the current user\npodman info | grep -i rootless\n# Expected output: rootless: true\n\n# 3. Configure the rootless network backend (pasta or slirp4netns) to prevent host interface access\ncat << 'EOF' > ~/.config/containers/containers.conf\n[network]\ndefault_network = \"podman\"\nnetwork_backend = \"netavark\"\nEOF"
     },
     {
       "type": "info",
@@ -21,12 +26,12 @@
     },
     {
       "type": "p",
-      "content": "Rootless container runtimes map virtual UIDs inside the container to ranges of subordinate UIDs on the host system. These allocations are controlled by two system configuration files: '/etc/subuid' and '/etc/subgid'. Verify that your host user has adequate namespace allocations:"
+      "content": "Rootless container runtimes map virtual UIDs inside the container to ranges of subordinate UIDs on the host system. These allocations are controlled by `/etc/subuid` and `/etc/subgid`. If allocations are missing, you must generate them to allow namespace mapping:"
     },
     {
       "type": "code",
       "language": "bash",
-      "content": "# View the subordinate UID maps allocated to your host user\ncat /etc/subuid\n# Expected output format: <username>:<start_uid>:<range_size>\n# Example: wtg:100000:65536\n\n# View subordinate GID maps\ncat /etc/subgid\n# Example: wtg:100000:65536"
+      "content": "# Allocate a range of 65536 subordinate UIDs/GIDs starting at 100000 for your user\n# Execute this on the host system:\nsudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USER\n\n# Update namespaces config to activate the mappings\npodman system migrate\n\n# Verify subordinate maps\ncat /etc/subuid\ncat /etc/subgid"
     },
     {
       "type": "h2",

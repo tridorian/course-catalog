@@ -25,13 +25,30 @@
       "content": "# Create a workspace directory specifically for the agent\nmkdir -p /var/home/wtg/workspace_agy_project\n\n# Assign ownership to the invoking user and set group ownership to a restricted group\nsudo chown -R $USER:nogroup /var/home/wtg/workspace_agy_project\n\n# Apply restrictive permissions (Owner: read/write/execute, Group/Others: none)\nchmod 700 /var/home/wtg/workspace_agy_project\n\n# Verify that permissions are set correctly\nls -ld /var/home/wtg/workspace_agy_project\n# Expected output shows: drwx------"
     },
     {
+    {
       "type": "p",
-      "content": "For production environments, the most secure configuration is running the agent within a dedicated, low-privilege operating system user account (e.g., `agy-sandbox`). By executing the agent under a restricted user profile, the host environment protects your primary user account's home folder."
+      "content": "For production environments, running the agent within a dedicated, low-privilege system user account (e.g., `agy-sandbox`) is a baseline. However, modifying host home directory permissions (such as `chmod 700` on your entire home directory) is highly problematic as it can break user applications, SSH agents, and desktop environment functionalities."
+    },
+    {
+      "type": "h3",
+      "content": "Container Isolation & Restricted Mounts"
+    },
+    {
+      "type": "p",
+      "content": "To avoid altering host permissions, use containers (Docker or Podman) to sandbox the agent. Implement three key security constraints:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Restricted Volume Mounts:** Only mount the specific project directory (`-v $(pwd)/project:/workspace:Z`). Never mount the entire home directory (`-v ~/:/workspace`) as this exposes SSH keyrings, configuration dotfiles, and sensitive browser session profiles.",
+        "**Disable DBus & X11 Socket Forwarding:** Do not share host IPC sockets (like `/tmp/.X11-unix` or `/var/run/dbus/system_bus_socket`) unless a graphical interface is strictly required for testing. Sharing these sockets allows container escape or keystroke sniffing on the host system.",
+        "**Credential Isolation with Dedicated Agent Keyrings:** Do not pass the host login keyring to the agent. Setup a dedicated agent keyring process (such as a local GPG-agent or mock keyring) inside the sandboxed environment to isolate API tokens and credentials."
+      ]
     },
     {
       "type": "code",
       "language": "bash",
-      "content": "# Create a dedicated system user for running the agent\nsudo useradd -m -s /bin/bash agy-sandbox\n\n# Secure your primary home directory from being read by the sandbox user\nchmod 700 /var/home/wtg\n\n# Test access restrictions as the sandbox user\nsudo -u agy-sandbox ls -la /var/home/wtg\n# Expected output: ls: cannot open directory '/var/home/wtg': Permission denied"
+      "content": "# 1. Run container with strict directory mounts and no IPC socket sharing\npodman run -it --rm \\\n  --name agy-secure-workspace \\\n  -v $(pwd)/project_dir:/workspace:Z \\\n  --network none \\\n  github.com/wtg-codes/agy-box:v1.23.2 /bin/bash\n\n# 2. Inside the container, start an isolated credentials keyring session\neval $(gpg-agent --daemon --options /workspace/.gnupg/gpg-agent.conf)"
     },
     {
       "type": "h3",
@@ -39,7 +56,7 @@
     },
     {
       "type": "p",
-      "content": "Question 1: If an agent is granted access to the `run_command` tool, why are Unix permissions like `chmod 700` required in addition to SDK policies?"
+      "content": "Question 1: If an agent is granted access to the `run_command` tool, why are Unix permissions and container boundaries required in addition to SDK policies?"
     },
     {
       "type": "p",
@@ -47,7 +64,7 @@
     },
     {
       "type": "p",
-      "content": "B) Commands run via the shell bypass the Python SDK file-policy middleware and execute with the permissions of the invoking UNIX user."
+      "content": "B) Commands run via the shell bypass the Python SDK file-policy middleware and execute with the permissions of the invoking UNIX user, requiring container sandbox isolation to prevent system-wide breaches."
     },
     {
       "type": "p",
@@ -63,27 +80,27 @@
     },
     {
       "type": "info",
-      "content": "Feedback: When an agent runs a command in the shell, it uses the host operating system's execution pipeline. This pipeline does not check Python-level middleware, meaning the agent can run any command your UNIX user can, unless system-level permissions block it."
+      "content": "Feedback: When an agent runs a command in the shell, it uses the host operating system's execution pipeline. This pipeline does not check Python-level middleware, meaning the agent can run any command your UNIX user can, unless system-level permissions or container namespaces block it."
     },
     {
       "type": "p",
-      "content": "Question 2: What is the primary purpose of running the AGY engine under a dedicated system user account like `agy-sandbox`?"
+      "content": "Question 2: What is the primary risk of mounting an entire user home directory into an agent's container sandbox?"
     },
     {
       "type": "p",
-      "content": "A) It enables the agent to execute commands with administrator privileges."
+      "content": "A) It causes container image signature verification to fail."
     },
     {
       "type": "p",
-      "content": "B) It isolates the agent process, preventing it from reading your primary user's SSH keys, dotfiles, or document folders even if it escapes the SDK boundary."
+      "content": "B) It exposes the entire user workspace, including sensitive SSH keys, cloud CLI configurations, and primary host login keyrings, to potential exfiltration or tampering by the agent."
     },
     {
       "type": "p",
-      "content": "C) It allows the agent to bypass network firewall rules."
+      "content": "C) It prevents the agent from resolving absolute symlinks."
     },
     {
       "type": "p",
-      "content": "D) It keeps a cached copy of the model weights on the filesystem."
+      "content": "D) It violates the OCI runtime spec and crashes the container engine."
     },
     {
       "type": "p",
@@ -91,7 +108,7 @@
     },
     {
       "type": "info",
-      "content": "Feedback: A dedicated unprivileged system user restricts the agent's system-level access. Even if the agent executes arbitrary shell scripts, standard UNIX DAC (Discretionary Access Control) prevents it from reading files in directories owned by other users (like your primary home directory with permissions `700`)."
+      "content": "Feedback: Mounting the entire home directory defeats the purpose of container isolation by providing the agent direct read/write access to sensitive files (SSH keys, cloud config, active credentials) belonging to the host developer."
     }
   ]
 }

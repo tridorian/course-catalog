@@ -13,12 +13,12 @@
     },
     {
       "type": "p",
-      "content": "Jules VM provisioning is defined using YAML or JSON manifest files. These manifests describe the machine shape (vCPUs, RAM), base disk image, network settings, and bootstrap shell scripts. Below is an example of a production-ready provisioning configuration for a build pipeline worker."
+      "content": "Jules VM provisioning is defined using YAML or JSON manifest files. These manifests describe the machine shape (vCPUs, RAM), base disk image, network settings, and bootstrap shell scripts. Below is an example of a production-ready provisioning configuration for a build pipeline worker, incorporating cryptographic image verification to prevent supply chain tampering."
     },
     {
       "type": "code",
       "language": "yaml",
-      "content": "instance:\n  name: \"jules-worker-l300-{{uuid}}\"\n  zone: \"us-central1-a\"\n  machine_type: \"n2-standard-4\"\n  boot_disk:\n    image: \"projects/tridorian-prod/global/images/jules-hardened-v3\"\n    size_gb: 100\n    type: \"pd-ssd\"\n  network_interfaces:\n    - network: \"projects/tridorian-vpc/global/networks/jules-internal\"\n      subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"\n      access_config: [] # No public IP for strict egress lock\n  metadata:\n    items:\n      - key: \"jules-daemon-config\"\n        value: '{\"log_level\": \"info\", \"allowed_ports\": [80, 443], \"max_execution_time_sec\": 1800}'\n      - key: \"startup-script\"\n        value: |\n          #!/bin/bash\n          echo \"Initializing Jules Daemon...\"\n          systemctl start jules-agent.service"
+      "content": "instance:\n  name: \"jules-worker-l300-{{uuid}}\"\n  zone: \"us-central1-a\"\n  machine_type: \"n2-standard-4\"\n  boot_disk:\n    image: \"projects/tridorian-prod/global/images/jules-hardened-v3\"\n    # Cryptographic checksum/signature verification\n    image_verification:\n      checksum: \"sha256:d8c07e0c45d3420042a98f1f7e9185a0c7e2b104928f64bd72efcda485121b64\"\n      signature_key_url: \"https://keys.tridorian.com/jules-image-signing.pub\"\n      enforce: true\n    size_gb: 100\n    type: \"pd-ssd\"\n  network_interfaces:\n    - network: \"projects/tridorian-vpc/global/networks/jules-internal\"\n      subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"\n      access_config: [] # No public IP for strict egress lock\n  metadata:\n    items:\n      - key: \"jules-daemon-config\"\n        value: '{\"log_level\": \"info\", \"allowed_ports\": [80, 443], \"max_execution_time_sec\": 1800}'\n      - key: \"startup-script\"\n        value: |\n          #!/bin/bash\n          echo \"Initializing Jules Daemon...\"\n          systemctl start jules-agent.service"
     },
     {
       "type": "h2",
@@ -58,7 +58,7 @@
       "type": "list",
       "items": [
         "1. Navigate to your workspace directory and create a spec file named `jules-test-spec.yaml`.",
-        "2. Copy the YAML provisioning config shown above and modify the machine_type to `e2-medium` for development testing.",
+        "2. Copy the YAML provisioning config shown above, modify the machine_type to `e2-medium` for development testing, and ensure the image verification checksum is active.",
         "3. Authenticate with your GCP project using the gcloud command line tool: `gcloud auth application-default login`.",
         "4. Execute the agy vm spawn command pointing to your spec file: `agy vm spawn --pool dev-pool --config jules-test-spec.yaml`.",
         "5. Monitor the startup progress using `agy vm logs --id <instance_id>`.",

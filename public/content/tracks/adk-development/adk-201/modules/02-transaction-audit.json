@@ -1,0 +1,62 @@
+{
+  "id": "2",
+  "title": "2. Transaction Auditing & Step Playback",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Transaction Auditing & Playback"
+    },
+    {
+      "type": "p",
+      "content": "Every model request, model output, and tool response is recorded as an immutable transaction log. The transaction auditor allows you to scrub backward and forward in execution time, playing back steps exactly as they occurred."
+    },
+    {
+      "type": "h2",
+      "content": "Scrubbing Execution Logs"
+    },
+    {
+      "type": "p",
+      "content": "In the 'Transaction' tab of the dashboard drawer, choose an active or completed session. The visual playback timeline displays:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "User input prompt payload.",
+        "Agent internal reasoning chain (thoughts, planning steps).",
+        "Tool call argument mapping (arguments and parameter verification).",
+        "Tool response outputs returned from local code execution.",
+        "Final compiled message returned to the client user."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Analyzing Tool Call JSON Schemas"
+    },
+    {
+      "type": "p",
+      "content": "Click on any tool transaction box to inspect the raw JSON exchange. This is vital to debug schema parsing issues:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"transaction_id\": \"tx-99238\",\n  \"step\": 3,\n  \"type\": \"tool_call\",\n  \"tool_name\": \"validate_csv_columns\",\n  \"arguments\": {\n    \"file_path\": \"src/test/customer_records.csv\",\n    \"expected_cols\": [\"id\", \"name\", \"email\"]\n  },\n  \"response_payload\": {\n    \"status\": \"success\",\n    \"valid\": true\n  }\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How does inspecting raw JSON transaction payloads in adk-web help debug failed tool executions?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It automatically repairs Python syntax bugs.\n- B) It shows the exact arguments sent by the model to your tool function, allowing you to check for schema or naming mismatch errors.\n- C) It compiles the project to a static website."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Checking the tool call JSON helps isolate whether parameter structure mismatches caused runtime exceptions."
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "4",
+  "title": "4. Lab - Creating Your First Custom Tool",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Custom Tool Authoring"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will author a custom file parsing tool in Python that validates CSV formatting. The agent will discover this tool via the `agent.yaml` registry and execute it during tasks."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Tool Source Code"
+    },
+    {
+      "type": "p",
+      "content": "Create a new file `src/tools/csv_validator.py` and write the Python tool utilizing ADK's decorator bindings. Make sure to define docstrings and type hints as the agent relies on them to generate the JSON Schema payload."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import csv\nfrom google_adk.tools import tool\n\n@tool\ndef validate_csv_columns(file_path: str, expected_cols: list[str]) -> dict:\n    \"\"\"\n    Validates that a CSV file contains the exact list of expected column names.\n    \n    Args:\n        file_path (str): The absolute or relative path to the local CSV file.\n        expected_cols (list[str]): The list of column headers required to be present.\n        \n    Returns:\n        dict: A status report indicating success boolean and list of missing columns.\n    \"\"\"\n    try:\n        with open(file_path, mode='r', encoding='utf-8') as f:\n            reader = csv.reader(f)\n            headers = next(reader, None)\n            if not headers:\n                return {\"status\": \"error\", \"valid\": False, \"reason\": \"CSV is empty\"}\n            \n            missing = [col for col in expected_cols if col not in headers]\n            if missing:\n                return {\"status\": \"invalid\", \"valid\": False, \"missing\": missing}\n            return {\"status\": \"success\", \"valid\": true, \"missing\": []}\n    except Exception as e:\n        return {\"status\": \"error\", \"valid\": False, \"reason\": str(e)}\n"
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Register the Tool in agent.yaml"
+    },
+    {
+      "type": "p",
+      "content": "Register the new tool file inside your `agent.yaml` file under the tools section:"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "tools:\n  - name: \"validate_csv_columns\"\n    source: \"src/tools/csv_validator.py\"\n"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How does the ADK runtime construct the JSON parameters schema that is shared with the LLM backend for tool discovery?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It prompts the developer to author a separate JSON file manually.\n- B) It parses the function signature type hints and docstrings of the decorated @tool function.\n- C) It reads global environment variables."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. ADK uses runtime reflection to inspect parameter types and descriptions directly from the code docstrings."
+    }
+  ]
+}

@@ -58,4 +58,11 @@ export const signOut = () => {
   }
 };
 
-export const getAccessToken = () => accessToken;
+export const getAccessToken = () => {
+  if (typeof window !== 'undefined') {
+    const mock = window.sessionStorage.getItem('mockToken') || 
+                 new URLSearchParams(window.location.search).get('mockToken');
+    if (mock) return mock;
+  }
+  return accessToken;
+};

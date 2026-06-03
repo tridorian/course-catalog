@@ -1,0 +1,62 @@
+{
+  "id": "2",
+  "title": "2. Launching the A2AServer Routing Daemon",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Deploying A2AServer Router"
+    },
+    {
+      "type": "p",
+      "content": "The `A2AServer` is the routing daemon that coordinates communication between agents. It acts as a local proxy, routes request envelopes, translates schemas, and handles message queue retries."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Configure a2a.yaml Routing Manifest"
+    },
+    {
+      "type": "p",
+      "content": "Create an orchestration configuration file to specify routing rules, ports, and allowed agent keys:"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "server:\n  port: 8090\n  host: \"localhost\"\n  auth_token: \"sec-key-9923\"\n\nrouting:\n  default_coordinator: \"hub-agent\"\n  agents:\n    - id: \"hub-agent\"\n      port: 8091\n    - id: \"sql-agent\"\n      port: 8092\n    - id: \"git-agent\"\n      port: 8093\n"
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Launch the routing server daemon"
+    },
+    {
+      "type": "p",
+      "content": "Start the server using the CLI commands to monitor incoming routes and connections:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk a2a-server start --config a2a.yaml"
+    },
+    {
+      "type": "info",
+      "title": "Monitoring routes",
+      "content": "A2AServer exposes a diagnostics panel on port 8090/health. You can inspect registered agent nodes, latency maps, and queue depths."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary role of the A2AServer routing daemon in an agent network?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It executes local Python tests.\n- B) It acts as a broker, routing request envelopes, managing message queues, and verifying authentication keys.\n- C) It is a web interface for rendering HTML pages."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. A2AServer manages message envelope exchanges, transport routes, security permissions, and connectivity states."
+    }
+  ]
+}

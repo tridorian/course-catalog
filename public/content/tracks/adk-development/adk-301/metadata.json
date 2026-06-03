@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-301",
+  "title": "ADK-301: Agent-to-Agent (A2A) Orchestration",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Design and orchestrate multi-agent collaboration environments. Configure A2AServer routing, launch remote agents, and write discovery card manifests.",
+  "features": [
+    {
+      "icon": "🔀",
+      "title": "A2AServer Routing",
+      "description": "Master the deployment of central routing servers for multi-agent networking and task delegation."
+    },
+    {
+      "icon": "🌐",
+      "title": "Remote Bindings",
+      "description": "Register agents hosted on remote endpoints with your orchestration network as local services."
+    },
+    {
+      "icon": "🏷️",
+      "title": "Agent Manifests",
+      "description": "Author agent-card.json files containing dynamic capability and scope declarations."
+    }
+  ]
+}

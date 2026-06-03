@@ -123,6 +123,15 @@ const Dashboard = () => {
 
         {/* Header */}
         <div className="text-center mb-16 relative">
+          <div className="absolute top-0 left-0">
+            <Link 
+              to="/help" 
+              className="flex items-center gap-2 px-3 py-1 bg-[#132617] text-[#4ade80] border border-[#4ade80]/30 rounded-full text-[10px] font-mono hover:bg-[#4ade80]/10 transition-all uppercase tracking-widest"
+            >
+              <Icons.HelpCircle size={12} />
+              Help & Troubleshooting
+            </Link>
+          </div>
           {role === 'admin' && (
             <div className="absolute top-0 right-0">
               <Link 

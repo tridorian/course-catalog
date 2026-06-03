@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Course Introduction & Architecture",
+      "file": "modules/01-introduction.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Installing the CLI and Environment Setup",
+      "file": "modules/02-cli-installation.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Deconstructing agent.yaml Configuration",
+      "file": "modules/03-agent-config.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Lab - Creating Your First Custom Tool",
+      "file": "modules/04-custom-tool.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Execution and Local Verification",
+      "file": "modules/05-local-testing.json"
+    }
+  ]
+}

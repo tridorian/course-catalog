@@ -67,6 +67,28 @@
     },
     {
       "type": "h2",
+      "content": "🔐 Cryptographically Signed, Immutable Action Logs"
+    },
+    {
+      "type": "p",
+      "content": "Manual validation of agent proposals is vital, but security audits require an untamperable audit trail. If an agent executes commands or attempts to write files, Antigravity records all events into a cryptographically signed log file. Each log entry is hashed and chained to the hash of the preceding entry (forming a hash chain), and the entire block is signed using the developer's verified GPG key or a hardware security module (HSM)."
+    },
+    {
+      "type": "p",
+      "content": "This prevents either a compromised agent session or local shell bypass from editing or erasing its historical records, assuring absolute audit integrity for corporate compliance teams."
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"event_id\": 105,\n  \"timestamp\": \"2026-06-03T19:25:00Z\",\n  \"action\": \"run_command\",\n  \"command\": \"npm run build\",\n  \"previous_hash\": \"c7b139ec42b918a93...\",\n  \"hash\": \"9e742df8b321c1724...\",\n  \"signature\": \"MEYCIQCcPjW48a...\"\n}"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Verify the integrity and cryptographic signatures of the local execution log\nagy audit verify --log-file ~/.antigravity/logs/session-active.jsonl --public-key keys/developer-audit.pub"
+    },
+    {
+      "type": "h2",
       "content": "Check Your Understanding"
     },
     {

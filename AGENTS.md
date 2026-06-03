@@ -152,6 +152,17 @@ The following files must be kept in sync with code changes:
 
 ## 4. Development Workflow
 
+### Configuring Jules Environment Setup
+
+Jules runs codebase tasks within an isolated VM. To optimize VM startup times and cache dependencies (like `puppeteer` for screenshots), use the provided setup script:
+
+1. Go to the codebase configuration on the **Jules Web Interface** (https://jules.google).
+2. Set the **Initial Setup** command field to:
+   ```bash
+   ./scripts/setup-jules.sh
+   ```
+3. Click **Run and Snapshot** to validate the script and create a cached environment snapshot.
+
 ### Starting the Dev Server
 
 ```bash

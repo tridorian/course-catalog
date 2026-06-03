@@ -1,0 +1,47 @@
+{
+  "id": "4",
+  "title": "4. Secure Action Handlers & Event Routing",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Event Security & Verification"
+    },
+    {
+      "type": "p",
+      "content": "Because A2UI elements route events directly back to agents, executing scripts within these components presents security risks. Enforcing sandboxed execution policies prevents malicious inputs from executing commands."
+    },
+    {
+      "type": "h2",
+      "content": "Threat Vector: Callback Injection"
+    },
+    {
+      "type": "p",
+      "content": "An attacker could manipulate form submission values to send shell escape sequences, hoping the agent runs them directly in tools. Security policies must follow three rules:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Input Type Enforcement: Validate that numerical fields contain only integers/decimals prior to dispatching tools.",
+        "CSRF Token Protection: Attach a session token header to all UI action events to verify the click originated from an active workspace interface.",
+        "Sanitization Filters: Strip potential script elements and command pipeline operators (e.g. ;, &&, |) from text inputs."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which security mechanism validates that an A2UI submission event originated from the active user's session and not a spoofed network request?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Python type hints\n- B) Session CSRF tokens in event headers\n- C) Markdown validation filters"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Event routing uses CSRF tokens to verify session authenticity."
+    }
+  ]
+}

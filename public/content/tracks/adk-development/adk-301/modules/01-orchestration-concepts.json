@@ -1,0 +1,64 @@
+{
+  "id": "1",
+  "title": "1. The Multi-Agent Paradigm & Orchestration Topologies",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Multi-Agent Systems & Architecture Topologies"
+    },
+    {
+      "type": "p",
+      "content": "Complex software engineering problems cannot be solved efficiently by a single model loop. Splitting tasks across focused, specialized agents increases precision, reduces input context usage, and enables parallel processing pipelines."
+    },
+    {
+      "type": "h2",
+      "content": "Multi-Agent Topology Models"
+    },
+    {
+      "type": "p",
+      "content": "Developers can configure agent communications using two primary structure topologies:"
+    },
+    {
+      "type": "grid",
+      "items": [
+        {
+          "icon": "Shuffle",
+          "title": "Hub-and-Spoke Topology",
+          "content": "A central coordinator agent receives user input, plans steps, delegating tasks to sub-agents, compiling output.",
+          "border": "#4ade80"
+        },
+        {
+          "icon": "Network",
+          "title": "Peer-to-Peer Mesh Topology",
+          "content": "Agents communicate directly, triggering callbacks and passing payloads autonomously based on state changes.",
+          "border": "#3b82f6"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "The A2A Protocol Architecture"
+    },
+    {
+      "type": "p",
+      "content": "The Agent-to-Agent (A2A) protocol defines how agents declare parameters, register endpoints, establish trust, and exchange structured JSON task payloads across local networks or public HTTP transports."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which multi-agent topology uses a coordinator agent to process user inputs and delegate tasks?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Peer-to-Peer Mesh\n- B) Hub-and-Spoke\n- C) Circular Chain"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. In a Hub-and-Spoke model, a central coordinator coordinates routing and delegation between spokes."
+    }
+  ]
+}

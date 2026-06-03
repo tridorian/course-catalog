@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-402",
+  "title": "ADK-402: Enterprise Integration & MCP",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Deploy production agents connected to Model Context Protocol (MCP) servers, configure OAuth2 integrations, and execute securely inside virtualized sandboxes.",
+  "features": [
+    {
+      "icon": "🌐",
+      "title": "Model Context Protocol",
+      "description": "Connect agents to standardized database APIs and documentation repositories using MCP tool hosts."
+    },
+    {
+      "icon": "🔑",
+      "title": "OAuth Security",
+      "description": "Configure secure token handshakes and user identity redirection flows for enterprise systems."
+    },
+    {
+      "icon": "📦",
+      "title": "Virtualized Sandboxes",
+      "description": "Deploy agent loops within sandboxed container environments using distrobox and isolated OCI nodes."
+    }
+  ]
+}
