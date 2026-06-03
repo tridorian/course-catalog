@@ -66,3 +66,8 @@ To streamline authoring and prevent data collisions, we will develop a native **
 *   **Metadata Tattooing:** The Add-on and Sync Engine will utilize the Google Drive `Properties` (or `appProperties`) service and the Docs `DocumentProperties` to "tattoo" crucial metadata directly onto the files.
     *   **Stored Properties:** `last_sync_timestamp`, `live_version_id`, `course_slug`, and `validation_status`.
     *   **Stale Update Prevention:** Before the Sync Engine updates Firestore, it compares the tattooed `live_version_id` against the current Docs version. If a collision is detected (e.g., the doc was modified concurrently), the Add-on alerts the user, preventing stale or conflicting updates from going live.
+
+## 8. References
+
+For current implementation details on client-side Google Drive persistence, offline delta syncing, and the local doc parser, refer to:
+- [ADR 0004: Progress Persistence & Drive Synchronization](./adr/0004-progress-persistence-drive-synchronization.md)

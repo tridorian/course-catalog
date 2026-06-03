@@ -24,6 +24,8 @@ import HelpSection from './components/HelpSection';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
 import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/googleDrive';
 import { getAccessToken } from './services/googleAuth';
+import ThemePicker from './components/ThemePicker';
+import { useTheme } from './hooks/useTheme';
 
 // --- Main App Component ---
 
@@ -244,8 +246,8 @@ function AppContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050805] flex items-center justify-center">
-        <div className="text-[#4ade80] font-mono animate-pulse text-xl tracking-widest">
+      <div className="min-h-screen bg-base flex items-center justify-center">
+        <div className="text-accent-text font-mono animate-pulse text-xl tracking-widest">
           LOADING TRIDORIAN MISSION...
         </div>
       </div>
@@ -254,8 +256,8 @@ function AppContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#050805] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#0a120c] border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
+      <div className="min-h-screen bg-base flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
           <AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Mission Interrupted</h2>
           <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
@@ -272,7 +274,7 @@ function AppContent() {
 
   if (!activeStep && moduleId) {
     return (
-      <div className="min-h-screen bg-[#050805] flex items-center justify-center">
+      <div className="min-h-screen bg-base flex items-center justify-center">
         <div className="text-red-500 font-mono text-xl tracking-widest">
           ERROR: MISSION CONTENT NOT FOUND.
         </div>
@@ -281,12 +283,12 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050805] text-[#f0fdf4] font-sans flex flex-col md:flex-row selection:bg-[#4ade80] selection:text-black">
+    <div className="min-h-screen bg-base text-main font-sans flex flex-col md:flex-row selection:bg-accent selection:text-accent-fg">
 
       {/* Mobile Header */}
-      <div className="md:hidden bg-[#0a120c] border-b border-[#1f3d25] p-4 flex justify-between items-center sticky top-0 z-50">
-        <div className="font-bold text-[#4ade80] tracking-widest">TRIDORIAN</div>
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-[#f0fdf4]">
+      <div className="md:hidden bg-panel border-b border-border-main p-4 flex justify-between items-center sticky top-0 z-50">
+        <div className="font-bold text-accent-text tracking-widest">TRIDORIAN</div>
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-main">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -295,15 +297,15 @@ function AppContent() {
       <div className={`
         ${isMobileMenuOpen ? 'block' : 'hidden'}
         md:block fixed md:sticky top-[61px] md:top-0 h-[calc(100vh-61px)] md:h-screen
-        w-full md:w-80 bg-[#0a120c] border-r border-[#1f3d25] flex flex-col z-40
+        w-full md:w-80 bg-panel border-r border-border-main flex flex-col z-40
         transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar
       `}>
-        <div className="p-6 hidden md:block border-b border-[#1f3d25]">
+        <div className="p-6 hidden md:block border-b border-border-main">
           <div className="flex justify-between items-start mb-2">
-            <div className="font-extrabold text-xl text-[#4ade80] tracking-[0.2em]">TRIDORIAN</div>
+            <div className="font-extrabold text-xl text-accent-text tracking-[0.2em]">TRIDORIAN</div>
             <SyncStatus status={syncStatus} onRetry={handleRetrySync} />
           </div>
-          <div className="text-xs text-[#86efac] mt-1 font-mono uppercase">{courseMetadata?.title || 'LABS // UNKNOWN'}</div>
+          <div className="text-xs text-text-muted mt-1 font-mono uppercase">{courseMetadata?.title || 'LABS // UNKNOWN'}</div>
         </div>
 
         <div className="p-4 flex-1">
@@ -319,10 +321,10 @@ function AppContent() {
                   key={`${step.id || ""}-${index}`}
                   className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex justify-between items-center group relative ${
                     isActive
-                      ? 'bg-[#132617] text-[#4ade80] border border-[#1f3d25] shadow-[0_0_15px_rgba(74,222,128,0.1)]'
+                      ? 'bg-muted text-accent-text border border-border-main shadow-accent'
                       : isLocked
                         ? 'text-gray-600 opacity-50'
-                        : 'text-gray-400 hover:bg-[#132617]/50 hover:text-white'
+                        : 'text-gray-400 hover:bg-muted/50 hover:text-white'
                   }`}
                 >
                   <button
@@ -344,9 +346,9 @@ function AppContent() {
                       {isLocked ? (
                         <Lock size={14} className="text-gray-600" />
                       ) : isCompleted ? (
-                        <CheckCircle2 size={14} className="text-[#4ade80]" data-testid={`check-icon-${index}`} />
+                        <CheckCircle2 size={14} className="text-accent-text" data-testid={`check-icon-${index}`} />
                       ) : (
-                        <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-[#4ade80] animate-pulse' : 'border-gray-500'}`}></div>
+                        <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-accent animate-pulse' : 'border-gray-500'}`}></div>
                       )}
                     </button>
                     <span className="truncate">{step.title}</span>
@@ -354,7 +356,7 @@ function AppContent() {
                   <span className="text-[10px] opacity-40 whitespace-nowrap font-mono relative z-10 pointer-events-none">{step.duration}</span>
 
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#4ade80] rounded-r-full shadow-[0_0_8px_#4ade80] z-20"></div>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-accent rounded-r-full shadow-accent z-20"></div>
                   )}
                 </div>
               );
@@ -363,26 +365,26 @@ function AppContent() {
         </div>
 
         {/* Global Progress */}
-        <div className="p-6 border-t border-[#1f3d25] bg-[#050805]">
-          <div className="flex justify-between text-xs text-[#86efac] mb-2">
+        <div className="p-6 border-t border-border-main bg-base">
+          <div className="flex justify-between text-xs text-text-muted mb-2">
             <span>Progress</span>
             <span>{Math.round(progressPercentage)}%</span>
           </div>
-          <div className="h-2 w-full bg-[#132617] rounded-full overflow-hidden mb-4">
+          <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-4">
             <div
-              className="h-full bg-[#4ade80] transition-all duration-500 ease-out shadow-[0_0_10px_#4ade80]"
+              className="h-full bg-accent transition-all duration-500 ease-out shadow-accent"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
           <button
             onClick={() => setShowResetModal(true)}
-            className="w-full py-2 text-[10px] font-mono text-gray-500 hover:text-red-400 border border-[#1f3d25] hover:border-red-900/30 rounded transition-all uppercase tracking-tighter"
+            className="w-full py-2 text-[10px] font-mono text-gray-500 hover:text-red-400 border border-border-main hover:border-red-900/30 rounded transition-all uppercase tracking-tighter"
           >
             Reset Progress
           </button>
           <button
             onClick={() => navigate('/help')}
-            className="w-full mt-2 py-2 text-[10px] font-mono text-gray-500 hover:text-[#4ade80] border border-[#1f3d25] hover:border-[#4ade80]/30 rounded transition-all uppercase tracking-tighter flex items-center justify-center gap-1.5"
+            className="w-full mt-2 py-2 text-[10px] font-mono text-gray-500 hover:text-accent-text border border-border-main hover:border-accent-border rounded transition-all uppercase tracking-tighter flex items-center justify-center gap-1.5"
           >
             <HelpCircle size={10} />
             Help & Troubleshooting
@@ -393,7 +395,7 @@ function AppContent() {
       {/* Reset Confirmation Modal */}
       {showResetModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#0a120c] border border-[#1f3d25] rounded-xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+          <div className="bg-panel border border-border-main rounded-xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
             <h3 className="text-xl font-bold text-white mb-4">Reset Progress?</h3>
             <p className="text-gray-400 text-sm mb-8 leading-relaxed">
               Are you sure you want to reset your progress for this course? This cannot be undone.
@@ -407,7 +409,7 @@ function AppContent() {
               </button>
               <button
                 onClick={() => setShowResetModal(false)}
-                className="w-full py-3 bg-[#132617] hover:bg-[#1f3d25] text-gray-400 rounded-lg font-medium transition-all"
+                className="w-full py-3 bg-muted hover:bg-elevated text-gray-400 rounded-lg font-medium transition-all"
               >
                 Cancel
               </button>
@@ -421,16 +423,16 @@ function AppContent() {
 
         {/* Resume Session Banner */}
         {isResumeBannerVisible && resumeSession && !isBannerDismissed && (
-          <div className="bg-[#132617] border-b border-[#4ade80]/30 p-4 animate-in slide-in-from-top duration-500 z-50">
+          <div className="bg-muted border-b border-accent-border p-4 animate-in slide-in-from-top duration-500 z-50">
             <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#4ade80]/10 flex items-center justify-center border border-[#4ade80]/20">
-                  <History size={20} className="text-[#4ade80]" />
+                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center border border-accent-border">
+                  <History size={20} className="text-accent-text" />
                 </div>
                 <div>
                   <div className="text-sm font-bold text-white">Resume Session?</div>
                   <div className="text-xs text-gray-400 font-mono">
-                    You were last working on <span className="text-[#4ade80]">{resumeSession.courseId} / {resumeSession.moduleId}</span>
+                    You were last working on <span className="text-accent-text">{resumeSession.courseId} / {resumeSession.moduleId}</span>
                   </div>
                 </div>
               </div>
@@ -449,7 +451,7 @@ function AppContent() {
                     navigate(`/${resumeSession.trackId}/${resumeSession.courseId}/${resumeSession.moduleId}`);
                     setIsResumeBannerVisible(false);
                   }}
-                  className="px-4 py-1.5 bg-[#4ade80] text-black text-xs font-bold rounded flex items-center gap-2 hover:bg-[#22c55e] transition-all"
+                  className="px-4 py-1.5 bg-accent text-accent-fg text-xs font-bold rounded flex items-center gap-2 hover:brightness-110 transition-all"
                 >
                   RESUME MISSION
                 </button>
@@ -459,16 +461,16 @@ function AppContent() {
         )}
 
         {/* Subtle Background Glow */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#4ade80]/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
 
         <main className="flex-1 p-6 md:p-12 lg:p-16 max-w-4xl mx-auto w-full z-10">
 
           {/* Breadcrumbs */}
           <div className="mb-4 text-xs font-mono text-gray-500 tracking-wider">
-             <button onClick={() => navigate(`/${currentTrackId}`)} className="hover:text-[#4ade80] transition-colors">{currentTrackId}</button>
+             <button onClick={() => navigate(`/${currentTrackId}`)} className="hover:text-accent-text transition-colors">{currentTrackId}</button>
              <span className="opacity-50 mx-1">/</span>
-             <button onClick={() => navigate(`/${currentTrackId}/${currentCourseId}`)} className="hover:text-[#4ade80] transition-colors">{currentCourseId}</button>
-             {moduleId ? <><span className="opacity-50 mx-1">/</span> <span className="text-[#86efac]">{activeStep?.title}</span></> : null}
+             <button onClick={() => navigate(`/${currentTrackId}/${currentCourseId}`)} className="hover:text-accent-text transition-colors">{currentCourseId}</button>
+             {moduleId ? <><span className="opacity-50 mx-1">/</span> <span className="text-text-muted">{activeStep?.title}</span></> : null}
           </div>
 
           {!moduleId ? (
@@ -479,13 +481,13 @@ function AppContent() {
                    const isCompleted = completedSteps.includes(index);
                    const isLocked = index > 0 && !completedSteps.includes(index - 1);
                    return (
-                     <div key={step.id} className={`p-4 rounded-xl border ${isLocked ? 'border-[#1f3d25] bg-[#0a120c] opacity-50' : 'border-[#1f3d25] bg-[#132617]'}`}>
-                        <h3 className="font-bold text-[#4ade80] mb-2">{step.title}</h3>
+                     <div key={step.id} className={`p-4 rounded-xl border ${isLocked ? 'border-border-main bg-panel opacity-50' : 'border-border-main bg-muted'}`}>
+                        <h3 className="font-bold text-accent-text mb-2">{step.title}</h3>
                         <p className="text-sm text-gray-400 mb-4">{step.description || 'Module details'}</p>
                         <button
                           disabled={isLocked}
                           onClick={() => navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`)}
-                          className="text-xs px-4 py-2 bg-[#4ade80] text-black font-bold rounded-lg hover:bg-[#22c55e]"
+                          className="text-xs px-4 py-2 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110"
                         >
                           {isCompleted ? 'Review Module' : 'Start Module'}
                         </button>
@@ -498,7 +500,7 @@ function AppContent() {
             <>
               {/* Step Indicator */}
           <div className="mb-8 flex items-center justify-between">
-            <div className="text-xs font-mono text-[#86efac] tracking-widest uppercase">
+            <div className="text-xs font-mono text-text-muted tracking-widest uppercase">
               Module {activeStepIndex + 1} <span className="opacity-30 mx-2">//</span> {activeStep.title.replace(/^\d+\.\s*/, '')}
             </div>
             <div className="text-[10px] font-mono text-gray-500">
@@ -506,9 +508,9 @@ function AppContent() {
             </div>
           </div>
 
-          <div className="h-1 w-full bg-[#132617] rounded-full overflow-hidden mb-12">
+          <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-12">
             <div
-              className="h-full bg-gradient-to-r from-[#1f3d25] to-[#4ade80] transition-all duration-700 ease-in-out"
+              className="h-full bg-gradient-to-r from-border-main to-accent transition-all duration-700 ease-in-out"
               style={{ width: `${((activeStepIndex + 1) / totalSteps) * 100}%` }}
             ></div>
           </div>
@@ -523,14 +525,14 @@ function AppContent() {
 
         {/* Bottom Navigation Bar */}
         {moduleId && (
-        <footer className="fixed md:sticky bottom-0 w-full md:w-auto bg-[#0a120c] border-t border-[#1f3d25] p-4 px-6 md:px-12 flex justify-between items-center z-30">
+        <footer className="fixed md:sticky bottom-0 w-full md:w-auto bg-panel border-t border-border-main p-4 px-6 md:px-12 flex justify-between items-center z-30">
           <button
             onClick={goToPrev}
             disabled={activeStepIndex === 0}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
               activeStepIndex === 0
                 ? 'text-gray-600 cursor-not-allowed'
-                : 'text-white hover:bg-[#132617]'
+                : 'text-white hover:bg-muted'
             }`}
           >
             <ChevronLeft size={20} />
@@ -540,7 +542,7 @@ function AppContent() {
           {activeStepIndex === totalSteps - 1 ? (
             <button
               onClick={completeCourse}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-[#4ade80] text-black hover:bg-[#22c55e] shadow-[0_0_15px_rgba(74,222,128,0.3)] animate-pulse"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse"
             >
               <Trophy size={20} />
               Complete Course
@@ -548,7 +550,7 @@ function AppContent() {
           ) : (
             <button
               onClick={goToNext}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-[#4ade80] text-black hover:bg-[#22c55e] shadow-[0_0_15px_rgba(74,222,128,0.3)]"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all bg-accent text-accent-fg hover:brightness-110 shadow-accent"
             >
               Next
               <ChevronRight size={20} />
@@ -558,31 +560,17 @@ function AppContent() {
         )}
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
-        /* Custom Scrollbar for sidebar to match theme */
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #0a120c;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #1f3d25;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #4ade80;
-        }
-      `}} />
+
     </div>
   );
 }
 
 
 export default function App() {
+  const { theme, setTheme } = useTheme();
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<Dashboard theme={theme} setTheme={setTheme} />} />
       <Route path="/admin" element={<AdminPanel />} />
       <Route path="/help" element={<HelpSection />} />
       <Route path="/:trackId" element={<TrackPage />} />

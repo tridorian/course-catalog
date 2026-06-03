@@ -52,3 +52,9 @@ Before syncing, use the **Tridorian Validator** Apps Script (Extensions > Apps S
 - Existence of `[Config]` and `[Intro]` tabs.
 - Presence of required metadata in the Config table.
 - Heading 1 and Heading 2 in every module tab.
+
+## 4. References
+
+For technical decisions and implementation details regarding hierarchy structure, schema validation, and drive synchronization, refer to:
+- [ADR 0001: Core Content Hierarchy & Schema Validation](./adr/0001-core-content-hierarchy-schema-validation.md)
+- [ADR 0004: Progress Persistence & Drive Synchronization](./adr/0004-progress-persistence-drive-synchronization.md)

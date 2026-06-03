@@ -18,9 +18,9 @@ const EmbedEditOverlay = ({ url, sourceFile, onClose }) => {
 
   return (
     <div className="absolute inset-0 bg-black/90 z-20 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="bg-[#0a120c] border border-[#4ade80] rounded-xl p-6 max-w-lg w-full shadow-[0_0_30px_rgba(74,222,128,0.2)]">
+      <div className="bg-panel border border-accent rounded-xl p-6 max-w-lg w-full shadow-accent">
         <div className="flex justify-between items-center mb-4">
-          <h4 className="text-sm font-bold text-[#4ade80] tracking-wider uppercase">Edit Embed URL</h4>
+          <h4 className="text-sm font-bold text-accent-text tracking-wider uppercase">Edit Embed URL</h4>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
             <X size={18} />
           </button>
@@ -30,15 +30,15 @@ const EmbedEditOverlay = ({ url, sourceFile, onClose }) => {
           <div>
             <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Source File</label>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-[#132617] px-3 py-2 rounded text-xs text-[#86efac] font-mono break-all">
+              <code className="flex-1 bg-muted px-3 py-2 rounded text-xs text-text-muted font-mono break-all">
                 {sourceFile || 'Unknown'}
               </code>
               <button
                 onClick={() => copyToClipboard(sourceFile || '', 'file')}
-                className="p-2 hover:bg-[#132617] rounded transition-colors text-gray-400 hover:text-[#4ade80]"
+                className="p-2 hover:bg-muted rounded transition-colors text-gray-400 hover:text-accent-text"
                 title="Copy file path"
               >
-                {copied === 'file' ? <Check size={14} className="text-[#4ade80]" /> : <Copy size={14} />}
+                {copied === 'file' ? <Check size={14} className="text-accent-text" /> : <Copy size={14} />}
               </button>
             </div>
           </div>
@@ -46,21 +46,21 @@ const EmbedEditOverlay = ({ url, sourceFile, onClose }) => {
           <div>
             <label className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1">Current URL</label>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-[#132617] px-3 py-2 rounded text-xs text-[#86efac] font-mono break-all">
+              <code className="flex-1 bg-muted px-3 py-2 rounded text-xs text-text-muted font-mono break-all">
                 {url}
               </code>
               <button
                 onClick={() => copyToClipboard(url, 'url')}
-                className="p-2 hover:bg-[#132617] rounded transition-colors text-gray-400 hover:text-[#4ade80]"
+                className="p-2 hover:bg-muted rounded transition-colors text-gray-400 hover:text-accent-text"
                 title="Copy URL"
               >
-                {copied === 'url' ? <Check size={14} className="text-[#4ade80]" /> : <Copy size={14} />}
+                {copied === 'url' ? <Check size={14} className="text-accent-text" /> : <Copy size={14} />}
               </button>
             </div>
           </div>
 
           <p className="text-[10px] text-gray-500 mt-2 leading-relaxed">
-            Open the source file above and update the <code className="text-[#86efac]">"url"</code> field.
+            Open the source file above and update the <code className="text-text-muted">"url"</code> field.
             The dev server will hot-reload on next navigation.
           </p>
         </div>
@@ -77,7 +77,7 @@ const DevEditButton = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute top-2 right-2 z-10 p-1.5 bg-[#132617] border border-[#1f3d25] rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#4ade80] hover:text-black text-[#4ade80]"
+      className="absolute top-2 right-2 z-10 p-1.5 bg-muted border border-border-main rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent hover:text-accent-fg text-accent-text"
       title="Edit embed URL (dev mode)"
     >
       <Pencil size={12} />
@@ -95,10 +95,10 @@ export const VideoEmbed = ({ url, title = "Video Walkthrough", sourceFile }) => 
   }
 
   return (
-    <div className="my-6 rounded-xl overflow-hidden border border-[#1f3d25] bg-[#0a120c] shadow-2xl group relative">
+    <div className="my-6 rounded-xl overflow-hidden border border-border-main bg-panel shadow-2xl group relative">
       <DevEditButton onClick={() => setShowEdit(true)} />
       {showEdit && <EmbedEditOverlay url={url} sourceFile={sourceFile} onClose={() => setShowEdit(false)} />}
-      <div className="bg-[#132617] px-4 py-2 text-xs font-semibold text-[#4ade80] flex justify-between items-center border-b border-[#1f3d25]">
+      <div className="bg-muted px-4 py-2 text-xs font-semibold text-accent-text flex justify-between items-center border-b border-border-main">
         <span className="flex items-center gap-2">
           <PlayCircle size={14} />
           {title.toUpperCase()}
@@ -128,10 +128,10 @@ export const SlideDeckEmbed = ({ url, title = "Reference Slide Deck", sourceFile
   }
 
   return (
-    <div className="my-6 rounded-xl overflow-hidden border border-[#1f3d25] bg-[#0a120c] shadow-2xl group relative">
+    <div className="my-6 rounded-xl overflow-hidden border border-border-main bg-panel shadow-2xl group relative">
       <DevEditButton onClick={() => setShowEdit(true)} />
       {showEdit && <EmbedEditOverlay url={url} sourceFile={sourceFile} onClose={() => setShowEdit(false)} />}
-      <div className="bg-[#132617] px-4 py-2 text-xs font-semibold text-[#86efac] flex justify-between items-center border-b border-[#1f3d25]">
+      <div className="bg-muted px-4 py-2 text-xs font-semibold text-text-muted flex justify-between items-center border-b border-border-main">
         <span className="flex items-center gap-2">
           <Presentation size={14} />
           {title.toUpperCase()}

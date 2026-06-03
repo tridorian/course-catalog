@@ -4,8 +4,9 @@ import * as Icons from 'lucide-react';
 import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
 import * as googleAuth from '../services/googleAuth';
 import { checkUserRole } from '../services/roleManager';
+import ThemePicker from './ThemePicker';
 
-const Dashboard = () => {
+const Dashboard = ({ theme, setTheme }) => {
   const [catalog, setCatalog] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -67,8 +68,8 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050805] flex items-center justify-center">
-        <div className="text-[#4ade80] font-mono animate-pulse text-xl tracking-widest">
+      <div className="min-h-screen bg-base flex items-center justify-center">
+        <div className="text-accent-text font-mono animate-pulse text-xl tracking-widest">
           INITIALIZING TRIDORIAN...
         </div>
       </div>
@@ -77,8 +78,8 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#050805] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#0a120c] border border-red-900/50 rounded-lg p-8 text-center">
+      <div className="min-h-screen bg-base flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center">
           <Icons.AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-red-500 mb-2">CATALOG UNAVAILABLE</h2>
           <p className="text-gray-400 font-mono text-sm">{error}</p>
@@ -88,33 +89,33 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050805] text-[#f0fdf4] selection:bg-[#4ade80] selection:text-black">
+    <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg">
       {/* Background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#4ade80]/5 rounded-full blur-[150px] pointer-events-none"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-accent/5 rounded-full blur-[150px] pointer-events-none"></div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 py-16">
         {/* Connection Status / Onboarding Banner */}
         <div className="mb-12">
           {!isConnected ? (
-            <div className="bg-[#132617] border border-[#4ade80]/30 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_0_20px_rgba(74,222,128,0.05)]">
+            <div className="bg-muted border border-accent-border rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-accent">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#4ade80]/10 rounded-full flex items-center justify-center border border-[#4ade80]/20">
-                  <Icons.CloudOff className="text-[#4ade80]" size={24} />
+                <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center border border-accent-border">
+                  <Icons.CloudOff className="text-accent-text" size={24} />
                 </div>
                 <div>
                   <h3 className="text-white font-bold">Connect Google Drive to Sync Progress</h3>
-                  <p className="text-[#86efac] text-sm">Save your mission status across devices and resume where you left off.</p>
+                  <p className="text-text-muted text-sm">Save your mission status across devices and resume where you left off.</p>
                 </div>
               </div>
               <button
                 onClick={handleConnect}
-                className="px-6 py-2 bg-[#4ade80] text-black font-bold rounded-lg hover:bg-[#22c55e] transition-all shadow-[0_0_15px_rgba(74,222,128,0.2)] whitespace-nowrap"
+                className="px-6 py-2 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 transition-all shadow-accent whitespace-nowrap"
               >
                 Connect Sync
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-end gap-2 text-[10px] font-mono text-[#4ade80] uppercase tracking-widest opacity-70">
+            <div className="flex items-center justify-end gap-2 text-[10px] font-mono text-accent-text uppercase tracking-widest opacity-70">
               <Icons.Cloud size={12} />
               <span>Drive Sync Connected</span>
             </div>
@@ -123,29 +124,30 @@ const Dashboard = () => {
 
         {/* Header */}
         <div className="text-center mb-16 relative">
-          <div className="absolute top-0 left-0">
+          <div className="absolute top-0 left-0 flex items-center gap-2">
             <Link 
               to="/help" 
-              className="flex items-center gap-2 px-3 py-1 bg-[#132617] text-[#4ade80] border border-[#4ade80]/30 rounded-full text-[10px] font-mono hover:bg-[#4ade80]/10 transition-all uppercase tracking-widest"
+              className="flex items-center gap-2 px-3 py-1 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
             >
               <Icons.HelpCircle size={12} />
               Help & Troubleshooting
             </Link>
+            <ThemePicker theme={theme} setTheme={setTheme} />
           </div>
           {role === 'admin' && (
             <div className="absolute top-0 right-0">
               <Link 
                 to="/admin" 
-                className="flex items-center gap-2 px-3 py-1 bg-[#132617] text-[#4ade80] border border-[#4ade80]/30 rounded-full text-[10px] font-mono hover:bg-[#4ade80]/10 transition-all uppercase tracking-widest"
+                className="flex items-center gap-2 px-3 py-1 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
               >
                 <Icons.Shield size={12} />
                 Admin Control Panel
               </Link>
             </div>
           )}
-          <div className="font-extrabold text-2xl text-[#4ade80] tracking-[0.3em] mb-4">TRIDORIAN</div>
+          <div className="font-extrabold text-2xl text-accent-text tracking-[0.3em] mb-4">TRIDORIAN</div>
           <h1 className="text-5xl font-extrabold text-white mb-4">Course Catalog</h1>
-          <p className="text-lg text-[#86efac] max-w-2xl mx-auto">
+          <p className="text-lg text-text-muted max-w-2xl mx-auto">
             Select a learning track to begin your mission. Each track contains multiple courses designed to build expertise progressively.
           </p>
         </div>
@@ -158,29 +160,29 @@ const Dashboard = () => {
               <button
                 key={track.id}
                 onClick={() => navigate(`/${track.id}`)}
-                className="group text-left w-full bg-[#0a120c] border border-[#1f3d25] rounded-2xl p-8 hover:border-[#4ade80] transition-all duration-300 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)] relative overflow-hidden"
+                className="group text-left w-full bg-panel border border-border-main rounded-2xl p-8 hover:border-accent transition-all duration-300 hover:shadow-accent relative overflow-hidden"
               >
                 {/* Hover glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#4ade80]/0 to-[#4ade80]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-accent/0 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
 
                 <div className="relative flex items-start gap-6">
-                  <div className="w-16 h-16 bg-[#132617] rounded-xl flex items-center justify-center border border-[#1f3d25] group-hover:border-[#4ade80] group-hover:shadow-[0_0_15px_rgba(74,222,128,0.2)] transition-all duration-300 flex-shrink-0">
-                    <TrackIcon className="text-[#4ade80]" size={32} />
+                  <div className="w-16 h-16 bg-muted rounded-xl flex items-center justify-center border border-border-main group-hover:border-accent group-hover:shadow-accent transition-all duration-300 flex-shrink-0">
+                    <TrackIcon className="text-accent-text" size={32} />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold text-white group-hover:text-[#4ade80] transition-colors">{track.title}</h2>
-                        <Icons.ChevronRight className="text-gray-600 group-hover:text-[#4ade80] group-hover:translate-x-1 transition-all" size={24} />
+                        <h2 className="text-2xl font-bold text-white group-hover:text-accent-text transition-colors">{track.title}</h2>
+                        <Icons.ChevronRight className="text-gray-600 group-hover:text-accent-text group-hover:translate-x-1 transition-all" size={24} />
                       </div>
                       {trackProgress[track.id] && (
-                        <div className="text-[10px] font-mono text-[#4ade80] border border-[#4ade80]/30 px-2 py-0.5 rounded bg-[#4ade80]/5">
+                        <div className="text-[10px] font-mono text-accent-text border border-accent-border px-2 py-0.5 rounded bg-accent/5">
                           {trackProgress[track.id].percentage}% COMPLETE
                         </div>
                       )}
                     </div>
-                    <p className="text-[#86efac] text-sm leading-relaxed">{track.description}</p>
+                    <p className="text-text-muted text-sm leading-relaxed">{track.description}</p>
                   </div>
                 </div>
 

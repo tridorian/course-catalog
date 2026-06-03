@@ -2,6 +2,14 @@
 
 This document describes the high-level architecture of the Tridorian Course Platform.
 
+## Architecture Decision Records (ADRs)
+
+For detailed rationale and design decisions, please refer to the following ADRs:
+- [ADR 0001: Core Content Hierarchy & Schema Validation](./adr/0001-core-content-hierarchy-schema-validation.md)
+- [ADR 0002: Multi-Type Module Rendering](./adr/0002-multi-type-module-rendering.md)
+- [ADR 0003: Dynamic Routing & Breadcrumb Navigation](./adr/0003-dynamic-routing-breadcrumb-navigation.md)
+- [ADR 0004: Progress Persistence & Drive Synchronization](./adr/0004-progress-persistence-drive-synchronization.md)
+
 ## Tech Stack
 
 - **Framework:** [React](https://reactjs.org/)

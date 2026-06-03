@@ -1,3 +1,156 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ========================================
+   TRIDORIAN THEME ENGINE
+   5 themes via CSS custom properties
+   ======================================== */
+
+/* Default: Tridorian Dark (green accent on dark bg) */
+:root {
+  color-scheme: dark;
+  --bg-base: #050805;
+  --bg-panel: #0a120c;
+  --bg-muted: #132617;
+  --bg-elevated: #1a3520;
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
+  --border-main: #1f3d25;
+  --border-subtle: #132617;
+  --accent-bg: #4ade80;
+  --accent-fg: #000000;
+  --accent-text: #4ade80;
+  --accent-muted: rgba(74, 222, 128, 0.1);
+  --accent-border: rgba(74, 222, 128, 0.3);
+  --shadow-accent: 0 0 15px rgba(74, 222, 128, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+}
+
+/* Light Theme */
+.theme-light {
+  color-scheme: light;
+  --bg-base: #f8faf9;
+  --bg-panel: #ffffff;
+  --bg-muted: #ecfdf5;
+  --bg-elevated: #ffffff;
+  --text-main: #0f1f15;
+  --text-muted: #4b6e5a;
+  --border-main: #d1e7dd;
+  --border-subtle: #ecfdf5;
+  --accent-bg: #16a34a;
+  --accent-fg: #ffffff;
+  --accent-text: #15803d;
+  --accent-muted: rgba(22, 163, 74, 0.08);
+  --accent-border: rgba(22, 163, 74, 0.25);
+  --shadow-accent: 0 0 15px rgba(22, 163, 74, 0.15);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Rainbow Kitten — warm playful pinks, WCAG AA compliant */
+.theme-kitten {
+  color-scheme: light;
+  --bg-base: #fef4f8;
+  --bg-panel: #ffffff;
+  --bg-muted: #fde8ef;
+  --bg-elevated: #fffafc;
+  --text-main: #2d0b1a;
+  --text-muted: #8e1d50;
+  --border-main: #f4b8cc;
+  --border-subtle: #fde8ef;
+  --accent-bg: #e91e8c;
+  --accent-fg: #ffffff;
+  --accent-text: #c2185b;
+  --accent-muted: rgba(233, 30, 140, 0.08);
+  --accent-border: rgba(233, 30, 140, 0.25);
+  --shadow-accent: 0 0 15px rgba(233, 30, 140, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Caribbean Mood — warm tropical teal, WCAG AA compliant */
+.theme-caribbean {
+  color-scheme: light;
+  --bg-base: #e6f9f5;
+  --bg-panel: #ffffff;
+  --bg-muted: #ccf2ea;
+  --bg-elevated: #f5fffe;
+  --text-main: #0a2922;
+  --text-muted: #1a6b5e;
+  --border-main: #7ad4c6;
+  --border-subtle: #ccf2ea;
+  --accent-bg: #0d9e8a;
+  --accent-fg: #ffffff;
+  --accent-text: #0b7d6d;
+  --accent-muted: rgba(13, 158, 138, 0.08);
+  --accent-border: rgba(13, 158, 138, 0.25);
+  --shadow-accent: 0 0 15px rgba(13, 158, 138, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Lunar Vibe — monochrome, focused, white on black */
+.theme-lunar {
+  color-scheme: dark;
+  --bg-base: #000000;
+  --bg-panel: #0c0c0c;
+  --bg-muted: #161616;
+  --bg-elevated: #1e1e1e;
+  --text-main: #f5f5f5;
+  --text-muted: #b0b0b0;
+  --border-main: #2a2a2a;
+  --border-subtle: #161616;
+  --accent-bg: #e8e8e8;
+  --accent-fg: #000000;
+  --accent-text: #e0e0e0;
+  --accent-muted: rgba(232, 232, 232, 0.07);
+  --accent-border: rgba(232, 232, 232, 0.18);
+  --shadow-accent: 0 0 15px rgba(255, 255, 255, 0.06);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+}
+
+/* Themed Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-panel);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-text);
+}
+
+/* Core Utility Classes */
+.accent-btn {
+  @apply transition-all duration-200 ease-in-out font-bold;
+  background-color: var(--accent-bg);
+  color: var(--accent-fg);
+  box-shadow: var(--shadow-sm);
+}
+.accent-btn:hover {
+  @apply brightness-110;
+  box-shadow: var(--shadow-accent);
+}
+.accent-btn:active {
+  @apply brightness-95;
+}
+.accent-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+@layer base {
+  body {
+    @apply antialiased;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}

@@ -7,12 +7,12 @@ const SyncStatus = ({ status, onRetry }) => {
     switch (status) {
       case 'synced':
         return {
-          icon: <CheckCircle size={16} className="text-[#4ade80]" />,
+          icon: <CheckCircle size={16} className="text-accent-text" />,
           text: 'Synced',
           tooltip: 'All changes saved to Google Drive',
-          color: 'text-[#4ade80]',
-          bg: 'bg-[#4ade80]/10',
-          border: 'border-[#4ade80]/20'
+          color: 'text-accent-text',
+          bg: 'bg-accent/10',
+          border: 'border-accent-border'
         };
       case 'syncing':
         return {

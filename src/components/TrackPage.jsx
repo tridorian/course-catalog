@@ -67,8 +67,8 @@ const TrackPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050805] flex items-center justify-center">
-        <div className="text-[#4ade80] font-mono animate-pulse text-xl tracking-widest">
+      <div className="min-h-screen bg-base flex items-center justify-center">
+        <div className="text-accent-text font-mono animate-pulse text-xl tracking-widest">
           LOADING TRACK DATA...
         </div>
       </div>
@@ -77,8 +77,8 @@ const TrackPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#050805] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#0a120c] border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
+      <div className="min-h-screen bg-base flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
           <Icons.AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Track Not Found</h2>
           <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
@@ -94,15 +94,15 @@ const TrackPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050805] text-[#f0fdf4] selection:bg-[#4ade80] selection:text-black">
+    <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg">
       {/* Background glow */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#4ade80]/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 py-16">
         {/* Breadcrumb */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-[#4ade80] transition-colors mb-8 tracking-wider group"
+          className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-accent-text transition-colors mb-8 tracking-wider group"
         >
           <Icons.ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
           ALL TRACKS
@@ -112,7 +112,7 @@ const TrackPage = () => {
         <div className="mb-12">
           <div className="text-[10px] font-mono text-gray-600 tracking-widest uppercase mb-3">{track.track_id}</div>
           <h1 className="text-4xl font-extrabold text-white mb-4">{track.title}</h1>
-          <p className="text-lg text-[#86efac] max-w-3xl">{track.description}</p>
+          <p className="text-lg text-text-muted max-w-3xl">{track.description}</p>
           <div className="mt-4 text-xs font-mono text-gray-500">
             {track.courses.length} {track.courses.length === 1 ? 'course' : 'courses'} available
           </div>
@@ -133,11 +133,11 @@ const TrackPage = () => {
               switch (levelId) {
                 case 'L100':
                   return {
-                    accent: '#4ade80',
-                    borderColor: 'border-[#1f3d25] hover:border-[#4ade80]',
-                    glow: 'shadow-[0_0_20px_rgba(74,222,128,0.05)] hover:shadow-[0_0_25px_rgba(74,222,128,0.15)]',
-                    bgGlow: 'from-[#4ade80]/0 to-[#4ade80]/5',
-                    badgeBg: 'bg-[#132617] text-[#4ade80] border-[#1f3d25]',
+                    accent: null,
+                    borderColor: 'border-border-main hover:border-accent',
+                    glow: 'shadow-accent hover:shadow-accent',
+                    bgGlow: 'from-accent/0 to-accent/5',
+                    badgeBg: 'bg-muted text-accent-text border-border-main',
                     label: 'L100 Core'
                   };
                 case 'L200':
@@ -169,11 +169,11 @@ const TrackPage = () => {
                   };
                 default:
                   return {
-                    accent: '#4ade80',
-                    borderColor: 'border-[#1f3d25] hover:border-[#4ade80]',
-                    glow: 'shadow-[0_0_20px_rgba(74,222,128,0.05)] hover:shadow-[0_0_25px_rgba(74,222,128,0.15)]',
-                    bgGlow: 'from-[#4ade80]/0 to-[#4ade80]/5',
-                    badgeBg: 'bg-[#132617] text-[#4ade80] border-[#1f3d25]',
+                    accent: null,
+                    borderColor: 'border-border-main hover:border-accent',
+                    glow: 'shadow-accent hover:shadow-accent',
+                    bgGlow: 'from-accent/0 to-accent/5',
+                    badgeBg: 'bg-muted text-accent-text border-border-main',
                     label: 'L100 Core'
                   };
               }
@@ -185,7 +185,7 @@ const TrackPage = () => {
               <button
                 key={course.id}
                 onClick={() => navigate(`/${trackId}/${course.id}`)}
-                className={`group text-left bg-[#0a120c] border ${style.borderColor} rounded-xl p-6 transition-all duration-300 ${style.glow} relative overflow-hidden flex flex-col justify-between`}
+                className={`group text-left bg-panel border ${style.borderColor} rounded-xl p-6 transition-all duration-300 ${style.glow} relative overflow-hidden flex flex-col justify-between`}
               >
                 {/* Hover glow */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${style.bgGlow} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}></div>
@@ -199,7 +199,7 @@ const TrackPage = () => {
                           {style.label}
                         </span>
                         {course.duration && (
-                          <span className="text-[10px] font-mono text-gray-500 bg-[#111] px-2 py-0.5 rounded border border-[#222] flex items-center gap-1">
+                          <span className="text-[10px] font-mono text-gray-500 bg-base px-2 py-0.5 rounded border border-border-main flex items-center gap-1">
                             <Icons.Clock size={10} /> {course.duration} mins
                           </span>
                         )}
@@ -215,11 +215,11 @@ const TrackPage = () => {
                       <div 
                         className="w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-300 flex-shrink-0"
                         style={{ 
-                          backgroundColor: `${style.accent}12`, 
-                          borderColor: `${style.accent}33`,
+                          backgroundColor: style.accent ? `${style.accent}12` : 'var(--accent-muted)', 
+                          borderColor: style.accent ? `${style.accent}33` : 'var(--accent-border)',
                         }}
                       >
-                        <CourseIcon style={{ color: style.accent }} size={24} />
+                        <CourseIcon style={{ color: style.accent || 'var(--accent-bg)' }} size={24} />
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-white group-hover:text-white transition-colors leading-tight">
@@ -229,7 +229,7 @@ const TrackPage = () => {
                     </div>
 
                     {/* Abstract / Description */}
-                    <p className="text-sm text-[#86efac] mb-5 leading-relaxed font-light opacity-90 group-hover:opacity-100 transition-opacity">
+                    <p className="text-sm text-text-muted mb-5 leading-relaxed font-light opacity-90 group-hover:opacity-100 transition-opacity">
                       {renderSimpleMarkdown(course.description)}
                     </p>
 
@@ -237,7 +237,7 @@ const TrackPage = () => {
                     {course.tags && course.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-5">
                         {course.tags.map((tag, i) => (
-                          <span key={i} className="text-[10px] font-mono text-gray-400 bg-black/40 px-2 py-0.5 rounded border border-[#1a1a1a]">
+                          <span key={i} className="text-[10px] font-mono text-gray-400 bg-black/40 px-2 py-0.5 rounded border border-border-subtle">
                             #{tag.toLowerCase()}
                           </span>
                         ))}
@@ -253,26 +253,26 @@ const TrackPage = () => {
                           <span className="text-[9px] font-mono uppercase tracking-wider text-gray-500">Progress</span>
                           <span className="text-[9px] font-mono text-gray-400">{progress.percentage}%</span>
                         </div>
-                        <div className="h-1 w-full bg-[#132617] rounded-full overflow-hidden">
+                        <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                           <div
-                            className="h-full shadow-[0_0_5px_#4ade80]"
+                            className="h-full shadow-accent"
                             style={{ 
                               width: `${progress.percentage}%`,
-                              backgroundColor: style.accent
+                              backgroundColor: style.accent || 'var(--accent-bg)'
                             }}
                           ></div>
                         </div>
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between border-t border-[#111] pt-4 mt-2">
+                    <div className="flex items-center justify-between border-t border-border-subtle pt-4 mt-2">
                       <span className="text-[10px] font-mono text-gray-500 tracking-wider flex items-center gap-1.5">
                         <Icons.Layers size={12} />
-                        {course.modules} MODULES {isCompleted && <span className="text-[#4ade80] font-bold">// COMPLETED</span>}
+                        {course.modules} MODULES {isCompleted && <span className="text-accent-text font-bold">// COMPLETED</span>}
                       </span>
                       <span 
                         className="flex items-center gap-1 text-xs font-medium transition-colors"
-                        style={{ color: style.accent }}
+                        style={{ color: style.accent || 'var(--accent-text)' }}
                       >
                         {progress ? 'Resume Mission' : 'Start Mission'} 
                         <Icons.ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />

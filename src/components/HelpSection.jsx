@@ -14,39 +14,39 @@ const HelpSection = () => {
       subtitle: 'Keep your progress synced across all devices.',
       content: (
         <div className="space-y-6">
-          <div className="bg-[#132617]/30 border border-[#1f3d25] rounded-xl p-6">
+          <div className="bg-muted/30 border border-border-main rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <Icons.Cloud className="text-[#4ade80]" size={20} />
+              <Icons.Cloud className="text-accent-text" size={20} />
               Connecting to Google Drive
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
               To persist your learning progress across different browser sessions and devices, you can link the platform to your Google Drive account. This creates an isolated file in your Drive appdata folder, keeping your credentials secure and private.
             </p>
-            <div className="border border-[#1f3d25] rounded-lg overflow-hidden bg-black/40 mb-4 shadow-lg">
+            <div className="border border-border-main rounded-lg overflow-hidden bg-black/40 mb-4 shadow-lg">
               <img
                 src="/assets/screenshots/dashboard-disconnected.png"
                 alt="Connect Google Drive Onboarding Banner"
-                className="w-full object-cover border-b border-[#1f3d25] opacity-90 hover:opacity-100 transition-opacity duration-300"
+                className="w-full object-cover border-b border-border-main opacity-90 hover:opacity-100 transition-opacity duration-300"
               />
-              <div className="p-3 bg-[#0a120c] text-xs font-mono text-gray-500">
+              <div className="p-3 bg-panel text-xs font-mono text-gray-500">
                 Figure 1: Onboarding banner visible when disconnected from Google Drive.
               </div>
             </div>
-            <div className="border border-[#1f3d25] rounded-lg overflow-hidden bg-black/40 shadow-lg">
+            <div className="border border-border-main rounded-lg overflow-hidden bg-black/40 shadow-lg">
               <img
                 src="/assets/screenshots/dashboard-connected.png"
                 alt="Connected Google Drive State"
-                className="w-full object-cover border-b border-[#1f3d25] opacity-90 hover:opacity-100 transition-opacity duration-300"
+                className="w-full object-cover border-b border-border-main opacity-90 hover:opacity-100 transition-opacity duration-300"
               />
-              <div className="p-3 bg-[#0a120c] text-xs font-mono text-gray-500">
+              <div className="p-3 bg-panel text-xs font-mono text-gray-500">
                 Figure 2: Sync status badge confirming active connection.
               </div>
             </div>
           </div>
 
-          <div className="bg-[#132617]/30 border border-[#1f3d25] rounded-xl p-6">
+          <div className="bg-muted/30 border border-border-main rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <Icons.WifiOff className="text-[#4ade80]" size={20} />
+              <Icons.WifiOff className="text-accent-text" size={20} />
               Offline Operations & Queuing
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed">
@@ -63,31 +63,31 @@ const HelpSection = () => {
       subtitle: 'Unlock modules and navigate the course map.',
       content: (
         <div className="space-y-6">
-          <div className="bg-[#132617]/30 border border-[#1f3d25] rounded-xl p-6">
+          <div className="bg-muted/30 border border-border-main rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <Icons.Lock className="text-[#4ade80]" size={20} />
+              <Icons.Lock className="text-accent-text" size={20} />
               Locked Modules & Prerequisites
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
               Courses are designed as linear learning progressions. Modules will appear locked until you complete all previous modules in the course. Completing a module automatically unlocks the subsequent one.
             </p>
-            <div className="border border-[#1f3d25] rounded-lg overflow-hidden bg-black/40 mb-4 shadow-lg">
+            <div className="border border-border-main rounded-lg overflow-hidden bg-black/40 mb-4 shadow-lg">
               <img
                 src="/assets/screenshots/course-map.png"
                 alt="Track Course Map"
-                className="w-full object-cover border-b border-[#1f3d25] opacity-90 hover:opacity-100 transition-opacity duration-300"
+                className="w-full object-cover border-b border-border-main opacity-90 hover:opacity-100 transition-opacity duration-300"
               />
-              <div className="p-3 bg-[#0a120c] text-xs font-mono text-gray-500">
+              <div className="p-3 bg-panel text-xs font-mono text-gray-500">
                 Figure 3: Interactive Course Map displaying progression status.
               </div>
             </div>
-            <div className="border border-[#1f3d25] rounded-lg overflow-hidden bg-black/40 shadow-lg">
+            <div className="border border-border-main rounded-lg overflow-hidden bg-black/40 shadow-lg">
               <img
                 src="/assets/screenshots/module-view.png"
                 alt="Module Step Renderer with Sidebar Progress"
-                className="w-full object-cover border-b border-[#1f3d25] opacity-90 hover:opacity-100 transition-opacity duration-300"
+                className="w-full object-cover border-b border-border-main opacity-90 hover:opacity-100 transition-opacity duration-300"
               />
-              <div className="p-3 bg-[#0a120c] text-xs font-mono text-gray-500">
+              <div className="p-3 bg-panel text-xs font-mono text-gray-500">
                 Figure 4: Course player view with sidebar navigation and module checks.
               </div>
             </div>
@@ -102,21 +102,21 @@ const HelpSection = () => {
       subtitle: 'Wipe progress history to retake a course.',
       content: (
         <div className="space-y-6">
-          <div className="bg-[#132617]/30 border border-[#1f3d25] rounded-xl p-6">
+          <div className="bg-muted/30 border border-border-main rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <Icons.RotateCcw className="text-[#4ade80]" size={20} />
+              <Icons.RotateCcw className="text-accent-text" size={20} />
               Resetting Track and Course Status
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
               If you want to start a course from scratch, you can reset your progress. This will clear the locally cached progress for the course and update the remote Google Drive file accordingly.
             </p>
-            <div className="border border-[#1f3d25] rounded-lg overflow-hidden bg-black/40 mb-4 shadow-lg">
+            <div className="border border-border-main rounded-lg overflow-hidden bg-black/40 mb-4 shadow-lg">
               <img
                 src="/assets/screenshots/reset-modal.png"
                 alt="Reset Progress Confirmation Modal"
-                className="w-full object-cover border-b border-[#1f3d25] opacity-90 hover:opacity-100 transition-opacity duration-300"
+                className="w-full object-cover border-b border-border-main opacity-90 hover:opacity-100 transition-opacity duration-300"
               />
-              <div className="p-3 bg-[#0a120c] text-xs font-mono text-gray-500">
+              <div className="p-3 bg-panel text-xs font-mono text-gray-500">
                 Figure 5: Confirmation dialog that prevents accidental data wipe.
               </div>
             </div>
@@ -134,9 +134,9 @@ const HelpSection = () => {
       subtitle: 'Sync course curriculum from Google Docs to the repository.',
       content: (
         <div className="space-y-6">
-          <div className="bg-[#132617]/30 border border-[#1f3d25] rounded-xl p-6">
+          <div className="bg-muted/30 border border-border-main rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <Icons.Database className="text-[#4ade80]" size={20} />
+              <Icons.Database className="text-accent-text" size={20} />
               Docs to Repository Compilation
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
@@ -144,41 +144,41 @@ const HelpSection = () => {
             </p>
             <ol className="list-decimal pl-6 space-y-3 text-sm text-gray-300">
               <li>
-                Verify that your course configuration maps correctly in <code className="text-[#4ade80]">scripts/sync-config.json</code>.
+                Verify that your course configuration maps correctly in <code className="text-accent-text">scripts/sync-config.json</code>.
               </li>
               <li>
                 Ensure you are authenticated with Google Cloud Platform locally by running:
-                <pre className="bg-black/60 p-3 rounded font-mono text-xs text-[#4ade80] mt-1.5 overflow-x-auto">
+                <pre className="bg-black/60 p-3 rounded font-mono text-xs text-accent-text mt-1.5 overflow-x-auto">
                   gcloud auth application-default login
                 </pre>
               </li>
               <li>
                 Execute the sync-docs script to fetch and compile all configured course documents:
-                <pre className="bg-black/60 p-3 rounded font-mono text-xs text-[#4ade80] mt-1.5 overflow-x-auto">
+                <pre className="bg-black/60 p-3 rounded font-mono text-xs text-accent-text mt-1.5 overflow-x-auto">
                   node scripts/sync-docs.js
                 </pre>
               </li>
               <li>
-                To sync courses marked with <code className="text-[#4ade80]">Status: Draft</code>, append the draft bypass environment variable:
-                <pre className="bg-black/60 p-3 rounded font-mono text-xs text-[#4ade80] mt-1.5 overflow-x-auto">
+                To sync courses marked with <code className="text-accent-text">Status: Draft</code>, append the draft bypass environment variable:
+                <pre className="bg-black/60 p-3 rounded font-mono text-xs text-accent-text mt-1.5 overflow-x-auto">
                   SYNC_DRAFT=true node scripts/sync-docs.js
                 </pre>
               </li>
             </ol>
-            <p className="text-gray-400 text-xs mt-6 leading-relaxed italic border-t border-[#1f3d25] pt-4">
+            <p className="text-gray-400 text-xs mt-6 leading-relaxed italic border-t border-border-main pt-4">
               Note: The sync script reads the document structures, parses heading types and layouts, and updates the local course JSON content automatically.
             </p>
           </div>
 
-          <div className="bg-[#132617]/30 border border-[#1f3d25] rounded-xl p-6">
+          <div className="bg-muted/30 border border-border-main rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <Icons.Send className="text-[#4ade80]" size={20} />
+              <Icons.Send className="text-accent-text" size={20} />
               Pushing Local Edits back to Google Docs
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
               If you make changes to local JSON course files (e.g. via local subagent edits or manual refinements) and wish to populate those modifications back into the online template:
             </p>
-            <pre className="bg-black/60 p-3 rounded font-mono text-xs text-[#4ade80] overflow-x-auto">
+            <pre className="bg-black/60 p-3 rounded font-mono text-xs text-accent-text overflow-x-auto">
               node scripts/populate-course-doc.js --docId [GoogleDocID] --data [PathToCourseJSON]
             </pre>
           </div>
@@ -192,7 +192,7 @@ const HelpSection = () => {
       subtitle: 'Resolve common errors and stuck states.',
       content: (
         <div className="space-y-6">
-          <div className="bg-[#132617]/30 border border-[#1f3d25] rounded-xl p-6 space-y-6">
+          <div className="bg-muted/30 border border-border-main rounded-xl p-6 space-y-6">
             <div>
               <h4 className="text-white font-bold mb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
                 <Icons.AlertCircle className="text-red-400" size={16} />
@@ -203,7 +203,7 @@ const HelpSection = () => {
               </p>
             </div>
 
-            <div className="border-t border-[#1f3d25] pt-6">
+            <div className="border-t border-border-main pt-6">
               <h4 className="text-white font-bold mb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
                 <Icons.AlertCircle className="text-red-400" size={16} />
                 "Failed to fetch user info" Console Log or Error Screen
@@ -213,7 +213,7 @@ const HelpSection = () => {
               </p>
             </div>
 
-            <div className="border-t border-[#1f3d25] pt-6">
+            <div className="border-t border-border-main pt-6">
               <h4 className="text-white font-bold mb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
                 <Icons.AlertCircle className="text-red-400" size={16} />
                 Course Module Remains Locked After Completing Prior Step
@@ -232,15 +232,15 @@ const HelpSection = () => {
   const ActiveIcon = Icons[activeTopic.icon] || Icons.HelpCircle;
 
   return (
-    <div className="min-h-screen bg-[#050805] text-[#f0fdf4] selection:bg-[#4ade80] selection:text-black">
+    <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg">
       {/* Subtle Background Glow */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#4ade80]/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
       
       <div className="relative z-10 max-w-5xl mx-auto px-6 py-12">
         {/* Header Breadcrumbs */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-[#4ade80] transition-colors mb-6 tracking-wider group"
+          className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-accent-text transition-colors mb-6 tracking-wider group"
         >
           <Icons.ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
           BACK TO CATALOG
@@ -249,7 +249,7 @@ const HelpSection = () => {
         {/* Page Title */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-2">
-            <Icons.HelpCircle className="text-[#4ade80]" size={36} />
+            <Icons.HelpCircle className="text-accent-text" size={36} />
             <h1 className="text-4xl font-extrabold text-white tracking-tight">Help & Troubleshooting</h1>
           </div>
           <p className="text-gray-400 text-sm max-w-2xl">
@@ -272,14 +272,14 @@ const HelpSection = () => {
                   onClick={() => setActiveTab(topic.id)}
                   className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-3 relative border ${
                     isActive
-                      ? 'bg-[#132617] text-[#4ade80] border-[#1f3d25] shadow-[0_0_15px_rgba(74,222,128,0.05)]'
-                      : 'text-gray-400 border-transparent hover:bg-[#132617]/40 hover:text-white'
+                      ? 'bg-muted text-accent-text border-border-main shadow-accent'
+                      : 'text-gray-400 border-transparent hover:bg-muted/40 hover:text-white'
                   }`}
                 >
-                  <Icon size={18} className={isActive ? 'text-[#4ade80]' : 'text-gray-500'} />
+                  <Icon size={18} className={isActive ? 'text-accent-text' : 'text-gray-500'} />
                   <span>{topic.title}</span>
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#4ade80] rounded-r-full shadow-[0_0_8px_#4ade80]"></div>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-accent rounded-r-full shadow-accent"></div>
                   )}
                 </button>
               );
@@ -288,9 +288,9 @@ const HelpSection = () => {
 
           {/* Content Area */}
           <div className="lg:col-span-3 space-y-6">
-            <div className="border-b border-[#1f3d25] pb-4 mb-6">
+            <div className="border-b border-border-main pb-4 mb-6">
               <div className="flex items-center gap-3 mb-2">
-                <ActiveIcon className="text-[#4ade80]" size={24} />
+                <ActiveIcon className="text-accent-text" size={24} />
                 <h2 className="text-2xl font-bold text-white">{activeTopic.title}</h2>
               </div>
               <p className="text-gray-400 text-sm font-light">{activeTopic.subtitle}</p>
@@ -304,9 +304,9 @@ const HelpSection = () => {
         </div>
 
         {/* Footer */}
-        <div className="mt-20 border-t border-[#1f3d25] pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-gray-600">
+        <div className="mt-20 border-t border-border-main pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-gray-600">
           <span>Tridorian User Guide & Troubleshooting Manual</span>
-          <span className="hover:text-[#4ade80] transition-colors cursor-pointer" onClick={() => navigate('/')}>
+          <span className="hover:text-accent-text transition-colors cursor-pointer" onClick={() => navigate('/')}>
             Return to Dashboard
           </span>
         </div>
