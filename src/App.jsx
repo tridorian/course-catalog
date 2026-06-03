@@ -27,6 +27,7 @@ import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/g
 import { getAccessToken } from './services/googleAuth';
 import ThemePicker from './components/ThemePicker';
 import { useTheme } from './hooks/useTheme';
+import BadgeCelebration from './components/BadgeCelebration';
 
 // --- Main App Component ---
 
@@ -45,6 +46,7 @@ function AppContent({ theme, setTheme }) {
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
 
   const { trackId, courseId, moduleId } = useParams();
@@ -235,8 +237,7 @@ function AppContent({ theme, setTheme }) {
     // Mark all steps as completed
     const allIndices = courseSteps.map((_, i) => i);
     setCompletedSteps(allIndices);
-    // Navigate back to the Course Map
-    navigate(`/${currentTrackId}/${currentCourseId}`);
+    setShowCelebration(true);
   };
 
   const handleResetProgress = async () => {
@@ -313,7 +314,8 @@ function AppContent({ theme, setTheme }) {
   }
 
   return (
-    <div className="min-h-screen bg-base text-main font-sans flex flex-col md:flex-row selection:bg-accent selection:text-accent-fg">
+    <div className="min-h-screen bg-base text-main font-sans flex flex-col md:flex-row selection:bg-accent selection:text-accent-fg relative overflow-hidden">
+      <div className="theme-pattern-grid" />
 
       {/* Mobile Header */}
       <div className="md:hidden bg-panel border-b border-border-main p-4 flex justify-between items-center sticky top-0 z-50">
@@ -385,7 +387,7 @@ function AppContent({ theme, setTheme }) {
                   >
                     {step.title}
                   </button>
-                  <div className="flex items-center gap-3 truncate relative z-10 pointer-events-none">
+                  <div className="flex items-center gap-3 min-w-0 relative z-10 pointer-events-none">
                     <button
                       onClick={(e) => handleToggleComplete(index, e)}
                       data-testid={`toggle-complete-${index}`}
@@ -420,7 +422,7 @@ function AppContent({ theme, setTheme }) {
           </div>
           <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-4">
             <div
-              className="h-full bg-accent transition-all duration-500 ease-out shadow-accent"
+              className="h-full bg-accent progress-bar-fill transition-all duration-500 ease-out shadow-accent"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
@@ -609,10 +611,21 @@ function AppContent({ theme, setTheme }) {
       </div>
 
       {showScrollIndicator && (
-        <div className="fixed bottom-24 md:bottom-8 right-6 bg-accent/90 backdrop-blur text-accent-fg px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold shadow-accent animate-bounce z-40">
+        <div className="fixed bottom-24 md:bottom-8 right-6 bg-accent backdrop-blur text-accent-fg px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold shadow-accent animate-bounce z-40">
           <span>Scroll down to proceed</span>
-          <Icons.ArrowDown size={14} />
+          <ArrowDown size={14} />
         </div>
+      )}
+
+      {showCelebration && (
+        <BadgeCelebration
+          badgeTitle={courseMetadata?.title || 'Course Completed'}
+          trackName={trackId}
+          onDismiss={() => {
+            setShowCelebration(false);
+            navigate(`/${currentTrackId}/${currentCourseId}`);
+          }}
+        />
       )}
 
     </div>

@@ -95,7 +95,8 @@ const TrackPage = ({ theme, setTheme }) => {
   }
 
   return (
-    <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg">
+    <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg relative overflow-hidden">
+      <div className="theme-pattern-grid" />
       {/* Background glow */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none"></div>
 

@@ -154,3 +154,382 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
+
+/* ========================================
+   CUSTOM SCROLLBARS PER THEME
+   ======================================== */
+.theme-kitten ::-webkit-scrollbar-thumb {
+  background: var(--accent-bg);
+  border: 2px solid var(--bg-panel);
+}
+.theme-kitten ::-webkit-scrollbar-track {
+  background: var(--bg-muted);
+}
+
+.theme-caribbean ::-webkit-scrollbar-thumb {
+  background: var(--accent-text);
+  border-radius: 4px;
+}
+.theme-caribbean ::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+.theme-lunar ::-webkit-scrollbar-thumb {
+  background: var(--accent-bg);
+  border-radius: 0px;
+}
+.theme-lunar ::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+/* ========================================
+   THEME PATTERN & GRID OVERLAYS
+   ======================================== */
+.theme-pattern-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+:root:not(.theme-light):not(.theme-kitten):not(.theme-caribbean):not(.theme-lunar) .theme-pattern-grid {
+  background-image: 
+    linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.theme-light .theme-pattern-grid {
+  background-image: radial-gradient(var(--border-main) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+
+.theme-kitten .theme-pattern-grid {
+  background-image: radial-gradient(var(--border-main) 1px, transparent 0);
+  background-size: 24px 24px;
+  opacity: 0.6;
+}
+
+.theme-caribbean .theme-pattern-grid {
+  background: radial-gradient(circle at 100% 150%, transparent 24%, var(--border-subtle) 24%, var(--border-subtle) 28%, transparent 28%, transparent);
+  background-size: 40px 40px;
+}
+
+.theme-lunar .theme-pattern-grid {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ========================================
+   CUSTOM INTERACTIVE CURSORS
+   ======================================== */
+body:not([class*="theme-"]) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='0' y='2' width='8' height='12' fill='%234ade80'/%3E%3C/svg%3E") 4 8, auto;
+}
+body:not([class*="theme-"]) a,
+body:not([class*="theme-"]) button,
+body:not([class*="theme-"]) [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='0' y='2' width='8' height='12' fill='%234ade80' opacity='0.7'/%3E%3Cpath d='M4,10 L12,10' stroke='%234ade80' stroke-width='2'/%3E%3C/svg%3E") 4 8, pointer;
+}
+
+body.theme-light {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='5' fill='none' stroke='%2316a34a' stroke-width='2'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%2316a34a'/%3E%3C/svg%3E") 10 10, auto;
+}
+body.theme-light a,
+body.theme-light button,
+body.theme-light [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='7' fill='none' stroke='%2315803d' stroke-width='1.5'/%3E%3Cpath d='M10,3 C10,3 7,7 10,12 C13,7 10,3 10,3' fill='%2315803d'/%3E%3C/svg%3E") 10 10, pointer;
+}
+
+body.theme-kitten {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16,14 C12,14 10,17 10,21 C10,25 13,27 16,27 C19,27 22,25 22,21 C22,17 20,14 16,14 Z' fill='%23e91e8c'/%3E%3Ccircle cx='9' cy='11' r='3.5' fill='%23e91e8c'/%3E%3Ccircle cx='13.5' cy='7.5' r='3.5' fill='%23e91e8c'/%3E%3Ccircle cx='18.5' cy='7.5' r='3.5' fill='%23e91e8c'/%3E%3Ccircle cx='23' cy='11' r='3.5' fill='%23e91e8c'/%3E%3C/svg%3E") 16 16, auto;
+}
+body.theme-kitten a,
+body.theme-kitten button,
+body.theme-kitten [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16,14 C12,14 10,17 10,21 C10,25 13,27 16,27 C19,27 22,25 22,21 C22,17 20,14 16,14 Z' fill='%23c2185b'/%3E%3Ccircle cx='9' cy='11' r='3.5' fill='%23c2185b'/%3E%3Ccircle cx='13.5' cy='7.5' r='3.5' fill='%23c2185b'/%3E%3Ccircle cx='18.5' cy='7.5' r='3.5' fill='%23c2185b'/%3E%3Ccircle cx='23' cy='11' r='3.5' fill='%23c2185b'/%3E%3Cpath d='M16,14 L16,9' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, pointer;
+}
+
+body.theme-caribbean {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='rgba(13, 158, 138, 0.2)' stroke='%230d9e8a' stroke-width='2'/%3E%3Ccircle cx='9' cy='9' r='2' fill='white'/%3E%3C/svg%3E") 12 12, auto;
+}
+body.theme-caribbean a,
+body.theme-caribbean button,
+body.theme-caribbean [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='rgba(13, 158, 138, 0.4)' stroke='%230b7d6d' stroke-width='2'/%3E%3Cpath d='M8,8 C11,10 13,10 16,8' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+body.theme-lunar {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='6' fill='none' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='12' y1='2' x2='12' y2='6' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='12' y1='18' x2='12' y2='22' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='2' y1='12' x2='6' y2='12' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='18' y1='12' x2='22' y2='12' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3C/svg%3E") 12 12, auto;
+}
+body.theme-lunar a,
+body.theme-lunar button,
+body.theme-lunar [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='6' fill='%23e8e8e8'/%3E%3Ccircle cx='10' cy='10' r='5' fill='%230c0c0c'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+/* ========================================
+   THEME HOVER EFFECTS & MICRO-INTERACTIONS
+   ======================================== */
+
+/* Tridorian Dark Hover */
+body:not([class*="theme-"]) .accent-btn {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+@keyframes terminal-blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Tridorian Dark Progress Glow & Scan */
+body:not([class*="theme-"]) .progress-bar-fill {
+  background: linear-gradient(90deg, #22c55e 0%, #4ade80 50%, #22c55e 100%);
+  background-size: 200% 100%;
+  animation: matrix-scan 2s linear infinite;
+}
+
+@keyframes matrix-scan {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
+
+/* Tridorian Dark Checkbox Glitch */
+body:not([class*="theme-"]) .group:hover svg.text-accent-text {
+  animation: cyber-glitch 0.3s ease;
+}
+
+@keyframes cyber-glitch {
+  0% { transform: translate(0) skew(0deg); }
+  20% { transform: translate(-2px, 2px) skew(-5deg); filter: hue-rotate(90deg); }
+  40% { transform: translate(2px, -2px) skew(5deg); }
+  60% { transform: translate(-1px, -1px) skew(-2deg); }
+  80% { transform: translate(1px, 1px) skew(2deg); }
+  100% { transform: translate(0) skew(0deg); }
+}
+
+/* Clean Light Leaf-Spring Hover */
+body.theme-light .accent-btn:hover,
+body.theme-light .rounded-xl:hover {
+  transform: scale(1.03) translateY(-2px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body.theme-light svg.text-accent-text {
+  animation: leaf-bloom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes leaf-bloom {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.2) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+body.theme-light .progress-bar-fill {
+  background: linear-gradient(90deg, #16a34a 0%, #4ade80 100%);
+  position: relative;
+  overflow: hidden;
+}
+body.theme-light .progress-bar-fill::after {
+  content: '🌿';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  animation: leaf-sway 2s ease-in-out infinite alternate;
+}
+
+@keyframes leaf-sway {
+  0% { transform: translateY(-50%) rotate(-10deg); }
+  100% { transform: translateY(-50%) rotate(15deg); }
+}
+
+/* Rainbow Kitten Wobble/Jiggle */
+body.theme-kitten .accent-btn:hover,
+body.theme-kitten nav div.group:hover,
+body.theme-kitten .rounded-xl:hover {
+  animation: jiggle 0.4s ease-in-out;
+}
+
+@keyframes jiggle {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.05) rotate(-2deg); }
+  50% { transform: scale(0.96) rotate(2deg); }
+  75% { transform: scale(1.02) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+body.theme-kitten .border-accent {
+  border-image: linear-gradient(45deg, #ff9a9e, #fecfef, #a1c4fd, #fecfef) 1;
+  animation: rainbow-border-flow 3s linear infinite;
+}
+
+@keyframes rainbow-border-flow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+body.theme-kitten .progress-bar-fill {
+  background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 25%, #a1c4fd 50%, #fecfef 75%, #ff9a9e 100%);
+  background-size: 200% auto;
+  animation: rainbow-wave 2s linear infinite;
+  position: relative;
+}
+
+@keyframes rainbow-wave {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+body.theme-kitten .progress-bar-fill::after {
+  content: '🧶';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  animation: spin-yarn 1.5s linear infinite;
+}
+
+@keyframes spin-yarn {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Caribbean Mood sea sway */
+body.theme-caribbean nav div.group:hover,
+body.theme-caribbean .rounded-xl:hover {
+  transform: translateY(-2px);
+  animation: sea-sway 3s ease-in-out infinite alternate;
+}
+
+@keyframes sea-sway {
+  0% { transform: translateY(-2px) rotate(-0.5deg); }
+  100% { transform: translateY(-3px) rotate(0.5deg); }
+}
+
+body.theme-caribbean .accent-btn {
+  position: relative;
+  overflow: hidden;
+  background-size: 100% 200%;
+  background-image: linear-gradient(to top, var(--accent-bg) 50%, #7ad4c6 100%);
+  transition: background-position 0.5s ease;
+}
+body.theme-caribbean .accent-btn:hover {
+  background-position: 0 100%;
+}
+
+body.theme-caribbean svg.text-accent-text {
+  animation: bubble-burst 0.6s ease-out;
+}
+
+@keyframes bubble-burst {
+  0% { transform: scale(0.6); filter: brightness(1.5); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+body.theme-caribbean .progress-bar-fill {
+  background: linear-gradient(90deg, #0d9e8a 0%, #ccf2ea 50%, #0d9e8a 100%);
+  background-size: 200% 100%;
+  animation: matrix-scan 3s ease-in-out infinite;
+}
+
+/* Lunar Vibe stark hover */
+body.theme-lunar .rounded-xl:hover,
+body.theme-lunar nav div.group:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.theme-lunar .accent-btn:hover {
+  box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.3);
+}
+
+body.theme-lunar svg.text-accent-text {
+  animation: cosmic-spark 0.8s ease-in-out;
+}
+
+@keyframes cosmic-spark {
+  0% { filter: drop-shadow(0 0 0 white); opacity: 0; }
+  50% { filter: drop-shadow(0 0 8px white); opacity: 1; }
+  100% { filter: drop-shadow(0 0 2px white); }
+}
+
+body.theme-lunar .progress-bar-fill {
+  position: relative;
+  background-color: var(--accent-bg);
+  overflow: hidden;
+}
+body.theme-lunar .progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shooting-star 1.8s ease-in-out infinite;
+}
+
+@keyframes shooting-star {
+  0% { left: -50%; }
+  100% { left: 150%; }
+}
+
+/* ========================================
+   CELEBRATION PHYSICS CLASSES
+   ======================================== */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-50px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+.animate-fall {
+  animation: fall linear infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.group:hover .group-hover\:animate-shimmer {
+  animation: shimmer 1.2s ease-in-out;
+}
+
+/* Custom Cursor Override Switch */
+body.disable-custom-cursor,
+body.disable-custom-cursor * {
+  cursor: auto !important;
+}
+body.disable-custom-cursor a,
+body.disable-custom-cursor button,
+body.disable-custom-cursor [role="button"],
+body.disable-custom-cursor select,
+body.disable-custom-cursor input {
+  cursor: pointer !important;
+}

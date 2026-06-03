@@ -11,7 +11,31 @@ const THEME_OPTIONS = [
 
 const ThemePicker = ({ theme, setTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCursorEnabled, setIsCursorEnabled] = useState(() => {
+    try {
+      const stored = localStorage.getItem('tridorian_disable_cursor');
+      return stored !== 'true';
+    } catch {
+      return true;
+    }
+  });
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (isCursorEnabled) {
+      document.body.classList.remove('disable-custom-cursor');
+    } else {
+      document.body.classList.add('disable-custom-cursor');
+    }
+    try {
+      localStorage.setItem('tridorian_disable_cursor', (!isCursorEnabled).toString());
+    } catch {}
+  }, [isCursorEnabled]);
+
+  const toggleCursor = (e) => {
+    e.stopPropagation();
+    setIsCursorEnabled(!isCursorEnabled);
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -100,6 +124,34 @@ const ThemePicker = ({ theme, setTheme }) => {
               );
             })}
           </div>
+          
+          <div className="p-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+            <button
+              onClick={toggleCursor}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono font-bold hover:bg-muted/50 transition-all duration-150"
+              style={{
+                color: 'var(--text-muted)',
+              }}
+              data-testid="toggle-cursor-button"
+            >
+              <span>✨ Custom Cursor</span>
+              <div 
+                className="w-8 h-4 rounded-full p-0.5 transition-colors duration-200"
+                style={{
+                  backgroundColor: isCursorEnabled ? 'var(--accent-bg)' : 'var(--bg-muted)',
+                  border: '1px solid var(--border-main)',
+                }}
+              >
+                <div 
+                  className="w-2.5 h-2.5 rounded-full bg-white transition-transform duration-200"
+                  style={{
+                    transform: isCursorEnabled ? 'translateX(16px)' : 'translateX(0)',
+                  }}
+                />
+              </div>
+            </button>
+          </div>
+
           <div
             className="px-4 py-2 border-t text-center text-[9px] font-mono uppercase tracking-widest"
             style={{

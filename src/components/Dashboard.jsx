@@ -89,7 +89,8 @@ const Dashboard = ({ theme, setTheme }) => {
   }
 
   return (
-    <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg">
+    <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg relative overflow-hidden">
+      <div className="theme-pattern-grid" />
       {/* Background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-accent/5 rounded-full blur-[150px] pointer-events-none"></div>
 
