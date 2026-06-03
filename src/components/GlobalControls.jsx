@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Palette, Check, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { Palette, Check, Volume2, VolumeX, Sparkles, Cpu } from 'lucide-react';
 import * as themeAudio from '../services/themeAudio';
+import { saveCustomTheme, getCustomTheme } from '../services/customTheme';
+import { generateThemeWithGemini } from '../services/themeGenerator';
 
 const THEME_OPTIONS = [
   { id: 'dark', label: '🌿 Tridorian Dark', swatches: ['#050805', '#4ade80', '#f0fdf4'] },
@@ -23,6 +25,16 @@ const GlobalControls = ({ theme, setTheme }) => {
   const dropdownRef = useRef(null);
   const [audioState, setAudioState] = useState(() => themeAudio.getAudioState());
   const [isSliderVisible, setIsSliderVisible] = useState(false);
+
+  // AI Theme Generator state
+  const [showGenerator, setShowGenerator] = useState(false);
+  const [prompt, setPrompt] = useState('');
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('tridorian_gemini_api_key') || '');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genError, setGenError] = useState(null);
+
+  const customThemeVars = getCustomTheme();
+  const hasCustomTheme = !!customThemeVars;
 
   useEffect(() => {
     if (isCursorEnabled) {
@@ -51,6 +63,32 @@ const GlobalControls = ({ theme, setTheme }) => {
     const vol = parseFloat(e.target.value);
     themeAudio.setVolume(vol);
     setAudioState(prev => ({ ...prev, volume: vol }));
+  };
+
+  const handleGenerateTheme = async () => {
+    if (!prompt.trim()) {
+      setGenError("Prompt cannot be empty.");
+      return;
+    }
+    setIsGenerating(true);
+    setGenError(null);
+
+    try {
+      const themeVars = await generateThemeWithGemini(prompt, apiKey);
+      saveCustomTheme(themeVars);
+      setTheme('custom');
+      themeAudio.playThemeMusic('custom');
+      setShowGenerator(false);
+      setPrompt('');
+    } catch (e) {
+      if (e.message === 'API_KEY_REQUIRED') {
+        setGenError("A Gemini API Key is required to run the theme generator.");
+      } else {
+        setGenError(e.message);
+      }
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -201,7 +239,59 @@ const GlobalControls = ({ theme, setTheme }) => {
                   </button>
                 );
               })}
+
+              {/* Injected AI Custom Theme Option if saved */}
+              {hasCustomTheme && (
+                <button
+                  onClick={() => {
+                    setTheme('custom');
+                    themeAudio.playThemeMusic('custom');
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+                  style={{
+                    backgroundColor: theme === 'custom' ? 'var(--accent-muted)' : 'transparent',
+                    color: theme === 'custom' ? 'var(--text-main)' : 'var(--text-muted)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: theme === 'custom' ? 'var(--accent-border)' : 'transparent',
+                  }}
+                  data-testid="theme-option-custom"
+                >
+                  <div className="flex gap-0.5">
+                    {customThemeVars.swatches?.map((color, i) => (
+                      <div
+                        key={i}
+                        className="w-4 h-4 rounded-full border border-black/20"
+                        style={{ backgroundColor: color }}
+                      />
+                    )) || (
+                      <div className="w-12 h-4 rounded-full border border-black/20 bg-accent/20 flex items-center justify-center font-mono text-[9px]">AI</div>
+                    )}
+                  </div>
+                  <span className="flex-1 text-left">🎨 AI Custom Theme</span>
+                  {theme === 'custom' && (
+                    <Check size={14} style={{ color: 'var(--accent-text)' }} />
+                  )}
+                </button>
+              )}
             </div>
+
+            {/* AI Theme Generator Button */}
+            <div className="p-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setShowGenerator(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-mono font-bold bg-accent/10 hover:bg-accent/20 text-accent-text border border-accent-border transition-all duration-150"
+                data-testid="ai-theme-gen-trigger"
+              >
+                <Cpu size={12} />
+                <span>AI Theme Generator</span>
+              </button>
+            </div>
+
             <div
               className="px-4 py-2 border-t text-center text-[9px] font-mono uppercase tracking-widest"
               style={{
@@ -215,6 +305,67 @@ const GlobalControls = ({ theme, setTheme }) => {
           </div>
         )}
       </div>
+
+      {/* 4. AI Theme Generator Prompt Modal */}
+      {showGenerator && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-panel border border-border-main rounded-xl p-6 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] font-sans">
+            <h3 className="text-lg font-bold text-main mb-2">AI Theme Generator</h3>
+            <p className="text-text-muted text-xs mb-4">
+              Enter a design style and generate a custom CSS theme palette using Gemini.
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-text-muted mb-1">Gemini API Key</label>
+                <input
+                  type="password"
+                  placeholder="Enter API Key (pre-fills if saved)"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="w-full px-3 py-2 bg-muted border border-border-main rounded-lg text-sm text-main placeholder-text-muted/50 focus:outline-none focus:border-accent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-text-muted mb-1">Theme Prompt</label>
+                <textarea
+                  placeholder="e.g. Cyberpunk neon orange and deep purple, Autumn forest warm browns and greens, Soft minimalist slate blue..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  rows="3"
+                  className="w-full px-3 py-2 bg-muted border border-border-main rounded-lg text-sm text-main placeholder-text-muted/50 focus:outline-none focus:border-accent resize-none"
+                />
+              </div>
+              
+              {genError && (
+                <div className="text-red-400 text-xs font-mono max-w-xs break-words">
+                  {genError}
+                </div>
+              )}
+              
+              <div className="flex gap-3">
+                <button
+                  disabled={isGenerating}
+                  onClick={handleGenerateTheme}
+                  className="flex-1 py-2.5 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                >
+                  {isGenerating ? "Generating..." : "Generate Theme"}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowGenerator(false);
+                    setGenError(null);
+                  }}
+                  className="px-4 py-2.5 bg-muted text-text-muted rounded-lg hover:bg-elevated transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
