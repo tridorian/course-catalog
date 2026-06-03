@@ -28,7 +28,7 @@
     {
       "type": "code",
       "language": "bash",
-      "content": "rm -rf $(which agv)\nrm -rf $(which python3)"
+      "content": "rm -rf $(which agy)\nrm -rf $(which python3)"
     },
     {
       "type": "p",

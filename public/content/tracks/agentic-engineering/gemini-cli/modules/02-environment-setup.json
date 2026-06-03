@@ -19,7 +19,7 @@
       "type": "tier_card",
       "title": "\u25b6 TIER 1: Easy (Direct Binary Install)",
       "description": "Best for getting up and running quickly on a personal machine.",
-      "code": "# macOS & Linux\ncurl -sL https://dl.google.com/agv/install.sh | bash\n\n# Windows (Winget)\nwinget install Google.Antigravity"
+      "code": "# macOS & Linux\ncurl -sL https://dl.google.com/agy/install.sh | bash\n\n# Windows (Winget)\nwinget install Google.Antigravity"
     },
     {
       "type": "tier_card",
@@ -49,13 +49,13 @@
     {
       "type": "code",
       "language": "bash",
-      "content": "mkdir -p ~/my-agv-work\n\ndocker run -it --rm --name agv-sandbox \\\n  --network host \\\n  -v ~/my-agv-work:/workspace \\\n  ghcr.io/bluefin-wtg-org/agv-workspace:latest"
+      "content": "mkdir -p ~/my-agy-work\n\ndocker run -it --rm --name agy-sandbox \\\n  --network host \\\n  -v ~/my-agy-work:/workspace \\\n  ghcr.io/bluefin-wtg-org/agy-workspace:latest"
     },
     {
       "type": "info",
       "title": "Verify the Toolchain",
       "content": "Once inside, verify everything is staged perfectly without installing a single package:",
-      "code": "python3 --version\nagv --version\npython3 -c \"from playwright.sync_api import sync_playwright; print('\u2705 Playwright is ready.')\""
+      "code": "python3 --version\nagy --version\npython3 -c \"from playwright.sync_api import sync_playwright; print('\u2705 Playwright is ready.')\""
     }
   ]
 }

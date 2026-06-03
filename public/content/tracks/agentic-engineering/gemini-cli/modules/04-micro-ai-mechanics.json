@@ -9,7 +9,7 @@
     },
     {
       "type": "p",
-      "content": "Master the micro-level developer tools in AGV before moving on to fully autonomous agents."
+      "content": "Master the micro-level developer tools in AGY before moving on to fully autonomous agents."
     },
     {
       "type": "feature_card",
@@ -25,7 +25,7 @@
       "title": "Context Passing",
       "content": "Intentionally break the code (e.g., delete a required colon `:`). Highlight the broken function, press **Cmd + L** (or **Ctrl + L**).",
       "prompt": "What is wrong with this code?",
-      "footer": "Notice how AGV automatically attaches the highlighted code block as context to the agent's side panel."
+      "footer": "Notice how AGY automatically attaches the highlighted code block as context to the agent's side panel."
     },
     {
       "type": "feature_card",

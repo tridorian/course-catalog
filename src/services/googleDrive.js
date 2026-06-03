@@ -5,9 +5,9 @@
 import { getAccessToken, signIn } from './googleAuth';
 
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3/files';
-const PROGRESS_FILE_NAME = 'agv_course_progress.json';
-const LOCAL_STORAGE_KEY = 'agv_local_progress';
-const OFFLINE_QUEUE_KEY = 'agv_offline_queue';
+const PROGRESS_FILE_NAME = 'agy_course_progress.json';
+const LOCAL_STORAGE_KEY = 'agy_local_progress';
+const OFFLINE_QUEUE_KEY = 'agy_offline_queue';
 
 async function driveFetch(url, options = {}, retryCount = 0) {
   const token = getAccessToken();

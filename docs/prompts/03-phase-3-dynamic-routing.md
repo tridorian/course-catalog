@@ -9,7 +9,7 @@ Enhance navigation using `react-router-dom` and implement hierarchical breadcrum
 ## Tasks
 1. **Testing Navigation:**
    - Write tests to verify that clicking a module in the sidebar updates the URL and changes the displayed content.
-   - Verify that deep links (e.g., `#/labs/agv-101/module-3`) load the correct state on page refresh.
+   - Verify that deep links (e.g., `#/labs/agy-101/module-3`) load the correct state on page refresh.
 2. **Routing:**
    - Introduce `react-router-dom` to `src/App.jsx`.
    - Map routes to the hierarchy: `/:track/:course/:moduleId?`.
