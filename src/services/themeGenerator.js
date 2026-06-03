@@ -1,12 +1,16 @@
 // src/services/themeGenerator.js
 // Integrates with Gemini API to generate custom color theme JSON variables.
+import { getAccessToken } from './googleAuth';
 
 export async function generateThemeWithGemini(promptText, userApiKey = '') {
   const apiKey = userApiKey || 
                  localStorage.getItem('tridorian_gemini_api_key') || 
                  (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') || 
                  '';
-  if (!apiKey) {
+
+  const gAuthToken = getAccessToken();
+
+  if (!apiKey && !gAuthToken) {
     throw new Error('API_KEY_REQUIRED');
   }
 
@@ -38,7 +42,15 @@ Specify these exact keys with hex values or standard rgba strings:
   "swatches": ["bg-base", "accent-bg", "text-main"]
 }`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  let url;
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (apiKey) {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  } else {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
+    headers['Authorization'] = `Bearer ${gAuthToken}`;
+  }
 
   const payload = {
     contents: {
@@ -56,9 +68,7 @@ Specify these exact keys with hex values or standard rgba strings:
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: headers,
     body: JSON.stringify(payload)
   });
 
