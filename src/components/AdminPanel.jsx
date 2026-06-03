@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Shield, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
 import { checkUserRole } from '../services/roleManager';
 import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
-import ThemePicker from './ThemePicker';
+import GlobalControls from './GlobalControls';
 
 const AdminPanel = ({ theme, setTheme }) => {
   const [role, setRole] = useState(null);
@@ -128,7 +128,7 @@ const AdminPanel = ({ theme, setTheme }) => {
           </div>
           
           <div className="flex items-center gap-4">
-            <ThemePicker theme={theme} setTheme={setTheme} />
+            <GlobalControls theme={theme} setTheme={setTheme} />
             <Link 
               to="/" 
               className="flex items-center gap-2 px-4 py-2 bg-muted text-text-muted border border-border-main rounded-lg hover:bg-elevated transition-all text-sm font-medium"

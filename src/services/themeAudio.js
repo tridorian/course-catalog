@@ -1,12 +1,13 @@
 // src/services/themeAudio.js
-// Procedural Audio Synthesizer for Tridorian Course Catalog
-// Generates infinite themed ambient music loops using the browser's Web Audio API.
+// Advanced Procedural Audio Synthesizer for Tridorian Course Catalog
+// Generates immersive, rich themed ambient music loops using the browser's Web Audio API.
 
 let audioCtx = null;
 let masterGain = null;
 let currentLoopId = null;
 let activeNodes = [];
 let schedulerTimer = null;
+let evolveTimer = null;
 
 // Persistent preference keys
 const VOL_KEY = 'tridorian_audio_volume';
@@ -38,17 +39,21 @@ function cleanupActiveNodes() {
     clearInterval(schedulerTimer);
     schedulerTimer = null;
   }
+  if (evolveTimer) {
+    clearInterval(evolveTimer);
+    evolveTimer = null;
+  }
 
   const now = audioCtx ? audioCtx.currentTime : 0;
   activeNodes.forEach(node => {
     try {
-      if (node.gain) {
-        node.gain.gain.setValueAtTime(node.gain.gain.value, now);
-        node.gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+      if (node.gainNode) {
+        node.gainNode.gain.setValueAtTime(node.gainNode.gain.value, now);
+        node.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
       }
       setTimeout(() => {
         try { node.stop(); } catch (e) {}
-      }, 1500);
+      }, 1800);
     } catch (e) {}
   });
   activeNodes = [];
@@ -68,13 +73,45 @@ function createDelayNode(feedbackVal = 0.5, delayTimeVal = 0.4) {
   return { delay, feedback };
 }
 
+// Helper to play FM synthesized bell plucks
+function playFMBell(freq, duration, modulationIndex, modulationRatio, gainVal, time) {
+  const carrier = audioCtx.createOscillator();
+  const modulator = audioCtx.createOscillator();
+  const modGain = audioCtx.createGain();
+  const bellGain = audioCtx.createGain();
+
+  carrier.type = 'sine';
+  carrier.frequency.value = freq;
+
+  modulator.type = 'sine';
+  modulator.frequency.value = freq * modulationRatio;
+
+  modGain.gain.setValueAtTime(freq * modulationIndex, time);
+  modGain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+  bellGain.gain.setValueAtTime(0, time);
+  bellGain.gain.linearRampToValueAtTime(gainVal, time + 0.01);
+  bellGain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+  modulator.connect(modGain);
+  modGain.connect(carrier.frequency);
+  carrier.connect(bellGain);
+  bellGain.connect(masterGain);
+
+  modulator.start(time);
+  carrier.start(time);
+
+  modulator.stop(time + duration + 0.2);
+  carrier.stop(time + duration + 0.2);
+}
+
 // --- Synthesizers for each Theme ---
 
-// 1. Tridorian Dark: Cyberpunk Pulsating Drone & Dark Cyber Plucks
+// 1. Tridorian Dark: Cyberpunk Pulsating Drone & Analog Sequencer
 function playTridorianDark() {
   const now = audioCtx.currentTime;
 
-  // Pulsating low drone
+  // Pulsating analog low bass drone (saw + detuned square)
   const osc1 = audioCtx.createOscillator();
   const osc2 = audioCtx.createOscillator();
   const filter = audioCtx.createBiquadFilter();
@@ -82,23 +119,25 @@ function playTridorianDark() {
 
   osc1.type = 'sawtooth';
   osc1.frequency.value = 55; // A1
-  osc2.type = 'triangle';
-  osc2.frequency.value = 55.5; // Slightly detuned
+  
+  osc2.type = 'square';
+  osc2.frequency.value = 55.4; // Detuned
 
   filter.type = 'lowpass';
-  filter.frequency.value = 140;
+  filter.frequency.setValueAtTime(150, now);
+  filter.Q.setValueAtTime(6, now);
 
-  // LFO to modulate filter cutoff
+  // Slow LFO sweeping the filter cutoff frequency for analog movement
   const lfo = audioCtx.createOscillator();
   const lfoGain = audioCtx.createGain();
-  lfo.frequency.value = 0.15; // Slow sweep
-  lfoGain.gain.value = 40;
+  lfo.frequency.value = 0.08; // Super slow sweep
+  lfoGain.gain.value = 80;
 
   lfo.connect(lfoGain);
   lfoGain.connect(filter.frequency);
 
   gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.4, now + 2); // Slow fade-in
+  gain.gain.linearRampToValueAtTime(0.35, now + 3);
 
   osc1.connect(filter);
   osc2.connect(filter);
@@ -109,69 +148,152 @@ function playTridorianDark() {
   osc2.start(now);
   lfo.start(now);
 
+  osc1.gainNode = gain;
+  osc2.gainNode = gain;
+  lfo.gainNode = gain;
   activeNodes.push(osc1, osc2, lfo);
 
-  // Plucks sequencer (A minor pentatonic)
-  const notes = [110, 130.81, 146.83, 164.81, 196.00, 220, 261.63];
+  // Industrial high-pass atmospheric noise sweep
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+  }
+  const noiseNode = audioCtx.createBufferSource();
+  noiseNode.buffer = noiseBuffer;
+  noiseNode.loop = true;
+
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.setValueAtTime(800, now);
+  noiseFilter.Q.setValueAtTime(3, now);
+
+  const noiseLfo = audioCtx.createOscillator();
+  const noiseLfoGain = audioCtx.createGain();
+  noiseLfo.frequency.value = 0.05;
+  noiseLfoGain.gain.value = 400;
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0, now);
+  noiseGain.gain.linearRampToValueAtTime(0.015, now + 4);
+
+  noiseLfo.connect(noiseLfoGain);
+  noiseLfoGain.connect(noiseFilter.frequency);
+  noiseNode.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(masterGain);
+
+  noiseNode.start(now);
+  noiseLfo.start(now);
+  noiseNode.gainNode = noiseGain;
+  activeNodes.push(noiseNode, noiseLfo);
+
+  // Syncopated 8-step cyberpunk sequencer (A minor pentatonic)
+  const sequence = [110, 110, 130.81, 146.83, 110, 164.81, 110, 196.00]; // A2 -> C3 -> D3 -> E3 -> G3
   let step = 0;
 
   schedulerTimer = setInterval(() => {
     if (audioCtx.state === 'suspended') return;
     const schedNow = audioCtx.currentTime;
     
-    // Play a note every 1.5 seconds
-    if (step % 2 === 0) {
-      const freq = notes[Math.floor(Math.random() * notes.length)];
+    // Play notes on steps
+    if (step % 8 !== 1 && step % 8 !== 5) { // Skip some steps for a nice rhythm
+      const baseFreq = sequence[step % sequence.length];
+      const noteFreq = baseFreq * (Math.random() > 0.85 ? 2 : 1); // Occasional octave jump
+
       const pluckOsc = audioCtx.createOscillator();
       const pluckGain = audioCtx.createGain();
-      const delayObj = createDelayNode(0.4, 0.45);
+      const pluckFilter = audioCtx.createBiquadFilter();
+      const delayObj = createDelayNode(0.35, 0.38);
 
-      pluckOsc.type = 'sine';
-      pluckOsc.frequency.setValueAtTime(freq, schedNow);
+      pluckOsc.type = 'sawtooth';
+      pluckOsc.frequency.setValueAtTime(noteFreq, schedNow);
+
+      // Analog filter sweep envelope for plucks
+      pluckFilter.type = 'lowpass';
+      pluckFilter.frequency.setValueAtTime(noteFreq * 4, schedNow);
+      pluckFilter.frequency.exponentialRampToValueAtTime(noteFreq * 1.2, schedNow + 0.25);
 
       pluckGain.gain.setValueAtTime(0, schedNow);
-      pluckGain.gain.linearRampToValueAtTime(0.18, schedNow + 0.05);
-      pluckGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 1.5);
+      pluckGain.gain.linearRampToValueAtTime(0.12, schedNow + 0.01);
+      pluckGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.4);
 
-      pluckOsc.connect(pluckGain);
+      pluckOsc.connect(pluckFilter);
+      pluckFilter.connect(pluckGain);
       pluckGain.connect(masterGain);
       
-      // route to delay
       pluckGain.connect(delayObj.delay);
       delayObj.delay.connect(masterGain);
 
       pluckOsc.start(schedNow);
-      pluckOsc.stop(schedNow + 2);
+      pluckOsc.stop(schedNow + 0.5);
     }
     step++;
-  }, 750);
+  }, 220); // Cyberpunk tempo
 }
 
-// 2. Clean Light: Bright, airy ambient bells and soft chord pads
+// 2. Clean Light: Airy Zen Evolving Chords & Crystal FM Chimes
 function playCleanLight() {
   const now = audioCtx.currentTime;
 
-  // Soft major chord pad
-  const freqs = [220, 277.18, 329.63, 440]; // A major
-  const padNodes = freqs.map(f => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+  // Evolving chord progression in G Major
+  const progressions = [
+    [196.00, 246.94, 293.66, 392.00], // G Major
+    [261.63, 329.63, 392.00, 523.25], // C Major
+    [293.66, 369.99, 440.00, 587.33], // D Major
+    [164.81, 246.94, 329.63, 392.00]  // E Minor
+  ];
+
+  let currentProgIdx = 0;
+  let activePadOscs = [];
+  const padGain = audioCtx.createGain();
+  padGain.gain.setValueAtTime(0, now);
+  padGain.gain.linearRampToValueAtTime(0.1, now + 3);
+  padGain.connect(masterGain);
+
+  const startChord = (chordFreqs, time) => {
+    // Fade out previous oscillators
+    const oldOscs = activePadOscs;
+    activePadOscs = [];
     
-    osc.type = 'triangle';
-    osc.frequency.value = f;
-    
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.08, now + 3);
+    oldOscs.forEach(o => {
+      o.gainNode.gain.setValueAtTime(o.gainNode.gain.value, time);
+      o.gainNode.gain.linearRampToValueAtTime(0, time + 2.5);
+      setTimeout(() => { o.stop(); }, 3000);
+    });
 
-    osc.connect(gain);
-    gain.connect(masterGain);
-    osc.start(now);
-    return osc;
-  });
+    // Start new chord oscillators
+    chordFreqs.forEach(f => {
+      const osc = audioCtx.createOscillator();
+      const oscGain = audioCtx.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, time);
+      
+      oscGain.gain.setValueAtTime(0, time);
+      oscGain.gain.linearRampToValueAtTime(0.045, time + 2.5);
 
-  activeNodes.push(...padNodes);
+      osc.connect(oscGain);
+      oscGain.connect(padGain);
+      osc.start(time);
+      osc.gainNode = oscGain;
+      activePadOscs.push(osc);
+    });
+  };
 
-  // Sparkly Bell sequencer (Pentatonic scale C# major)
+  // Start the first chord immediately
+  startChord(progressions[currentProgIdx], now);
+
+  // Evolve chords every 7 seconds
+  evolveTimer = setInterval(() => {
+    if (audioCtx.state === 'suspended') return;
+    const schedNow = audioCtx.currentTime;
+    currentProgIdx = (currentProgIdx + 1) % progressions.length;
+    startChord(progressions[currentProgIdx], schedNow);
+  }, 7000);
+
+  // FM Crystal Chimes (C# major pentatonic chimes)
   const bellNotes = [554.37, 622.25, 698.46, 830.61, 932.33, 1108.73];
   
   schedulerTimer = setInterval(() => {
@@ -179,204 +301,384 @@ function playCleanLight() {
     const schedNow = audioCtx.currentTime;
     
     // Play sparse random bells
-    if (Math.random() > 0.4) {
+    if (Math.random() > 0.45) {
       const freq = bellNotes[Math.floor(Math.random() * bellNotes.length)];
-      const bell = audioCtx.createOscillator();
-      const bellGain = audioCtx.createGain();
-
-      bell.type = 'sine';
-      bell.frequency.setValueAtTime(freq, schedNow);
-
-      bellGain.gain.setValueAtTime(0, schedNow);
-      bellGain.gain.linearRampToValueAtTime(0.08, schedNow + 0.01);
-      bellGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 3);
-
-      bell.connect(bellGain);
-      bellGain.connect(masterGain);
-
-      bell.start(schedNow);
-      bell.stop(schedNow + 3.2);
+      // Bell physical model using FM synthesis (modRatio 3.5, modIndex 1.8)
+      playFMBell(freq, 3.5, 1.8, 3.5, 0.05, schedNow);
     }
-  }, 1000);
+  }, 1200);
 }
 
-// 3. Rainbow Kitten: Retro chiptune arpeggiator loop (playful/bubbly)
+// 3. Rainbow Kitten: Retro Chiptune Walking Bass & Chord-Aware Arp
 function playRainbowKitten() {
   const now = audioCtx.currentTime;
 
-  // Soft root bass drone
-  const bass = audioCtx.createOscillator();
-  const bassGain = audioCtx.createGain();
-  bass.type = 'triangle';
-  bass.frequency.value = 130.81; // C3
-  bassGain.gain.setValueAtTime(0, now);
-  bassGain.gain.linearRampToValueAtTime(0.12, now + 1);
-  bass.connect(bassGain);
-  bassGain.connect(masterGain);
-  bass.start(now);
-  activeNodes.push(bass);
+  const chords = [
+    { root: 261.63, pattern: [261.63, 329.63, 392.00, 523.25] }, // C Major
+    { root: 349.23, pattern: [349.23, 440.00, 523.25, 698.46] }, // F Major
+    { root: 392.00, pattern: [392.00, 493.88, 587.33, 783.99] }, // G Major
+    { root: 220.00, pattern: [220.00, 261.63, 329.63, 440.00] }  // A Minor
+  ];
 
-  // Bubbly arpeggiator (C Major chord pattern)
-  const pattern = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
-  let idx = 0;
+  let currentChordIdx = 0;
 
+  // Change chord progression every 4 seconds
+  evolveTimer = setInterval(() => {
+    if (audioCtx.state === 'suspended') return;
+    currentChordIdx = (currentChordIdx + 1) % chords.length;
+  }, 4000);
+
+  // 8-bit walking bassline (Triangle Wave)
+  let bassStep = 0;
   schedulerTimer = setInterval(() => {
     if (audioCtx.state === 'suspended') return;
     const schedNow = audioCtx.currentTime;
 
-    const pluck = audioCtx.createOscillator();
-    const pluckGain = audioCtx.createGain();
+    const activeChord = chords[currentChordIdx];
+    // Simple 8-bit walking bass rhythm: Root -> Octave -> 5th -> Octave
+    let noteFreq = activeChord.root / 2; // Bass octave
+    if (bassStep % 4 === 1) noteFreq = activeChord.pattern[2] / 2; // 5th
+    if (bassStep % 4 === 2) noteFreq = activeChord.root; // Root original
+    if (bassStep % 4 === 3) noteFreq = activeChord.pattern[1] / 2; // 3rd
 
-    pluck.type = 'square';
-    pluck.frequency.setValueAtTime(pattern[idx], schedNow);
+    const bassOsc = audioCtx.createOscillator();
+    const bassGain = audioCtx.createGain();
 
-    pluckGain.gain.setValueAtTime(0, schedNow);
-    pluckGain.gain.linearRampToValueAtTime(0.03, schedNow + 0.01);
-    pluckGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.25);
+    bassOsc.type = 'triangle';
+    bassOsc.frequency.setValueAtTime(noteFreq, schedNow);
 
-    pluck.connect(pluckGain);
-    pluckGain.connect(masterGain);
+    bassGain.gain.setValueAtTime(0, schedNow);
+    bassGain.gain.linearRampToValueAtTime(0.12, schedNow + 0.02);
+    bassGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.35);
 
-    pluck.start(schedNow);
-    pluck.stop(schedNow + 0.3);
+    bassOsc.connect(bassGain);
+    bassGain.connect(masterGain);
 
-    idx = (idx + 1) % pattern.length;
-  }, 180); // Quick upbeat 8th notes
+    bassOsc.start(schedNow);
+    bassOsc.stop(schedNow + 0.4);
+
+    bassStep++;
+  }, 400);
+
+  // Rapid square-wave arpeggiator
+  let arpIdx = 0;
+  const arpInterval = setInterval(() => {
+    if (audioCtx.state === 'suspended') return;
+    const schedNow = audioCtx.currentTime;
+
+    const activeChord = chords[currentChordIdx];
+    const noteFreq = activeChord.pattern[arpIdx % activeChord.pattern.length];
+
+    const arpOsc = audioCtx.createOscillator();
+    const arpGain = audioCtx.createGain();
+
+    // Pulse/Square wave for 8-bit tone
+    arpOsc.type = 'square';
+    arpOsc.frequency.setValueAtTime(noteFreq, schedNow);
+
+    arpGain.gain.setValueAtTime(0, schedNow);
+    arpGain.gain.linearRampToValueAtTime(0.015, schedNow + 0.005);
+    arpGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.12);
+
+    arpOsc.connect(arpGain);
+    arpGain.connect(masterGain);
+
+    arpOsc.start(schedNow);
+    arpOsc.stop(schedNow + 0.15);
+
+    // Procedural bubble pop sounds (sweeping pitch) triggered occasionally
+    if (Math.random() > 0.96) {
+      const popOsc = audioCtx.createOscillator();
+      const popGain = audioCtx.createGain();
+      popOsc.type = 'sine';
+      popOsc.frequency.setValueAtTime(400, schedNow);
+      popOsc.frequency.exponentialRampToValueAtTime(1200, schedNow + 0.08); // Quick sweep up
+
+      popGain.gain.setValueAtTime(0, schedNow);
+      popGain.gain.linearRampToValueAtTime(0.02, schedNow + 0.005);
+      popGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.08);
+
+      popOsc.connect(popGain);
+      popGain.connect(masterGain);
+      popOsc.start(schedNow);
+      popOsc.stop(schedNow + 0.1);
+    }
+
+    arpIdx++;
+  }, 130);
+
+  // Track the interval so it can be cleared inside cleanupActiveNodes
+  const oldCleanup = cleanupActiveNodes;
+  cleanupActiveNodes = () => {
+    clearInterval(arpInterval);
+    oldCleanup();
+    cleanupActiveNodes = oldCleanup; // Restore original reference
+  };
 }
 
-// 4. Caribbean Mood: Tropical steel-pan chords & ocean-wave noise generator
+// 4. Caribbean Mood: Calypso Steel Drums & Stereo Ocean Waves
 function playCaribbeanMood() {
   const now = audioCtx.currentTime;
 
-  // Ambient sea breeze generator using White Noise
-  const bufferSize = 2 * audioCtx.sampleRate;
+  // Sea wave generator using lowpass filtered white noise panning left-to-right
+  const bufferSize = 4 * audioCtx.sampleRate;
   const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
   const output = noiseBuffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
     output[i] = Math.random() * 2 - 1;
   }
-
   const whiteNoise = audioCtx.createBufferSource();
   whiteNoise.buffer = noiseBuffer;
   whiteNoise.loop = true;
 
   const noiseFilter = audioCtx.createBiquadFilter();
   noiseFilter.type = 'lowpass';
-  noiseFilter.frequency.value = 350;
+  noiseFilter.frequency.setValueAtTime(250, now);
 
   const noiseGain = audioCtx.createGain();
   noiseGain.gain.setValueAtTime(0, now);
-  noiseGain.gain.linearRampToValueAtTime(0.05, now + 2);
+  noiseGain.gain.linearRampToValueAtTime(0.04, now + 3);
 
-  // Modulate sea waves
+  // Slow LFO for 7-second wave swells
   const waveLfo = audioCtx.createOscillator();
   const waveLfoGain = audioCtx.createGain();
-  waveLfo.frequency.value = 0.12; // 8-second wave swells
-  waveLfoGain.gain.value = 250;
+  waveLfo.frequency.value = 0.14; // wave rate
+  waveLfoGain.gain.value = 180;
+
+  // Stereo Panner to wash the waves left and right
+  const panner = audioCtx.createStereoPanner();
+  const panLfo = audioCtx.createOscillator();
+  const panLfoGain = audioCtx.createGain();
+  panLfo.frequency.value = 0.08; // Slower pan
+  panLfoGain.gain.value = 0.9;
 
   waveLfo.connect(waveLfoGain);
   waveLfoGain.connect(noiseFilter.frequency);
 
+  panLfo.connect(panLfoGain);
+  panLfoGain.connect(panner.pan);
+
   whiteNoise.connect(noiseFilter);
   noiseFilter.connect(noiseGain);
-  noiseGain.connect(masterGain);
+  noiseGain.connect(panner);
+  panner.connect(masterGain);
 
   whiteNoise.start(now);
   waveLfo.start(now);
+  panLfo.start(now);
 
-  activeNodes.push(whiteNoise, waveLfo);
+  whiteNoise.gainNode = noiseGain;
+  activeNodes.push(whiteNoise, waveLfo, panLfo);
 
-  // Relaxing plucks (Pentatonic F Major)
-  const steelNotes = [174.61, 196.00, 220.00, 261.63, 293.66, 349.23];
-  
+  // Caribbean calypso chords progression (F -> Bb -> C -> Bb)
+  const calypsoChords = [
+    [174.61, 220.00, 261.63, 349.23], // F Major
+    [233.08, 293.66, 349.23, 466.16], // Bb Major
+    [261.63, 329.63, 392.00, 523.25], // C Major
+    [233.08, 293.66, 349.23, 466.16]  // Bb Major
+  ];
+
+  let chordIdx = 0;
   schedulerTimer = setInterval(() => {
     if (audioCtx.state === 'suspended') return;
     const schedNow = audioCtx.currentTime;
 
-    if (Math.random() > 0.4) {
-      const pluck = audioCtx.createOscillator();
-      const pluckGain = audioCtx.createGain();
-      // steel pan has slight detuned higher harmonics
+    const currentChord = calypsoChords[chordIdx % calypsoChords.length];
+
+    // Trigger calypso steel pan plucks with physical modeling physics:
+    // quick high-frequency noise strike + ringing root sine + harmonics
+    if (Math.random() > 0.3) {
+      const rootFreq = currentChord[Math.floor(Math.random() * currentChord.length)];
+      
+      // Ringing body (Sine + slightly detuned 2nd and 3rd harmonics)
+      const bodyNode = audioCtx.createOscillator();
+      const bodyGain = audioCtx.createGain();
+      bodyNode.type = 'sine';
+      bodyNode.frequency.setValueAtTime(rootFreq, schedNow);
+
       const harmonic = audioCtx.createOscillator();
-
-      pluck.type = 'triangle';
-      pluck.frequency.setValueAtTime(steelNotes[Math.floor(Math.random() * steelNotes.length)], schedNow);
-
+      const harmonicGain = audioCtx.createGain();
       harmonic.type = 'sine';
-      harmonic.frequency.setValueAtTime(pluck.frequency.value * 2.01, schedNow); // detuned octave harmonic
+      harmonic.frequency.setValueAtTime(rootFreq * 2.005, schedNow); // Slightly detuned octave
 
-      pluckGain.gain.setValueAtTime(0, schedNow);
-      pluckGain.gain.linearRampToValueAtTime(0.09, schedNow + 0.02);
-      pluckGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 1.2);
+      // High-frequency impact noise strike
+      const strikeNoise = audioCtx.createBufferSource();
+      strikeNoise.buffer = noiseBuffer;
+      const strikeFilter = audioCtx.createBiquadFilter();
+      strikeFilter.type = 'bandpass';
+      strikeFilter.frequency.setValueAtTime(3000, schedNow);
+      
+      const strikeGain = audioCtx.createGain();
+      strikeGain.gain.setValueAtTime(0.02, schedNow);
+      strikeGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.03); // Quick strike decay
 
-      pluck.connect(pluckGain);
-      harmonic.connect(pluckGain);
-      pluckGain.connect(masterGain);
+      bodyGain.gain.setValueAtTime(0, schedNow);
+      bodyGain.gain.linearRampToValueAtTime(0.07, schedNow + 0.01);
+      bodyGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 1.2);
 
-      pluck.start(schedNow);
+      harmonicGain.gain.setValueAtTime(0, schedNow);
+      harmonicGain.gain.linearRampToValueAtTime(0.035, schedNow + 0.01);
+      harmonicGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.8);
+
+      bodyNode.connect(bodyGain);
+      bodyGain.connect(masterGain);
+
+      harmonic.connect(harmonicGain);
+      harmonicGain.connect(masterGain);
+
+      strikeNoise.connect(strikeFilter);
+      strikeFilter.connect(strikeGain);
+      strikeGain.connect(masterGain);
+
+      bodyNode.start(schedNow);
       harmonic.start(schedNow);
-      pluck.stop(schedNow + 1.5);
-      harmonic.stop(schedNow + 1.5);
+      strikeNoise.start(schedNow);
+
+      bodyNode.stop(schedNow + 1.5);
+      harmonic.stop(schedNow + 1.0);
+      strikeNoise.stop(schedNow + 0.1);
     }
-  }, 1200);
+
+    chordIdx++;
+  }, 1000);
 }
 
-// 5. Lunar Vibe: Sparse deep space echoes & cold ambient bells
+// 5. Lunar Vibe: Sparse Solar Wind, Deep Sub Drone & Spaced Echo Plucks
 function playLunarVibe() {
   const now = audioCtx.currentTime;
 
-  // Cold cosmic drone
-  const osc = audioCtx.createOscillator();
-  const filter = audioCtx.createBiquadFilter();
-  const gain = audioCtx.createGain();
+  // Deep multi-oscillator detuned sub space drone (C1 + detuned C1)
+  const sub1 = audioCtx.createOscillator();
+  const sub2 = audioCtx.createOscillator();
+  const droneGain = audioCtx.createGain();
+  const droneFilter = audioCtx.createBiquadFilter();
 
-  osc.type = 'sine';
-  osc.frequency.value = 65.41; // C2
+  sub1.type = 'sine';
+  sub1.frequency.setValueAtTime(32.70, now); // C1
+  
+  sub2.type = 'sine';
+  sub2.frequency.setValueAtTime(32.90, now); // Detuned C1 (beating)
 
-  filter.type = 'lowpass';
-  filter.frequency.value = 100;
+  droneFilter.type = 'lowpass';
+  droneFilter.frequency.setValueAtTime(90, now);
 
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.25, now + 4);
+  droneGain.gain.setValueAtTime(0, now);
+  droneGain.gain.linearRampToValueAtTime(0.3, now + 4);
 
-  osc.connect(filter);
-  filter.connect(gain);
-  gain.connect(masterGain);
+  sub1.connect(droneFilter);
+  sub2.connect(droneFilter);
+  droneFilter.connect(droneGain);
+  droneGain.connect(masterGain);
 
-  osc.start(now);
-  activeNodes.push(osc);
+  sub1.start(now);
+  sub2.start(now);
+  
+  sub1.gainNode = droneGain;
+  activeNodes.push(sub1, sub2);
 
-  // Sparse spaced-out echo piano notes
-  const notes = [130.81, 164.81, 196.00, 246.94, 261.63, 329.63, 392.00];
+  // Solar wind: sweeps of resonant lowpass band on white noise
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+  }
+  const noiseSource = audioCtx.createBufferSource();
+  noiseSource.buffer = noiseBuffer;
+  noiseSource.loop = true;
+
+  const windFilter = audioCtx.createBiquadFilter();
+  windFilter.type = 'bandpass';
+  windFilter.frequency.setValueAtTime(400, now);
+  windFilter.Q.setValueAtTime(4, now);
+
+  const windGain = audioCtx.createGain();
+  windGain.gain.setValueAtTime(0, now);
+  windGain.gain.linearRampToValueAtTime(0.02, now + 3);
+
+  const windLfo = audioCtx.createOscillator();
+  const windLfoGain = audioCtx.createGain();
+  windLfo.frequency.value = 0.04; // Very slow sweep
+  windLfoGain.gain.value = 350;
+
+  windLfo.connect(windLfoGain);
+  windLfoGain.connect(windFilter.frequency);
+  noiseSource.connect(windFilter);
+  windFilter.connect(windGain);
+  windGain.connect(masterGain);
+
+  noiseSource.start(now);
+  windLfo.start(now);
+  noiseSource.gainNode = windGain;
+  activeNodes.push(noiseSource, windLfo);
+
+  // Space echo-plucks with LFO vibrato in C major pentatonic
+  const pentatonic = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
 
   schedulerTimer = setInterval(() => {
     if (audioCtx.state === 'suspended') return;
     const schedNow = audioCtx.currentTime;
 
-    if (Math.random() > 0.6) {
-      const noteFreq = notes[Math.floor(Math.random() * notes.length)];
-      const oscNode = audioCtx.createOscillator();
+    // Sparse, ethereal space notes
+    if (Math.random() > 0.55) {
+      const noteFreq = pentatonic[Math.floor(Math.random() * pentatonic.length)];
+      const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
-      const delayObj = createDelayNode(0.65, 0.7); // High echo delay
+      const delayObj = createDelayNode(0.68, 0.75); // Ethereal feedback echoes
 
-      oscNode.type = 'sine';
-      oscNode.frequency.setValueAtTime(noteFreq, schedNow);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(noteFreq, schedNow);
+
+      // Eerie vibrato (LFO at 5.5Hz modulating frequency)
+      const vibratoLfo = audioCtx.createOscillator();
+      const vibratoGain = audioCtx.createGain();
+      vibratoLfo.frequency.value = 5.5;
+      vibratoGain.gain.value = 5.0; // Detuning range
+
+      vibratoLfo.connect(vibratoGain);
+      vibratoGain.connect(osc.frequency);
 
       gainNode.gain.setValueAtTime(0, schedNow);
-      gainNode.gain.linearRampToValueAtTime(0.08, schedNow + 0.1);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, schedNow + 4);
+      gainNode.gain.linearRampToValueAtTime(0.065, schedNow + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, schedNow + 3.5);
 
-      oscNode.connect(gainNode);
+      osc.connect(gainNode);
       gainNode.connect(masterGain);
       
-      // route through delay
       gainNode.connect(delayObj.delay);
       delayObj.delay.connect(masterGain);
 
-      oscNode.start(schedNow);
-      oscNode.stop(schedNow + 5);
+      osc.start(schedNow);
+      vibratoLfo.start(schedNow);
+
+      osc.stop(schedNow + 4);
+      vibratoLfo.stop(schedNow + 4);
     }
-  }, 2500);
+
+    // Occasional space beacon ping every 6 seconds
+    if (Math.random() > 0.88) {
+      const beaconFreq = 1567.98; // G6
+      const beaconOsc = audioCtx.createOscillator();
+      const beaconGain = audioCtx.createGain();
+      const beaconDelay = createDelayNode(0.5, 0.4);
+
+      beaconOsc.type = 'sine';
+      beaconOsc.frequency.setValueAtTime(beaconFreq, schedNow);
+
+      beaconGain.gain.setValueAtTime(0, schedNow);
+      beaconGain.gain.linearRampToValueAtTime(0.015, schedNow + 0.005);
+      beaconGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.2);
+
+      beaconOsc.connect(beaconGain);
+      beaconGain.connect(masterGain);
+      beaconGain.connect(beaconDelay.delay);
+      beaconDelay.delay.connect(masterGain);
+
+      beaconOsc.start(schedNow);
+      beaconOsc.stop(schedNow + 0.3);
+    }
+
+  }, 1800);
 }
 
 // --- Controller Actions ---
@@ -395,7 +697,7 @@ export function playThemeMusic(themeId) {
     currentLoopId = themeId;
     cleanupActiveNodes();
 
-    console.log(`[Theme Audio] Loading music loop: ${themeId}...`);
+    console.log(`[Theme Audio] Loading upgraded music loop: ${themeId}...`);
     if (themeId === 'dark') {
       playTridorianDark();
     } else if (themeId === 'light') {

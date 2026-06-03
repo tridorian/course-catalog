@@ -4,7 +4,7 @@ import * as Icons from 'lucide-react';
 import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
 import * as googleAuth from '../services/googleAuth';
 import { checkUserRole } from '../services/roleManager';
-import ThemePicker from './ThemePicker';
+import GlobalControls from './GlobalControls';
 import ProfileModal from './ProfileModal';
 
 const Dashboard = ({ theme, setTheme }) => {
@@ -114,7 +114,7 @@ const Dashboard = ({ theme, setTheme }) => {
               <Icons.User size={12} />
               My Profile
             </button>
-            <ThemePicker theme={theme} setTheme={setTheme} />
+            <GlobalControls theme={theme} setTheme={setTheme} />
           </div>
           {role === 'admin' && (
             <Link 

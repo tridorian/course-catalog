@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import ThemePicker from './ThemePicker';
+import GlobalControls from './GlobalControls';
 import CodeBlock from './CodeBlock';
 
 const HelpSection = ({ theme, setTheme }) => {
@@ -242,7 +242,7 @@ const HelpSection = ({ theme, setTheme }) => {
             BACK TO CATALOG
           </button>
           <div className="flex items-center gap-3">
-            <ThemePicker theme={theme} setTheme={setTheme} />
+             <GlobalControls theme={theme} setTheme={setTheme} />
           </div>
         </div>
 

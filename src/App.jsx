@@ -25,7 +25,7 @@ import HelpSection from './components/HelpSection';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
 import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/googleDrive';
 import { getAccessToken } from './services/googleAuth';
-import ThemePicker from './components/ThemePicker';
+import GlobalControls from './components/GlobalControls';
 import { useTheme } from './hooks/useTheme';
 import * as themeAudio from './services/themeAudio';
 import BadgeCelebration from './components/BadgeCelebration';
@@ -327,7 +327,7 @@ function AppContent({ theme, setTheme }) {
           TRIDORIAN
         </button>
         <div className="flex items-center gap-4">
-          <ThemePicker theme={theme} setTheme={setTheme} />
+          <GlobalControls theme={theme} setTheme={setTheme} />
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-main">
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -355,7 +355,7 @@ function AppContent({ theme, setTheme }) {
             <div className="text-xs text-text-muted font-mono uppercase truncate max-w-[160px]" title={courseMetadata?.title}>
               {courseMetadata?.title || 'LABS // UNKNOWN'}
             </div>
-            <ThemePicker theme={theme} setTheme={setTheme} />
+            <GlobalControls theme={theme} setTheme={setTheme} />
           </div>
         </div>
 

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { fetchTrackManifest } from '../services/contentLoader';
 import { checkUserRole } from '../services/roleManager';
-import ThemePicker from './ThemePicker';
+import GlobalControls from './GlobalControls';
 
 // Simple markdown formatter helper for titles and descriptions
 function renderSimpleMarkdown(text) {
@@ -118,7 +118,7 @@ const TrackPage = ({ theme, setTheme }) => {
               <Icons.HelpCircle size={12} />
               Help & Troubleshooting
             </Link>
-            <ThemePicker theme={theme} setTheme={setTheme} />
+             <GlobalControls theme={theme} setTheme={setTheme} />
           </div>
         </div>
 
