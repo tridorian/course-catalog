@@ -1,7 +1,7 @@
 {
   "course_id": "agy-431",
   "title": "AGY-431: Scale & Immutable DevOps (L400)",
-  "description": "An advanced, hands-on masterclass for DevOps Leads and Platform Engineers. Master the architecture, deployment, and orchestration of containerized Google Antigravity environments (agy-box) across remote cloud VMs. Learn how to configure private container registries behind restrictive corporate proxies, manage TLS/SSL certificate injection, and implement secure headless CI/CD execution loops with strict policy enforcement. This course features step-by-step guidance on setting up, configuring, and authenticating Google Workspace MCP services across multiple deployment surfaces.",
+  "description": "An advanced, hands-on masterclass for DevOps Leads and Platform Engineers. Master the architecture, deployment, and orchestration of containerized Google Antigravity environments (agy-box) across remote cloud VMs. Learn how to configure private container registries behind restrictive corporate proxies, manage TLS/SSL certificate injection, and implement secure headless CI/CD execution loops with strict policy enforcement.",
   "highlights": [
     {
       "icon": "🛡️",

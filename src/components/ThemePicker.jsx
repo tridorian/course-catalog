@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Palette, Check } from 'lucide-react';
+import { Palette, Check, Volume2, VolumeX } from 'lucide-react';
+import * as themeAudio from '../services/themeAudio';
 
 const THEME_OPTIONS = [
   { id: 'dark', label: '🌿 Tridorian Dark', swatches: ['#050805', '#4ade80', '#f0fdf4'] },
@@ -20,6 +21,7 @@ const ThemePicker = ({ theme, setTheme }) => {
     }
   });
   const dropdownRef = useRef(null);
+  const [audioState, setAudioState] = useState(() => themeAudio.getAudioState());
 
   useEffect(() => {
     if (isCursorEnabled) {
@@ -35,6 +37,19 @@ const ThemePicker = ({ theme, setTheme }) => {
   const toggleCursor = (e) => {
     e.stopPropagation();
     setIsCursorEnabled(!isCursorEnabled);
+  };
+
+  const handleToggleMute = (e) => {
+    e.stopPropagation();
+    const muted = themeAudio.toggleMute();
+    setAudioState(prev => ({ ...prev, isMuted: muted }));
+  };
+
+  const handleVolumeChange = (e) => {
+    e.stopPropagation();
+    const vol = parseFloat(e.target.value);
+    themeAudio.setVolume(vol);
+    setAudioState(prev => ({ ...prev, volume: vol }));
   };
 
   // Close dropdown when clicking outside
@@ -94,6 +109,7 @@ const ThemePicker = ({ theme, setTheme }) => {
                   key={opt.id}
                   onClick={() => {
                     setTheme(opt.id);
+                    themeAudio.playThemeMusic(opt.id);
                     setIsOpen(false);
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
@@ -125,10 +141,10 @@ const ThemePicker = ({ theme, setTheme }) => {
             })}
           </div>
           
-          <div className="p-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+          <div className="p-2 border-t space-y-1.5" style={{ borderColor: 'var(--border-subtle)' }}>
             <button
               onClick={toggleCursor}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono font-bold hover:bg-muted/50 transition-all duration-150"
+              className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-mono font-bold hover:bg-muted/50 transition-all duration-150"
               style={{
                 color: 'var(--text-muted)',
               }}
@@ -150,6 +166,32 @@ const ThemePicker = ({ theme, setTheme }) => {
                 />
               </div>
             </button>
+
+            <div className="px-3 py-1 flex items-center justify-between gap-2 text-xs font-mono font-bold" style={{ color: 'var(--text-muted)' }}>
+              <button 
+                onClick={handleToggleMute}
+                className="flex items-center gap-1.5 hover:text-accent-text transition-colors focus:outline-none"
+                title={audioState.isMuted ? "Unmute Music" : "Mute Music"}
+              >
+                {audioState.isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
+                <span>Ambient Music</span>
+              </button>
+            </div>
+            <div className="px-3 pb-1 flex items-center gap-2">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={audioState.volume}
+                onChange={handleVolumeChange}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full h-1 bg-muted rounded-lg appearance-none cursor-pointer accent-accent"
+                style={{
+                  accentColor: 'var(--accent-bg)',
+                }}
+              />
+            </div>
           </div>
 
           <div

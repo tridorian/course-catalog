@@ -21,35 +21,36 @@
   ],
   "modules": [
     {
-      "title": "1. Introduction to Human-in-the-Loop Collaboration",
+      "title": "1. Intro to Human-in-the-Loop",
       "blocks": [
         {
           "type": "p",
-          "content": "Welcome to **AGY-104: Agent-Human Collaboration Loops**. In the landscape of agentic engineering, autonomous agents are highly capable but operate under deterministic constraints and lack human contextual judgment. Human-in-the-loop (HITL) is a design pattern that inserts human oversight at critical validation junctions, ensuring that the agent does not execute destructive, insecure, or incorrect actions."
+          "content": "Welcome to **AGY-104: Agent-Human Collaboration Loops**. In the landscape of agentic engineering, autonomous agents are highly capable but operate under deterministic constraints and lack human contextual judgment. Human-in-the-loop (HITL) is a core design pattern that inserts human oversight at critical validation junctions, ensuring that the agent does not execute destructive, insecure, or incorrect actions."
         },
         {
           "type": "p",
-          "content": "For instance, when an agent runs commands that modify your local system or perform file deletion, standard safety protocols require the user to explicitly confirm before the command is sent to the shell. This course teaches you how to establish these safety gates, author instructions that set boundary lines, and control the agent's flow of execution."
+          "content": "Unlike traditional chat-based AI assistants that act synchronously and line-by-line, Google Antigravity uses an agent-first architecture. It assumes the agent is an autonomous actor that can plan, browse the web, write code, and run tests independently. However, giving an AI agent free access to your filesystem and shell requires strict safety boundaries."
         },
         {
           "type": "h2",
-          "content": "Core Patterns of Agent-Human Collaboration"
+          "content": "Core Security Presets in Antigravity"
         },
         {
           "type": "p",
-          "content": "Collaboration between human operators and AI agents typically follows one of three distinct interaction styles:"
+          "content": "When initializing a workspace or launching Antigravity, you must choose how much autonomy to grant. These configurations are grouped into four security presets:"
         },
         {
           "type": "list",
           "items": [
-            "**Synchronous Steering:** The human works alongside the agent in real-time, providing ongoing chat guidance and refining goals as the task progresses.",
-            "**Asynchronous Checkpoints:** The agent runs independently in the background, pausing when it reaches a protected action or requires verification.",
-            "**State Inspection:** The user opens the current workspace state to verify files, run diagnostics, and confirm correctness before approving the next agent cycle."
+            "**Secure Mode:** Enforces strict execution limits, blocks external network requests, and requires approval for almost all filesystem and terminal operations. Ideal for untrusted repositories or sensitive files.",
+            "**Review-Driven Development (Recommended):** The optimal balance for day-to-day work. The agent has execution capabilities but stops frequently to request human approval for critical milestones, plan updates, and terminal commands.",
+            "**Agent-Driven Development:** The agent operates with high autonomy, executing actions and commands without stopping for manual approvals. This preset is highly efficient but carries severe risks if run outside a sandbox.",
+            "**Custom Configuration:** Allows you to micro-configure individual policies for artifacts, terminal execution, file system access, and browser capabilities."
           ]
         },
         {
           "type": "info",
-          "content": "In AGY SDK systems, security is not a post-process; it is integrated directly into the runtime execution loop through permission controls and directory boundaries. This ensures that the agent always remains a helper rather than a hazard."
+          "content": "Preserving local workstation safety is the highest priority. When operating in Review-Driven Development mode, the agent creates a shared context where you act as the architect and supervisor, confirming plans before they run."
         },
         {
           "type": "h2",
@@ -57,16 +58,42 @@
         },
         {
           "type": "p",
-          "content": "**Question 1:** What is the primary purpose of Human-in-the-Loop (HITL) design in agentic engineering?\n\n- A) To eliminate the need for autonomous agents entirely\n- B) To run agents at maximum speed without safety constraints\n- C) To place human checkpoints at critical junctions to verify actions, ensuring security and correctness\n- D) To automate the collection of user keystrokes for training models"
+          "content": "**Question 1:** Which security preset is recommended for standard development work to balance automation speed with safety?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A) Agent-Driven Development",
+            "B) Secure Mode",
+            "C) Review-Driven Development",
+            "D) Custom Configuration"
+          ]
         },
         {
           "type": "info",
-          "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Human-in-the-Loop validation is a safety-first architecture that inserts human review at critical boundaries (such as terminal executions or file writes) to prevent destructive actions and guide agents toward the correct outcome."
+          "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Review-Driven Development is the recommended preset because it frequently prompts the user for review at critical checkpoints (such as terminal commands or plan changes), allowing developers to steer the agent while preventing unauthorized actions."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2:** What is the fundamental difference between traditional AI chat assistants and agent-first platforms like Antigravity?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A) Traditional assistants do not use LLMs, while agentic platforms do.",
+            "B) Agentic platforms run synchronously line-by-line, whereas chat assistants run asynchronously.",
+            "C) Agentic platforms run autonomous, asynchronous loops to plan and execute tasks, necessitating security gates.",
+            "D) Traditional assistants require containerization, while agentic platforms always run on the host."
+          ]
+        },
+        {
+          "type": "info",
+          "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Agent-first platforms execute autonomous loops (planning, writing, testing, browsing) asynchronously, meaning they require built-in checkpoints and permission lists to keep the host secure."
         }
       ]
     },
     {
-      "title": "2. Composing Clear and Standardized Instructions",
+      "title": "2. Composing Standardized Instructions",
       "blocks": [
         {
           "type": "p",
@@ -79,7 +106,7 @@
         {
           "type": "code",
           "language": "markdown",
-          "content": "# Workspace Execution Rules & Guidelines\n\n## 1. Directory Boundaries\n- Primary Workspace: `/var/home/wtg/Repos/project-sandbox`\n- PROHIBITED DIRECTORIES: Do NOT access directories outside the workspace (e.g., `/etc`, `/tmp`, `/home/wtg/.ssh`).\n\n## 2. Command Permissions\n- ALLOWED: `npm run build`, `npm test`, `git status`, `git diff`\n- PROHIBITED: `rm -rf` on parent directories, `curl` executing remote scripts, `chmod` modifications.\n\n## 3. Execution Verification\n- After making modifications to any code, the agent MUST run the test suite using `npm test` and output the test summary before requesting completion."
+          "content": "# Workspace Execution Rules & Guidelines\n\n## 1. Directory Boundaries\n- Primary Workspace: `/var/home/wtg/Repos/project-sandbox`\n- PROHIBITED DIRECTORIES: Do NOT access directories outside the workspace (e.g., `/etc`, `/tmp`, `/home/wtg/.ssh`, `/var/log`).\n\n## 2. Command Permissions\n- ALLOWED: `npm run build`, `npm test`, `git status`, `git diff`\n- PROHIBITED: `rm -rf` on parent directories, `curl` executing remote scripts, `chmod` modifications.\n\n## 3. Execution Verification\n- After making modifications to any code, the agent MUST run the test suite using `npm test` and output the test summary before requesting completion."
         },
         {
           "type": "p",
@@ -87,40 +114,99 @@
         },
         {
           "type": "h2",
+          "content": "🛡️ Git Version Control for Workspace Rules"
+        },
+        {
+          "type": "p",
+          "content": "To prevent unauthorized local modifications, shell overrides, or prompt injection tampering, workspace rule files (`.gemini.md`) MUST be tracked in Git. Treating rules as code ensures that every boundary alteration goes through a rigorous peer-review and CI/CD validation process. Commits that modify rules should be cryptographically signed using GPG."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# 1. Initialize git tracking for workspace instructions\ngit init\ngit add .gemini.md\n\n# 2. Commit the peer-reviewed rules using a GPG signed commit\ngit commit -S -m \"security: enforce approved agent workspace rules\"\n\n# 3. Use pre-commit hooks to verify .gemini.md has not been altered without review\ncat << 'EOF' > .git/hooks/pre-commit\n#!/bin/sh\n# Check if .gemini.md matches approved security hash\nAPPROVED_HASH=\"a6d34e9e0...\"\nCURRENT_HASH=$(sha256sum .gemini.md | awk '{print $1}')\nif [ \"$CURRENT_HASH\" != \"$APPROVED_HASH\" ]; then\n  echo \"[ERROR] Unauthorized modification to .gemini.md rules detected!\"\n  exit 1\nfi\nEOF\nchmod +x .git/hooks/pre-commit"
+        },
+        {
+          "type": "warning",
+          "content": "If you write instructions that allow file writing or command execution outside the workspace, you bypass the default security boundaries. Only use absolute, literal paths in folder rule definitions to avoid path traversal bugs."
+        },
+        {
+          "type": "h2",
           "content": "Check Your Understanding"
         },
         {
           "type": "p",
-          "content": "**Question 1:** Why is it critical to explicitly specify prohibited directories in workspace instructions?\n\n- A) It speeds up the agent's computation by narrowing the search space\n- B) It prevents the agent from reading or writing sensitive files (like SSH keys or system configurations) if it encounters a path traversal bug\n- C) It is a hard requirement for the agent to boot up\n- D) It enables the agent to automatically gain administrator permissions"
+          "content": "**Question 1:** Why is it critical to explicitly specify prohibited directories in workspace instructions and track the rules file in Git?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A) It speeds up the agent's computation by narrowing the search space",
+            "B) It prevents the agent from accessing sensitive files, and Git tracking prevents unauthorized local overrides or malicious rule modifications",
+            "C) It is a hard requirement for the agent to boot up",
+            "D) It enables the agent to automatically gain administrator permissions"
+          ]
         },
         {
           "type": "info",
-          "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Defining explicit boundary rules, such as folder exclusion lists, establishes a clear path-traversal barrier. If the agent is instructed to write files, it will check these rules to verify it does not access or overwrite sensitive personal configuration paths."
+          "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Explicit folder rules prevent path traversal, and tracking these rules under Git version control ensures auditability and peer reviews, preventing malicious local modifications or prompt-based bypasses."
         }
       ]
     },
     {
-      "title": "3. Managing Terminal Execution Approvals",
+      "title": "3. Terminal Execution Approvals",
       "blocks": [
         {
           "type": "p",
-          "content": "AGY supports two primary terminal execution approval modes: manual approval and auto-approve mode. In manual approval mode, every command proposed by the agent is presented to the user with a prompt. The user must review the command line and approve or reject it. In auto-approve mode, commands run without manual prompt check-offs."
-        },
-        {
-          "type": "p",
-          "content": "The selection of these modes is governed by the environment. Tier 1 (Native Local Install) should ALWAYS use manual approvals, as the agent shares the user's host shell and environment variables. Tier 3 (agy-box Container Sandbox) isolates the agent in an OCI container, making `--auto-approve` safe because any command execution is firewalled inside the container."
-        },
-        {
-          "type": "warning",
-          "content": "Running the agent with the --auto-approve flag on a Tier 1 native installation grants full shell control to the LLM. If the model hallucinations lead to running a dangerous script, it can overwrite your local environment. Always use containerization for auto-approval workflows."
+          "content": "Giving an AI agent access to your file system, terminal, and browser is a double-edged sword. It enables autonomous code generation, debugging, and deployment but also opens vectors for prompt injection and data exfiltration. Antigravity addresses this through a robust permissions and policy framework."
         },
         {
           "type": "h2",
-          "content": "Configuring Execution Approvals"
+          "content": "The Three Core Agent Policies"
         },
         {
           "type": "p",
-          "content": "To configure execution approvals in your project workspace, you can define a `config.json` file inside the `.gemini` folder or pass parameters directly to the agy CLI tool. Let's look at the configuration payload structure:"
+          "content": "Antigravity relies on three main policy dimensions configured in settings under the **Agent** section:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Artifact Review Policy:** Governs how artifacts (plans, diffs, results) are approved. Options are: *Always Proceed* (agent never asks for reviews, highest risk), *Agent Decides* (agent prompts for review based on task complexity), and *Request Review* (always prompts the user before executing changes - recommended).",
+            "**Terminal Command Auto Execution Policy:** Dictates whether shell commands are executed automatically. Options are: *Always Proceed* (commands execute immediately unless matching the Deny list), and *Request Review* (always asks for confirmation unless matching the Allow list).",
+            "**JavaScript Execution Policy:** Controls browser-based JS operations. Options are: *Always Proceed* (runs JS in visual scraper tests automatically), *Request Review* (stops for approval before running JS), and *Disabled* (never executes JS inside the agent browser)."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Unified Permissions System: action(target)"
+        },
+        {
+          "type": "p",
+          "content": "Every agent action is evaluated against three priority lists: **Allow** (auto-approved), **Deny** (blocked immediately), and **Ask** (pauses for manual approval). Rules follow the format `action(target)` where:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`command(prefix)`: Matches terminal commands by prefix. E.g. `command(git)` matches `git add`, `git commit`.",
+            "`read_file(/absolute/path)`: Matches files/directories under the absolute path. No globs or `~` are supported.",
+            "`write_file(/absolute/path)`: Matches file write targets (implicitly grants `read_file` for that path).",
+            "`read_url(domain)`: Matches specific domains and subdomains (e.g. `read_url(github.com)`).",
+            "`mcp(server/tool)`: Matches specific Model Context Protocol tools (e.g. `mcp(filesystem/*)`)."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Positive vs. Negative Security Models"
+        },
+        {
+          "type": "p",
+          "content": "Using these policies, you can design two security postures:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Positive Security Model (Safe):** Set the terminal policy to *Request Review* and configure a whitelist in the Allow section (e.g. `command(ls)`, `command(git status)`). All other commands require explicit manual approval. This prevents catastrophic command executions.",
+            "**Negative Security Model (Risky):** Set the terminal policy to *Always Proceed* and configure a blacklist in the Deny section (e.g. `command(rm)`). While fast, this relies on you anticipating and pre-blocking every possible dangerous command. Use only inside a containerized sandbox."
+          ]
         },
         {
           "type": "code",
@@ -128,13 +214,30 @@
           "content": "{\n  \"execution\": {\n    \"sandbox_tier\": 3,\n    \"firewall_rules\": {\n      \"outbound_network\": \"restricted\",\n      \"allowed_domains\": [\"github.com\", \"npmjs.org\"]\n    },\n    \"approvals\": {\n      \"terminal_commands\": \"manual\",\n      \"file_write\": \"auto\",\n      \"network_access\": \"manual\"\n    }\n  }\n}"
         },
         {
+          "type": "warning",
+          "content": "Running the agent with the --auto-approve flag on a Tier 1 native installation grants full shell control to the LLM. If the model hallucinates and runs a dangerous script, it can compromise your workstation. Always use containerized sandboxes like agy-box for auto-approve workflows."
+        },
+        {
+          "type": "h2",
+          "content": "🔐 Cryptographically Signed, Immutable Action Logs"
+        },
+        {
           "type": "p",
-          "content": "Using the command line interface, the execution approval mode can be specified dynamically:"
+          "content": "Manual validation of agent proposals is vital, but security audits require an untamperable audit trail. If an agent executes commands or attempts to write files, Antigravity records all events into a cryptographically signed log file. Each log entry is hashed and chained to the hash of the preceding entry (forming a hash chain), and the entire block is signed using the developer's verified GPG key or a hardware security module (HSM)."
+        },
+        {
+          "type": "p",
+          "content": "This prevents either a compromised agent session or local shell bypass from editing or erasing its historical records, assuring absolute audit integrity for corporate compliance teams."
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"event_id\": 105,\n  \"timestamp\": \"2026-06-03T19:25:00Z\",\n  \"action\": \"run_command\",\n  \"command\": \"npm run build\",\n  \"previous_hash\": \"c7b139ec42b918a93...\",\n  \"hash\": \"9e742df8b321c1724...\",\n  \"signature\": \"MEYCIQCcPjW48a...\"\n}"
         },
         {
           "type": "code",
           "language": "bash",
-          "content": "# Start the agent with manual approval gates (Safe default)\nagy task run --task \"Refactor login validation\" --approvals manual\n\n# Start the agent in auto-approve mode (Use ONLY inside containerized sandboxes like agy-box)\nagy task run --task \"Run linting and format files\" --auto-approve"
+          "content": "# Verify the integrity and cryptographic signatures of the local execution log\nagy audit verify --log-file ~/.antigravity/logs/session-active.jsonl --public-key keys/developer-audit.pub"
         },
         {
           "type": "h2",
@@ -142,16 +245,42 @@
         },
         {
           "type": "p",
-          "content": "**Question 1:** Under what condition is it safe to use the `--auto-approve` execution flag?\n\n- A) Anytime the developer is too busy to click 'Approve'\n- B) Only when running inside an isolated sandbox container (such as agy-box) protected by a strict container firewall\n- C) Only when running as a superuser/root on a production host\n- D) Never, under any circumstances"
+          "content": "**Question 1:** Under what condition is it safe to use the `--auto-approve` execution flag?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A) Anytime the developer is too busy to click 'Approve'",
+            "B) Only when running inside an isolated sandbox container (such as agy-box) protected by a strict container firewall",
+            "C) Only when running as a superuser/root on a production host",
+            "D) Never, under any circumstances"
+          ]
         },
         {
           "type": "info",
           "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Auto-approve mode eliminates human confirmation prompts. It should only be active inside containerized sandboxes (like agy-box) that insulate your host system from execution anomalies."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2:** Which configuration represents a positive security model in Antigravity?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A) Setting policies to 'Always Proceed' and adding 'command(rm)' to the Deny list",
+            "B) Disabling the agent completely",
+            "C) Setting policies to 'Request Review' and defining whitelisted commands in the Allow list",
+            "D) Granting the agent root access while disabling network interfaces"
+          ]
+        },
+        {
+          "type": "info",
+          "content": "**Correct Answer: C**\n\n**Immediate Feedback:** A positive security model is based on whitelisting: we start by requesting review for everything and explicitly allow only verified, safe prefixes (e.g. `command(ls)` or `command(git)`)."
         }
       ]
     },
     {
-      "title": "4. Active Steering: Pausing, Redirecting, and Resuming",
+      "title": "4. Active Steering & Pausing",
       "blocks": [
         {
           "type": "p",
@@ -180,11 +309,32 @@
         },
         {
           "type": "h2",
+          "content": "Steering Use Cases"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Infinite Debugging Loops:** When the agent repeatedly executes the same compile or test command, trying the same failed fix. Pausing and pointing the agent to the actual bug saves significant token usage.",
+            "**Directory Crawl Drift:** When the agent begins scanning system or node_modules files. Pause, send a feedback redirect, and instruct it to stick to specific file paths.",
+            "**Unintended Code Refactoring:** When the agent starts rewriting files outside the task scope. Pause, instruct it to revert non-essential changes, and resume."
+          ]
+        },
+        {
+          "type": "h2",
           "content": "Check Your Understanding"
         },
         {
           "type": "p",
-          "content": "**Question 1:** If an agent is stuck in an infinite debugging loop trying to fix a test failure, what is the best collaborative response?\n\n- A) Force quit the entire terminal and start the workspace setup over\n- B) Pause the task, send feedback redirecting the agent to the specific bug location, and resume\n- C) Let it run indefinitely until it resolves the error or runs out of tokens\n- D) Change the testing rules to ignore all failures"
+          "content": "**Question 1:** If an agent is stuck in an infinite debugging loop trying to fix a test failure, what is the best collaborative response?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A) Force quit the entire terminal and start the workspace setup over",
+            "B) Pause the task, send feedback redirecting the agent to the specific bug location, and resume",
+            "C) Let it run indefinitely until it resolves the error or runs out of tokens",
+            "D) Change the testing rules to ignore all failures"
+          ]
         },
         {
           "type": "info",
@@ -193,7 +343,7 @@
       ]
     },
     {
-      "title": "5. End-to-End Collaboration Lab & Loop Verification",
+      "title": "5. End-to-End Collaboration Lab",
       "blocks": [
         {
           "type": "p",
@@ -210,7 +360,7 @@
             "Run a task with manual approval controls.",
             "Approve standard commands and reject a dangerous command.",
             "Pause, redirect, and resume execution to fix a code bug.",
-            "Verify task completion."
+            "Verify task completion and workspace boundaries."
           ]
         },
         {
@@ -224,7 +374,7 @@
         {
           "type": "code",
           "language": "bash",
-          "content": "# Create the workspace folder\nmkdir -p /var/home/wtg/Repos/lab-collab-loop\ncd /var/home/wtg/Repos/lab-collab-loop\n\n# Create a javascript file with a syntax bug (missing parenthesis)\necho \"function calculateTotal(price) { return price * 1.08\" > calculator.js\n\n# Create the workspace rules file\ncat << 'EOF' > .gemini.md\n# Workspace Rules\n- Always run code tests via node command\n- Do NOT delete calculator.js\nEOF"
+          "content": "# Create the workspace folder\nmkdir -p /var/home/wtg/Repos/lab-collab-loop\ncd /var/home/wtg/Repos/lab-collab-loop\n\n# Create a javascript file with a syntax bug (missing parenthesis)\necho \"function calculateTotal(price) { return price * 1.08\" > calculator.js\n\n# Create the workspace rules file\ncat << 'EOF' > .gemini.md\n# Workspace Rules\n- Always run code tests via node command\n- Do NOT delete calculator.js\n- Do NOT access folders outside /var/home/wtg/Repos/lab-collab-loop\nEOF"
         },
         {
           "type": "p",
@@ -241,7 +391,7 @@
         },
         {
           "type": "info",
-          "content": "If the agent proposes `node calculator.js`, enter `y` (Yes). If the agent proposes a dangerous or non-compliant command, enter `n` (No) and type corrective feedback."
+          "content": "If the agent proposes `node calculator.js`, enter `y` (Yes). If the agent proposes a dangerous or non-compliant command (such as `rm calculator.js` or attempting to list external directories), enter `n` (No) and type corrective feedback."
         },
         {
           "type": "p",
@@ -262,7 +412,16 @@
         },
         {
           "type": "p",
-          "content": "**Question 1:** If the agent proposes a command that you reject during manual approval, what should you do?\n\n- A) Press Ctrl+C to kill the engine and reinstall\n- B) Reject the command, select the option to provide feedback, and explain why the command is rejected so the agent can propose an alternative\n- C) Approve the command anyway and fix the damage afterward\n- D) Ignore the prompt and wait for it to time out"
+          "content": "**Question 1:** If the agent proposes a command that you reject during manual approval, what should you do?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A) Press Ctrl+C to kill the engine and reinstall",
+            "B) Reject the command, select the option to provide feedback, and explain why the command is rejected so the agent can propose an alternative",
+            "C) Approve the command anyway and fix the damage afterward",
+            "D) Ignore the prompt and wait for it to time out"
+          ]
         },
         {
           "type": "info",

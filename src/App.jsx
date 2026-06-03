@@ -27,6 +27,7 @@ import { loadProgress, saveCourseProgress, syncOfflineQueue } from './services/g
 import { getAccessToken } from './services/googleAuth';
 import ThemePicker from './components/ThemePicker';
 import { useTheme } from './hooks/useTheme';
+import * as themeAudio from './services/themeAudio';
 import BadgeCelebration from './components/BadgeCelebration';
 
 // --- Main App Component ---
@@ -635,6 +636,40 @@ function AppContent({ theme, setTheme }) {
 
 export default function App() {
   const { theme, setTheme } = useTheme();
+
+  // Unlock browser audio context on user interaction and start theme music
+  useEffect(() => {
+    let unlocked = false;
+
+    const handleInteraction = () => {
+      if (unlocked) return;
+      unlocked = true;
+      console.log(`[Theme Audio] Interaction detected. Launching theme music: ${theme}`);
+      themeAudio.playThemeMusic(theme);
+
+      // Clean up event listeners immediately
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+
+    window.addEventListener('click', handleInteraction);
+    window.addEventListener('keydown', handleInteraction);
+
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+  }, [theme]);
+
+  // Transition theme music dynamically when theme state changes (if already initialized/playing)
+  useEffect(() => {
+    const audioState = themeAudio.getAudioState();
+    if (audioState.currentLoopId && audioState.currentLoopId !== theme) {
+      console.log(`[Theme Audio] Theme transitioned from ${audioState.currentLoopId} to ${theme}. Updating synthesizer...`);
+      themeAudio.playThemeMusic(theme);
+    }
+  }, [theme]);
+
   return (
     <Routes>
       <Route path="/" element={<Dashboard theme={theme} setTheme={setTheme} />} />

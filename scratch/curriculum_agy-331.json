@@ -129,7 +129,12 @@
         },
         {
           "type": "p",
-          "content": "Running containers as root is a significant vulnerability for agent deployments. If the container engine runs with root privileges (as is common with default Docker configurations), any container breakout vulnerability instantly yields root control over the host. L300 platform engineering mandates rootless container execution. Under Podman or rootless Docker, the container engine runs entirely within the unprivileged user's namespace, mapping the container's virtual root user to a standard unprivileged user ID on the host."
+          "content": "Running containers as root is a significant vulnerability for agent deployments. If the container engine runs with root privileges (as is common with default Docker configurations), any container breakout vulnerability instantly yields root control over the host. L300 platform engineering mandates rootless container execution. Under Podman, the container engine runs entirely within the unprivileged user's namespace, mapping the container's virtual root user to a standard unprivileged user ID on the host. This prevents host filesystem takeover and root privilege escalation."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# 1. Install Podman on the host workstation\nsudo apt-get update && sudo apt-get install -y podman\n\n# 2. Verify Podman is running in rootless mode for the current user\npodman info | grep -i rootless\n# Expected output: rootless: true\n\n# 3. Configure the rootless network backend (pasta or slirp4netns) to prevent host interface access\ncat << 'EOF' > ~/.config/containers/containers.conf\n[network]\ndefault_network = \"podman\"\nnetwork_backend = \"netavark\"\nEOF"
         },
         {
           "type": "info",
@@ -141,12 +146,12 @@
         },
         {
           "type": "p",
-          "content": "Rootless container runtimes map virtual UIDs inside the container to ranges of subordinate UIDs on the host system. These allocations are controlled by two system configuration files: '/etc/subuid' and '/etc/subgid'. Verify that your host user has adequate namespace allocations:"
+          "content": "Rootless container runtimes map virtual UIDs inside the container to ranges of subordinate UIDs on the host system. These allocations are controlled by `/etc/subuid` and `/etc/subgid`. If allocations are missing, you must generate them to allow namespace mapping:"
         },
         {
           "type": "code",
           "language": "bash",
-          "content": "# View the subordinate UID maps allocated to your host user\ncat /etc/subuid\n# Expected output format: <username>:<start_uid>:<range_size>\n# Example: wtg:100000:65536\n\n# View subordinate GID maps\ncat /etc/subgid\n# Example: wtg:100000:65536"
+          "content": "# Allocate a range of 65536 subordinate UIDs/GIDs starting at 100000 for your user\n# Execute this on the host system:\nsudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USER\n\n# Update namespaces config to activate the mappings\npodman system migrate\n\n# Verify subordinate maps\ncat /etc/subuid\ncat /etc/subgid"
         },
         {
           "type": "h2",
@@ -254,11 +259,36 @@
         {
           "type": "code",
           "language": "ini",
-          "content": "[agy-sandbox]\nimage=ghcr.io/wtg-codes/agy-box-image:latest\n# Redirect the container's home directory to a dedicated sandbox folder\nhome=/var/home/wtg/sandbox_home\nstart_now=true\ninit=false\nnvidia=false\npull=false\n\n# Drop host integrations and isolate namespaces\nunshare_netns=true\nunshare_ipc=true\nunshare_dev=true\n\n# Mount ONLY the target project workspace folder instead of the entire home directory\nvolume=/var/home/wtg/workspace:/workspace:rw"
+          "content": "[agy-sandbox]\nimage=ghcr.io/wtg-codes/agy-box-image:v1.23.2\n# Redirect the container's home directory to a dedicated sandbox folder\nhome=/var/home/wtg/sandbox_home\nstart_now=true\ninit=false\nnvidia=false\npull=false\n\n# Drop host integrations and isolate namespaces\nunshare_netns=true\nunshare_ipc=true\nunshare_dev=true\n\n# Mount ONLY the target project workspace folder instead of the entire home directory\nvolume=/var/home/wtg/workspace:/workspace:rw\n\n# Confine the container using AppArmor and SELinux labels\nsecurity_opt=apparmor=distrobox-hardened\nsecurity_opt=label=type:container_t,label=level:s0:c100,c200"
         },
         {
           "type": "h3",
-          "content": "3.4 Assembling and Launching the Sandbox"
+          "content": "3.4 Hardening with AppArmor and SELinux Profiles"
+        },
+        {
+          "type": "p",
+          "content": "To prevent an agent that achieves code execution from exploiting kernel vulnerabilities, enforce MAC (Mandatory Access Control) policies using AppArmor or SELinux on the host system."
+        },
+        {
+          "type": "p",
+          "content": "**1. Hardening with AppArmor:** Write a custom profile restricting the container engine from executing risky operations. Define the profile `/etc/apparmor.d/containers/distrobox-hardened`:"
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "content": "# /etc/apparmor.d/containers/distrobox-hardened\nprofile distrobox-hardened flags=(attach_disconnected,mediate_deleted) {\n  # Inherit default container permissions\n  include <abstractions/base>\n  include <abstractions/nameservice>\n\n  # Deny raw sockets, trace operations, and mount overrides\n  deny network raw,\n  deny ptrace,\n  deny mount,\n  deny /sys/firmware/** r,\n  deny /proc/sysrq-trigger w,\n}"
+        },
+        {
+          "type": "p",
+          "content": "Load the profile into the kernel: `sudo apparmor_parser -r /etc/apparmor.d/containers/distrobox-hardened`."
+        },
+        {
+          "type": "p",
+          "content": "**2. Hardening with SELinux:** When running Podman on Fedora/RHEL hosts, assign a targeted domain (`container_t`) and set explicit MCS (Multi-Category Security) categories (like `s0:c100,c200`) using Podman security flags. This confines the agent process so it cannot read other containers' data or write to host system contexts."
+        },
+        {
+          "type": "h3",
+          "content": "3.5 Assembling and Launching the Sandbox"
         },
         {
           "type": "p",
@@ -271,7 +301,7 @@
         },
         {
           "type": "h2",
-          "content": "3.5 Inside the Sandbox: Verification Checklist"
+          "content": "3.6 Inside the Sandbox: Verification Checklist"
         },
         {
           "type": "p",
@@ -288,7 +318,7 @@
         },
         {
           "type": "h2",
-          "content": "3.6 Check Your Understanding"
+          "content": "3.7 Check Your Understanding"
         },
         {
           "type": "p",

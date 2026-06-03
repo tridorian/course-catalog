@@ -128,12 +128,12 @@
         },
         {
           "type": "p",
-          "content": "Jules VM provisioning is defined using YAML or JSON manifest files. These manifests describe the machine shape (vCPUs, RAM), base disk image, network settings, and bootstrap shell scripts. Below is an example of a production-ready provisioning configuration for a build pipeline worker."
+          "content": "Jules VM provisioning is defined using YAML or JSON manifest files. These manifests describe the machine shape (vCPUs, RAM), base disk image, network settings, and bootstrap shell scripts. Below is an example of a production-ready provisioning configuration for a build pipeline worker, incorporating cryptographic image verification to prevent supply chain tampering."
         },
         {
           "type": "code",
           "language": "yaml",
-          "content": "instance:\n  name: \"jules-worker-l300-{{uuid}}\"\n  zone: \"us-central1-a\"\n  machine_type: \"n2-standard-4\"\n  boot_disk:\n    image: \"projects/tridorian-prod/global/images/jules-hardened-v3\"\n    size_gb: 100\n    type: \"pd-ssd\"\n  network_interfaces:\n    - network: \"projects/tridorian-vpc/global/networks/jules-internal\"\n      subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"\n      access_config: [] # No public IP for strict egress lock\n  metadata:\n    items:\n      - key: \"jules-daemon-config\"\n        value: '{\"log_level\": \"info\", \"allowed_ports\": [80, 443], \"max_execution_time_sec\": 1800}'\n      - key: \"startup-script\"\n        value: |\n          #!/bin/bash\n          echo \"Initializing Jules Daemon...\"\n          systemctl start jules-agent.service"
+          "content": "instance:\n  name: \"jules-worker-l300-{{uuid}}\"\n  zone: \"us-central1-a\"\n  machine_type: \"n2-standard-4\"\n  boot_disk:\n    image: \"projects/tridorian-prod/global/images/jules-hardened-v3\"\n    # Cryptographic checksum/signature verification\n    image_verification:\n      checksum: \"sha256:d8c07e0c45d3420042a98f1f7e9185a0c7e2b104928f64bd72efcda485121b64\"\n      signature_key_url: \"https://keys.tridorian.com/jules-image-signing.pub\"\n      enforce: true\n    size_gb: 100\n    type: \"pd-ssd\"\n  network_interfaces:\n    - network: \"projects/tridorian-vpc/global/networks/jules-internal\"\n      subnetwork: \"regions/us-central1/subnetworks/jules-sandbox\"\n      access_config: [] # No public IP for strict egress lock\n  metadata:\n    items:\n      - key: \"jules-daemon-config\"\n        value: '{\"log_level\": \"info\", \"allowed_ports\": [80, 443], \"max_execution_time_sec\": 1800}'\n      - key: \"startup-script\"\n        value: |\n          #!/bin/bash\n          echo \"Initializing Jules Daemon...\"\n          systemctl start jules-agent.service"
         },
         {
           "type": "h2",
@@ -173,7 +173,7 @@
           "type": "list",
           "items": [
             "1. Navigate to your workspace directory and create a spec file named `jules-test-spec.yaml`.",
-            "2. Copy the YAML provisioning config shown above and modify the machine_type to `e2-medium` for development testing.",
+            "2. Copy the YAML provisioning config shown above, modify the machine_type to `e2-medium` for development testing, and ensure the image verification checksum is active.",
             "3. Authenticate with your GCP project using the gcloud command line tool: `gcloud auth application-default login`.",
             "4. Execute the agy vm spawn command pointing to your spec file: `agy vm spawn --pool dev-pool --config jules-test-spec.yaml`.",
             "5. Monitor the startup progress using `agy vm logs --id <instance_id>`.",
@@ -240,29 +240,29 @@
         },
         {
           "type": "p",
-          "content": "VM pooling rules are codified in a JSON policy document, typically managed by the Pool Manager. The policy outlines the min/max limits, scaling policies, and priority classes. Below is an example pool configuration:"
+          "content": "VM pooling rules are codified in a JSON policy document, typically managed by the Pool Manager. The policy outlines the min/max limits, scaling policies, resource costing parameters, tracking tags, and priority classes. Below is an example pool configuration:"
         },
         {
           "type": "code",
           "language": "json",
-          "content": "{\n  \"pool_id\": \"fast-testing-pool\",\n  \"display_name\": \"Isolated Fast Testing Pool\",\n  \"resource_limits\": {\n    \"machine_type\": \"c2-standard-4\",\n    \"cpu_quota\": 64,\n    \"memory_limit_gb\": 256\n  },\n  \"scaling_policy\": {\n    \"min_warm_instances\": 2,\n    \"max_instances\": 16,\n    \"scale_out_threshold_percent\": 85,\n    \"idle_timeout_seconds\": 300\n  },\n  \"routing_rules\": {\n    \"allowed_job_tags\": [\"unit-test\", \"lint\", \"security-scan\"],\n    \"priority_weight\": 100,\n    \"preemption_allowed\": true\n  }\n}"
+          "content": "{\n  \"pool_id\": \"fast-testing-pool\",\n  \"display_name\": \"Isolated Fast Testing Pool\",\n  \"resource_limits\": {\n    \"machine_type\": \"c2-standard-4\",\n    \"cpu_quota\": 64,\n    \"memory_limit_gb\": 256,\n    \"max_monthly_budget_usd\": 500,\n    \"max_instance_runtime_seconds\": 600\n  },\n  \"billing_metadata\": {\n    \"cost_center\": \"agentic-engineering\",\n    \"project_id\": \"isolated-testing\",\n    \"tags\": {\n      \"owner\": \"devops-team\",\n      \"env\": \"sandbox-vpc\"\n    }\n  },\n  \"scaling_policy\": {\n    \"min_warm_instances\": 2,\n    \"max_instances\": 16,\n    \"scale_out_threshold_percent\": 85,\n    \"idle_timeout_seconds\": 300\n  },\n  \"routing_rules\": {\n    \"allowed_job_tags\": [\"unit-test\", \"lint\", \"security-scan\"],\n    \"priority_weight\": 100,\n    \"preemption_allowed\": true\n  }\n}"
         },
         {
           "type": "info",
-          "content": "Key Design Rule: Preemption mapping. Use preemptible VMs (or spot instances) for pools running quick testing and linting jobs to save up to 80% on compute costs. For deployment pipelines, always use non-preemptible dedicated pools."
+          "content": "Key Design Rule: Preemption and Cost Tagging. Use preemptible VMs (or spot instances) for pools running quick testing and linting jobs to save up to 80% on compute costs. Always attach resource usage tags (like cost_center) to instances to ensure accurate chargeback tracking."
         },
         {
           "type": "h2",
-          "content": "Resource Quotas & Egress Rules"
+          "content": "Resource Quotas, VPC Segmentation & Egress Rules"
         },
         {
           "type": "p",
-          "content": "Architects must implement strict VPC Firewall rules to protect the internal network from compromised VMs. Below are the gcloud commands to create a default-deny egress rule for the Jules VM subnetwork, followed by a specific rule allowing egress only to a secure internal repository proxy."
+          "content": "Architects must segment the network by deploying pools inside an isolated VPC, entirely separate from the corporate intranet. The following commands establish a segmented subnet, configure a default-deny egress firewall, and whitelists access to a trusted local artifact proxy."
         },
         {
           "type": "code",
           "language": "bash",
-          "content": "# Create a VPC firewall rule blocking all egress traffic from Jules VMs\ngcloud compute firewall-rules create deny-jules-egress \\\n  --network=\"tridorian-vpc\" \\\n  --action=\"DENY\" \\\n  --rules=\"all\" \\\n  --destination-ranges=\"0.0.0.0/0\" \\\n  --target-tags=\"jules-sandbox-vm\" \\\n  --priority=1000\n\n# Allow egress only to the secure internal repository proxy for dependency installation\ngcloud compute firewall-rules create allow-jules-proxy-egress \\\n  --network=\"tridorian-vpc\" \\\n  --action=\"ALLOW\" \\\n  --rules=\"tcp:443\" \\\n  --destination-ranges=\"10.128.0.50/32\" \\\n  --target-tags=\"jules-sandbox-vm\" \\\n  --priority=900"
+          "content": "# 1. Create a dedicated sandbox VPC network\ngcloud compute networks create jules-sandbox-vpc --subnet-mode=custom\n\n# 2. Add a segmented subnet for pool instances\ngcloud compute networks subnets create jules-sandbox-subnet \\\n  --network=jules-sandbox-vpc \\\n  --region=us-central1 \\\n  --range=10.240.0.0/24\n\n# 3. Apply default-deny egress rule to isolate VMs from the internet and internal networks\ngcloud compute firewall-rules create deny-all-egress \\\n  --network=\"jules-sandbox-vpc\" \\\n  --action=\"DENY\" \\\n  --rules=\"all\" \\\n  --destination-ranges=\"0.0.0.0/0\" \\\n  --target-tags=\"jules-agent-vm\" \\\n  --priority=1000\n\n# 4. Whitelist egress only to the local repository proxy IP\ngcloud compute firewall-rules create allow-proxy-egress \\\n  --network=\"jules-sandbox-vpc\" \\\n  --action=\"ALLOW\" \\\n  --rules=\"tcp:443\" \\\n  --destination-ranges=\"10.128.0.50/32\" \\\n  --target-tags=\"jules-agent-vm\" \\\n  --priority=900"
         },
         {
           "type": "h2",
@@ -271,11 +271,12 @@
         {
           "type": "list",
           "items": [
-            "1. Create a JSON file named `test-pool-policy.json` with a pool configuration similar to the example shown above, setting `min_warm_instances` to 1.",
+            "1. Create a JSON file named `test-pool-policy.json` with a pool configuration similar to the example shown above, setting `min_warm_instances` to 1 and configuring `billing_metadata`.",
             "2. Apply the policy to the Jules VM Pool Manager using the CLI command: `agy pool apply --config test-pool-policy.json`.",
-            "3. Verify that the warm standby VM is provisioned: `agy pool status --id fast-testing-pool`.",
-            "4. Run the gcloud firewall commands in your GCP terminal to establish the default-deny and proxy-allow egress policies.",
-            "5. Spawn a test VM and verify that egress to `10.128.0.50` is allowed while all other public internet traffic is dropped."
+            "3. Verify that the warm standby VM is provisioned and tagged: `agy pool status --id fast-testing-pool`.",
+            "4. Run the gcloud firewall commands in your GCP terminal to establish the isolated VPC, segmented subnet, and default-deny egress rules.",
+            "5. Spawn a test VM on the segmented subnet and verify that egress to `10.128.0.50` is allowed while all other public internet traffic is dropped.",
+            "6. Check cost tracking diagnostics by executing `agy billing track --pool fast-testing-pool` to verify cost aggregation based on billing tags."
           ]
         },
         {

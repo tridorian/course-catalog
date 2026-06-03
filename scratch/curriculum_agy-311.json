@@ -4,24 +4,24 @@
   "description": "Learn to programmatically automate agentic workflows using the Google Antigravity SDK. This course covers initiating stateful conversation loops, managing token streams (text and thinking tokens), injecting structured context arrays, enforcing response schemas for machine-to-machine integrations, and controlling execution using lifecycle hooks and custom tools in both Python and Node.js environments.",
   "highlights": [
     {
-      "icon": "\ud83d\udd27",
+      "icon": "🔧",
       "title": "Dual-Language Libraries",
       "description": "Gain hands-on experience using both the Python and Node.js SDK libraries with parallel code implementations."
     },
     {
-      "icon": "\ud83d\udd04",
-      "title": "Workspace Integration",
-      "description": "Detail how to interact programmatically with Google Workspace APIs (Drive, Docs, Sheets) and manage OAuth."
+      "icon": "🔄",
+      "title": "Context Arrays & History",
+      "description": "Learn to seed, inject, and persist complex conversation history arrays to maintain state across execution runs."
     },
     {
-      "icon": "\ud83c\udfaf",
-      "title": "Prompt Engineering",
-      "description": "Structure system instructions, user prompts, and context boundaries to ensure reliable agent executions."
+      "icon": "🎯",
+      "title": "Structured Schema Outputs",
+      "description": "Force agent outputs to match strict JSON schemas and Pydantic models for bulletproof system integrations."
     },
     {
-      "icon": "\ud83d\udeaa",
-      "title": "Autonomy Control",
-      "description": "Implement custom function tools, session persistence, and pre-execution lifecycle hooks for human-in-the-loop gating."
+      "icon": "🚪",
+      "title": "Lifecycle Hooks & Gates",
+      "description": "Implement human-in-the-loop approvals, handle runtime exceptions, and monitor thinking tokens dynamically."
     }
   ],
   "modules": [
