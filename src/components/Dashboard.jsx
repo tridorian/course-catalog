@@ -5,6 +5,7 @@ import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
 import * as googleAuth from '../services/googleAuth';
 import { checkUserRole } from '../services/roleManager';
 import ThemePicker from './ThemePicker';
+import ProfileModal from './ProfileModal';
 
 const Dashboard = ({ theme, setTheme }) => {
   const [catalog, setCatalog] = useState(null);
@@ -13,6 +14,7 @@ const Dashboard = ({ theme, setTheme }) => {
   const [trackProgress, setTrackProgress] = useState({});
   const [isConnected, setIsConnected] = useState(!!googleAuth.getAccessToken());
   const [role, setRole] = useState('student');
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,6 +107,13 @@ const Dashboard = ({ theme, setTheme }) => {
               <Icons.HelpCircle size={12} />
               Help & Troubleshooting
             </Link>
+            <button
+              onClick={() => setIsProfileOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+            >
+              <Icons.User size={12} />
+              My Profile
+            </button>
             <ThemePicker theme={theme} setTheme={setTheme} />
           </div>
           {role === 'admin' && (
@@ -203,6 +212,12 @@ const Dashboard = ({ theme, setTheme }) => {
           Tridorian Learning Platform v1.0
         </div>
       </div>
+
+      <ProfileModal 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+        catalog={catalog} 
+      />
     </div>
   );
 };
