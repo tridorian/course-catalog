@@ -10,13 +10,7 @@
       "modules": 5,
       "icon": "Rocket"
     },
-    {
-      "id": "gemini-cli",
-      "title": "Gemini CLI Deep Dive",
-      "description": "Advanced command-line AI orchestration with Gemini. Learn to leverage CLI tools for automated workflows and pipeline integration.",
-      "modules": 9,
-      "icon": "Terminal"
-    },
+
     {
       "id": "agy-102",
       "title": "AGY-102: The UI Landscape & Selection (L100)",
