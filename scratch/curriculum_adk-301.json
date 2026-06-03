@@ -1,0 +1,292 @@
+{
+  "course_id": "adk-301",
+  "title": "ADK-301: Agent-to-Agent (A2A) Orchestration",
+  "description": "Design and orchestrate multi-agent collaboration environments. Configure A2AServer routing, launch remote agents, and write discovery card manifests.",
+  "highlights": [
+    {
+      "icon": "🔀",
+      "title": "A2AServer Routing",
+      "description": "Master the deployment of central routing servers for multi-agent networking and task delegation."
+    },
+    {
+      "icon": "🌐",
+      "title": "Remote Bindings",
+      "description": "Register agents hosted on remote endpoints with your orchestration network as local services."
+    },
+    {
+      "icon": "🏷️",
+      "title": "Agent Manifests",
+      "description": "Author agent-card.json files containing dynamic capability and scope declarations."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. The Multi-Agent Paradigm & Orchestration Topologies",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Multi-Agent Systems & Architecture Topologies"
+        },
+        {
+          "type": "p",
+          "content": "Complex software engineering problems cannot be solved efficiently by a single model loop. Splitting tasks across focused, specialized agents increases precision, reduces input context usage, and enables parallel processing pipelines."
+        },
+        {
+          "type": "h2",
+          "content": "Multi-Agent Topology Models"
+        },
+        {
+          "type": "p",
+          "content": "Developers can configure agent communications using two primary structure topologies:"
+        },
+        {
+          "type": "grid",
+          "items": [
+            {
+              "icon": "Shuffle",
+              "title": "Hub-and-Spoke Topology",
+              "content": "A central coordinator agent receives user input, plans steps, delegating tasks to sub-agents, compiling output.",
+              "border": "#4ade80"
+            },
+            {
+              "icon": "Network",
+              "title": "Peer-to-Peer Mesh Topology",
+              "content": "Agents communicate directly, triggering callbacks and passing payloads autonomously based on state changes.",
+              "border": "#3b82f6"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "The A2A Protocol Architecture"
+        },
+        {
+          "type": "p",
+          "content": "The Agent-to-Agent (A2A) protocol defines how agents declare parameters, register endpoints, establish trust, and exchange structured JSON task payloads across local networks or public HTTP transports."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Which multi-agent topology uses a coordinator agent to process user inputs and delegate tasks?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Peer-to-Peer Mesh\n- B) Hub-and-Spoke\n- C) Circular Chain"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. In a Hub-and-Spoke model, a central coordinator coordinates routing and delegation between spokes."
+        }
+      ]
+    },
+    {
+      "title": "2. Launching the A2AServer Routing Daemon",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Deploying A2AServer Router"
+        },
+        {
+          "type": "p",
+          "content": "The `A2AServer` is the routing daemon that coordinates communication between agents. It acts as a local proxy, routes request envelopes, translates schemas, and handles message queue retries."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Configure a2a.yaml Routing Manifest"
+        },
+        {
+          "type": "p",
+          "content": "Create an orchestration configuration file to specify routing rules, ports, and allowed agent keys:"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "server:\n  port: 8090\n  host: \"localhost\"\n  auth_token: \"sec-key-9923\"\n\nrouting:\n  default_coordinator: \"hub-agent\"\n  agents:\n    - id: \"hub-agent\"\n      port: 8091\n    - id: \"sql-agent\"\n      port: 8092\n    - id: \"git-agent\"\n      port: 8093\n"
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Launch the routing server daemon"
+        },
+        {
+          "type": "p",
+          "content": "Start the server using the CLI commands to monitor incoming routes and connections:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk a2a-server start --config a2a.yaml"
+        },
+        {
+          "type": "info",
+          "title": "Monitoring routes",
+          "content": "A2AServer exposes a diagnostics panel on port 8090/health. You can inspect registered agent nodes, latency maps, and queue depths."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary role of the A2AServer routing daemon in an agent network?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It executes local Python tests.\n- B) It acts as a broker, routing request envelopes, managing message queues, and verifying authentication keys.\n- C) It is a web interface for rendering HTML pages."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. A2AServer manages message envelope exchanges, transport routes, security permissions, and connectivity states."
+        }
+      ]
+    },
+    {
+      "title": "3. Remote Agent Integration with RemoteA2aAgent",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Remote Agents with RemoteA2aAgent"
+        },
+        {
+          "type": "p",
+          "content": "Not all agents can run on a single local server. The `RemoteA2aAgent` library allows you to bind an agent running on a remote cloud server to your local system as if it were a local module."
+        },
+        {
+          "type": "h2",
+          "content": "Writing a Python Remote Registration Script"
+        },
+        {
+          "type": "p",
+          "content": "Below is a python script utilizing the ADK library to spin up an agent and register it securely with a running `A2AServer` hub:"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from google_adk.a2a import RemoteA2aAgent, AgentServer\n\n# Define the agent logic locally\ndef run_database_query(query: str) -> dict:\n    # Database logic...\n    return {\"result\": \"records query success\"}\n\n# Initialize the remote agent configuration\nremote_agent = RemoteA2aAgent(\n    agent_id=\"sql-agent\",\n    server_url=\"http://localhost:8090\",\n    auth_token=\"sec-key-9923\"\n)\n\n# Register capabilities and register tool functions\nremote_agent.register_tool(\"query_db\", run_database_query)\n\n# Connect and listen for tasks from the orchestrator hub\nif __name__ == \"__main__\":\n    print(\"Starting RemoteA2aAgent loop for sql-agent...\")\n    remote_agent.start_event_loop()"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: When using RemoteA2aAgent, how does the remote agent receive tasks from the central hub?"
+        },
+        {
+          "type": "p",
+          "content": "- A) By writing logs to a shared network hard drive.\n- B) It opens an event loop or long-poll WebSocket connection to the A2AServer router URL, awaiting task assignments.\n- C) By scheduling cron jobs on the server."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. RemoteA2aAgent establishes a persistent link to the routing hub server, listening for incoming events to execute."
+        }
+      ]
+    },
+    {
+      "title": "4. Dynamic Discovery with Agent Cards and Manifests",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Agent Discovery & Manifest Files"
+        },
+        {
+          "type": "p",
+          "content": "To enable dynamic task routing, the orchestrator needs to know what tools and operations an agent provides without hardcoding logic. This metadata is declared in the `agent-card.json` manifest file."
+        },
+        {
+          "type": "h2",
+          "content": "Agent Card Manifest Schema (`agent-card.json`)"
+        },
+        {
+          "type": "p",
+          "content": "Create an agent card manifest file that defines inputs, scopes, models, and contact endpoints for your agent:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"agent_id\": \"security-scanner-agent\",\n  \"version\": \"1.4.0\",\n  \"capabilities\": {\n    \"domains\": [\"source-code\", \"vulnerability-scan\", \"dependency-check\"],\n    \"languages\": [\"python\", \"go\", \"javascript\"]\n  },\n  \"inputs\": {\n    \"repository_path\": \"string\",\n    \"scan_level\": \"string\"\n  },\n  \"routing_endpoint\": \"http://localhost:8094/a2a/v1/execute\",\n  \"security_claims\": {\n    \"requires_network\": false,\n    \"write_permission_required\": true\n  }\n}"
+        },
+        {
+          "type": "info",
+          "title": "Dynamic Routing Rules",
+          "content": "The central hub parses all available card manifests in the directory. If a user asks to scan a repo for issues, the hub matches 'vulnerability-scan' to the scanner's card and routes the message."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary function of the agent-card.json file in a multi-agent system?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It compiles Javascript dependencies.\n- B) It acts as a declarative manifest describing an agent's capabilities, inputs, and endpoints to enable dynamic routing and discovery.\n- C) It stores model weights for execution."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. The agent-card.json provides the metadata required by routing engines to discover capabilities dynamically."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab - Implementing Collaborative Planning and Execution",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Collaborative Agent Pipeline"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will configure a cooperative multi-agent workflow: a Coordinator agent receives user instructions, plans actions, routes a scan request to a Security agent, and writes a compliance report file."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Launch the A2AServer Daemon"
+        },
+        {
+          "type": "p",
+          "content": "Create the local router config and launch the central daemon:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk a2a-server start --port 8090"
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Start the Security Sub-Agent"
+        },
+        {
+          "type": "p",
+          "content": "Start the security script which runs a local scan tool and registers itself with the router daemon on port 8090:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "python src/agents/security_agent.py --register-hub http://localhost:8090"
+        },
+        {
+          "type": "h2",
+          "content": "Step 3: Trigger the Orchestration Task"
+        },
+        {
+          "type": "p",
+          "content": "Run the coordinator agent CLI command to execute the plan. The coordinator calls the registered security agent, waits for results, and prints reports:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk run --coordinator --prompt \"Scan the codebase folder src/app and output compliance results.\""
+        },
+        {
+          "type": "info",
+          "title": "Trace Playback Verification",
+          "content": "Open http://localhost:8501 to check step tracing. You should see a routing loop: Coordinator -> Security Agent (runs tool) -> Coordinator (compiles report)."
+        }
+      ]
+    }
+  ]
+}

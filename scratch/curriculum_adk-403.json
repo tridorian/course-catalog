@@ -1,0 +1,175 @@
+{
+  "course_id": "adk-403",
+  "title": "ADK-403: Custom A2UI Component Development",
+  "description": "Build and register bespoke client-side React widgets and charts that compile into sandboxed A2UI rendering frames.",
+  "highlights": [
+    {
+      "icon": "⚛️",
+      "title": "React Extensions",
+      "description": "Author custom React UI templates using strict JSON Schema properties to accept variables from agents."
+    },
+    {
+      "icon": "📊",
+      "title": "Data Charting",
+      "description": "Integrate visualization charting libraries to represent compound table columns graphically."
+    },
+    {
+      "icon": "🪝",
+      "title": "Event Callbacks",
+      "description": "Define custom callback parameters to send user interaction variables back to the active agent run."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Understanding React rendering rules in A2UI",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "A2UI React Rendering Rules"
+        },
+        {
+          "type": "p",
+          "content": "A2UI is a declarative UI frame. It prevents custom Javascript execution inside templates to block XSS vector attacks. If you build custom components, they must compile down to a static component list and accept variables strictly through properties."
+        },
+        {
+          "type": "info",
+          "title": "Security Boundary",
+          "content": "Components cannot access global `window` or `document` variables. They communicate with the parent frame using serialized state updates."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why does A2UI restrict raw JavaScript execution inside custom component definitions?\n- A) To speed up React compiling.\n- B) To mitigate XSS vulnerabilities and maintain a secure sandboxed UI frame.\n- C) To support older browser versions.\n\nFeedback: Option B is correct. Sandboxing prevents malicious code execution."
+        }
+      ]
+    },
+    {
+      "title": "2. Authoring a custom React-based component",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Creating custom React components"
+        },
+        {
+          "type": "p",
+          "content": "To add a component, you define its UI structure using React and register its schema so the agent can discover it."
+        },
+        {
+          "type": "h2",
+          "content": "React Card Component Example"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "code": "import React from 'react';\n\nexport function InfoBadge({ label, status }) {\n  const color = status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';\n  return (\n    <div className={`p-2 rounded-md ${color}`}>\n      <span className=\"font-bold\">{label}</span>: {status}\n    </div>\n  );\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How are status styles applied dynamically in the badge component above?\n- A) Via global CSS overrides\n- B) By evaluating status properties to set conditional class string names\n- C) Using inline compiled canvas elements\n\nFeedback: Option B is correct. Conditionals adjust style classes dynamically."
+        }
+      ]
+    },
+    {
+      "title": "3. Binding client-side interactivity and event loops",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Client-Side Callbacks"
+        },
+        {
+          "type": "p",
+          "content": "When a user clicks a button inside your custom component, the event must be serialized and passed back to the agent session to continue execution."
+        },
+        {
+          "type": "h2",
+          "content": "Interactive Button Code"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "code": "export function ActionButton({ taskId, onTrigger }) {\n  return (\n    <button onClick={() => onTrigger({ action: 'approve', id: taskId })} className=\"px-4 py-2 bg-blue-500 text-white rounded\">\n      Approve Task\n    </button>\n  );\n}"
+        },
+        {
+          "type": "warning",
+          "title": "Serialization Limits",
+          "content": "Callback parameters must be plain JSON objects. Trying to pass complex DOM events or functions will fail serialization."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What type of data payloads are allowed in A2UI action triggers?\n- A) Raw HTML strings\n- B) Plain, JSON-serializable dictionaries\n- C) Active Javascript event handlers\n\nFeedback: Option B is correct. Serialization limits payloads to plain JSON."
+        }
+      ]
+    },
+    {
+      "title": "4. Designing rich file uploads and interactive charts",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Data Visualization Components"
+        },
+        {
+          "type": "p",
+          "content": "A2UI includes charting widgets out of the box, allowing agents to present telemetry, token consumption logs, or spreadsheet data to users."
+        },
+        {
+          "type": "h2",
+          "content": "A2UI Chart Schema Payload"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"type\": \"chart\",\n  \"chart_type\": \"line\",\n  \"data\": [\n    {\"label\": \"Jan\", \"value\": 120},\n    {\"label\": \"Feb\", \"value\": 210}\n  ]\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How does an agent render a line chart inside A2UI?\n- A) By generating a PNG image file.\n- B) By returning a structured 'chart' schema with labels and values.\n- C) By writing CSS templates.\n\nFeedback: Option B is correct. The framework parses schemas to render interactive widgets."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab: Implementing a real-time data visualization card",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Implementing a Real-Time Data Visualization Card"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will define a custom schema block for an agent. The agent will return this schema to display sales metrics."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the Schema Response"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"type\": \"a2ui-layout\",\n  \"version\": \"1.0\",\n  \"components\": [\n    {\n      \"type\": \"card\",\n      \"title\": \"Q1 Revenue Report\",\n      \"content\": \"Total Sales: $450,000\",\n      \"border\": \"#3b82f6\"\n    }\n  ]\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the main wrapper key for layouts returned in A2UI?\n- A) root-layout\n- B) a2ui-layout\n- C) canvas-frame\n\nFeedback: Option B is correct. a2ui-layout starts layout definitions."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,594 @@
+{
+  "course_id": "agy-202",
+  "title": "AGY-202: AGY CLI Operations (L200)",
+  "description": "This course provides a comprehensive hands-on guide to mastering Google Antigravity's command line interface, agy. Built for terminal-first developers, DevOps engineers, and technical systems analysts, the course teaches you the global flag hierarchy, how to pipe local directory trees and text streams into agent contexts, the best practices for safe bulk file modifications and code refactoring using dry-run flags, and the automation of rapid batch query jobs. You will learn to integrate the agent directly into standard UNIX shell pipelines, culminating in a hands-on Specialist Capstone Challenge to earn your AGY Certified Terminal Specialist credential.",
+  "highlights": [
+    {
+      "icon": "⚙️",
+      "title": "Terminal-First Automation",
+      "description": "Execute complex agent operations entirely from the command line interface without opening a browser."
+    },
+    {
+      "icon": "🔀",
+      "title": "Input Piping & Context Injection",
+      "description": "Harness UNIX pipe streams to pass file lists, standard output, and workspace structures to the agent."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Safe Bulk Refactoring",
+      "description": "Perform multi-file modifications using dry-run verification flags and strict boundary permissions."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. agy CLI Binary & Syntax Foundations",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "# [1. agy CLI Binary & Syntax Foundations]"
+        },
+        {
+          "type": "h2",
+          "content": "Core Command Line Interface Architecture"
+        },
+        {
+          "type": "p",
+          "content": "The agy command line client is a compiled binary optimized for speed, terminal piping, and seamless integration into automated scripting workflows. It decouples the operational interface from the core execution engine and user interfaces (such as antigravity or antigravity-ide). In this module, we will explore the core command structure, global execution flags, interactive REPL mode, slash commands, and diagnostic logging configuration."
+        },
+        {
+          "type": "h3",
+          "content": "Standard Command Syntax and Subcommands"
+        },
+        {
+          "type": "p",
+          "content": "Executing commands in agy follows standard POSIX patterns where global options modify binary behaviors and subcommands trigger specific operational utilities. The syntax structure is: `agy [global flags] <subcommand> [subcommand arguments]`."
+        },
+        {
+          "type": "p",
+          "content": "The primary administrative subcommands of the agy CLI are:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "agy help: Displays usage guidelines and options for all subcommands.",
+            "agy install: Configures environment shell parameters, autocomplete features, and workstation paths.",
+            "agy update: Upgrades the local agy binary to the latest weekly release.",
+            "agy plugin: Manages local tool extensions (commands include list, install, uninstall, enable, disable).",
+            "agy changelog: Prints recent release highlights, bug fixes, and feature additions."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Display the current client version\nagy --version\n\n# Configure shell settings and update paths\nagy install\n\n# List all currently installed plugin extensions\nagy plugin list"
+        },
+        {
+          "type": "h3",
+          "content": "Execution Modes and Option Flags"
+        },
+        {
+          "type": "p",
+          "content": "The CLI supports both interactive and non-interactive execution modes, customized via global flags:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Interactive REPL (Default TTY): Initiated by running agy without execution flags. Starts a live connection loop, checks cloud tokens, and displays the command prompt >.",
+            "Print Non-Interactive Mode (-p, --print, --prompt): Runs a single prompt, outputs the result directly to stdout, and exits. Ideal for automated shell scripts.",
+            "Interactive Prompt Mode (-i, --prompt-interactive): Runs the initial prompt, then leaves the REPL open for further interactive queries.",
+            "Continue Previous Session (-c, --continue): Resumes the most recent local execution thread.",
+            "Resume Specific Session (--conversation <session-id>): Reloads the context, chat history, and variables of a specific session by ID."
+          ]
+        },
+        {
+          "type": "info",
+          "content": "Design Pattern: Always use the -p or --print flag when integrating agy within CI/CD pipelines or bash scripts. This prevents the CLI from opening an interactive prompt and waiting for user input, ensuring the script runs headlessly to completion."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Run a prompt in non-interactive print mode\nagy -p \"Summarize the current working directory\"\n\n# Start a session with a query and continue interactively\nagy -i \"Examine the package.json. What is the entry point?\"\n\n# Resume the last conversation session\nagy -c"
+        },
+        {
+          "type": "h3",
+          "content": "Interactive REPL Slash Commands"
+        },
+        {
+          "type": "p",
+          "content": "When working inside the interactive REPL shell (indicated by the > prompt), standard input is evaluated by the agent. To perform client commands without sending queries to the model, use slash commands:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "/help: Prints descriptions and usage examples for all interactive commands.",
+            "/quit or /exit: Exits the current REPL session safely.",
+            "/mcp list: Lists all configured Model Context Protocol servers and their connection statuses.",
+            "/mcp reload: Restarts and re-queries active MCP servers to refresh tool capabilities.",
+            "/memory reload: Reloads workspace context guidelines (such as .gemini.md files).",
+            "/skills reload: Re-scans and loads discovered local agent skills."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Diagnostic Logging and the --log-file Flag"
+        },
+        {
+          "type": "p",
+          "content": "All agy operations write tracing logs, daemon communications, and error details to disk. By default, these log files are saved to `~/.gemini/antigravity-cli/log/` with names formatted as `cli-YYYYMMDD_HHMMSS.log`."
+        },
+        {
+          "type": "p",
+          "content": "To redirect log outputs for a specific run, use the `--log-file` flag followed by an absolute file path. This is useful for writing test logs or keeping audit trails in automated environments."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Execute a query and write diagnostics to a dedicated log file\nagy -p \"Audit the workspace packages\" --log-file /var/home/wtg/Repos/course-catalog/logs/audit_run.log\n\n# Inspect the log file for warning or error indicators\ngrep -E \"WARN|ERROR\" /var/home/wtg/Repos/course-catalog/logs/audit_run.log"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: Which of the following flags runs a single prompt non-interactively and outputs the result directly to the terminal standard output?\n\nA) `agy -i \"prompt\"`\nB) `agy -c`\nC) `agy -p \"prompt\"`\nD) `agy --sandbox`\n\n*Feedback*: The correct answer is C. The `-p` (or `--print` / `--prompt`) flag runs the query non-interactively in print mode."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: What is the default path where agy CLI session diagnostics and error logs are stored on standard Unix systems?\n\nA) `/var/log/agy/`\nB) `~/.gemini/antigravity-cli/log/`\nC) `./logs/`\nD) `/tmp/agy/`\n\n*Feedback*: The correct answer is B. The default path for client session logs is `~/.gemini/antigravity-cli/log/`."
+        }
+      ]
+    },
+    {
+      "title": "2. Boundary Enforcement & Input Piping",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "# [2. Boundary Enforcement & Input Piping]"
+        },
+        {
+          "type": "h2",
+          "content": "Workspace Boundary Locking & Security Controls"
+        },
+        {
+          "type": "p",
+          "content": "To prevent autonomous agents from performing unauthorized filesystem actions, the agy CLI implements a dual-layered security architecture: local workspace boundary locking (via `.gemini.md`) and folder trust policies (via `settings.json`). In this module, you will learn how to lock directories, configure trusted workspaces, manage permissions in headless CI pipelines, and pipe terminal outputs directly into agent execution context streams."
+        },
+        {
+          "type": "h3",
+          "content": "Local Directory Boundaries (.gemini.md)"
+        },
+        {
+          "type": "p",
+          "content": "The agy execution engine reads a local `.gemini.md` configuration file placed in the root of the workspace directory. This file dictates the absolute read, write, and execute permissions granted to the agent. If the agent attempts to read a file outside this directory (such as `/etc/passwd` or `~/.ssh/id_rsa`), the CLI's filesystem broker intercepts the request and blocks it immediately to prevent directory traversal attacks."
+        },
+        {
+          "type": "warning",
+          "content": "Security Boundary Warning: Run agy verify in any new workspace directory to confirm that file boundaries are active. If `.gemini.md` is missing, the binary client will enforce strict read-only access and block any filesystem modifications unless running with the --sandbox flag or in a containerized environment (agy-box)."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create a secure playground directory\nmkdir -p /var/home/wtg/Repos/secure-sandbox\ncd /var/home/wtg/Repos/secure-sandbox\n\n# Establish explicit write and read permissions for the agent\necho \"permissions:\n  read-only: [./config/]\n  read-write: [./src/, ./tests/]\n  blocked: [/etc/, ~/.ssh/]\" > .gemini.md\n\n# Run boundary verification\nagy verify"
+        },
+        {
+          "type": "h3",
+          "content": "The Folder Trust Security Model"
+        },
+        {
+          "type": "p",
+          "content": "To prevent untrusted code repositories from executing arbitrary tools, you can enable Folder Trust in your global `~/.gemini/antigravity-cli/settings.json` configuration:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"security\": {\n    \"folderTrust\": {\n      \"enabled\": true\n    }\n  }\n}"
+        },
+        {
+          "type": "p",
+          "content": "When Folder Trust is active, opening a directory for the first time triggers a **Discovery Phase**. The CLI scans the workspace folder for:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Custom Commands: Reusable task definitions written in .toml files.",
+            "Model Context Protocol (MCP) Servers: External data and tool integrations.",
+            "System Hooks: Scripts that intercept and override execution loops.",
+            "Setting Overrides: Project-specific workspace configs.",
+            "Security Warnings & Errors: Warnings about bypassed sandboxes or invalid settings JSONs."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "If you mark a folder as **untrusted** (or run in an untrusted directory), the CLI runs in a restricted **Safe Mode** where workspace settings are ignored, environment variables from `.env` are blocked, extension operations are locked, auto-accept is disabled, and MCP servers are disconnected."
+        },
+        {
+          "type": "info",
+          "content": "Managing Folder Trust: You can change the trust level of the current directory at any time by running the /permissions command inside the REPL. This updates your rules stored centrally in `~/.gemini/trustedFolders.json`."
+        },
+        {
+          "type": "h3",
+          "content": "Bypassing Trust Checks in Headless Pipelines"
+        },
+        {
+          "type": "p",
+          "content": "In automated environments like GitHub Actions or GitLab CI, there is no interactive TTY to display the trust dialog. If Folder Trust is enabled globally and an untrusted folder is executed, the CLI throws a `FatalUntrustedWorkspaceError` and aborts."
+        },
+        {
+          "type": "p",
+          "content": "To proceed in these environments, you can bypass the trust check using one of the following mechanisms:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Command-Line Flag: Execute commands using the --skip-trust option.",
+            "Environment Variable: Set the environment variable GEMINI_CLI_TRUST_WORKSPACE=true before running agy."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Run agy safely in non-interactive pipeline using environment variable bypass\nexport GEMINI_CLI_TRUST_WORKSPACE=true\nagy -p \"Scan codebase for linting errors\"\n\n# Alternatively, bypass using the skip-trust flag\nagy --skip-trust -p \"Audit the dependency package trees\""
+        },
+        {
+          "type": "h3",
+          "content": "Piping Terminal Outputs to agent Contexts"
+        },
+        {
+          "type": "p",
+          "content": "Because agy reads from standard input (stdin) and prints to standard output (stdout), it integrates seamlessly into Unix shell pipes. This allows you to pass directory structures, log details, or code diffs directly into the agent context."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Piping Directory Trees: Stream output from find or tree commands to let the agent evaluate project layouts.",
+            "Piping Log Content: Pipe log streams to audit system errors or check warnings.",
+            "Piping Code Diffs: Pipe git diff outputs to automate code reviews."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Pipe directory structure to create a module map\ntree -L 2 /var/home/wtg/Repos/secure-sandbox | agy -p \"Write a folder overview summarizing this tree structure:\"\n\n# Pipe a raw error log to isolate the root failure\ncat logs/error.log | agy -p \"Extract the stack trace error message and explain the cause.\"\n\n# Pipe git differences to write a conventional commit message\ngit diff | agy -p \"Write a short Git commit message summarizing these code changes.\""
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: What happens when Folder Trust is active and a folder is marked as untrusted by the user?\n\nA) The agy CLI client refuses to open the directory and throws an authentication error.\nB) The client runs in restricted Safe Mode, ignoring local configurations, env files, and MCP servers.\nC) The CLI deletes all .env and settings files in that folder.\nD) The client runs only inside the Docker container sandbox.\n\n*Feedback*: The correct answer is B. Untrusted folders run in Safe Mode, disabling local settings, env variables, custom commands, and MCP servers to protect your workstation."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: How can you bypass folder trust dialog warnings when executing agy commands in a headless CI/CD pipeline script?\n\nA) Run the command with the --dangerously-skip-permissions flag.\nB) Set the environment variable `GEMINI_CLI_TRUST_WORKSPACE=true` or use the `--skip-trust` flag.\nC) Initialize the folder using the `agy install` subcommand.\nD) Run the script from the root user directory.\n\n*Feedback*: The correct answer is B. Setting `GEMINI_CLI_TRUST_WORKSPACE=true` or using the `--skip-trust` flag trusts the folder for the active session, preventing headless execution failures."
+        }
+      ]
+    },
+    {
+      "title": "3. Bulk Modifications & Refactoring",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "# [3. Bulk Modifications & Refactoring]"
+        },
+        {
+          "type": "h2",
+          "content": "Executing Code Mutations and Safe Refactoring"
+        },
+        {
+          "type": "p",
+          "content": "When directing an agent to perform bulk modifications or code refactoring across a project, maintaining codebase integrity is paramount. Since the agent can modify multiple files in a single execution loop, you must enforce strict staging, isolation, and verification practices. In this module, you will learn how to set up clean Git baselines, isolate agent runs using Git worktrees, execute under sandbox limits, and verify generated changes using test runners."
+        },
+        {
+          "type": "h3",
+          "content": "Maintaining a Clean Git Baseline"
+        },
+        {
+          "type": "p",
+          "content": "Before launching any bulk modification task, always verify that your local Git repository state is completely clean. This ensures that any logic errors, syntax mistakes, or unexpected modifications introduced by the agent can be reverted immediately without losing your own unsaved code changes."
+        },
+        {
+          "type": "warning",
+          "content": "Workstation Rollbacks: If the agent generates broken code or incorrect refactoring logic, do not attempt to prompt the agent to fix it on top of dirty files. Instead, instantly revert the workspace back to your clean baseline using standard git rollback commands."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Step 1: Ensure there are no untracked or modified files\ngit status\n\n# Step 2: Request the bulk refactoring operation via agy\naps-clean-test\nagy -p \"Scan all python files in src/utils/ and replace deprecated time.clock() calls with time.perf_counter().\"\n\n# Step 3: Audit changes using git diff\ngit diff\n\n# Step 4: Revert changes if the agent made mistakes\n# WARNING: This discards all unstaged changes in the directory\ngit checkout . && git clean -fd"
+        },
+        {
+          "type": "h3",
+          "content": "Isolating Agent Tasks with Git Worktrees"
+        },
+        {
+          "type": "p",
+          "content": "To prevent the agent from modifying your active development branch, the agy CLI provides a native integration to run tasks inside separate Git worktrees. Passing the `--worktree <name>` option instructs the client to automatically create a new Git worktree directory, link it to a clean branch, execute the agent's tasks inside it, and present the final diff."
+        },
+        {
+          "type": "p",
+          "content": "This isolates all code mutations in a temporary workspace, allowing you to review and merge the resulting commits using standard Pull Request reviews."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Launch a refactoring session inside a clean worktree named 'refactor-logging'\nagy --worktree refactor-logging -p \"Update all console.log calls in src/ to use a unified Winston logger import.\"\n\n# After completion, list active worktrees to verify isolation\ngit worktree list"
+        },
+        {
+          "type": "h3",
+          "content": "Executing under Sandbox Restrictions"
+        },
+        {
+          "type": "p",
+          "content": "For safety, the agy CLI allows running agent loops within an isolated execution sandbox. When running with the `--sandbox` flag, the CLI places restrictions on terminal command executions, network access, and system calls."
+        },
+        {
+          "type": "p",
+          "content": "In sandbox mode, the agent cannot execute commands that could compromise the host workstation (such as modifying system configurations, downloading external executables, or editing files outside the active workspace boundaries)."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Execute a refactoring task under strict sandbox constraints\nagy --sandbox -p \"Refactor code in src/handlers/ to use async/await syntax.\""
+        },
+        {
+          "type": "h3",
+          "content": "Automated Testing and Verification Loops"
+        },
+        {
+          "type": "p",
+          "content": "After an agent completes a bulk modification task, never assume the generated code is correct. You must immediately execute the project's automated test suite to ensure that no compilation errors, typing mismatches, or logical regressions were introduced."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Example verification loop following an agent run\nagy -p \"Add type annotations to all parameters in src/math.js\"\n\n# Immediately execute the TypeScript compiler and test runner\nnpx tsc --noEmit && npm test"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: Which agy CLI option isolates agent modifications by running the session inside a separate Git worktree folder?\n\nA) `--sandbox`\nB) `--worktree <name>`\nC) `--add-dir`\nD) `--dangerously-skip-permissions`\n\n*Feedback*: The correct answer is B. The `--worktree` option isolates changes inside a dedicated git worktree, keeping your main branch clean during edits."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: Why should you run the test suite immediately after an agent completes a bulk refactoring task?\n\nA) To verify that no syntax errors or logical regressions were introduced by the agent's modifications.\nB) To compile the agy binary on the host workstation.\nC) To authorize the client session with GCP credentials.\nD) To clean up the temporary log files automatically.\n\n*Feedback*: The correct answer is A. Test suites act as a logic firewall, validating that the agent's edits didn't break existing codebase behaviors."
+        }
+      ]
+    },
+    {
+      "title": "4. Running Rapid Query Batch Jobs",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "# [4. Running Rapid Query Batch Jobs]"
+        },
+        {
+          "type": "h2",
+          "content": "Batch Executions and MCP Integrations"
+        },
+        {
+          "type": "p",
+          "content": "To scale agent operations across hundreds of files or integrate external corporate databases and Google Workspace data, you must master CLI batch loops and Model Context Protocol (MCP) servers. In this module, we cover how to process files sequentially and in parallel using standard Unix shell loops, manage stdio and HTTP MCP servers, and run OAuth authentications for secure cloud tool extensions."
+        },
+        {
+          "type": "h3",
+          "content": "The Shell Loop Pattern for Batch Operations"
+        },
+        {
+          "type": "p",
+          "content": "When auditing or parsing a directory with many files, passing the entire folder to the agent at once leads to high token consumption, increased response latency, and reasoning degradation. A more robust pattern is to process files one-by-one inside a shell loop. This isolates each execution context, keeps the active context window minimal, and prevents a single file error from failing the entire batch run."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create a report folder and baseline file\nmkdir -p logs/audit\necho \"=== Security Audit Report ===\" > logs/audit/summary.txt\n\n# Run sequential checks over all config files in the project\nfor file in config/*.json; do\n  echo \"Auditing $(basename \"$file\")...\" >> logs/audit/summary.txt\n  cat \"$file\" | agy -p \"Audit this JSON structure. List any keys containing 'token', 'key', or 'password'. Format output as: [File] -> [Sensitive Keys].\" >> logs/audit/summary.txt\ndone\n\n# View the consolidated summary\ncat logs/audit/summary.txt"
+        },
+        {
+          "type": "h3",
+          "content": "Throttling Parallel Execution Threads"
+        },
+        {
+          "type": "p",
+          "content": "To accelerate large batch runs, you can execute individual agy commands in the background using the standard shell `&` operator. However, to prevent model rate limit blocks or workstation resource exhaustion, you must throttle the number of concurrent executions."
+        },
+        {
+          "type": "p",
+          "content": "By combining background jobs with the bash `wait -n` utility, you can maintain a fixed concurrency window (for example, limiting execution to 3 parallel jobs)."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Process utility scripts in parallel threads with a throttle limit of 3\nfor script in src/utils/*.js; do\n  # Run in background and redirect output to individual log files\n  agy -p \"Check this file for unused import statements. List them.\" < \"$script\" > \"logs/audit/unused_$(basename \"$script\").txt\" &\n  \n  # Throttling gate: Wait if 3 or more background jobs are active\n  if [[ $(jobs -r | wc -l) -ge 3 ]]; then\n    wait -n\n  fi\ndone\n\n# Wait for any remaining background processes to complete\nwait\necho \"Parallel batch audit finished successfully.\""
+        },
+        {
+          "type": "h3",
+          "content": "The Model Context Protocol (MCP) Command Suite"
+        },
+        {
+          "type": "p",
+          "content": "Model Context Protocol (MCP) servers allow you to extend the agent's capabilities with custom tools and databases. The agy CLI client manages these servers via the `agy mcp` command suite. All registered servers are stored globally in `~/.gemini/antigravity-cli/settings.json` under the `mcpServers` block."
+        },
+        {
+          "type": "list",
+          "items": [
+            "agy mcp list: Displays all registered MCP servers and their current connection status.",
+            "agy mcp add <name> <command> [args...]: Registers a stdio-based MCP server (e.g. adding a local Node script or Docker container running as a subprocess).",
+            "agy mcp add <name> <url> --transport http: Registers a remote HTTP/SSE-based MCP server.",
+            "agy mcp remove <name>: Deletes an MCP server configuration from settings.json."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Register a local file system MCP server running via Node.js\nagy mcp add filesystem npx -y @modelcontextprotocol/server-filesystem /var/home/wtg/Repos/secure-sandbox\n\n# Register a remote HTTP/SSE database query server\nagy mcp add database-service http://localhost:8000/mcp --transport http\n\n# List all active registrations and verify connection\nagy mcp list"
+        },
+        {
+          "type": "h3",
+          "content": "Running OAuth Authentications for Cloud MCP Servers"
+        },
+        {
+          "type": "p",
+          "content": "When connecting to Google Workspace APIs (such as Google Drive, Gmail, Docs, or Calendar), the MCP server requires user authentication. You configure these servers in `~/.gemini/antigravity-cli/settings.json` with your Google Cloud project's Client ID and Client Secret, then run the CLI authentication command to obtain OAuth tokens."
+        },
+        {
+          "type": "warning",
+          "content": "Browser Redirection: Running the `agy mcp auth` command opens a default browser window to authenticate with your Google account. Ensure you authorize the scopes requested by the MCP client to enable the agent to query your cloud resources."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Authenticate a Google Drive MCP server\nagy mcp auth google-drive\n\n# Authenticate a Gmail MCP server\nagy mcp auth gmail\n\n# Authenticate a Calendar MCP server\nagy mcp auth google-calendar"
+        },
+        {
+          "type": "info",
+          "content": "Once authenticated, you can query your Google Drive or Calendar directly from the agy CLI: `agy -p \"Search my Google Drive for files named SOW\"` or `agy -p \"List my calendar events for tomorrow\"`."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: Which agy subcommand registers a new stdio-based Model Context Protocol server in settings.json?\n\nA) `agy plugin add`\nB) `agy mcp add <name> <command>`\nC) `agy install mcp`\nD) `agy mcp auth`\n\n*Feedback*: The correct answer is B. `agy mcp add` registers new stdio-based or HTTP-based MCP servers into the global settings configuration file."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: Where does the agy CLI store global user settings and MCP server registrations?\n\nA) `~/.gemini/antigravity-cli/settings.json`\nB) `/etc/agy.conf`\nC) `.gemini.md`\nD) `~/.gemini/trustedFolders.json`\n\n*Feedback*: The correct answer is A. Global user settings and MCP server blocks are stored in `~/.gemini/antigravity-cli/settings.json`."
+        }
+      ]
+    },
+    {
+      "title": "5. CLI Pipelines & Capstone Challenge",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "# [5. CLI Pipelines & Capstone Challenge]"
+        },
+        {
+          "type": "h2",
+          "content": "Building Terminal Pipelines and the Specialist Challenge"
+        },
+        {
+          "type": "p",
+          "content": "Unix philosophy encourages building small, focused utilities that communicate via standard text streams. The agy CLI client is designed to participate directly in these streams. In this module, we will explore how to chain agy outputs with other shell tools like jq, run headless pipelines in CI/CD without trust blockers, and outline the specialist capstone challenge to earn your AGY Certified Terminal Specialist credential."
+        },
+        {
+          "type": "h3",
+          "content": "Chaining agy with UNIX Filters"
+        },
+        {
+          "type": "p",
+          "content": "By instructing the agent to generate raw, unadorned structured text (like JSON or CSV) without conversational preambles or markdown code blocks, you can pipe its output directly into tools like jq, grep, or awk. This enables you to automate downstream operations based on the agent's evaluations."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Extract error entries from a log, format as JSON list, and filter using jq\ncat logs/system.log | \\\n  agy -p \"Extract all critical database failures from this log stream. Return only a raw JSON array containing objects with keys 'timestamp' and 'error_message'. Do not include markdown code fences or conversational text.\" | \\\n  jq '.[] | select(.error_message | contains(\"Timeout\"))'"
+        },
+        {
+          "type": "h3",
+          "content": "Headless Automation and Trust Bypass in CI/CD"
+        },
+        {
+          "type": "p",
+          "content": "When running agy commands inside automated pipelines (like GitHub Actions workflows), you must configure the pipeline to bypass interactive prompts. To do this:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Enable non-interactive execution by always using the -p or --print option.",
+            "Bypass folder trust validations by running with the --skip-trust flag or setting the environment variable GEMINI_CLI_TRUST_WORKSPACE=true."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "content": "# Example GitHub Actions Job Step utilizing agy\n- name: Run automated codebase security scan\n  env:\n    GEMINI_CLI_TRUST_WORKSPACE: \"true\"\n    GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}\n  run: |\n    agy -p \"Scan all JS files in ./src for raw API keys. Report any findings.\" --log-file ./scan.log"
+        },
+        {
+          "type": "h3",
+          "content": "The Specialist Capstone Challenge"
+        },
+        {
+          "type": "p",
+          "content": "To complete the AGY Certified Terminal Specialist capstone and earn your Specialist badge, you must build an automated diagnostic reporting pipeline that processes unorganized workstation log files and outputs a clean markdown status summary."
+        },
+        {
+          "type": "p",
+          "content": "Your pipeline must run within a secure workspace boundary and be executed entirely via a defensive shell script."
+        },
+        {
+          "type": "h3",
+          "content": "Step-by-Step Capstone Blueprint"
+        },
+        {
+          "type": "p",
+          "content": "**Step 1: Setup Workspace and Permissions**"
+        },
+        {
+          "type": "p",
+          "content": "Create a secure directory at `/workspace/capstone` and initialize a `.gemini.md` boundary file restricting agent actions to that folder:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "mkdir -p /workspace/capstone\ncd /workspace/capstone\n\n# Configure boundary constraints\necho \"permissions:\n  read-write: [./]\n  blocked: [/etc/, ~/.ssh/]\" > .gemini.md"
+        },
+        {
+          "type": "p",
+          "content": "**Step 2: Seed Mock Log Data**"
+        },
+        {
+          "type": "p",
+          "content": "Create two mock server log files representing separate system nodes:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "cat << 'EOF' > node-1.log\n2026-06-03T10:00:00Z [INFO] System initialized.\n2026-06-03T10:05:00Z [WARN] Memory consumption at 85% limit.\n2026-06-03T10:08:00Z [ERROR] DB connection timed out after 5000ms.\nEOF\n\ncat << 'EOF' > node-2.log\n2026-06-03T10:01:00Z [INFO] Node 2 online.\n2026-06-03T10:06:00Z [WARN] Disk space low on volume /data.\n2026-06-03T10:12:00Z [ERROR] Authentication token expired for service api-client.\nEOF"
+        },
+        {
+          "type": "p",
+          "content": "**Step 3: Write the generate_report.sh Shell Script**"
+        },
+        {
+          "type": "p",
+          "content": "Write a bash script using defensive shell programming patterns (`set -euo pipefail`) that loops through each log file, pipes its contents to agy run to summarize critical warnings, and appends the output to `summary_report.md`:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "cat << 'EOF' > generate_report.sh\n#!/usr/bin/env bash\n\n# Enable strict error checking and pipeline failure detection\nset -euo pipefail\n\nOUTPUT=\"summary_report.md\"\n\necho \"# Systems Status Summary Report\" > \"$OUTPUT\"\necho \"Generated on: $(date)\" >> \"$OUTPUT\"\necho \"--------------------------------\" >> \"$OUTPUT\"\necho \"\" >> \"$OUTPUT\"\n\n# Iterate over each server log file in the capstone directory\nfor file in *.log; do\n  echo \"Processing $file...\"\n  echo \"### Node File: $(basename \"$file\")\" >> \"$OUTPUT\"\n  \n  # Stream the log contents to the agy client for analysis\n  cat \"$file\" | agy -p \"Summarize the critical warn or error logs in this stream. Keep the response to 3 short bullet points.\" >> \"$OUTPUT\"\n  echo \"\" >> \"$OUTPUT\"\ndone\n\necho \"Reporting pipeline complete. Output written to $OUTPUT.\"\nEOF\n\n# Make the script executable\nchmod +x generate_report.sh"
+        },
+        {
+          "type": "p",
+          "content": "**Step 4: Execute and Verify**"
+        },
+        {
+          "type": "p",
+          "content": "Run your reporting script and execute the automated capstone validator script to verify your project outcomes:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Run the pipeline\n./generate_report.sh\n\n# Execute the automated certification verification tool\nagy verify --course agy-202 --target ./summary_report.md"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: Why is the shell options directive `set -euo pipefail` standard in production pipeline scripts?\n\nA) It accelerates execution speed by skipping diagnostic checks.\nB) It ensures that if any single command in a pipeline fails, or a variable is undefined, the shell script terminates immediately.\nC) It authorizes the command line client with Google Workspace APIs.\nD) It compresses the generated output reports.\n\n*Feedback*: The correct answer is B. Defensive shell programming patterns ensure execution aborts instantly on errors rather than proceeding with incomplete data."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: Which command allows you to verify your local workspace capstone results against certification requirements?\n\nA) `agy status`\nB) `agy verify --course agy-202 --target ./summary_report.md`\nC) `node populate-course-doc.js`\nD) `npm run lint`\n\n*Feedback*: The correct answer is B. `agy verify` evaluates your local outputs to verify they meet badge completion criteria."
+        }
+      ]
+    }
+  ]
+}

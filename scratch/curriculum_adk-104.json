@@ -1,0 +1,211 @@
+{
+  "course_id": "adk-104",
+  "title": "ADK-104: Tool Schema Design & Basic APIs",
+  "description": "Design robust agent tool definitions using strict parameter schemas and type reflections to wrap weather and currency APIs.",
+  "highlights": [
+    {
+      "icon": "🗺️",
+      "title": "JSON Schema Design",
+      "description": "Construct declarative type schemas for custom parameters that the LLM consumes for tool selection."
+    },
+    {
+      "icon": "📝",
+      "title": "Pydantic Typing",
+      "description": "Use Pydantic models to assert validation bounds on inputs, catching parameter typos immediately."
+    },
+    {
+      "icon": "🌐",
+      "title": "API Integrations",
+      "description": "Configure external request boundaries, managing HTTP status codes and payloads safely."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Understanding JSON Schema parameter descriptions",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "JSON Schema Descriptions"
+        },
+        {
+          "type": "p",
+          "content": "The LLM backend reads function descriptions and argument descriptions to decide which tool to call. If your descriptions are ambiguous, the LLM will hallucinate arguments or pick the wrong tool."
+        },
+        {
+          "type": "h2",
+          "content": "Schema Reflection"
+        },
+        {
+          "type": "p",
+          "content": "ADK translates language docstrings and types to a JSON Schema parameter declaration:"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "@tool\ndef lookup_user_id(email: str) -> str:\n    \"\"\"\n    Retrieves the unique UUID for an active database customer record.\n    \n    Args:\n        email: The raw email address, e.g., 'user@example.com'.\n    \"\"\"\n    return \"usr_8f4a12b\""
+        },
+        {
+          "type": "info",
+          "title": "Docstring Formatting",
+          "content": "ADK expects standard docstring structures (such as Google Style or Sphinx) to successfully map description fields to JSON arguments."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the main source of description information for tool arguments?\n- A) Global metadata dictionaries\n- B) Function docstrings and comments\n- C) Local system configurations\n\nFeedback: Option B is correct. Docstrings describe the tool's usage to the LLM."
+        }
+      ]
+    },
+    {
+      "title": "2. Defining strict Pydantic structures for tool inputs",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Pydantic Validation for Tool Inputs"
+        },
+        {
+          "type": "p",
+          "content": "Pydantic offers strict, runtime class validation. By using Pydantic models in tool signatures, you ensure parameters adhere to specific constraints (like string length, email format, or enum constants)."
+        },
+        {
+          "type": "h2",
+          "content": "Pydantic Tool Integration"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from pydantic import BaseModel, Field, EmailStr\nfrom google_adk.tools import tool\n\nclass TicketInput(BaseModel):\n    user_email: EmailStr = Field(description=\"Customer support email address\")\n    urgency: str = Field(description=\"Ticket urgency: LOW, MEDIUM, or HIGH\")\n\n@tool\ndef create_support_ticket(ticket: TicketInput) -> str:\n    # Executed code\n    return f\"Created ticket for {ticket.user_email} with urgency {ticket.urgency}\""
+        },
+        {
+          "type": "warning",
+          "title": "Validation Failures",
+          "content": "If the LLM passes an invalid payload (e.g. invalid email structure), Pydantic triggers a ValidationError, which ADK returns to the LLM to auto-correct."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What happens when a tool argument fails Pydantic validation?\n- A) The host program crashes.\n- B) The agent exits immediately.\n- C) A validation exception returns to the LLM so it can attempt a corrected tool call.\n\nFeedback: Option C is correct. ADK catches validation errors and allows the agent loop to self-heal."
+        }
+      ]
+    },
+    {
+      "title": "3. Creating clean API tool interfaces",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Clean API Tool Design"
+        },
+        {
+          "type": "p",
+          "content": "Tools should do one thing and return structured data. Avoid returning raw HTML, giant nested blobs, or unformatted text logs to the LLM, as this wastes tokens."
+        },
+        {
+          "type": "grid",
+          "items": [
+            {
+              "icon": "Wrench",
+              "title": "Single Responsibility",
+              "content": "One function should solve one exact query (e.g., look up order vs edit order).",
+              "border": "#4ade80"
+            },
+            {
+              "icon": "ListFilter",
+              "title": "Filtering Blobs",
+              "content": "Discard metadata fields (like headers, tracing keys) before returning data to the agent.",
+              "border": "#3b82f6"
+            },
+            {
+              "icon": "Shield",
+              "title": "Error Boundaries",
+              "content": "Never throw uncaught generic exceptions; catch them and return error messages.",
+              "border": "#ef4444"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why should tool returns be compact and structured?\n- A) It compiles the project faster.\n- B) To minimize token consumption and guide clean LLM generation.\n- C) It is required by the OAuth standard.\n\nFeedback: Option B is correct. Keeping responses minimal saves token costs."
+        }
+      ]
+    },
+    {
+      "title": "4. Handling tool execution exceptions",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Handling Tool Exceptions"
+        },
+        {
+          "type": "p",
+          "content": "If a tool makes an HTTP request that returns a 500 error or throws a database connection error, it must handle the issue and provide semantic error descriptions."
+        },
+        {
+          "type": "h2",
+          "content": "Exception Safe Python Tool"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import requests\nfrom google_adk.tools import tool\n\n@tool\ndef fetch_user_dashboard(uid: str) -> dict:\n    \"\"\"\n    Fetches the user dashboard info.\n    \"\"\"\n    try:\n        r = requests.get(f\"https://api.internal/dash/{uid}\", timeout=5)\n        r.raise_for_status()\n        return {\"status\": \"success\", \"data\": r.json()}\n    except requests.exceptions.HTTPError as he:\n        return {\"status\": \"failed\", \"error\": f\"HTTP Error: {he.response.status_code}\"}\n    except Exception as e:\n        return {\"status\": \"error\", \"error\": str(e)}"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How should a tool handle a failed HTTP request?\n- A) Exit the process using sys.exit(1).\n- B) Catch the error and return a JSON dictionary containing the error message.\n- C) Throw a raw exception and let the program crash.\n\nFeedback: Option B is correct. Returning errors as standard tool outputs allows the agent to handle the failure gracefully."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab: Writing a structured weather and currency conversion tool",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Structured Weather & Currency Tools"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will author two custom tools in a python file, registering them via `agent.yaml`, and ensuring their parameters utilize clean, documented schemas."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the Tool Source Code"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from google_adk.tools import tool\n\n@tool\ndef get_weather_forecast(city: str, days: int = 1) -> dict:\n    \"\"\"\n    Retrieves the weather forecast for a target city for a specific number of days.\n    \n    Args:\n        city: Name of the target location, e.g. 'Boston, MA'\n        days: Duration in days to forecast (1 to 5)\n    \"\"\"\n    # Mock weather API data\n    return {\"city\": city, \"forecast\": [{\"day\": i, \"temp\": 72 + i, \"condition\": \"Sunny\"} for i in range(days)]}\n\n@tool\ndef convert_currency(amount: float, source_currency: str, target_currency: str) -> dict:\n    \"\"\"\n    Converts financial monetary value from a source currency to a target currency.\n    \"\"\"\n    rates = {\"USD\": 1.0, \"EUR\": 0.92, \"GBP\": 0.78}\n    src = rates.get(source_currency.upper())\n    tgt = rates.get(target_currency.upper())\n    if not src or not tgt:\n        return {\"success\": False, \"error\": \"Currency code unsupported\"}\n    \n    value = (amount / src) * tgt\n    return {\"success\": True, \"converted_amount\": round(value, 2)}\n"
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Register in agent.yaml"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "tools:\n  - name: \"get_weather_forecast\"\n    source: \"src/tools/weather.py\"\n  - name: \"convert_currency\"\n    source: \"src/tools/weather.py\""
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What would happen if the agent tried to convert USD to JPY using the convert_currency tool above?\n- A) The host environment crashes.\n- B) The tool returns a dictionary with 'success: False' and an error message.\n- C) The tool runs an infinite loop.\n\nFeedback: Option B is correct. Unsupported currencies trigger the boundary check."
+        }
+      ]
+    }
+  ]
+}

@@ -72,7 +72,7 @@ git config --global init.defaultBranch main
 # Checks if the user passed GOOGLE_SERVICE_ACCOUNT_KEY in the Jules settings env
 if [[ -n "${GOOGLE_SERVICE_ACCOUNT_KEY:-}" ]]; then
     log_info "GOOGLE_SERVICE_ACCOUNT_KEY detected in environment variables."
-    ADC_DIR="/var/home/wtg/.gcloud_config"
+    ADC_DIR="$HOME/.gcloud_config"
     ADC_PATH="$ADC_DIR/application_default_credentials.json"
     log_info "Creating credentials directory at: $ADC_DIR"
     mkdir -p "$ADC_DIR"

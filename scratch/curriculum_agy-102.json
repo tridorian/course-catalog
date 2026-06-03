@@ -1,0 +1,366 @@
+{
+  "course_id": "agy-102",
+  "title": "AGY-102: The UI Landscape & Selection (L100)",
+  "description": "This course provides a comprehensive comparative tour of Google Antigravity's three main command interfaces: the standalone visual board (antigravity), the lightweight command line interface (agy), and the agent-integrated workspace editor (antigravity-ide). Learners will explore the design philosophy, target use cases, configuration setups, and selection workflows for each UI surface, culminating in a clear understanding of how to seamlessly coordinate across all three for peak agentic productivity.",
+  "highlights": [
+    {
+      "icon": "🧭",
+      "title": "Comparative Interface Tour",
+      "description": "Master the functional differences between the CLI, Standalone UI, and IDE integration."
+    },
+    {
+      "icon": "🛠️",
+      "title": "Practical CLI Pipes & Scripts",
+      "description": "Learn to execute high-velocity batch tasks, folder queries, and CLI integration workflows using the native agy command line."
+    },
+    {
+      "icon": "🔄",
+      "title": "Cross-Interface Interoperability",
+      "description": "Understand how the three interfaces synchronize under the hood to enable seamless workflow transitions."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Multi-Interface Architecture & Selection Philosophy",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Understanding the Decoupled Paradigm"
+        },
+        {
+          "type": "p",
+          "content": "In Google Antigravity, we make a clean architectural distinction between the execution engine and the user interface. Traditional developer tools force a single interaction style, but AGY decouples these layers. The backend engine runs locally, in a hardened corporate workstation, or isolated in a secure container sandbox (agy-box). The frontend interface is entirely plug-and-play. This course explores the three primary interfaces used to direct the engine."
+        },
+        {
+          "type": "info",
+          "content": "Design Principle: Decoupling ensures that user interface preferences do not impact the engine's core capabilities. Whether you are using a visual board or piping commands in a bash shell, the underlying system uses the same security boundaries, workspace directory rules, and agent logic."
+        },
+        {
+          "type": "h3",
+          "content": "The Three Command Surfaces"
+        },
+        {
+          "type": "p",
+          "content": "To address the diverse workflows of software developers, system administrators, and business analysts, AGY offers three distinct user interfaces:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "agy (The Command Line Interface): A lightweight, terminal-first tool optimized for speed, batch operations, shell scripting, and pipeline integration.",
+            "antigravity (The Standalone Visual Board): A graphical dashboard serving as an asynchronous mission control center. Ideal for tracking multi-agent tasks, managing task boards, and watching live web-browsing visual playback.",
+            "antigravity-ide (The Workspace Editor): A dedicated fork of VS Code tailored for side-by-side document co-authoring, live code editing, active chats, and interactive text modifications."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Choosing the Right Interface"
+        },
+        {
+          "type": "p",
+          "content": "Interface selection depends on three main variables: the user's role, the nature of the task (synchronous editing vs. asynchronous research), and the execution environment. The table below represents the core selection guidelines:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Terminal-First Users & Scripts: Select agy for high-speed file operations, log scanning, bulk text modifications, and automation piping.",
+            "Visual Learners & Web Analysts: Select antigravity for web-scraping jobs, long-running research tasks, and visual audit logs of browser operations.",
+            "Content Writers & Developers: Select antigravity-ide for synchronous side-by-side editing, documentation drafting, and inline prompt rewrites."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Answer the following questions to verify your comprehension of the decoupled model:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is the main benefit of decoupling the execution surface from the user interface surface?\n  - A) It permits multiple users to edit the same file without conflict detection.\n  - B) It allows users to switch between visual, CLI, and editor views without losing their underlying environment configurations, security rules, and project context.\n  - C) It speeds up code execution by avoiding any local installation requirements.\n\nFeedback: Option B is correct. Decoupling allows you to transition between different UIs freely because the workspace directories, credentials, and security firewalls are managed centrally by the underlying engine.",
+            "Question 2: Which command surface is best suited for running a long, asynchronous background task that scans ten websites?\n  - A) agy CLI\n  - B) antigravity Visual Board\n  - C) antigravity-ide\n\nFeedback: Option B is correct. The standalone visual board (antigravity) is designed for asynchronous operations, web-browsing visual playback, and visual task cards."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "2. The CLI Client (agy) — High-Velocity Tasks",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Rapid Terminal Operations"
+        },
+        {
+          "type": "p",
+          "content": "The agy command line interface is the fastest way to communicate with the AGY engine. It requires zero graphical rendering, has minimal memory footprint, and integrates directly with standard Unix shell utilities. It is designed for terminal-first developers, DevOps engineers, and system administrators who want to perform immediate tasks without switching environments."
+        },
+        {
+          "type": "h3",
+          "content": "Core Commands & CLI Syntax"
+        },
+        {
+          "type": "p",
+          "content": "When you run a command via agy, the engine processes it within the active directory. The CLI runs in either interactive mode (prompting you for permissions on files and directories) or non-interactive mode (using flags to bypass approvals)."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Verify local system dependencies, cloud credentials, and directory locking\nagy --verify\n\n# Run a basic diagnostics query on files in the current folder\nagy query \"Find all active configuration files\"\n\n# Execute a text processing task in the local workspace directory\nagy run --task \"Parse the log files in ./logs, extract error messages, and save to errors.md\""
+        },
+        {
+          "type": "h3",
+          "content": "Automation and Shell Piping"
+        },
+        {
+          "type": "p",
+          "content": "Because agy outputs text and accepts standard arguments, you can easily pipe output from other tools into it. This is useful for automated scraping, mass text replacements, and code auditing."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Find all Python files modified within the last 2 days and pass them to agy for audit\nfind ./src -name \"*.py\" -mtime -2 | xargs agy run --task \"Scan these files for exposed secrets or credentials\""
+        },
+        {
+          "type": "warning",
+          "content": "Safety Guardrails: Running agy with the --auto-approve flag executes all actions without pausing for manual human approvals. Use this option only inside isolated development containers (such as agy-box) to protect your host system from accidental modifications."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Test your knowledge of terminal-first workflows:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What does the 'agy --verify' command do?\n  - A) It uploads local project directories to a public repository for scanning.\n  - B) It verifies local system prerequisites, checks active cloud credentials, and diagnostics the workspace integrity.\n  - C) It compiles all Python code into binary executable files.\n\nFeedback: Option B is correct. The verify flag is used to check setup readiness, active credential configurations, and security directory locks.",
+            "Question 2: What is a key safety risk when running the CLI with the '--auto-approve' flag?\n  - A) The agent will consume all your local memory.\n  - B) The agent will execute file mutations and shell commands without pausing to request human authorization.\n  - C) The CLI will crash due to network latency.\n\nFeedback: Option B is correct. Bypassing approval checks allows the agent to execute actions instantly, which can modify local folders without your oversight if not run inside a safe sandbox container."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "3. The Standalone Visual Board (antigravity) — Asynchronous Missions",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Visualizing Asynchronous Agent Workflows"
+        },
+        {
+          "type": "p",
+          "content": "The antigravity visual board is a desktop and web application designed for complex, asynchronous projects. Instead of monitoring a terminal stream line-by-line, the visual board uses a card-based interface (similar to Kanban) where users can create, queue, and dispatch tasks to multiple agents running in parallel."
+        },
+        {
+          "type": "h3",
+          "content": "Mission Cards and Agent Lanes"
+        },
+        {
+          "type": "p",
+          "content": "In antigravity, tasks are represented as 'Mission Cards'. Each card contains a prompt, execution parameters, maximum token allocations, and active output files. Cards move through status lanes (Queued, Running, Completed, Failed) as the backend engine executes the tasks."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Queued: The task is waiting for an engine execution slot or credential validation.",
+            "Running: The agent is active. Expanding the card displays real-time execution logs and terminal output streams.",
+            "Completed: The task finished successfully. The card displays a summary of the output files and direct links to the generated documents.",
+            "Failed: The task was interrupted by a compile error, safety violation, or budget limit. Detailed stack traces are displayed on the card."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Live Browser Automation & Playback Tapes"
+        },
+        {
+          "type": "p",
+          "content": "One of the most powerful capabilities of the visual board is its integrated browser viewport. When an agent is tasked with researching or scraping websites, the app spawns a headless browser session (via Playwright) and streams the visual output directly onto the dashboard. You can watch the agent click links, scroll pages, and compile data tables."
+        },
+        {
+          "type": "info",
+          "content": "Diagnostics: If a web research task fails, you can open the 'Playback Tape' viewer from the card menu. This displays a frame-by-frame video of the browser's session, which is saved locally under .gemini/recordings/, helping you debug dynamic elements or login blockages."
+        },
+        {
+          "type": "h3",
+          "content": "Step-by-Step Lab: Launching a Visual Research Card"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Step 1: Launch the antigravity standalone application from your terminal or desktop environment.",
+            "Step 2: Connect the board to your local project directory by clicking 'Open Workspace' in the top toolbar.",
+            "Step 3: Click 'New Mission' in the top-right corner to open the card creator.",
+            "Step 4: Type your prompt: 'Search the web for the latest three security advisories regarding Python flask libraries, compile them, and output to advisories.md'.",
+            "Step 5: Under execution bounds, limit maximum tokens to 100,000 and select the 'Safe Web Search' toolset.",
+            "Step 6: Click 'Launch'. Observe the card moving into the 'Running' lane.",
+            "Step 7: Click on the running card to watch the live console logs. Observe the browser viewport opening as the agent navigates search portals.",
+            "Step 8: Once complete, click the link to advisories.md displayed inside the completed card to view the final compiled document."
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Performance Impact: Running multiple concurrent visual browser playbacks consumes significant RAM and GPU resources. Ensure your local workstation has at least 16GB of RAM before spinning up more than three concurrent browser agents."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Review your comprehension of the standalone visual board features:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is the primary purpose of the 'Playback Tape' in the antigravity visual board?\n  - A) To play background music while the agent is running tasks.\n  - B) To record and inspect the frame-by-frame visual browser actions of the agent for debugging and auditing.\n  - C) To compile markdown text into slides.\n\nFeedback: Option B is correct. The Playback Tape is a visual log of the browser automation session, allowing developers to audit how an agent interacted with websites.",
+            "Question 2: Which view paradigm does the standalone visual board use to manage multiple agent tasks?\n  - A) A code editor pane with side-by-side terminal tabs.\n  - B) A command-line script editor with pipe structures.\n  - C) A card-based board (Kanban) with status lanes.\n\nFeedback: Option C is correct. The standalone board organizes tasks as Mission Cards that move through Queued, Running, Completed, and Failed lanes."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "4. The Workspace Editor (antigravity-ide) — Synchronous Editing",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Code Co-Authoring & Sidecar Collaboration"
+        },
+        {
+          "type": "p",
+          "content": "The antigravity-ide is a customized fork of VS Code. While the visual board is optimized for asynchronous, high-level task tracking, antigravity-ide is designed for synchronous, side-by-side cooperation. It brings the agent directly into your coding environment, allowing you to write code, compose documentation, and refactor text files with real-time feedback."
+        },
+        {
+          "type": "h3",
+          "content": "The Sidecar Panel"
+        },
+        {
+          "type": "p",
+          "content": "The core of the IDE interface is the Sidecar panel. This is an integrated agent chat window that automatically tracks your active editor state. It understands which file you have open, what code lines are highlighted, and what build errors are in the terminal output."
+        },
+        {
+          "type": "info",
+          "content": "Context Isolation: The Sidecar respects standard workspace boundaries. It will never read or modify files outside the directory bounds configured in your .gemini.md firewall rules."
+        },
+        {
+          "type": "h3",
+          "content": "Step-by-Step Lab: Co-Authoring a Statement of Work (SOW)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Step 1: Open antigravity-ide and select your active project directory.",
+            "Step 2: Create a new file named project_sow.md in the file explorer.",
+            "Step 3: Paste the following rough draft outline into the editor:",
+            "Step 4: Highlight the draft text block and press Ctrl+I (or CMD+I on macOS) to invoke the inline agent prompt.",
+            "Step 5: In the prompt box, enter: 'Expand this draft into a professional Project SOW, including sections for Scope, Timeline, and Resource allocation, matching standard corporate style sheets.'",
+            "Step 6: Review the proposed modifications displayed as an inline diff (green text for additions, red text for deletions) directly in your active editor tab.",
+            "Step 7: Click 'Accept' in the diff utility bar to overwrite the rough outline with the expanded professional copy."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "content": "# Project Draft Outline\nProject Name: Cloud Infrastructure Setup\nClient: Acme Corp\nTimeline: 4 weeks\nDetails: Setup native container sandboxes and establish local folder permissions."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Verify your understanding of synchronous editing workflows:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: How does the Sidecar panel in antigravity-ide retrieve context for its recommendations?\n  - A) It scans your entire local hard drive for files.\n  - B) It automatically reads the file you have open and matches the text you have highlighted.\n  - C) It polls the visual board's active recordings folder.\n\nFeedback: Option B is correct. The Sidecar is context-aware and uses your active tab and text highlights as context for prompt completions.",
+            "Question 2: What utility displays proposed modifications within antigravity-ide before you accept them?\n  - A) A command line log message.\n  - B) An inline green-and-red diff overlay directly in the editor tab.\n  - C) A separate visual card in the visual board.\n\nFeedback: Option B is correct. Diff overlays display proposed changes directly in line with your code, letting you audit additions and deletions before committing them."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "5. Cross-Interface Interoperability & Selection Workflows",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Coordinated Workflows & Sync Pipelines"
+        },
+        {
+          "type": "p",
+          "content": "While each of the three interfaces has its distinct strength, they are not mutually exclusive. The true power of the Google Antigravity ecosystem lies in coordinating all three surfaces. Because they all interface with the same underlying engine, they share a single workspace source of truth."
+        },
+        {
+          "type": "h3",
+          "content": "The Shared Directory State"
+        },
+        {
+          "type": "p",
+          "content": "The central point of sync is the project folder itself. This folder contains the .gemini/ database cache, local files, and .gemini.md governance rules. Let's look at how tasks started in one interface are visible and modifiable in others:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Visual outputs: Files generated by a web-scraping card in antigravity appear immediately in the file tree of antigravity-ide.",
+            "Workspace boundaries: Security rules and folder locks set up via CLI (agy) are strictly enforced in both the visual board and the editor.",
+            "Session history: Agent activity logs and tool calls can be monitored using terminal commands, visual cards, or the editor sidecar."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Real-world Scenario: Research to Code Delivery"
+        },
+        {
+          "type": "p",
+          "content": "This scenario walks through a complete end-to-end development cycle utilizing all three surfaces:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Step 1: Web Research: Open antigravity (Visual Board) and run a research card that scrapes documentation tables from standard public APIs. The agent writes this raw scraped data to a workspace file called api_ref.json.",
+            "Step 2: Verification: Run 'agy --verify' in your terminal. This CLI check confirms that the newly created api_ref.json file is syntactically valid and complies with workspace rule sizes.",
+            "Step 3: Code Co-Authoring: Open antigravity-ide. Open a python file where you want to implement the API calls. Select the code region, open the Sidecar prompt, reference api_ref.json, and ask the agent to generate the helper functions.",
+            "Step 4: Refactoring: Review the proposed code diff inside the editor, accept the changes, and execute the tests using the integrated terminal."
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Concurrency Warning: Do not run concurrent write operations on the same file across different interfaces (e.g., trying to modify a file with an inline rewrite in antigravity-ide while a CLI agent is writing to it). While the engine maintains locks, concurrent updates can cause local version conflicts."
+        },
+        {
+          "type": "h3",
+          "content": "Interface Selection Summary Checksheet"
+        },
+        {
+          "type": "p",
+          "content": "Use this quick checksheet to select the optimal tool for any task:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Select CLI (agy) when: Running rapid file mutations, scripting bulk file tasks, running status diagnostics, or executing shell pipes.",
+            "Select Standalone (antigravity) when: Orchestrating multi-agent tasks, running visual web research, monitoring browser automation playbacks, or managing task lists.",
+            "Select IDE (antigravity-ide) when: Writing code or documents, running line-by-line diff inspections, co-authoring text, or requiring chat guidance."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Complete this final quiz on cross-interface workflows:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is the primary common file that defines the workspace boundaries and security rule boundaries for all three interfaces?\n  - A) package.json\n  - B) .gemini.md\n  - C) Dockerfile\n\nFeedback: Option B is correct. The .gemini.md file defines directory boundaries, file permissions, and tool access limits for all interfaces connected to the workspace.",
+            "Question 2: If an agent writes a file using a Visual Board card in antigravity, how do you access that file in antigravity-ide?\n  - A) You must export it via a web download link on the card.\n  - B) The file is written directly to the shared local workspace folder and is immediately visible in the IDE's file tree.\n  - C) You must sync the IDE database using a CLI command.\n\nFeedback: Option B is correct. Because all interfaces operate on the same local workspace directory, any file written by one interface is instantly accessible to the others."
+          ]
+        }
+      ]
+    }
+  ]
+}

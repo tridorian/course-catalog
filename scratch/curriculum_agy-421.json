@@ -1,0 +1,341 @@
+{
+  "course_id": "agy-421",
+  "title": "AGY-421: Enterprise Governance & Rules (L400)",
+  "description": "Welcome to AGY-421: Enterprise Governance & Rules. This L400 course is designed exclusively for Lead Architects and Delivery Directors who are responsible for establishing, monitoring, and enforcing development standards, compliance frameworks, and security boundaries across autonomous agentic teams. Throughout this course, you will learn to codify enterprise compliance, configure local workspace firewalls using .gemini.md, restrict execution commands, design multi-agent workflows, verify architectural patterns, and integrate governance audits directly into CI/CD pipelines to prevent rule drift and maintain immutable security boundaries.",
+  "highlights": [
+    {
+      "icon": "🛡️",
+      "title": "Hardened Security Boundaries",
+      "description": "Define strict firewalls, path locks, and never-touch files (.env, private keys) that agents cannot read or modify."
+    },
+    {
+      "icon": "🏗️",
+      "title": "Architectural Enforcement",
+      "description": "Codify architectural patterns (Hexagonal, DDD) and enforce strict test-driven development (TDD) validation cycles using Jules VM pools."
+    },
+    {
+      "icon": "🤖",
+      "title": "Automated Governance & Auditing",
+      "description": "Build GitHub Actions CI/CD checks and write drift detection scripts to ensure global rules remain unmodified and active across all repositories."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Foundations of Agentic Governance",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Introduction to Agentic Governance"
+        },
+        {
+          "type": "p",
+          "content": "In an autonomous agentic engineering environment, AI agents operate with direct access to file systems, command line terminals, and network gateways. While this enables high-velocity task execution, it also exposes the workspace to significant risks. Without strict, machine-readable boundaries, autonomous agents can inadvertently access sensitive credentials, introduce architectural drift, or execute destructive shell commands. AGY-421 provides Lead Architects and Delivery Directors with the tools to write, distribute, and enforce immutable boundaries at the directory level using workspace-specific rules."
+        },
+        {
+          "type": "p",
+          "content": "The .gemini.md file is a special Markdown-based rules file placed in a workspace. At runtime, the AGY execution engine (which powers the CLI agy and the IDE extension antigravity-ide) checks for these rules before starting any LLM execution context. The engine compiles these rules directly into the agent's system instructions, creating a binding contract that the LLM must follow during its reasoning and tool-execution loops."
+        },
+        {
+          "type": "info",
+          "content": "Always keep your .gemini.md files committed to version control. This ensures that every developer and agent operating on the codebase uses the exact same ruleset, and prevents individual developers or agents from relaxing security boundaries locally."
+        },
+        {
+          "type": "h3",
+          "content": "Workspace Directory Hierarchy & Rule Precedence"
+        },
+        {
+          "type": "p",
+          "content": "Rules follow a standard hierarchy where parent directory rules apply to all children folders unless explicitly overridden. The resolution order is:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "1. Global rules (located in ~/.config/antigravity/rules.md or ~/.gemini/GEMINI.md)",
+            "2. Workspace root rules (located in /workspace/.gemini.md)",
+            "3. Subdirectory rules (located in /workspace/src/.gemini.md)"
+          ]
+        },
+        {
+          "type": "p",
+          "content": "To maintain integrity, enterprise policies typically block subdirectories from relaxing constraints defined at the workspace root. If a root policy declares a boundary as immutable, any attempt by a subdirectory rules file to override it will be rejected by the execution engine."
+        },
+        {
+          "type": "h3",
+          "content": "Lab: Initializing a Governed Workspace"
+        },
+        {
+          "type": "p",
+          "content": "Let's set up a standard workspace structure and create our first root-level governance rules file. Execute the following terminal commands to prepare the workspace:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "mkdir -p enterprise-workspace/src\ncd enterprise-workspace\ntouch .gemini.md\ntouch src/main.py"
+        },
+        {
+          "type": "p",
+          "content": "Next, open .gemini.md and write a baseline configuration defining the environment parameters, identity context, and the allowed tools. A typical enterprise baseline configuration looks as follows:"
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "content": "# Workspace Identity & Rules\n- Workspace Name: Enterprise Core Module\n- Language Stack: Python 3.11+, TypeScript 5.0+\n- Architecture Pattern: Clean Architecture\n\n## Mandatory Rules\n1. All source changes must reside inside the `src/` directory.\n2. Do not install any external Python dependencies without permission.\n3. The developer or agent must not use shell scripts to bypass safety checks."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Answer the following questions to verify your comprehension of the decoupled model:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is the correct order of precedence for .gemini.md rules execution at runtime?\n  - A) Subdirectory overrides Workspace Root, which overrides Global rules.\n  - B) Global rules override all directory-level rules.\n  - C) Workspace Root rules override Subdirectory rules in all circumstances.\n  - D) Rules are resolved in alphabetical order.\n\nFeedback: Option A is correct. Rules are evaluated hierarchically from the global configuration down to the deepest subdirectory containing a .gemini.md rules file, allowing local directories to define specific patterns or overrides unless globally prohibited.",
+            "Question 2: Why should .gemini.md files be committed to version control?\n  - A) To compile them into binary execution engines.\n  - B) To ensure team-wide consistency, audit trails, and automatic enforcement across developer environments and CI pipelines.\n  - C) To enable formatting features in VS Code.\n  - D) To translate them to python files.\n\nFeedback: Option B is correct. Committing governance rule files ensures that they are distributed to all developers and CI pipelines, providing an audit trail for policy modifications and preventing local rules evasion."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "2. Codifying Compliance Guardrails",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Enforcing Compliance and Code Standards"
+        },
+        {
+          "type": "p",
+          "content": "Agents can generate large volumes of code quickly, but they are prone to using deprecated APIs, introducing insecure libraries, or ignoring code style guidelines. To prevent this, architects must write clear compliance constraints. The .gemini.md rules file should contain precise language specifying target code formatting, strict TypeScript or Python configurations, naming conventions, and linting rules."
+        },
+        {
+          "type": "p",
+          "content": "An effective rules configuration must block bypass mechanisms. For example, agents often insert comments like '// eslint-disable-next-line' or '@ts-ignore' to quickly resolve compilation or linter errors. A robust workspace rule explicitly forbids the insertion of lint-disabling annotations and requires standard code style checks to pass before a task is considered complete."
+        },
+        {
+          "type": "warning",
+          "content": "Agents will often try to resolve lint errors by modifying configuration files (such as .eslintrc.json, pyproject.toml, or tsconfig.json) instead of fixing the code itself. Make sure your rules block explicitly locks configuration files from being altered by the agent, ensuring that compilation strictness remains high."
+        },
+        {
+          "type": "h3",
+          "content": "Lab: Defining Code Compliance Constraints"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, we will update our .gemini.md configuration to enforce TypeScript strict mode, block deprecated fetch APIs (such as raw XMLHttpRequest), and enforce ESLint rules. Add the following rules section to your workspace .gemini.md file:"
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "content": "## Code Quality & Compliance Rules\n- TypeScript Configuration: Enforce strict mode (`strict: true` in tsconfig.json).\n- Forbidden APIs:\n  * Never write or approve code that uses `XMLHttpRequest` or third-party `axios` wrapper. Use native standard `fetch` API.\n- Coding Style Guidelines:\n  * Class names must use PascalCase (e.g., `UserController`).\n  * Interface names must be prefixed with `I` (e.g., `IUserService`).\n  * Every new function must contain JSDoc documentation with `@param` and `@returns` tags.\n- Lint Bypass Restrictions:\n  * You are strictly forbidden from writing `// eslint-disable-next-line` or `@ts-ignore` comments to bypass type checker or linter flags."
+        },
+        {
+          "type": "p",
+          "content": "To test the linter rule locally, run the AGY verify check. This command scans the codebase and verifies if the files adhere to the custom rules defined in .gemini.md."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "agy verify --rule-check code-quality --dir ./src"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Answer the following questions to verify your comprehension of compliance rules:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: Which of the following is a common vector used by agents to bypass linting checks, and how can it be codified against in .gemini.md?\n  - A) Agents will delete the codebase; codified against by keeping external backups.\n  - B) Agents will add lint-disabling comments (e.g., // eslint-disable-next-line); codified against by writing a rule that strictly forbids these annotations and checking for them in verify pipelines.\n  - C) Agents will switch the IDE to basic text editors; codified against by locking user settings.\n  - D) Agents will compile files manually without compiling flags.\n\nFeedback: Option B is correct. Agents frequently insert comments like // eslint-disable-next-line or @ts-ignore to bypass compilations. The .gemini.md must explicitly forbid this and CI checks must reject code with new bypass comments.",
+            "Question 2: Why should workspace rules lock configurations like tsconfig.json?\n  - A) To reduce compile speeds.\n  - B) To prevent agents from weakening typescript compiler flags to quickly make bad code compile.\n  - C) To enable javascript support.\n  - D) To let agents define custom libraries.\n\nFeedback: Option B is correct. Locking compiler configurations prevents agents from solving type compliance issues by disabling strict flags, ensuring the code standard remains high."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "3. Security Boundaries & Firewalls",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Securing the Workspace Environment"
+        },
+        {
+          "type": "p",
+          "content": "An agent operating in your workspace has access to file reading and editing tools. If not constrained, a compromise or model hallucination can cause the agent to read sensitive local files, upload files to external servers, or execute destructive shell commands. We must establish a strict security boundary by defining 'Never-Read' and 'Never-Write' path patterns, along with a blocklist of shell execution commands."
+        },
+        {
+          "type": "p",
+          "content": "Path locking uses canonical path resolution. The AGY agent engine checks the target path of any tool call against the security patterns. If the target path resolves to an excluded file or falls outside the allowed directory, the tool call is blocked before it reaches the file system. To prevent directory traversal bypass attempts (such as using `../../`), the runtime engine converts all references into absolute canonical paths before validation."
+        },
+        {
+          "type": "warning",
+          "content": "Always resolve paths to their absolute canonical form. Agents can try to bypass directory limits using relative syntax (e.g., ../../etc/passwd). The AGY runtime engine must be configured to resolve symlinks and relative references before performing the path authorization checks."
+        },
+        {
+          "type": "h3",
+          "content": "Lab: Hardening the Workspace Security Configurations"
+        },
+        {
+          "type": "p",
+          "content": "We will configure a security policy in .gemini.md that prevents reading environmental variables, private credentials, and ssh keys. It also defines a terminal command blocklist to block remote data extraction. Add this section to your .gemini.md file:"
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "content": "## Security Boundaries & Execution Policies\n- Allowed Directories: `/workspace/src`, `/workspace/tests`\n- Restricted Paths (Never-Read, Never-Write):\n  * `**/.env`\n  * `**/.git`\n  * `~/.ssh/**`\n  * `/etc/**`\n  * `**/credentials.json`\n- CLI Command Blocklist (Never Execute):\n  * `curl`\n  * `wget`\n  * `nc` (netcat)\n  * `sh` or `bash` scripts from external URLs\n  * `gcloud auth print-access-token`\n- Terminal Execution Approval Policy:\n  * Read-only commands (e.g., `ls`, `git diff`): Auto-approve.\n  * Write or execute commands (e.g., `pytest`, `npm test`): Require manual developer approval."
+        },
+        {
+          "type": "p",
+          "content": "Test the security boundaries by trying to query the workspace config with a mock command that attempts to read blocked pathways. Run the command below to test the agent engine's reaction to restricted paths:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "agy run \"cat ../../.env\" --workspace-rule-check"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Answer the following questions to verify your comprehension of security boundaries:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: Which technique prevents an agent from using directory traversal (e.g., ../../) to read sensitive operating system files?\n  - A) Running the agent in an encrypted terminal session.\n  - B) Resolving all path parameters to their absolute canonical form before checking them against the allowed/restricted path lists.\n  - C) Renaming all system folders to hide them from the agent.\n  - D) Restricting the model token size.\n\nFeedback: Option B is correct. Resolving the absolute canonical path ensures that any relative references or symlinks are evaluated to their true file location, allowing the security engine to block unauthorized reads.",
+            "Question 2: What is the primary purpose of a CLI command blocklist in .gemini.md?\n  - A) To speed up terminal execution times.\n  - B) To block command utilities (like curl or netcat) that could be used by an agent to exfiltrate private source code or credentials to an external server.\n  - C) To force developers to type commands manually.\n  - D) To automate SSH key generation.\n\nFeedback: Option B is correct. Restricting data exfiltration utilities protects the workspace from leaking intellectual property or access tokens during agent execution loops."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "4. Workflows & Multi-Agent Flow",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Managing Multi-Agent Development Workflows"
+        },
+        {
+          "type": "p",
+          "content": "Large scale projects require multiple agents to cooperate on design, implementation, and testing. To prevent chaos, Lead Architects specify workflow rules in .gemini.md. These rules dictate the exact sequence of actions that agents must perform. A common best practice is enforcing a Test-Driven Development (TDD) loop where the agent is required to write tests, verify they fail, implement the fix, run tests, and ensure code coverage does not decrease."
+        },
+        {
+          "type": "p",
+          "content": "To organize these multi-agent pipelines without writing complex code, Antigravity 2.0 introduces a zero-code configuration architecture under the `.agents/` folder. First, developers define the team in `agents.md` to declare specialized personas (such as Product Manager, Frontend Engineer, and QA) and their respective responsibilities. Second, modular skills and artifact handover rules are saved as markdown documents in `skills/` (for example, specifying technical limits and code review policies). Third, automated handovers are structured in `workflows/` as custom slash commands (like `/startcycle`), channelling requirements from initial specification to testing and deployment."
+        },
+        {
+          "type": "p",
+          "content": "To make verification secure and reliable, developers utilize Jules VM Pools. Jules is an isolated virtual machine runner that allows test executions to run in a clean, remote sandbox. Rather than executing tests directly on a developer's workstation, the local agent packages the change, invokes a Jules VM container to build and test the software, and reads the status payload before committing."
+        },
+        {
+          "type": "info",
+          "content": "By isolating test executions inside remote Jules VMs, you protect your local workspace from shell code injection. Additionally, this pattern guarantees environment parity, as every test runs in an identical clean environment, preventing the classic 'works on my machine' bug."
+        },
+        {
+          "type": "h3",
+          "content": "Lab: Defining Multi-Agent Workflows and Jules VM Integrations"
+        },
+        {
+          "type": "p",
+          "content": "Let's update our .gemini.md file to configure a multi-agent development and testing workflow. Copy the following workflow specification block into your configuration:"
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "content": "## Architectural Workflows & Verification Loops\n- Task Execution Sequence:\n  1. Read requirements and write corresponding unit tests inside `tests/` folder.\n  2. Execute test runner. Confirm tests fail (Red phase).\n  3. Implement code changes inside `src/` to satisfy the tests (Green phase).\n  4. Re-run tests. Confirm all tests pass.\n  5. Execute test coverage tool. Confirm coverage is >= 90%.\n  6. Submit diff to Lead Architect agent for code review.\n- Jules VM Verification Integration:\n  * Environment: Python 3.11 with pytest\n  * Build Command: `pip install -r requirements.txt`\n  * Verification Command: `pytest --cov=src/ tests/`\n  * Target Pool: `jules-testing-pool-04`\n  * Action: Execute test script inside remote Jules VM container. Do not execute test commands locally on the workstation host."
+        },
+        {
+          "type": "p",
+          "content": "To launch this multi-agent workflow and delegate the test validation to a Jules VM instance, use the CLI command below:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "agy task run --task \"Implement user registration validator\" --jules-pool jules-testing-pool-04 --verify-flow tdd"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Answer the following questions to verify your comprehension of workflow architecture:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: Why is executing test runs in a remote Jules VM rather than locally on the developer's workstation preferred in L400 enterprise setups?\n  - A) It reduces local CPU usage and isolates potential code injection vulnerabilities or malicious code inside a containerized sandbox.\n  - B) It speeds up linter checks by running them on a central cluster.\n  - C) It allows the agent to bypass authentication tokens.\n  - D) It enables the agent to write more complex code.\n\nFeedback: Option A is correct. Running builds and test commands on remote, ephemeral Jules VMs provides a sandbox that isolates developer machines from malicious or destructive scripts that models might write or execute.",
+            "Question 2: What are the phases of the TDD loop defined in the workflow rules?\n  - A) Design, Commit, Deploy.\n  - B) Red (fail tests), Green (pass tests), Refactor (improve structure and check coverage).\n  - C) Write code, Compile, Lint.\n  - D) Fetch dependencies, Write docs, Approve.\n\nFeedback: Option B is correct. Enforcing the Red-Green-Refactor cycle prevents agents from writing untested code and guarantees code quality through continuous automated verification."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "5. Rule Auditing & CI/CD Deployment",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Enterprise Rules Deployment & CI/CD Verification"
+        },
+        {
+          "type": "p",
+          "content": "Having .gemini.md rules in a repository is only effective if they are consistently maintained. Developers or agents might modify the governance files to remove security blocklists, or bypass style checks to speed up task completion. Architects must implement mechanisms to audit these rules and prevent policy drift."
+        },
+        {
+          "type": "p",
+          "content": "The primary line of defense is integrating rule audits into the CI/CD pipeline. Every pull request must be checked to ensure that:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "1. The .gemini.md rules file exists in the correct workspace locations.",
+            "2. The rules file has not been modified without authorization from a Lead Architect (enforced via checksum verification).",
+            "3. All newly created or altered files strictly comply with the active ruleset."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "If unauthorized rule modifications are detected, the pipeline must fail immediately, preventing changes from merging."
+        },
+        {
+          "type": "info",
+          "content": "To streamline the master hash verification, you can store the approved checksum in a GitHub Repository Variable or Secret. If the .gemini.md file needs to be updated, the change must be submitted in a separate PR approved by the Architecture Board, which also updates the master hash secret."
+        },
+        {
+          "type": "h3",
+          "content": "Lab: Configuring a CI/CD Rules Audit Pipeline"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, we will write a GitHub Actions workflow that runs on every pull request. The workflow runs a checksum verification against the .gemini.md file using a stored master hash to ensure it has not been modified without approval, and runs the AGY verification linting tool. Create a GitHub Actions workflow file at .github/workflows/agy-governance.yml with the following configuration:"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "content": "name: AGY Enterprise Governance Lint & Verify\non:\n  pull_request:\n    branches: [ main ]\njobs:\n  audit-rules:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout Codebase\n        uses: actions/checkout@v3\n        with:\n          fetch-depth: 0\n      - name: Setup Node.js Environment\n        uses: actions/setup-node@v3\n        with:\n          node-version: 18\n      - name: Install AGY CLI\n        run: npm install -g @google-antigravity/cli\n      - name: Verify Rule Integrity (Anti-Drift Check)\n        run: |\n          MASTER_HASH=\"7e8a9f0e1c2d3b4a5f6e7d8c9b0a1f2e\"\n          CURRENT_HASH=$(md5sum .gemini.md | awk '{print $1}')\n          if [ \"$CURRENT_HASH\" != \"$MASTER_HASH\" ]; then\n            echo \"[ERROR] Unauthorized modification of .gemini.md detected!\"\n            echo \"Expected Hash: $MASTER_HASH\"\n            echo \"Actual Hash: $CURRENT_HASH\"\n            exit 1\n          fi\n          echo \"[SUCCESS] Rules integrity verified.\"\n      - name: Run AGY Code Compliance Audits\n        run: agy audit --dir ./src --rules-file .gemini.md"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Answer the following questions to verify your comprehension of rule auditing:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is 'Rule Drift' in the context of agentic engineering governance, and how is it mitigated?\n  - A) Rule Drift is when rules files are automatically deleted by the OS; mitigated by running disk checks.\n  - B) Rule Drift is when local rules files are modified to relax compliance or security policies; mitigated by running integrity hash checks inside CI/CD pipelines.\n  - C) Rule Drift is when agents run too fast; mitigated by throttle limits.\n  - D) Rule Drift is when models update their internal training datasets; mitigated by model freezing.\n\nFeedback: Option B is correct. Rule Drift occurs when developers or agents modify local workspace rules to bypass governance constraints. Mitigation involves verifying the file's hash against an authorized value in CI/CD pipelines.",
+            "Question 2: How can an organization safely manage updates to their .gemini.md rules?\n  - A) Allow any developer to rewrite the file in their workspace without review.\n  - B) Establish an Architecture Board approval process where rule changes are reviewed, and updates are committed along with their new verified checksum in the CI pipeline configurations.\n  - C) Put rules in gitignore so they are never tracked.\n  - D) Delete the rules file when running tests.\n\nFeedback: Option B is correct. Treating governance configurations as infrastructure-as-code ensures that changes are reviewed, verified, and cataloged systematically, preventing security escapes."
+          ]
+        }
+      ]
+    }
+  ]
+}

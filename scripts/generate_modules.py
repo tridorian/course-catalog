@@ -1,9 +1,9 @@
 import json
 import os
 
-# Define output directories
-modules_dir = "/var/home/wtg/Repos/course-catalog/public/content/tracks/agentic-engineering/agy-311/modules"
-scratch_dir = "/var/home/wtg/.gemini/antigravity-cli/brain/9b98efbd-6ce7-4922-b107-9f3154ab80eb/scratch"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+modules_dir = os.path.abspath(os.path.join(script_dir, "../public/content/tracks/agentic-engineering/agy-311/modules"))
+scratch_dir = os.path.abspath(os.path.join(script_dir, "../scratch"))
 
 # Create directories if they do not exist
 os.makedirs(modules_dir, exist_ok=True)

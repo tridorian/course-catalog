@@ -1,0 +1,166 @@
+{
+  "course_id": "adk-302",
+  "title": "ADK-302: Intent Classification & Routing Agents",
+  "description": "Configure router agents to classify semantic intents and dispatch task execution parameters to worker sub-agents.",
+  "highlights": [
+    {
+      "icon": "🔀",
+      "title": "Supervisor Design",
+      "description": "Design a centralized supervisor agent that processes input queries and selects downstream executors."
+    },
+    {
+      "icon": "🎯",
+      "title": "Intent Parsing",
+      "description": "Apply classification prompts or vector similarities to tag messages with specialized labels."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Fallback Paths",
+      "description": "Handle complex and unresolvable intents with grace, escalating queries to manual intervention channels."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. The Supervisor-Worker design pattern",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Supervisor-Worker Design Pattern"
+        },
+        {
+          "type": "p",
+          "content": "For large projects, a single agent with 50 tools will make errors. The Supervisor-Worker pattern breaks this down. A supervisor agent handles triage, extracting intent and delegating sub-tasks to specialized sub-agents with 3-5 tools each."
+        },
+        {
+          "type": "info",
+          "title": "Architecture",
+          "content": "The supervisor agent is the primary endpoint, and it routes payloads to sub-agents via the A2A network protocol. It consolidates the final responses."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the main benefit of the Supervisor-Worker pattern?\n- A) It removes the need for LLMs.\n- B) It prevents tool selection confusion by isolating tools within small, focused sub-agents.\n- C) It is faster to execute.\n\nFeedback: Option B is correct. Focus limits selection mistakes."
+        }
+      ]
+    },
+    {
+      "title": "2. Building intent classifiers using semantic embedding",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Intent Classification via Embeddings"
+        },
+        {
+          "type": "p",
+          "content": "Before invoking the agent loop, comparing the cosine similarity of the user's query against a dataset of labeled intent vectors allows choosing the best agent configuration quickly."
+        },
+        {
+          "type": "h2",
+          "content": "Classification Python Mock"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "def classify_intent(query: str) -> str:\n    # Simple semantic rule router\n    q = query.lower()\n    if any(k in q for k in [\"pay\", \"invoice\", \"card\", \"billing\"]):\n        return \"billing_agent\"\n    if any(k in q for k in [\"bug\", \"broken\", \"error\", \"crash\"]):\n        return \"tech_agent\"\n    return \"general_agent\""
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why use intent classification prior to triggering model execution?\n- A) It encrypts the user's input.\n- B) It skips querying the expensive reasoning LLM for simple path routing.\n- C) It compiles custom tool modules.\n\nFeedback: Option B is correct. Pre-routing limits token costs."
+        }
+      ]
+    },
+    {
+      "title": "3. Routing messages dynamically to specialized sub-agents",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Dynamic Multi-Agent Routing"
+        },
+        {
+          "type": "p",
+          "content": "Once the supervisor identifies the target worker agent, it formats the task payload and sends it using the A2AServer routing system."
+        },
+        {
+          "type": "h2",
+          "content": "A2A Dynamic Dispatch Code"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from google_adk.a2a import A2AServer\n\nasync def route_task(target_agent: str, task_desc: str):\n    server = A2AServer()\n    # Send request to sub-agent worker channel\n    response = await server.send_message(\n        recipient=target_agent,\n        message=task_desc\n    )\n    return response"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What protocol facilitates programmatic dispatching between agents?\n- A) HTTP OAuth2\n- B) A2A (Agent-to-Agent)\n- C) TCP Socket\n\nFeedback: Option B is correct. A2A handles multi-agent messages."
+        }
+      ]
+    },
+    {
+      "title": "4. Handling escalation pathways and fallback policies",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Escalation & Fallbacks"
+        },
+        {
+          "type": "p",
+          "content": "When an agent fails to match a route, or the sub-agent returns an execution failure, the supervisor must execute a fallback policy. This usually means escalating to a human operator or returning a friendly message."
+        },
+        {
+          "type": "warning",
+          "title": "Loop Detection",
+          "content": "If two agents continually refer queries to each other, they will create an execution loop. Implement a 'max_redirects' header in agent messages to break loops."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How do you prevent infinite redirection loops in multi-agent routing?\n- A) Stop executing code.\n- B) Track a redirection counter (e.g. max_redirects) in the message envelope.\n- C) Enforce database transactions.\n\nFeedback: Option B is correct. Counters prevent loops."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab: Designing a triage routing agent",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Designing a Triage Routing Agent"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will write a complete triage routing program in Python that reads queries, classifies them, and dispatches messages to the appropriate agent worker."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the routing logic"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "class TriageSupervisor:\n    def __init__(self):\n        self.workers = {\n            \"billing\": lambda q: f\"Billing Worker processed: {q}\",\n            \"support\": lambda q: f\"Support Worker processed: {q}\"\n        }\n        \n    def route(self, query: str) -> str:\n        if \"price\" in query or \"invoice\" in query:\n            return self.workers[\"billing\"](query)\n        else:\n            return self.workers[\"support\"](query)\n\nif __name__ == '__main__':\n    supervisor = TriageSupervisor()\n    print(supervisor.route(\"Can you check my invoice details?\"))\n    print(supervisor.route(\"How do I reset my password?\"))"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Which worker handled the invoice query in the script?\n- A) Support Worker\n- B) Billing Worker\n- C) None\n\nFeedback: Option B is correct. Billing Worker matched the 'invoice' keyword."
+        }
+      ]
+    }
+  ]
+}

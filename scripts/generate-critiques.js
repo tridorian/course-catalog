@@ -9,7 +9,7 @@ const TRACK_DIR = path.join(ROOT_DIR, 'public/content/tracks/agentic-engineering
 const TRACK_JSON_PATH = path.join(TRACK_DIR, 'track.json');
 
 async function getGeminiToken() {
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = '/var/home/wtg/.gcloud_config/application_default_credentials.json';
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS || path.join(process.env.HOME || '', '.gcloud_config', 'application_default_credentials.json');
   const auth = new google.auth.GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/cloud-platform']
   });

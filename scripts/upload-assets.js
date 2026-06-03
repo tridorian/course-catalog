@@ -6,10 +6,10 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '..');
 const TRACK_FOLDER_ID = '1Qz3O9gMN96IdSKE2lKmYjj75CmCQ_Mq2';
-const BRAIN_DIR = '/var/home/wtg/.gemini/antigravity-cli/brain/9b98efbd-6ce7-4922-b107-9f3154ab80eb';
+const BRAIN_DIR = path.join(__dirname, '../scratch');
 
 async function getGoogleAuth() {
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = '/var/home/wtg/.gcloud_config/application_default_credentials.json';
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS || path.join(process.env.HOME || '', '.gcloud_config', 'application_default_credentials.json');
   const auth = new google.auth.GoogleAuth({
     scopes: [
       'https://www.googleapis.com/auth/drive'

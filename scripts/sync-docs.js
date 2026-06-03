@@ -12,7 +12,7 @@ async function getDocsClient() {
   const authKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!authKey) {
     console.log('GOOGLE_SERVICE_ACCOUNT_KEY not set, attempting to use application default credentials...');
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = '/var/home/wtg/.gcloud_config/application_default_credentials.json';
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS || path.join(process.env.HOME || '', '.gcloud_config', 'application_default_credentials.json');
     const auth = new google.auth.GoogleAuth({
       scopes: ['https://www.googleapis.com/auth/documents.readonly', 'https://www.googleapis.com/auth/drive.readonly']
     });

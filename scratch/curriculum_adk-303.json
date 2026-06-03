@@ -1,0 +1,184 @@
+{
+  "course_id": "adk-303",
+  "title": "ADK-303: Collaborative Multi-Agent Patterns",
+  "description": "Master consensus protocols, voting nodes, shared blackboards, and sequential editing chains across agent workgroups.",
+  "highlights": [
+    {
+      "icon": "📋",
+      "title": "Blackboards",
+      "description": "Design shared state stores where multiple independent agents read and write variables during calculations."
+    },
+    {
+      "icon": "🗳️",
+      "title": "Voting Consensus",
+      "description": "Implement consensus checks where worker agents validate each other's outputs before writing to files."
+    },
+    {
+      "icon": "⛓️",
+      "title": "Sequential Pipelines",
+      "description": "Structure multi-agent pipelines (writer -> reviewer -> publisher) to automate corporate document writing."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Shared state blackboard architectures",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Blackboard Architectures"
+        },
+        {
+          "type": "p",
+          "content": "In a blackboard architecture, agents do not message each other directly. Instead, they read from and write to a centralized, shared state space called the 'Blackboard'."
+        },
+        {
+          "type": "h2",
+          "content": "Blackboard Structure"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "class Blackboard:\n    def __init__(self):\n        self.data = {}\n    def update(self, key, value):\n        self.data[key] = value\n    def get(self, key):\n        return self.data.get(key)"
+        },
+        {
+          "type": "info",
+          "title": "Decoupling Benefits",
+          "content": "This decouples agent logic. Agents monitor changes on the blackboard and act only when their specialized inputs are ready."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How do agents exchange information in a Blackboard architecture?\n- A) Direct network sockets\n- B) By posting to and reading from a shared central memory store\n- C) Via command-line arguments\n\nFeedback: Option B is correct. The Blackboard is a shared space."
+        }
+      ]
+    },
+    {
+      "title": "2. Sequential processing pipelines with intermediate validation",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Sequential Pipelines"
+        },
+        {
+          "type": "p",
+          "content": "A sequential pipeline passes a work artifact along a chain of agents. For example, a Writer Agent drafts text, a Reviewer Agent identifies bugs, and an Editor Agent applies corrections."
+        },
+        {
+          "type": "h2",
+          "content": "Pipeline Flow Code"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "draft = writer.draft_topic(\"ADK Security\")\nerrors = reviewer.review_content(draft)\nif errors:\n    final_doc = editor.apply_corrections(draft, errors)\nelse:\n    final_doc = draft"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the purpose of intermediate validation in sequential pipelines?\n- A) To encrypt files before saving.\n- B) To verify quality at each step, preventing downstream errors.\n- C) To compile code modules.\n\nFeedback: Option B is correct. Validation ensures errors are corrected early."
+        }
+      ]
+    },
+    {
+      "title": "3. Implementing voting and consensus-based decisions",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Voting & Consensus Patterns"
+        },
+        {
+          "type": "p",
+          "content": "For safety-critical decisions, you can query multiple instances of an agent and require a consensus vote before executing a tool (like releasing funds)."
+        },
+        {
+          "type": "h2",
+          "content": "Consensus Logic Code"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "votes = [agent_a.evaluate(data), agent_b.evaluate(data), agent_c.evaluate(data)]\n# Count yes/no votes\nyes_count = sum(1 for v in votes if v == \"APPROVED\")\nconsensus_reached = yes_count >= 2"
+        },
+        {
+          "type": "warning",
+          "title": "Latency Cost",
+          "content": "Voting patterns require multiple LLM calls. Ensure the execution time does not exceed the application's timeout budgets."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary disadvantage of multi-agent voting architectures?\n- A) They are less accurate.\n- B) They increase latency and API token costs because multiple LLM calls run in parallel.\n- C) They require database migrations.\n\nFeedback: Option B is correct. More calls mean higher costs and times."
+        }
+      ]
+    },
+    {
+      "title": "4. Conflict resolution and state syncing",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Conflict Resolution & Syncing"
+        },
+        {
+          "type": "p",
+          "content": "When multiple agents write to the blackboard concurrently, race conditions occur. You must apply write locks, transaction scopes, or timestamp checks to maintain consistency."
+        },
+        {
+          "type": "h2",
+          "content": "Mutex Lock Blackboard"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import threading\n\nclass LockedBlackboard:\n    def __init__(self):\n        self.lock = threading.Lock()\n        self.data = {}\n    def safe_write(self, key, value):\n        with self.lock:\n            self.data[key] = value"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How do you prevent two agents from overwriting each other's blackboard changes concurrently?\n- A) Run them sequentially only.\n- B) Apply mutual exclusion locks (mutexes) or transactions to write operations.\n- C) Turn off all memory variables.\n\nFeedback: Option B is correct. Locks guarantee thread-safe writes."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab: Building a collaborative document drafting team",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Building a Collaborative Document Drafting Team"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will build a Python program that defines a sequential pipeline. You will run a Writer Agent that produces text and a Reviewer Agent that flags missing details."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the Pipeline Script"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "class Writer:\n    def draft(self):\n        return \"Title: ADK Security. We use tools to run code.\"\n\nclass Reviewer:\n    def review(self, text):\n        issues = []\n        if \"sandbox\" not in text.lower():\n            issues.append(\"Missing details about sandboxed execution.\")\n        return issues\n\nif __name__ == '__main__':\n    w = Writer()\n    r = Reviewer()\n    \n    doc = w.draft()\n    problems = r.review(doc)\n    print(\"Draft:\", doc)\n    print(\"Review Issues:\", problems)"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What detail was reported as missing by the Reviewer Agent?\n- A) ADK installation steps\n- B) Details about sandboxed execution\n- C) Code indentation rules\n\nFeedback: Option B is correct. The text draft did not contain the word 'sandbox'."
+        }
+      ]
+    }
+  ]
+}

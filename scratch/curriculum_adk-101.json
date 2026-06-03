@@ -1,0 +1,358 @@
+{
+  "course_id": "adk-101",
+  "title": "ADK-101: ADK Foundations",
+  "description": "Master the basics of Google's Agent Development Kit (ADK). Setup your local environment, install the CLI, configure agent.yaml, and run your first agent.",
+  "highlights": [
+    {
+      "icon": "⚙️",
+      "title": "CLI Installation",
+      "description": "Learn to install the ADK command line interface across native systems and sandboxed containers."
+    },
+    {
+      "icon": "📝",
+      "title": "YAML Configurations",
+      "description": "Master the schema design of agent.yaml to register tools, parameters, and memory parameters."
+    },
+    {
+      "icon": "🛠️",
+      "title": "Tool Authoring",
+      "description": "Write custom tools using Python or TypeScript decorators with strict parameter typing schemas."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Course Introduction & Architecture",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "ADK Foundations: Introduction & Architecture"
+        },
+        {
+          "type": "p",
+          "content": "Welcome to ADK Foundations. Google's Agent Development Kit (ADK) is a modular, language-independent framework built to run autonomous AI agents in production. ADK structures agent loops, standardizes tool invocation formats, manages session memory boundaries, and facilitates integration with enterprise services."
+        },
+        {
+          "type": "h2",
+          "content": "Core Architectural Components"
+        },
+        {
+          "type": "p",
+          "content": "Before writing code, it is critical to understand the four primary pillars of the ADK system architecture:"
+        },
+        {
+          "type": "grid",
+          "items": [
+            {
+              "icon": "Cpu",
+              "title": "Agent Engine",
+              "content": "The central core that coordinates semantic routing, planning, and task execution sequences using LLM backends.",
+              "border": "#4ade80"
+            },
+            {
+              "icon": "Wrench",
+              "title": "Tool Registry",
+              "content": "A structured library of functions that the agent can execute, configured with exact JSON Schemas.",
+              "border": "#4ade80"
+            },
+            {
+              "icon": "FolderLock",
+              "title": "Workspace Boundary",
+              "content": "A localized sandboxed folder structure restricting the agent's file system read, write, and execute permissions.",
+              "border": "#ef4444"
+            },
+            {
+              "icon": "History",
+              "title": "Session Store",
+              "content": "A stateful ledger tracking model requests, response steps, token consumption, and variables.",
+              "border": "#3b82f6"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Pre-requisites and Environment Check"
+        },
+        {
+          "type": "p",
+          "content": "Verify that your developer machine meets the minimum system dependencies before installing the SDK CLI tool:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Python 3.10 or higher (required for Python tool bindings and scripts)",
+            "Node.js 18.x or higher (required for TypeScript tool decoration and local web tooling)",
+            "Go 1.20 or higher (optional, required if building high-throughput native extensions)",
+            "Docker, Podman, or Distrobox (strongly recommended for sandboxed workspace containment)"
+          ]
+        },
+        {
+          "type": "info",
+          "title": "Pro-Tip: Runtime Verification",
+          "content": "Ensure Python and Node are in your system PATH by running 'python --version' and 'node --version' in your active shell prior to bootstrapping."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary role of the Session Store in the ADK architecture?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It compiles custom Go binaries into OCI container images.\n- B) It acts as a stateful ledger tracking conversational state, token counts, and execution traces.\n- C) It is a firewall that blocks external HTTP traffic."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. The Session Store tracks the step-by-step state of the agent run, including token usage and conversation memory."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which runtime engines are officially supported for writing custom ADK tool decorations?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Python, TypeScript/Node.js, and Go.\n- B) Only Ruby on Rails.\n- C) Bash shell scripts exclusively."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option A is correct. ADK provides official language bindings and decorators for Python, Node.js/TypeScript, and Go."
+        }
+      ]
+    },
+    {
+      "title": "2. Installing the CLI and Environment Setup",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Installing the ADK CLI Tool"
+        },
+        {
+          "type": "p",
+          "content": "The ADK system is administered using the `adk` command line interface. This tool manages project bootstrapping, agent testing, local server execution, and production deployments."
+        },
+        {
+          "type": "h2",
+          "content": "Option A: Native Script Installation"
+        },
+        {
+          "type": "p",
+          "content": "For standard development workstations, install the CLI globally using the direct package managers or the secure bootstrap script:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Installing via NPM global package manager\nnpm install -g @google/adk-cli\n\n# Alternative: Python package installation for script-heavy environments\npip install google-adk-cli"
+        },
+        {
+          "type": "h2",
+          "content": "Option B: Sandboxed distrobox execution (Tier 3 Hardening)"
+        },
+        {
+          "type": "p",
+          "content": "For locked-down corporate workstations, run the installer inside a local OCI distrobox sandbox container. This avoids local workspace contamination:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Initialize a distrobox shell using the official ADK base image\ndistrobox create -n adk-box --image gcr.io/google-adk/adk-box:latest\n\n# Enter the sandboxed shell to run the ADK toolchain\ndistrobox enter adk-box"
+        },
+        {
+          "type": "h2",
+          "content": "Verifying the Installation"
+        },
+        {
+          "type": "p",
+          "content": "Run the diagnostics suite to confirm the CLI is authenticated and has correct file access permissions:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk doctor"
+        },
+        {
+          "type": "info",
+          "title": "Diagnostic Logs",
+          "content": "The 'adk doctor' command checks model connectivity, runs local permissions verification in ~/.adk/cache, and reports dependency versions."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What command should you run to verify that your system paths, Python models, and security dependencies are ready for ADK development?"
+        },
+        {
+          "type": "p",
+          "content": "- A) adk check\n- B) adk doctor\n- C) adk verify --all"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. 'adk doctor' is the official built-in CLI diagnostic suite."
+        }
+      ]
+    },
+    {
+      "title": "3. Deconstructing agent.yaml Configuration",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Anatomy of agent.yaml"
+        },
+        {
+          "type": "p",
+          "content": "Every ADK agent is defined by a primary metadata and configuration file named `agent.yaml`. This file explicitly declares the agent's identity, the execution model, model hyperparameters, registered tool modules, and conversation memory windows."
+        },
+        {
+          "type": "h2",
+          "content": "Detailed agent.yaml Structure"
+        },
+        {
+          "type": "p",
+          "content": "Below is a complete, production-grade example of an `agent.yaml` definition file:"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "version: \"1.0.0\"\nagent_id: \"document-analyzer-agent\"\ntitle: \"Enterprise Document Analyzer\"\ndescription: \"Extracts structured schema facts from uploaded financial reports.\"\n\nmodel:\n  provider: \"google-vertex\"\n  name: \"gemini-1.5-pro\"\n  parameters:\n    temperature: 0.1\n    top_p: 0.95\n    max_output_tokens: 8192\n\nmemory:\n  type: \"sliding-window\"\n  window_size: 15\n  compaction_policy: \"summarize\"\n\ntools:\n  - name: \"read_file_content\"\n    source: \"src/tools/file_ops.py\"\n    class: \"ReadFileContentTool\"\n  - name: \"regex_search\"\n    source: \"src/tools/text_regex.py\"\n    class: \"RegexSearchTool\"\n\nsecurity:\n  workspace_lock: true\n  network_access: \"restricted\"\n  allowed_domains:\n    - \"*.googleapis.com\"\n"
+        },
+        {
+          "type": "h2",
+          "content": "Key Parameters Explained"
+        },
+        {
+          "type": "list",
+          "items": [
+            "model.parameters.temperature: Determines token sampling randomness. In engineering tools, keep this low (0.0 to 0.2) to guarantee deterministic code outputs and strict schema adherence.",
+            "memory.compaction_policy: Defines how the agent compresses messages when context thresholds are exceeded. 'summarize' triggers a background call to summarize older messages, while 'truncate' deletes oldest turns.",
+            "security.workspace_lock: When set to true, restricts the agent from reading or writing files outside of its immediate execution folder."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why should an agent.yaml used for backend data migration have a temperature parameter of 0.0 or 0.1?"
+        },
+        {
+          "type": "p",
+          "content": "- A) To reduce memory allocation size in the container.\n- B) To ensure consistent, deterministic behavior and minimize hallucinated variables during parsing.\n- C) To make the agent run twice as fast."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Lowering the temperature decreases model randomness, which is critical for structured data processing and code execution."
+        }
+      ]
+    },
+    {
+      "title": "4. Lab - Creating Your First Custom Tool",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Custom Tool Authoring"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will author a custom file parsing tool in Python that validates CSV formatting. The agent will discover this tool via the `agent.yaml` registry and execute it during tasks."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the Tool Source Code"
+        },
+        {
+          "type": "p",
+          "content": "Create a new file `src/tools/csv_validator.py` and write the Python tool utilizing ADK's decorator bindings. Make sure to define docstrings and type hints as the agent relies on them to generate the JSON Schema payload."
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import csv\nfrom google_adk.tools import tool\n\n@tool\ndef validate_csv_columns(file_path: str, expected_cols: list[str]) -> dict:\n    \"\"\"\n    Validates that a CSV file contains the exact list of expected column names.\n    \n    Args:\n        file_path (str): The absolute or relative path to the local CSV file.\n        expected_cols (list[str]): The list of column headers required to be present.\n        \n    Returns:\n        dict: A status report indicating success boolean and list of missing columns.\n    \"\"\"\n    try:\n        with open(file_path, mode='r', encoding='utf-8') as f:\n            reader = csv.reader(f)\n            headers = next(reader, None)\n            if not headers:\n                return {\"status\": \"error\", \"valid\": False, \"reason\": \"CSV is empty\"}\n            \n            missing = [col for col in expected_cols if col not in headers]\n            if missing:\n                return {\"status\": \"invalid\", \"valid\": False, \"missing\": missing}\n            return {\"status\": \"success\", \"valid\": true, \"missing\": []}\n    except Exception as e:\n        return {\"status\": \"error\", \"valid\": False, \"reason\": str(e)}\n"
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Register the Tool in agent.yaml"
+        },
+        {
+          "type": "p",
+          "content": "Register the new tool file inside your `agent.yaml` file under the tools section:"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "tools:\n  - name: \"validate_csv_columns\"\n    source: \"src/tools/csv_validator.py\"\n"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How does the ADK runtime construct the JSON parameters schema that is shared with the LLM backend for tool discovery?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It prompts the developer to author a separate JSON file manually.\n- B) It parses the function signature type hints and docstrings of the decorated @tool function.\n- C) It reads global environment variables."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. ADK uses runtime reflection to inspect parameter types and descriptions directly from the code docstrings."
+        }
+      ]
+    },
+    {
+      "title": "5. Execution and Local Verification",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Running and Testing Agents Locally"
+        },
+        {
+          "type": "p",
+          "content": "Once your configurations and tool files are registered, run the local execution engine using the ADK CLI to verify agent outputs and validate tool interfaces."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Execute with a Direct Prompt"
+        },
+        {
+          "type": "p",
+          "content": "Run the agent in single-prompt execution mode. This initializes the connection, registers your tools, passes the prompt, executes the loop, and prints output:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk run --prompt \"Validate if customer_records.csv contains headers: id, name, email. Use relative path: src/test/customer_records.csv\""
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Run in Interactive Repl Mode"
+        },
+        {
+          "type": "p",
+          "content": "To test multi-step dialogues and evaluate memory window slide parameters, launch the interactive shell (REPL) interface:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk run --interactive"
+        },
+        {
+          "type": "info",
+          "title": "Trace Output Folder",
+          "content": "By default, every execution of 'adk run' dumps a step-by-step tracking log file into the workspace directory under `.adk/logs/runs/`. You can reference these files to diagnose tool execution arguments."
+        },
+        {
+          "type": "h2",
+          "content": "Congratulations!"
+        },
+        {
+          "type": "p",
+          "content": "You have completed ADK-101: ADK Foundations. You are now ready to advance to developer tooling and visualization dashboards in ADK-201."
+        }
+      ]
+    }
+  ]
+}

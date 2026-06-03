@@ -1,0 +1,198 @@
+{
+  "course_id": "adk-203",
+  "title": "ADK-203: Stateful Conversation Memory",
+  "description": "Implement conversation storage adapters for sliding windows, summarization, Redis caches, and persistent Postgres backends.",
+  "highlights": [
+    {
+      "icon": "🧠",
+      "title": "Memory Windows",
+      "description": "Design conversational sliding windows that maintain recent context without exceeding token quotas."
+    },
+    {
+      "icon": "⚡",
+      "title": "Redis Cache",
+      "description": "Setup fast memory caches that save session chats with custom TTL timeouts."
+    },
+    {
+      "icon": "🗄️",
+      "title": "PostgreSQL Store",
+      "description": "Build relational persistence models that store, fetch, and restore multi-user conversations."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Introduction to agent conversation memory paradigms",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Conversation Memory Paradigms"
+        },
+        {
+          "type": "p",
+          "content": "LLMs are inherently stateless. Each request must pass the historical message context. Managing this context limits token overhead."
+        },
+        {
+          "type": "grid",
+          "items": [
+            {
+              "icon": "ArrowRight",
+              "title": "Full History",
+              "content": "Sends every message. Accurate but runs out of context tokens quickly.",
+              "border": "#ef4444"
+            },
+            {
+              "icon": "Sliders",
+              "title": "Sliding Window",
+              "content": "Only keeps the last N messages, discarding older context.",
+              "border": "#3b82f6"
+            },
+            {
+              "icon": "FileText",
+              "title": "Summarization",
+              "content": "Summarizes older history into a single paragraph to save tokens.",
+              "border": "#4ade80"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary drawback of sending full conversation history with every message?\n- A) It is slow to parse on the client.\n- B) It exhausts token limits, increasing costs and response latencies.\n- C) It requires database write locks.\n\nFeedback: Option B is correct. Full history consumes tokens rapidly."
+        }
+      ]
+    },
+    {
+      "title": "2. Windowed conversation histories vs summarization",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Windowed Memory vs Summarized Memory"
+        },
+        {
+          "type": "p",
+          "content": "Sliding windows are simple and maintain precise local context. Summarized memory uses an intermediate LLM run to condense historical turns, preserving older context at lower accuracy."
+        },
+        {
+          "type": "h2",
+          "content": "Window Configuration Example"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from google_adk.memory import WindowedMemory\n\n# Configure memory to store only the last 4 conversational turns\nmemory = WindowedMemory(window_size=4)"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: When is a sliding window memory format preferred over summarization?\n- A) When long-term history is critical.\n- B) When precise details of the last few messages must be preserved without distortion.\n- C) When saving maximum tokens is the only priority.\n\nFeedback: Option B is correct. Windows preserve exact wording for recent turns."
+        }
+      ]
+    },
+    {
+      "title": "3. Persistence layer: Redis adapters",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Redis Memory Persistence"
+        },
+        {
+          "type": "p",
+          "content": "Redis is an in-memory database ideal for low-latency session caches. In multi-user setups, storing thread history in Redis ensures horizontal scaling."
+        },
+        {
+          "type": "h2",
+          "content": "Python Redis Adapter Setup"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import redis\nfrom google_adk.memory import RedisMemoryStore\n\nr_client = redis.Redis(host='localhost', port=6379, db=0)\n# Connect the memory manager to Redis with a 1 hour TTL\nstore = RedisMemoryStore(client=r_client, ttl_seconds=3600)"
+        },
+        {
+          "type": "info",
+          "title": "TTL Strategy",
+          "content": "Setting an explicit TTL ensures stale chat sessions are evicted, managing memory usage automatically."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why is Redis highly suitable for session memory stores?\n- A) It supports complex SQL queries.\n- B) It offers extremely low-latency reads and writes with automatic TTL eviction.\n- C) It runs inside the client web browser.\n\nFeedback: Option B is correct. Redis handles fast lookups and auto-eviction."
+        }
+      ]
+    },
+    {
+      "title": "4. Memory isolation in multi-tenant configurations",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Multi-Tenant Memory Isolation"
+        },
+        {
+          "type": "p",
+          "content": "In a production environment, multiple users talk to the same backend. You must isolate memory threads to prevent data leaks."
+        },
+        {
+          "type": "h2",
+          "content": "Key Isolation Pattern"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "def get_user_chat_history(user_id: str, thread_id: str):\n    # Ensure keys are namespace isolated\n    redis_key = f\"tenant:user:{user_id}:thread:{thread_id}\"\n    return r_client.get(redis_key)"
+        },
+        {
+          "type": "warning",
+          "title": "Data Security Warning",
+          "content": "Never fall back to global shared memory variables. Any concurrent query will leak conversation history to other sessions."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How do you prevent session leaks in multi-tenant configurations?\n- A) Run a separate agent VM for every user.\n- B) Partition chat memory keys using distinct namespaces (tenant:user:thread).\n- C) Turn off all history persistence.\n\nFeedback: Option B is correct. Namespace keys keep threads isolated."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab: Building a stateful memory management agent",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Building a Stateful Memory Management Agent"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will build a Python program that saves session histories to a local SQLite database, loading and resuming them dynamically."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the SQLite Memory Manager"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import sqlite3\nimport json\n\nclass SQLiteMemoryStore:\n    def __init__(self, db_path=\"chats.db\"):\n        self.conn = sqlite3.connect(db_path)\n        self.conn.execute(\"CREATE TABLE IF NOT EXISTS history (session_id TEXT, messages TEXT)\")\n        self.conn.commit()\n        \n    def save_session(self, session_id, messages):\n        msg_str = json.dumps(messages)\n        cursor = self.conn.cursor()\n        cursor.execute(\"INSERT OR REPLACE INTO history (session_id, messages) VALUES (?, ?)\", (session_id, msg_str))\n        self.conn.commit()\n        \n    def load_session(self, session_id):\n        cursor = self.conn.cursor()\n        cursor.execute(\"SELECT messages FROM history WHERE session_id = ?\", (session_id,))\n        row = cursor.fetchone()\n        return json.loads(row[0]) if row else []\n\nif __name__ == '__main__':\n    store = SQLiteMemoryStore()\n    sample_msgs = [{\"role\": \"user\", \"content\": \"Hi\"}, {\"role\": \"model\", \"content\": \"Hello!\"}]\n    store.save_session(\"sess_100\", sample_msgs)\n    print(\"Loaded Session:\", store.load_session(\"sess_100\"))"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What database is used in the script above to store the conversation messages?\n- A) MongoDB\n- B) PostgreSQL\n- C) SQLite\n\nFeedback: Option C is correct. SQLite is used to store and restore session history."
+        }
+      ]
+    }
+  ]
+}

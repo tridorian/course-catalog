@@ -1,0 +1,274 @@
+{
+  "course_id": "agy-104",
+  "title": "AGY-104: Agent-Human Collaboration Loops (L100)",
+  "description": "Constructing clear instructions, managing terminal execution approvals, and learning how to safely pause, redirect, and resume an agent task.",
+  "highlights": [
+    {
+      "icon": "Compass",
+      "title": "Human-in-the-Loop Orchestration",
+      "description": "Learn to manage autonomous agent cycles with safety, balancing automation speed with human confirmation gates."
+    },
+    {
+      "icon": "Terminal",
+      "title": "Execution Approval Control",
+      "description": "Master the configurations behind manual task check-offs and high-autonomy --auto-approve container pipelines."
+    },
+    {
+      "icon": "HelpCircle",
+      "title": "Active Steering & Interrupts",
+      "description": "Acquire the tools and commands needed to pause, redirect, and safely resume agents during live execution loops."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Introduction to Human-in-the-Loop Collaboration",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "Welcome to **AGY-104: Agent-Human Collaboration Loops**. In the landscape of agentic engineering, autonomous agents are highly capable but operate under deterministic constraints and lack human contextual judgment. Human-in-the-loop (HITL) is a design pattern that inserts human oversight at critical validation junctions, ensuring that the agent does not execute destructive, insecure, or incorrect actions."
+        },
+        {
+          "type": "p",
+          "content": "For instance, when an agent runs commands that modify your local system or perform file deletion, standard safety protocols require the user to explicitly confirm before the command is sent to the shell. This course teaches you how to establish these safety gates, author instructions that set boundary lines, and control the agent's flow of execution."
+        },
+        {
+          "type": "h2",
+          "content": "Core Patterns of Agent-Human Collaboration"
+        },
+        {
+          "type": "p",
+          "content": "Collaboration between human operators and AI agents typically follows one of three distinct interaction styles:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Synchronous Steering:** The human works alongside the agent in real-time, providing ongoing chat guidance and refining goals as the task progresses.",
+            "**Asynchronous Checkpoints:** The agent runs independently in the background, pausing when it reaches a protected action or requires verification.",
+            "**State Inspection:** The user opens the current workspace state to verify files, run diagnostics, and confirm correctness before approving the next agent cycle."
+          ]
+        },
+        {
+          "type": "info",
+          "content": "In AGY SDK systems, security is not a post-process; it is integrated directly into the runtime execution loop through permission controls and directory boundaries. This ensures that the agent always remains a helper rather than a hazard."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1:** What is the primary purpose of Human-in-the-Loop (HITL) design in agentic engineering?\n\n- A) To eliminate the need for autonomous agents entirely\n- B) To run agents at maximum speed without safety constraints\n- C) To place human checkpoints at critical junctions to verify actions, ensuring security and correctness\n- D) To automate the collection of user keystrokes for training models"
+        },
+        {
+          "type": "info",
+          "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Human-in-the-Loop validation is a safety-first architecture that inserts human review at critical boundaries (such as terminal executions or file writes) to prevent destructive actions and guide agents toward the correct outcome."
+        }
+      ]
+    },
+    {
+      "title": "2. Composing Clear and Standardized Instructions",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "Agents are highly sensitive to prompt structure, context delimiters, and target outputs. Composing clear instructions is key to preventing agents from going down infinite loops or misinterpreting goals. The main tool for configuring local workspace boundaries and instructions is the local rule file, typically called `.gemini.md` or a customized `instructions.md` in the root workspace."
+        },
+        {
+          "type": "p",
+          "content": "When formatting instructions, you must define: (1) The precise objectives of the task, (2) The directory boundaries (the file system sandbox), (3) Allowed vs. prohibited CLI tools, and (4) The exact output expectations. Below is an example of a standardized workspace instruction file."
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "content": "# Workspace Execution Rules & Guidelines\n\n## 1. Directory Boundaries\n- Primary Workspace: `/var/home/wtg/Repos/project-sandbox`\n- PROHIBITED DIRECTORIES: Do NOT access directories outside the workspace (e.g., `/etc`, `/tmp`, `/home/wtg/.ssh`).\n\n## 2. Command Permissions\n- ALLOWED: `npm run build`, `npm test`, `git status`, `git diff`\n- PROHIBITED: `rm -rf` on parent directories, `curl` executing remote scripts, `chmod` modifications.\n\n## 3. Execution Verification\n- After making modifications to any code, the agent MUST run the test suite using `npm test` and output the test summary before requesting completion."
+        },
+        {
+          "type": "p",
+          "content": "By establishing these boundaries in a structured format, the agent parses the rules as a system instruction before every step, reducing the risk of security violations or out-of-scope work."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1:** Why is it critical to explicitly specify prohibited directories in workspace instructions?\n\n- A) It speeds up the agent's computation by narrowing the search space\n- B) It prevents the agent from reading or writing sensitive files (like SSH keys or system configurations) if it encounters a path traversal bug\n- C) It is a hard requirement for the agent to boot up\n- D) It enables the agent to automatically gain administrator permissions"
+        },
+        {
+          "type": "info",
+          "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Defining explicit boundary rules, such as folder exclusion lists, establishes a clear path-traversal barrier. If the agent is instructed to write files, it will check these rules to verify it does not access or overwrite sensitive personal configuration paths."
+        }
+      ]
+    },
+    {
+      "title": "3. Managing Terminal Execution Approvals",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "AGY supports two primary terminal execution approval modes: manual approval and auto-approve mode. In manual approval mode, every command proposed by the agent is presented to the user with a prompt. The user must review the command line and approve or reject it. In auto-approve mode, commands run without manual prompt check-offs."
+        },
+        {
+          "type": "p",
+          "content": "The selection of these modes is governed by the environment. Tier 1 (Native Local Install) should ALWAYS use manual approvals, as the agent shares the user's host shell and environment variables. Tier 3 (agy-box Container Sandbox) isolates the agent in an OCI container, making `--auto-approve` safe because any command execution is firewalled inside the container."
+        },
+        {
+          "type": "warning",
+          "content": "Running the agent with the --auto-approve flag on a Tier 1 native installation grants full shell control to the LLM. If the model hallucinations lead to running a dangerous script, it can overwrite your local environment. Always use containerization for auto-approval workflows."
+        },
+        {
+          "type": "h2",
+          "content": "Configuring Execution Approvals"
+        },
+        {
+          "type": "p",
+          "content": "To configure execution approvals in your project workspace, you can define a `config.json` file inside the `.gemini` folder or pass parameters directly to the agy CLI tool. Let's look at the configuration payload structure:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"execution\": {\n    \"sandbox_tier\": 3,\n    \"firewall_rules\": {\n      \"outbound_network\": \"restricted\",\n      \"allowed_domains\": [\"github.com\", \"npmjs.org\"]\n    },\n    \"approvals\": {\n      \"terminal_commands\": \"manual\",\n      \"file_write\": \"auto\",\n      \"network_access\": \"manual\"\n    }\n  }\n}"
+        },
+        {
+          "type": "p",
+          "content": "Using the command line interface, the execution approval mode can be specified dynamically:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Start the agent with manual approval gates (Safe default)\nagy task run --task \"Refactor login validation\" --approvals manual\n\n# Start the agent in auto-approve mode (Use ONLY inside containerized sandboxes like agy-box)\nagy task run --task \"Run linting and format files\" --auto-approve"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1:** Under what condition is it safe to use the `--auto-approve` execution flag?\n\n- A) Anytime the developer is too busy to click 'Approve'\n- B) Only when running inside an isolated sandbox container (such as agy-box) protected by a strict container firewall\n- C) Only when running as a superuser/root on a production host\n- D) Never, under any circumstances"
+        },
+        {
+          "type": "info",
+          "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Auto-approve mode eliminates human confirmation prompts. It should only be active inside containerized sandboxes (like agy-box) that insulate your host system from execution anomalies."
+        }
+      ]
+    },
+    {
+      "title": "4. Active Steering: Pausing, Redirecting, and Resuming",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "During long-running agent tasks (such as crawling documentation or performing refactoring across multiple files), the agent may drift from the intended scope or get stuck in a diagnostic loop. Active steering allows the user to intercept the execution flow, pause the task, redirect the agent, and resume."
+        },
+        {
+          "type": "p",
+          "content": "When a task is running asynchronously (e.g. launched via the visual dashboard `antigravity` or run in the background terminal), you can interact with it using key controls. In the `antigravity` GUI, you can click the 'Pause' button, type corrective instructions in the chat, and click 'Resume'. In the command-line interface, you can manage running tasks using standard CLI instructions."
+        },
+        {
+          "type": "h2",
+          "content": "CLI Task Control Commands"
+        },
+        {
+          "type": "p",
+          "content": "Let's look at the CLI commands used to list, pause, send input to redirect, and resume agentic tasks in a terminal interface:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# List all active background tasks running in the workspace\nagy task list\n\n# Check the status of a specific task (e.g. task_7384)\nagy task status --id task_7384\n\n# Pause the execution loop of a running task\nagy task pause --id task_7384\n\n# Send feedback input to redirect the agent's logic\nagy task feedback --id task_7384 --message \"Stop searching the docs directory. Focus only on index.js and check the regex pattern on line 42.\"\n\n# Resume the execution of the paused task\nagy task resume --id task_7384"
+        },
+        {
+          "type": "info",
+          "content": "Steering is most effective when done early. If you see the agent proposing incorrect terminal commands or writing redundant test files, pause the task, inspect the files, provide feedback, and resume."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1:** If an agent is stuck in an infinite debugging loop trying to fix a test failure, what is the best collaborative response?\n\n- A) Force quit the entire terminal and start the workspace setup over\n- B) Pause the task, send feedback redirecting the agent to the specific bug location, and resume\n- C) Let it run indefinitely until it resolves the error or runs out of tokens\n- D) Change the testing rules to ignore all failures"
+        },
+        {
+          "type": "info",
+          "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Pausing the task, sending target feedback to correct the agent's logic, and resuming is the definition of active steering. It saves tokens and guides the agent toward the correct fix."
+        }
+      ]
+    },
+    {
+      "title": "5. End-to-End Collaboration Lab & Loop Verification",
+      "blocks": [
+        {
+          "type": "p",
+          "content": "Now that you have learned the concepts of instruction writing, execution approvals, and steering, you will perform a hands-on lab exercise. In this lab, we will simulate a project repair workflow. You will provide the initial instructions, review commands manually, pause and redirect the agent, and verify the final outcome."
+        },
+        {
+          "type": "h2",
+          "content": "Lab Objectives"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Initialize a simulated local workspace with target files.",
+            "Run a task with manual approval controls.",
+            "Approve standard commands and reject a dangerous command.",
+            "Pause, redirect, and resume execution to fix a code bug.",
+            "Verify task completion."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Step-by-Step Lab Guide"
+        },
+        {
+          "type": "p",
+          "content": "**Step 1: Set up the workspace**\nCreate a new folder and add a simple javascript file that contains a syntax bug. Also create an instructions file."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create the workspace folder\nmkdir -p /var/home/wtg/Repos/lab-collab-loop\ncd /var/home/wtg/Repos/lab-collab-loop\n\n# Create a javascript file with a syntax bug (missing parenthesis)\necho \"function calculateTotal(price) { return price * 1.08\" > calculator.js\n\n# Create the workspace rules file\ncat << 'EOF' > .gemini.md\n# Workspace Rules\n- Always run code tests via node command\n- Do NOT delete calculator.js\nEOF"
+        },
+        {
+          "type": "p",
+          "content": "**Step 2: Trigger the task with Manual approvals**\nStart the agent task to refactor the code and verify its output, enabling manual approval prompts."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "agy task run --task \"Fix the syntax bug in calculator.js and run node calculator.js to test\" --approvals manual"
+        },
+        {
+          "type": "p",
+          "content": "**Step 3: Review and Approve/Reject Commands**\nDuring execution, the agent will suggest a command to test the file. Review the prompt carefully. If it suggests a safe command, approve it. If it proposes to delete files, reject it."
+        },
+        {
+          "type": "info",
+          "content": "If the agent proposes `node calculator.js`, enter `y` (Yes). If the agent proposes a dangerous or non-compliant command, enter `n` (No) and type corrective feedback."
+        },
+        {
+          "type": "p",
+          "content": "**Step 4: Steering Interrupt**\nSuppose the agent starts reading logs outside the workspace. Pause the agent, provide redirection, and resume execution:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Pause the running task\nagy task pause\n\n# Redirect the agent\nagy task feedback --message \"Do not read system logs. Use calculator.js directly.\"\n\n# Resume the task\nagy task resume"
+        },
+        {
+          "type": "p",
+          "content": "Once the agent fixes the parenthesis in `calculator.js` and successfully tests it, verify the file contents to ensure the work matches instructions."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1:** If the agent proposes a command that you reject during manual approval, what should you do?\n\n- A) Press Ctrl+C to kill the engine and reinstall\n- B) Reject the command, select the option to provide feedback, and explain why the command is rejected so the agent can propose an alternative\n- C) Approve the command anyway and fix the damage afterward\n- D) Ignore the prompt and wait for it to time out"
+        },
+        {
+          "type": "info",
+          "content": "**Correct Answer: B**\n\n**Immediate Feedback:** When you reject a command in manual approval mode, the system allows you to submit feedback. The agent receives this explanation, refines its reasoning, and proposes a corrected approach."
+        }
+      ]
+    }
+  ]
+}

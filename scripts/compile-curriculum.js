@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SCRATCH_DIR = '/var/home/wtg/.gemini/antigravity-cli/brain/9b98efbd-6ce7-4922-b107-9f3154ab80eb/scratch';
+const SCRATCH_DIR = path.join(__dirname, '../scratch');
 
 async function main() {
   const args = process.argv.slice(2);

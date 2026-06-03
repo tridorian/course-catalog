@@ -1,0 +1,522 @@
+{
+  "course_id": "agy-103",
+  "title": "AGY-103: Workspace Design & File Security (L100)",
+  "description": "Learn to design secure workspace boundaries and configure file-system level access controls for autonomous AI agents. This course provides comprehensive training on directory locking, POSIX folder permissions, and designing custom SDK policies to shield sensitive user folders (such as SSH keys, desktop, documents) from agent interactions.",
+  "highlights": [
+    {
+      "icon": "🔒",
+      "title": "Boundary Containment",
+      "description": "Lock agent execution strictly to designated workspace paths using canonical paths validation."
+    },
+    {
+      "icon": "📂",
+      "title": "POSIX Directory Security",
+      "description": "Enforce standard permissions (chmod/chown) and create low-privilege runtime configurations to block shell escapes."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Custom Firewalls",
+      "description": "Implement SDK argument predicates to intercept and deny tool requests that target sensitive files."
+    },
+    {
+      "icon": "🧪",
+      "title": "Verification Audits",
+      "description": "Use the agy CLI verification tool and mock simulations to audit configuration security before execution."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Intro to Workspaces & Boundary Risks",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "The Threat Model of Agentic Execution"
+        },
+        {
+          "type": "p",
+          "content": "Autonomous AI agents operating on the local filesystem present unique and serious security challenges. When an agent is granted execution capabilities (such as the ability to view, create, edit files, or execute terminal commands), it typically runs within the host shell session of the user who invoked it. This means the agent inherits all access privileges of that user account, including read, write, and execute permissions across the entire directory structure."
+        },
+        {
+          "type": "warning",
+          "content": "Host Privileges Exposure. Running an agent directly on a local development machine without boundary containment exposes your entire home directory. If the agent makes a planning error, encounters a bug, or is targeted by a prompt injection attack, it can destroy or compromise vital system folders (such as ~/.ssh, ~/.bashrc, or ~/Documents)."
+        },
+        {
+          "type": "p",
+          "content": "To address this vulnerability, security engineering for AI agents relies on the Principle of Least Privilege (PoLP). In this context, PoLP dictates that an agent must only be granted access to the specific resources and directories necessary to execute its immediate task. Securing the filesystem is the first line of defense before executing any autonomous workflows. We must distinguish between logical SDK-level boundaries and operating system-level enforcement."
+        },
+        {
+          "type": "h3",
+          "content": "Implicit Shell user permissions inheritance"
+        },
+        {
+          "type": "p",
+          "content": "When you execute an agent process in your terminal, the process runs under your User Identifier (UID) and Group Identifier (GID). Any tool execution, such as reading an environment configuration file, will succeed if your user account has access. If your account has passwordless sudo configured or if credentials are cached, an agent targeted by an exploit can run system-wide commands."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Dotfile Modification: An agent modifying ~/.bashrc or ~/.zshrc can append malicious commands that execute automatically when a user opens a new shell terminal.",
+            "SSH Private Keys: Credentials stored in ~/.ssh/id_rsa or other private key files can be read and exfiltrated.",
+            "Cloud Provider Credentials: Configuration files like ~/.aws/credentials or ~/.gcloud_config contain active access keys that provide access to cloud infrastructure.",
+            "Personal Directories: Standard folders such as ~/Desktop, ~/Downloads, and ~/Documents often contain unencrypted personal data and sensitive work materials."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary security risk of running an autonomous agent locally without configuring workspace boundaries?"
+        },
+        {
+          "type": "p",
+          "content": "A) The agent will experience API connection timeouts."
+        },
+        {
+          "type": "p",
+          "content": "B) The agent runs with your user credentials and can read or modify sensitive files like ~/.ssh/id_rsa or ~/.bashrc."
+        },
+        {
+          "type": "p",
+          "content": "C) The agent will write files in an invalid format."
+        },
+        {
+          "type": "p",
+          "content": "D) The agent will run too slowly."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: An agent inherits the privileges of the invoking user. If workspace boundaries are not configured, it can access any file your user accounts can access, posing a severe risk to private keys and configuration dotfiles."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which of the following describes the Principle of Least Privilege (PoLP) as applied to agent engineering?"
+        },
+        {
+          "type": "p",
+          "content": "A) Minimizing the number of files in the workspace to save hard disk space."
+        },
+        {
+          "type": "p",
+          "content": "B) Restricting the agent's tool execution access and file access strictly to what is required for its task."
+        },
+        {
+          "type": "p",
+          "content": "C) Restricting the agent to use only low-cost models."
+        },
+        {
+          "type": "p",
+          "content": "D) Forcing the agent to run in a single-threaded execution loop."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: The Principle of Least Privilege means granting the agent only the minimum level of access (workspace directory permissions, specific tools) required to perform its designated duties, reducing the blast radius of any potential failure."
+        }
+      ]
+    },
+    {
+      "title": "2. SDK Boundaries & Directory Locking",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Logical Boundaries via the AGY SDK"
+        },
+        {
+          "type": "p",
+          "content": "The Google Antigravity (AGY) SDK provides native support for restricting file access to defined directories. By configuring the `workspaces` parameter in the agent configuration, you apply an implicit workspace boundary. This boundary is enforced by a built-in policy middleware called `policy.workspace_only()`, which inspects all file operations and rejects those pointing outside the allowed paths."
+        },
+        {
+          "type": "p",
+          "content": "To set up workspace locking in Python, you define the absolute path to your project workspace folder and pass it as a list to the `workspaces` argument of `LocalAgentConfig`."
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "content": "import os\nfrom google.antigravity import Agent, LocalAgentConfig, CapabilitiesConfig\n\n# Define the absolute path to your project workspace\nproject_dir = os.path.abspath(\"/var/home/wtg/workspace_agy_project\")\nos.makedirs(project_dir, exist_ok=True)\n\n# Initialize the agent configuration with a workspace lock\nconfig = LocalAgentConfig(\n    system_instructions=\"You are a filesystem helper agent.\",\n    capabilities=CapabilitiesConfig(file_management=True, terminal_execution=False),\n    workspaces=[project_dir] # Explicit list of allowed directories\n)\n\n# Instantiate the agent\nagent = Agent(config=config)\nprint(f\"Workspace lock set to: {project_dir}\")"
+        },
+        {
+          "type": "p",
+          "content": "When the `workspaces` list is populated, the AGY SDK will block file-related tools (such as `view_file`, `create_file`, and `edit_file`) from reading or writing to files outside those paths. It enforces this by resolving target file paths to their absolute canonical form. This prevents directory traversal attacks, where an agent might try to access restricted files using relative references (e.g., `../../etc/passwd`)."
+        },
+        {
+          "type": "warning",
+          "content": "Symlink Directory Traversal. Symlinks (symbolic links) placed inside a workspace can point to files outside the boundary. The `workspace_only()` policy resolves symlinks to their absolute canonical targets before comparing them to the workspace path. If a symlink points to a file outside the workspace, the SDK will block access to the target path. Avoid creating symlinks to external directories within your workspaces."
+        },
+        {
+          "type": "info",
+          "content": "Under the hood, if `LocalAgentConfig.workspaces` is defined, the SDK prepends the `policy.workspace_only()` checker to the policy evaluation list. This ensures path resolution happens first before any other tool permissions are evaluated."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How does the `policy.workspace_only()` middleware prevent directory traversal attacks (e.g., path sequences using `../../`)?"
+        },
+        {
+          "type": "p",
+          "content": "A) It rewrites the target path to point to a safe system folder."
+        },
+        {
+          "type": "p",
+          "content": "B) It runs a regular expression match to look for dots in the path."
+        },
+        {
+          "type": "p",
+          "content": "C) It resolves all file path parameters to their absolute canonical form before checking them against the allowed workspace roots."
+        },
+        {
+          "type": "p",
+          "content": "D) It disables the terminal command execution tool completely."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: C"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: The SDK resolves all relative and symlinked paths to their absolute canonical targets. This ensures that any attempt to break out of the workspace boundary using path traversal sequences (like `..`) is detected and blocked before the tool executes."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: What is the behavior of the AGY SDK workspace policy when it encounters a symlink pointing to an external directory?"
+        },
+        {
+          "type": "p",
+          "content": "A) It allows access as long as the symlink file itself is physically located in the workspace."
+        },
+        {
+          "type": "p",
+          "content": "B) It resolves the symlink to its target, identifies that the target path lies outside the allowed workspace, and blocks execution."
+        },
+        {
+          "type": "p",
+          "content": "C) It deletes the symlink file automatically."
+        },
+        {
+          "type": "p",
+          "content": "D) It converts the symlink into a regular text file containing the target path."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: The SDK canonicalizes target paths (resolving symlinks to their actual destination folders). If the resolved destination resides outside the allowed workspace directories, the SDK blocks the tool call."
+        }
+      ]
+    },
+    {
+      "title": "3. Unix Permissions & System Hardening",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Operating System Boundaries"
+        },
+        {
+          "type": "p",
+          "content": "While SDK-level policies provide a clean, declarative interface for restricting file operations, they are not a complete security boundary. If an agent is granted shell execution privileges via the `run_command` tool, it can execute commands directly on the host operating system. In this scenario, the agent's actions are governed by POSIX-level permissions. To ensure comprehensive safety, you must configure operating system-level restrictions."
+        },
+        {
+          "type": "warning",
+          "content": "The Shell Bypass Vulnerability. If your agent is configured to run shell commands (`run_command`), the commands execute under your host user context. If the agent executes a shell command like `cat ~/.ssh/id_rsa`, it completely bypasses the Python interpreter and the SDK's file policies. OS-level security permissions are necessary to protect your files."
+        },
+        {
+          "type": "p",
+          "content": "To lock down files at the system level, you must configure ownership and permission settings using UNIX tools like `chown` and `chmod`. This prevents unauthorized processes from reading or writing to sensitive workspace directories."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create a workspace directory specifically for the agent\nmkdir -p /var/home/wtg/workspace_agy_project\n\n# Assign ownership to the invoking user and set group ownership to a restricted group\nsudo chown -R $USER:nogroup /var/home/wtg/workspace_agy_project\n\n# Apply restrictive permissions (Owner: read/write/execute, Group/Others: none)\nchmod 700 /var/home/wtg/workspace_agy_project\n\n# Verify that permissions are set correctly\nls -ld /var/home/wtg/workspace_agy_project\n# Expected output shows: drwx------"
+        },
+        {
+          "type": "p",
+          "content": "For production environments, the most secure configuration is running the agent within a dedicated, low-privilege operating system user account (e.g., `agy-sandbox`). By executing the agent under a restricted user profile, the host environment protects your primary user account's home folder."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create a dedicated system user for running the agent\nsudo useradd -m -s /bin/bash agy-sandbox\n\n# Secure your primary home directory from being read by the sandbox user\nchmod 700 /var/home/wtg\n\n# Test access restrictions as the sandbox user\nsudo -u agy-sandbox ls -la /var/home/wtg\n# Expected output: ls: cannot open directory '/var/home/wtg': Permission denied"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: If an agent is granted access to the `run_command` tool, why are Unix permissions like `chmod 700` required in addition to SDK policies?"
+        },
+        {
+          "type": "p",
+          "content": "A) The SDK policy checks only execute when a file is modified."
+        },
+        {
+          "type": "p",
+          "content": "B) Commands run via the shell bypass the Python SDK file-policy middleware and execute with the permissions of the invoking UNIX user."
+        },
+        {
+          "type": "p",
+          "content": "C) Running commands in the shell requires writing to a temp file in /tmp."
+        },
+        {
+          "type": "p",
+          "content": "D) Unix permissions speed up token processing."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: When an agent runs a command in the shell, it uses the host operating system's execution pipeline. This pipeline does not check Python-level middleware, meaning the agent can run any command your UNIX user can, unless system-level permissions block it."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: What is the primary purpose of running the AGY engine under a dedicated system user account like `agy-sandbox`?"
+        },
+        {
+          "type": "p",
+          "content": "A) It enables the agent to execute commands with administrator privileges."
+        },
+        {
+          "type": "p",
+          "content": "B) It isolates the agent process, preventing it from reading your primary user's SSH keys, dotfiles, or document folders even if it escapes the SDK boundary."
+        },
+        {
+          "type": "p",
+          "content": "C) It allows the agent to bypass network firewall rules."
+        },
+        {
+          "type": "p",
+          "content": "D) It keeps a cached copy of the model weights on the filesystem."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: A dedicated unprivileged system user restricts the agent's system-level access. Even if the agent executes arbitrary shell scripts, standard UNIX DAC (Discretionary Access Control) prevents it from reading files in directories owned by other users (like your primary home directory with permissions `700`)."
+        }
+      ]
+    },
+    {
+      "title": "4. Folder Firewalls & Sensitive Dirs",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Folder Firewalls & Custom Predicates"
+        },
+        {
+          "type": "p",
+          "content": "A 'Folder Firewall' is a design pattern in the AGY SDK that uses custom policy predicates to block operations on paths containing sensitive keywords or pointing to system directories. By declaring specific block rules, you prevent the agent from reading private credentials or overwriting critical system files."
+        },
+        {
+          "type": "warning",
+          "content": "Dotfile and Config Security. Agents often attempt to read or write dotfiles (like `.bashrc`, `.zshrc`, or `.gitconfig`) to modify environment paths or configure utilities. However, modifying these files can introduce security risks, such as command hijacking or key leaks. These files should be explicitly blacklisted."
+        },
+        {
+          "type": "p",
+          "content": "To build a folder firewall in the AGY SDK, you can use the `when` parameter of a policy rule. This parameter takes a predicate function that inspects the arguments of a tool call (such as the target path) and applies restrictions if a match is found."
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "content": "from google.antigravity.hooks import policy\n\n# Define the predicate to check for sensitive folders and files\ndef is_sensitive_target(args):\n    # Retrieve path argument from different tool schemas\n    path = args.get(\"AbsolutePath\") or args.get(\"TargetFile\") or args.get(\"SearchPath\")\n    if not path:\n        return False\n    \n    path_str = str(path).lower()\n    # Sensitive tokens to match and block\n    blacklist = [\n        \".ssh\", \"id_rsa\", \"id_dsa\", \"id_ed25519\", \"authorized_keys\",\n        \".bashrc\", \".zshrc\", \".bash_history\", \".bash_profile\",\n        \".aws\", \".gcloud_config\", \".gnupg\",\n        \"desktop\", \"documents\", \"/etc\", \"/var/run\"\n    ]\n    return any(item in path_str for item in blacklist)\n\n# Apply policy rules with the predicate check\npolicies = [\n    policy.deny(\"view_file\", when=is_sensitive_target, name=\"block_sensitive_reads\"),\n    policy.deny(\"edit_file\", when=is_sensitive_target, name=\"block_sensitive_writes\"),\n    policy.deny(\"create_file\", when=is_sensitive_target, name=\"block_sensitive_creates\"),\n    policy.deny(\"run_command\", when=lambda args: is_sensitive_target(args), name=\"block_shell_traversal\"),\n    policy.workspace_only([\"/var/home/wtg/workspace_agy_project\"])\n]"
+        },
+        {
+          "type": "p",
+          "content": "In addition to custom policy predicates, you should restrict permissions on your SSH folder directly on the host operating system. This provides defense-in-depth protection for your credentials."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Secure the SSH directory and key files\nchmod 700 ~/.ssh\nchmod 600 ~/.ssh/id_*\nchmod 644 ~/.ssh/authorized_keys\nchmod 644 ~/.ssh/known_hosts\n\n# Confirm your configurations are protected\nls -la ~/.ssh"
+        },
+        {
+          "type": "h3",
+          "content": "Agent Permissions Configuration & Custom Rules"
+        },
+        {
+          "type": "p",
+          "content": "Antigravity uses a unified permission system to control what actions the Agent can perform on your behalf. Every action is represented as a permission resource that can be placed into one of three lists: Allow, Deny, and Ask. The lists follow the format: action(target)."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Allow List (Positive Security Model): Represents a configuration where only whitelisted commands are permitted without prompts, and everything else is blocked or sent for review. For example, command(ls) or command(git) allows git commits and status checks.",
+            "Deny List (Negative Security Model): Defines safeguards where specified dangerous actions (e.g. command(rm) or write_file(/etc/)) are blocked, but everything else is allowed. This model is riskier as it requires anticipating every potential vulnerability.",
+            "Ask List: Commands or access directories that require interactive user approval. By default, any operation not in the Allow list behaves as Ask in Review-Driven Development mode."
+          ]
+        },
+        {
+          "type": "info",
+          "content": "Custom rules can also be codified into markdown rules files. Workspace-specific rules are defined in your-workspace/.agents/rules/ or in the project-level .gemini.md rules file, while global configurations reside in ~/.gemini/GEMINI.md. These files act as system instructions that guide the agent's behavior during a session."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the purpose of the `when` parameter in an AGY policy rule?"
+        },
+        {
+          "type": "p",
+          "content": "A) It configures a time-based scheduler for tool availability."
+        },
+        {
+          "type": "p",
+          "content": "B) It defines a predicate function that inspects tool arguments, allowing you to conditionally apply the policy rule."
+        },
+        {
+          "type": "p",
+          "content": "C) It determines which model is used to execute the tool."
+        },
+        {
+          "type": "p",
+          "content": "D) It specifies the order in which policies are evaluated."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: The `when` parameter accepts a predicate function that receives the tool's arguments as input. If the function returns True, the policy rule is triggered, allowing for conditional blocks based on specific target directories or command names."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which permission syntax correctly blocks all write operations to the host's system configuration directory `/etc`?"
+        },
+        {
+          "type": "p",
+          "content": "A) deny_write_file(\"/etc/\")"
+        },
+        {
+          "type": "p",
+          "content": "B) write_file(/etc)"
+        },
+        {
+          "type": "p",
+          "content": "C) block:write(/etc)"
+        },
+        {
+          "type": "p",
+          "content": "D) write_file(\"/etc/*\")"
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: The target format for read and write file permission specifications is write_file(/path), using absolute literal paths (no wildcards or globs). Placing write_file(/etc) in the Deny list blocks all write operations targeting /etc."
+        }
+      ]
+    },
+    {
+      "title": "5. Verification & Safety Drills",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Active Verification Drills"
+        },
+        {
+          "type": "p",
+          "content": "To ensure your workspace boundaries and folder firewalls are correctly configured, you must run verification checks and safety drills. By simulating an agent attempting to access a forbidden file, you can verify that the AGY SDK policies and system permissions are active."
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "content": "import asyncio\nfrom google.antigravity import Agent, LocalAgentConfig, CapabilitiesConfig\nfrom google.antigravity.hooks import policy\n\n# Define a simulated verification drill\nasync def run_safety_drill():\n    # Setup policies targeting SSH credentials\n    policies = [\n        policy.deny(\"view_file\", when=lambda a: \".ssh\" in str(a.get(\"AbsolutePath\", \"\")), name=\"deny_ssh\"),\n        policy.workspace_only([\"/var/home/wtg/workspace_agy_project\"])\n    ]\n    \n    config = LocalAgentConfig(\n        system_instructions=\"You are a validation bot.\",\n        capabilities=CapabilitiesConfig(file_management=True),\n        workspaces=[\"/var/home/wtg/workspace_agy_project\"],\n        policies=policies\n    )\n    \n    agent = Agent(config)\n    print(\"Initiating safety drill...\")\n    \n    # Simulate the agent attempting to call view_file on a restricted path\n    try:\n        await agent.execute_tool(\n            \"view_file\",\n            {\"AbsolutePath\": \"/var/home/wtg/.ssh/id_rsa\"}\n        )\n        print(\"[FAIL] Security Breach! The agent successfully read the restricted file.\")\n    except Exception as e:\n        print(f\"[PASS] Access blocked as expected. Policy message: {e}\")\n\nasyncio.run(run_safety_drill())"
+        },
+        {
+          "type": "p",
+          "content": "The AGY command-line interface includes a built-in verification command `agy --verify`. This tool runs file system diagnostics, checking that workspace directory permissions are secure and that the directory locks are active."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Execute the AGY CLI security verification tool\nagy --verify --workspace /var/home/wtg/workspace_agy_project\n\n# Expected diagnostic output:\n# [+] Auditing directory permissions... OK (Permissions: 700)\n# [+] Testing SSH credential exposures... OK (Path ~/.ssh is locked)\n# [+] Evaluating active AGY SDK policies... OK (policy.workspace_only is active)\n# [SUCCESS] Workspace security verification complete. Safe for agent execution."
+        },
+        {
+          "type": "warning",
+          "content": "Continuous Validation. Always run validation checks after making changes to your local environment, updating packages, or modifying user groups. Changes to system access control lists or group memberships can unintentionally expose host paths to the agent's execution context."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What does running the `agy --verify` command validate in a workspace environment?"
+        },
+        {
+          "type": "p",
+          "content": "A) It checks the response latency of the Gemini model APIs."
+        },
+        {
+          "type": "p",
+          "content": "B) It checks workspace path permissions, verifies private folder restrictions, and confirms the active SDK policy configurations."
+        },
+        {
+          "type": "p",
+          "content": "C) It counts the number of files in the workspace directory."
+        },
+        {
+          "type": "p",
+          "content": "D) It uploads execution logs to the cloud."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: The `agy --verify` command audits workspace security settings by verifying folder permissions, verifying that sensitive folders are locked, and validating active SDK security policies."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: In a secure deployment workflow, when should security verification checks be performed?"
+        },
+        {
+          "type": "p",
+          "content": "A) Only during the initial application setup."
+        },
+        {
+          "type": "p",
+          "content": "B) Continuously and automatically after environment modifications, dependency updates, or group configuration changes."
+        },
+        {
+          "type": "p",
+          "content": "C) Only when the agent crashes."
+        },
+        {
+          "type": "p",
+          "content": "D) At the end of every programming sprint."
+        },
+        {
+          "type": "p",
+          "content": "Correct Answer: B"
+        },
+        {
+          "type": "info",
+          "content": "Feedback: Security configurations must be validated continuously. Any system updates, user additions, or changes to OS groups can impact discretionary access controls, making ongoing automated audits via `agy --verify` a critical best practice."
+        }
+      ]
+    }
+  ]
+}
