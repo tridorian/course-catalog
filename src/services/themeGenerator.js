@@ -2,20 +2,74 @@
 // Integrates with Gemini API to generate custom color theme JSON variables.
 import { getAccessToken } from './googleAuth';
 
-export async function generateThemeWithGemini(promptText, userApiKey = '') {
-  const apiKey = userApiKey || 
-                 localStorage.getItem('tridorian_gemini_api_key') || 
-                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') || 
-                 '';
+function getValidApiKey(userApiKey = '') {
+  const LEAKED_KEY = 'AIzaSyCrQVmC1PFEFb-oLAuOQdT7Jr-gb9W-JzY';
 
+  const isValid = (k) => {
+    if (!k) return false;
+    const trimmed = k.trim();
+    return trimmed !== LEAKED_KEY && 
+           trimmed !== 'your-gemini-api-key-here' && 
+           !trimmed.startsWith('your-');
+  };
+
+  // 1. User supplied
+  if (userApiKey && isValid(userApiKey)) {
+    return userApiKey.trim();
+  }
+
+  // 2. LocalStorage (with cleanup)
+  const localKey = typeof localStorage !== 'undefined' ? localStorage.getItem('tridorian_gemini_api_key') : '';
+  if (localKey && isValid(localKey)) {
+    return localKey.trim();
+  } else if (localKey && !isValid(localKey)) {
+    try {
+      localStorage.removeItem('tridorian_gemini_api_key');
+    } catch (e) {}
+  }
+
+  // 3. Env variable
+  const envKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '';
+  if (envKey && isValid(envKey)) {
+    return envKey.trim();
+  }
+
+  return '';
+}
+
+export async function generateThemeWithGemini(promptText, userApiKey = '') {
+  const proxyUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_PROXY_URL : '';
+
+  if (proxyUrl) {
+    const url = `${proxyUrl.replace(/\/$/, '')}/generate-theme`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: promptText })
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Proxy error: ${response.status} - ${errText}`);
+    }
+    return await response.json();
+  }
+
+  const apiKey = getValidApiKey(userApiKey);
   const gAuthToken = getAccessToken();
 
   if (!apiKey && !gAuthToken) {
+    const rawKey = (userApiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('tridorian_gemini_api_key') : '') || '').trim();
+    if (rawKey === 'AIzaSyCrQVmC1PFEFb-oLAuOQdT7Jr-gb9W-JzY') {
+      throw new Error('API key was reported as leaked. Please use a different Gemini API key or sign in with Google.');
+    }
+    if (rawKey === 'your-gemini-api-key-here' || rawKey.startsWith('your-')) {
+      throw new Error('Please replace the placeholder API key with a valid Gemini API key or sign in with Google.');
+    }
     throw new Error('API_KEY_REQUIRED');
   }
 
-  // Save key if supplied
-  if (userApiKey) {
+  // Save key if supplied and valid
+  if (userApiKey && getValidApiKey(userApiKey)) {
     localStorage.setItem('tridorian_gemini_api_key', userApiKey);
   }
 
@@ -102,14 +156,34 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
 }
 
 export async function generateMusicWithLyria(promptText, userApiKey = '') {
-  const apiKey = userApiKey || 
-                 localStorage.getItem('tridorian_gemini_api_key') || 
-                 (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') || 
-                 '';
+  const proxyUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_PROXY_URL : '';
 
+  if (proxyUrl) {
+    const url = `${proxyUrl.replace(/\/$/, '')}/generate-music`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: promptText })
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Proxy error: ${response.status} - ${errText}`);
+    }
+    const data = await response.json();
+    return data.audioDataUrl;
+  }
+
+  const apiKey = getValidApiKey(userApiKey);
   const gAuthToken = getAccessToken();
 
   if (!apiKey && !gAuthToken) {
+    const rawKey = (userApiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('tridorian_gemini_api_key') : '') || '').trim();
+    if (rawKey === 'AIzaSyCrQVmC1PFEFb-oLAuOQdT7Jr-gb9W-JzY') {
+      throw new Error('API key was reported as leaked. Please use a different Gemini API key or sign in with Google.');
+    }
+    if (rawKey === 'your-gemini-api-key-here' || rawKey.startsWith('your-')) {
+      throw new Error('Please replace the placeholder API key with a valid Gemini API key or sign in with Google.');
+    }
     throw new Error('API_KEY_REQUIRED');
   }
 

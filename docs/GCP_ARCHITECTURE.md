@@ -67,7 +67,15 @@ To streamline authoring and prevent data collisions, we will develop a native **
     *   **Stored Properties:** `last_sync_timestamp`, `live_version_id`, `course_slug`, and `validation_status`.
     *   **Stale Update Prevention:** Before the Sync Engine updates Firestore, it compares the tattooed `live_version_id` against the current Docs version. If a collision is detected (e.g., the doc was modified concurrently), the Add-on alerts the user, preventing stale or conflicting updates from going live.
 
-## 8. References
+## 8. Backend API Proxy (For Dynamic Themes)
+
+To protect developer API credentials while ensuring the AI Theme Generator works for users who cannot authenticate using Google Sign-In, the production environment will deploy a secure backend API proxy.
+
+1.  **Architecture**: The client application routes theme and music generation requests through `/api/generate-theme` and `/api/generate-music` on the application backend (or a dedicated Cloud Run / Cloud Function proxy).
+2.  **Secret Isolation**: The backend proxy holds the service-account-bound API key (`AQ....`) in its environment variables, fetched securely at launch from **GCP Secret Manager**.
+3.  **Local Development**: In local development, developers can run `scripts/gemini_proxy.js` or configure `VITE_PROXY_URL=http://localhost:5001` in their git-ignored `.env.local` file to bypass direct Google API requests.
+
+## 9. References
 
 For current implementation details on client-side Google Drive persistence, offline delta syncing, and the local doc parser, refer to:
 - [ADR 0004: Progress Persistence & Drive Synchronization](./adr/0004-progress-persistence-drive-synchronization.md)

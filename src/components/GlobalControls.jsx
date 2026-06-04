@@ -10,7 +10,7 @@ const THEME_OPTIONS = [
   { id: 'kitten', label: '🐱 Rainbow Kitten', swatches: ['#fef4f8', '#e91e8c', '#2d0b1a'] },
   { id: 'caribbean', label: '🏝️ Caribbean Mood', swatches: ['#e6f9f5', '#0d9e8a', '#0a2922'] },
   { id: 'lunar', label: '🌙 Lunar Vibe', swatches: ['#000000', '#e8e8e8', '#b0b0b0'] },
-  { id: 'jungle', label: '🐆 Jungle Safari', swatches: ['#0c1a12', '#eab308', '#b91c1c'] },
+  { id: 'jungle', label: '🦖 Jurassic Jeep', swatches: ['#060e0a', '#f5c518', '#b91c1c'] },
   { id: 'genesis', label: '😈 EVA-01', swatches: ['#0a0512', '#39ff14', '#f3e8ff'] },
 ];
 
@@ -31,11 +31,36 @@ const GlobalControls = ({ theme, setTheme }) => {
   // AI Theme Generator state
   const [showGenerator, setShowGenerator] = useState(false);
   const [prompt, setPrompt] = useState('');
-  const [apiKey, setApiKey] = useState(() => 
-    localStorage.getItem('tridorian_gemini_api_key') || 
-    (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') || 
-    ''
-  );
+  const [apiKey, setApiKey] = useState(() => {
+    const LEAKED_KEY = 'AIzaSyCrQVmC1PFEFb-oLAuOQdT7Jr-gb9W-JzY';
+    const isValid = (k) => {
+      if (!k) return false;
+      const trimmed = k.trim();
+      return trimmed !== LEAKED_KEY && 
+             trimmed !== 'your-gemini-api-key-here' && 
+             !trimmed.startsWith('your-');
+    };
+
+    // 1. Check local storage
+    const localKey = typeof localStorage !== 'undefined' ? localStorage.getItem('tridorian_gemini_api_key') : '';
+    if (localKey) {
+      if (isValid(localKey)) {
+        return localKey.trim();
+      } else {
+        try {
+          localStorage.removeItem('tridorian_gemini_api_key');
+        } catch (e) {}
+      }
+    }
+
+    // 2. Check environment variable
+    const envKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '';
+    if (envKey && isValid(envKey)) {
+      return envKey.trim();
+    }
+
+    return '';
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
   const [genStatus, setGenStatus] = useState('');

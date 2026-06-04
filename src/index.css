@@ -142,7 +142,7 @@
   --quiz-incorrect-border: rgba(244, 63, 94, 0.4);
 }
 
-/* Jungle Safari — Jurassic Park Jeep Jamboree: deep forest green, hazard yellow, and crimson red */
+/* Jurassic Jeep — Jurassic Park Jeep Jamboree: deep forest green, hazard yellow, and crimson red */
 .theme-jungle {
   color-scheme: dark;
   --bg-base: #060e0a;
@@ -153,13 +153,13 @@
   --text-muted: #86efac;
   --border-main: #204d37;
   --border-subtle: #132a1e;
-  --accent-bg: #eab308;
+  --accent-bg: #f5c518;
   --accent-fg: #000000;
-  --accent-text: #eab308;
-  --accent-muted: rgba(234, 179, 8, 0.08);
-  --accent-border: rgba(234, 179, 8, 0.25);
+  --accent-text: #f5c518;
+  --accent-muted: rgba(245, 197, 24, 0.08);
+  --accent-border: rgba(245, 197, 24, 0.25);
   --accent-red: #b91c1c;
-  --shadow-accent: 0 0 15px rgba(234, 179, 8, 0.2);
+  --shadow-accent: 0 0 15px rgba(245, 197, 24, 0.2);
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
   --quiz-correct-bg: rgba(16, 185, 129, 0.15);
@@ -168,7 +168,7 @@
   --quiz-incorrect-bg: rgba(185, 28, 28, 0.15);
   --quiz-incorrect-text: #fca5a5;
   --quiz-incorrect-border: rgba(185, 28, 28, 0.4);
-  --theme-pattern-bg: url("/jungle_safari_bg.png");
+  --theme-pattern-bg: url("/jurassic_jeep_bg.png");
   --theme-pattern-size: 1024px 1024px;
   --theme-pattern-opacity: 0.25;
 }
