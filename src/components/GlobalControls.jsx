@@ -5,8 +5,8 @@ import { saveCustomTheme, getCustomTheme, getCustomThemes, deleteCustomTheme, se
 import { generateThemeWithGemini, generateMusicWithLyria, generateImageWithImagen } from '../services/themeGenerator';
 
 const THEME_OPTIONS = [
-  { id: 'dark', label: '🌿 tridorian Dark', swatches: ['#050805', '#4ade80', '#f0fdf4'] },
-  { id: 'light', label: '☀️ Clean Light', swatches: ['#f8faf9', '#16a34a', '#0f1f15'] },
+  { id: 'dark', label: '🌿 tridorian Dark', swatches: ['#050805', '#26D07C', '#f0fdf4'] },
+  { id: 'light', label: '☀️ Clean Light', swatches: ['#f8faf9', '#1FB86D', '#0f1f15'] },
   { id: 'kitten', label: '🐱 Rainbow Kitten', swatches: ['#fef4f8', '#e91e8c', '#2d0b1a'] },
   { id: 'caribbean', label: '🏝️ Caribbean Mood', swatches: ['#e6f9f5', '#0d9e8a', '#0a2922'] },
   { id: 'lunar', label: '🌙 Lunar Vibe', swatches: ['#000000', '#e8e8e8', '#b0b0b0'] },
@@ -405,7 +405,7 @@ const GlobalControls = ({ theme, setTheme }) => {
                   const isActive = theme === 'custom' && activeCustomTheme && activeCustomTheme.id === opt.id;
                 const swatches = opt.swatches || [
                   opt['bg-base'] || '#080c08',
-                  opt['accent-bg'] || '#22c55e',
+                  opt['accent-bg'] || '#20B870',
                   opt['text-main'] || '#f0fdf4'
                 ];
                 return (
@@ -670,7 +670,7 @@ const GlobalControls = ({ theme, setTheme }) => {
               
               {/* Real-time Terminal Log Console */}
               {(isGenerating || genLogs.length > 0) && (
-                <div className="mt-4 p-3 bg-black border border-border-main rounded-lg font-mono text-[10px] leading-relaxed text-[#4ade80] max-h-96 overflow-y-auto space-y-1">
+                <div className="mt-4 p-3 bg-black border border-border-main rounded-lg font-mono text-[10px] leading-relaxed text-[#26D07C] max-h-96 overflow-y-auto space-y-1">
                   <div className="text-[10px] text-gray-500 uppercase tracking-wider pb-1 border-b border-border-subtle mb-1 flex justify-between items-center">
                     <span>Theme Generation Logs</span>
                     {isGenerating && <span className="animate-pulse text-amber-500">● RUNNING</span>}
