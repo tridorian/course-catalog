@@ -245,13 +245,14 @@ describe('GlobalControls Theme Integration', () => {
     expect(style.getPropertyValue('--test-pattern-size')).toBe('');
   });
 
-  it('updates volume on global scroll wheel events', () => {
+  it('updates volume on widget scroll wheel events', () => {
     render(<GlobalControls theme="dark" setTheme={vi.fn()} />);
 
-    // Trigger a wheel scroll event on the body
+    const widget = screen.getByTestId('volume-scroll-widget');
+    // Trigger a wheel scroll event on the widget
     const event = new WheelEvent('wheel', { deltaY: -100, bubbles: true });
     act(() => {
-      window.dispatchEvent(event);
+      widget.dispatchEvent(event);
     });
 
     expect(themeAudio.setVolume).toHaveBeenCalledWith(0.35);

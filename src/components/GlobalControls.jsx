@@ -79,34 +79,6 @@ const GlobalControls = ({ theme, setTheme }) => {
     } catch {}
   }, [isCursorEnabled]);
 
-  // Global scroll wheel volume controls
-  useEffect(() => {
-    const handleGlobalWheel = (e) => {
-      // Don't intercept if scrolling inside a scrollable container (like the sidebar or the main content text area)
-      if (e.target?.closest && (e.target.closest('.overflow-y-auto') || e.target.closest('.custom-scrollbar'))) {
-        return;
-      }
-
-      e.preventDefault();
-      // Ensure audio context is initialized and unlocked on user scroll activation
-      themeAudio.playThemeMusic(theme);
-
-      const change = e.deltaY < 0 ? 0.05 : -0.05;
-      
-      setAudioState(prev => {
-        const newVol = Math.max(0, Math.min(1, parseFloat(prev.volume) + change));
-        const roundedVol = Math.round(newVol * 100) / 100;
-        themeAudio.setVolume(roundedVol);
-        return { ...prev, volume: roundedVol };
-      });
-    };
-
-    window.addEventListener('wheel', handleGlobalWheel, { passive: false });
-    return () => {
-      window.removeEventListener('wheel', handleGlobalWheel);
-    };
-  }, [theme]);
-
 
 
   const toggleCursor = (e) => {
@@ -497,6 +469,7 @@ const GlobalControls = ({ theme, setTheme }) => {
 
       {/* 3. Static Audio Controls */}
       <div 
+        data-testid="volume-scroll-widget"
         className="flex items-center rounded-full border px-2 py-1.5"
         style={{
           borderColor: 'var(--border-main)',
