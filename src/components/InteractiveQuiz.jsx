@@ -304,6 +304,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
           let stateClass = '';
           if (isSelected) {
             optionStyle = 'border-accent bg-muted text-accent-text shadow-accent';
+            stateClass = 'quiz-selected';
           }
 
           if (showAnswerStatus) {
@@ -316,7 +317,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
               spanStyle = 'text-[var(--quiz-incorrect-text)]';
               stateClass = 'quiz-incorrect';
             } else {
-              optionStyle = 'opacity-85 border-border-main text-muted bg-panel';
+              optionStyle = 'opacity-85 border-border-main text-text-muted bg-panel';
               spanStyle = '';
               stateClass = 'quiz-unselected';
             }
@@ -337,7 +338,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
                     ? 'bg-emerald-500 border-emerald-400 text-black'
                     : isSelected
                       ? 'bg-rose-500 border-rose-400 text-white'
-                      : 'border-gray-600 text-gray-600'
+                      : 'border-border-main text-text-muted'
                   : isSelected
                     ? 'bg-accent border-accent text-accent-fg'
                     : 'border-border-main text-main bg-base'

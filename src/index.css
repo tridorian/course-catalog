@@ -748,6 +748,26 @@ body.disable-custom-cursor input {
 }
 
 /* Quiz Option Contrast & Readability Overrides */
+.quiz-option {
+  color: var(--text-main) !important;
+  background-color: var(--bg-panel) !important;
+  border-color: var(--border-main) !important;
+}
+.quiz-option span {
+  color: inherit !important;
+}
+.quiz-option:hover:not(:disabled) {
+  background-color: var(--bg-elevated) !important;
+  color: var(--accent-text) !important;
+}
+.quiz-option.quiz-selected {
+  background-color: var(--bg-muted) !important;
+  border-color: var(--accent-bg) !important;
+  color: var(--accent-text) !important;
+}
+.quiz-option.quiz-selected span {
+  color: var(--accent-text) !important;
+}
 .quiz-option:disabled {
   opacity: 1 !important;
   cursor: not-allowed !important;
@@ -771,6 +791,10 @@ body.disable-custom-cursor input {
 }
 .quiz-option.quiz-unselected {
   opacity: 0.85 !important;
+  color: var(--text-muted) !important;
+}
+.quiz-option.quiz-unselected span {
+  color: var(--text-muted) !important;
 }
 
 /* Custom Scrollbar for sidebar to match theme */
