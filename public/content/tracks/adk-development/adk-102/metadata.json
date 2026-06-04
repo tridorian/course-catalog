@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-102",
+  "title": "ADK-102: Advanced Configs & Multi-model Setup",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Dive deep into agent.yaml properties. Configure model backends, safety filters, context parameters, temperature, and tokens.",
+  "features": [
+    {
+      "icon": "⚙️",
+      "title": "YAML Schema",
+      "description": "Examine the nested schema fields of agent.yaml, including settings, safety filters, and execution properties."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Safety Thresholds",
+      "description": "Set block limits for hate speech, harassment, sexually explicit content, and dangerous scenarios."
+    },
+    {
+      "icon": "🤖",
+      "title": "Backend Selection",
+      "description": "Learn to alternate between models like Gemini Flash, Gemini Pro, and configure secondary fallbacks."
+    }
+  ]
+}

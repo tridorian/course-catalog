@@ -13,7 +13,7 @@ export const initGoogleAuth = (clientId) => {
       try {
         tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: clientId,
-          scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
+          scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/generative-language',
           callback: (response) => {
             if (response.error !== undefined) {
               reject(response);
@@ -53,9 +53,15 @@ export const signOut = () => {
   if (accessToken) {
     window.google.accounts.oauth2.revoke(accessToken, () => {
       accessToken = null;
-      console.log('Access token revoked');
     });
   }
 };
 
-export const getAccessToken = () => accessToken;
+export const getAccessToken = () => {
+  if (typeof window !== 'undefined') {
+    const mock = window.sessionStorage.getItem('mockToken') || 
+                 new URLSearchParams(window.location.search).get('mockToken');
+    if (mock) return mock;
+  }
+  return accessToken;
+};

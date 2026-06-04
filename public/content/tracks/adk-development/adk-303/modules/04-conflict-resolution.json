@@ -1,0 +1,32 @@
+{
+  "id": "4",
+  "title": "4. Conflict resolution and state syncing",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Conflict Resolution & Syncing"
+    },
+    {
+      "type": "p",
+      "content": "When multiple agents write to the blackboard concurrently, race conditions occur. You must apply write locks, transaction scopes, or timestamp checks to maintain consistency."
+    },
+    {
+      "type": "h2",
+      "content": "Mutex Lock Blackboard"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import threading\n\nclass LockedBlackboard:\n    def __init__(self):\n        self.lock = threading.Lock()\n        self.data = {}\n    def safe_write(self, key, value):\n        with self.lock:\n            self.data[key] = value"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How do you prevent two agents from overwriting each other's blackboard changes concurrently?\n- A) Run them sequentially only.\n- B) Apply mutual exclusion locks (mutexes) or transactions to write operations.\n- C) Turn off all memory variables.\n\nFeedback: Option B is correct. Locks guarantee thread-safe writes."
+    }
+  ]
+}

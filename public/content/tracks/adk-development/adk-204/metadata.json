@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-204",
+  "title": "ADK-204: Local Mocking & Agent Testing",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Design regression suites, unit test tool integrations, and mock model endpoints to establish robust agent CI/CD pipelines.",
+  "features": [
+    {
+      "icon": "🧪",
+      "title": "Unit Testing Tools",
+      "description": "Write local unit tests for tool functions to verify response accuracy without querying LLMs."
+    },
+    {
+      "icon": "🃏",
+      "title": "Model Mocking",
+      "description": "Use mock responses to capture agent states and token payloads, avoiding live API invocation fees."
+    },
+    {
+      "icon": "🚀",
+      "title": "CI Pipeline Integration",
+      "description": "Build regression testing scripts that integrate with GitHub Actions build verification steps."
+    }
+  ]
+}

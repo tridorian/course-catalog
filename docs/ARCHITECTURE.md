@@ -1,6 +1,14 @@
 # Architecture
 
-This document describes the high-level architecture of the Tridorian Course Platform.
+This document describes the high-level architecture of the tridorian Course Platform.
+
+## Architecture Decision Records (ADRs)
+
+For detailed rationale and design decisions, please refer to the following ADRs:
+- [ADR 0001: Core Content Hierarchy & Schema Validation](./adr/0001-core-content-hierarchy-schema-validation.md)
+- [ADR 0002: Multi-Type Module Rendering](./adr/0002-multi-type-module-rendering.md)
+- [ADR 0003: Dynamic Routing & Breadcrumb Navigation](./adr/0003-dynamic-routing-breadcrumb-navigation.md)
+- [ADR 0004: Progress Persistence & Drive Synchronization](./adr/0004-progress-persistence-drive-synchronization.md)
 
 ## Tech Stack
 
@@ -15,7 +23,7 @@ This document describes the high-level architecture of the Tridorian Course Plat
 The platform follows a 4-tier content hierarchy for maximum modularity and scalability:
 
 1.  **Track:** The top-level container (e.g., "AI Engineering", "Cloud Operations"). A Track contains multiple Courses.
-2.  **Course:** A specific learning path within a Track (e.g., "AGV-01: Agentic Workflows"). A Course is composed of multiple Modules.
+2.  **Course:** A specific learning path within a Track (e.g., "AGY-01: Agentic Workflows"). A Course is composed of multiple Modules.
 3.  **Module:** A discrete unit of learning. Modules can be of different types:
     - **Lab:** An interactive, step-by-step technical guide (the primary module type).
     - **Presentation:** A module centered around a Google Slides deck or a Google Drive video walkthrough.
@@ -52,7 +60,7 @@ The application fetches content dynamically from the `public/content/` directory
 - This decoupling allows content updates without rebuilding the application.
 
 ### Multi-Course Support
-A single Track can contain multiple Courses. Each course lives in its own directory under `public/content/tracks/[track_id]/`. When a user navigates between courses (e.g., from `agv-101` to `gemini-cli`), the application:
+A single Track can contain multiple Courses. Each course lives in its own directory under `public/content/tracks/[track_id]/`. When a user navigates between courses (e.g., from `agy-101` to `gemini-cli`), the application:
 - Re-fetches the manifest and all module content for the new course.
 - **Resets `completedSteps`** to avoid stale progress from the previous course bleeding over.
 
@@ -63,6 +71,15 @@ A single Track can contain multiple Courses. Each course lives in its own direct
 - `activeStepIndex`: Derived from the URL `moduleId` param matched against `courseSteps[].id` using `String()` coercion.
 - `completedSteps`: An array of indices representing finished modules, used for progress tracking and locking. Reset on course switch.
 - `courseMetadata`: Stores the high-level information about the current course.
+
+### Persistence & Offline Support
+The application uses a hybrid persistence model to save user progress:
+- **Primary (Google Drive):** Progress is synced to a hidden `agv_course_progress.json` file in the user's Google Drive `appDataFolder`.
+- **Metadata (appProperties):** Concise progress summaries (active module ID, completed indices) are stored as `appProperties` on the Drive file for fast querying. Key limit is 124 bytes per entry.
+- **Local Cache (localStorage):** All changes are mirrored to `localStorage` (`agv_local_progress`) for immediate UI responsiveness.
+- **Offline Queuing:** If Drive is unreachable, updates are queued in `agv_offline_queue`.
+- **Sync Logic:** When back online, the app merges queued deltas back to Drive using Union for completed steps and Last-Write-Wins (LWW) for active steps based on timestamps.
+- **Auto-Reauth:** The Google Drive service automatically handles `401 Unauthorized` errors by triggering a transparent re-authentication flow via Google Identity Services.
 
 ### Routing
 The app uses `HashRouter` with four route patterns:
@@ -88,7 +105,7 @@ This makes it easy to identify and update stale or broken embed URLs without sea
 
 ## Styling & Theme
 
-The application uses the "Tridorian" dark theme:
+The application uses the "tridorian" dark theme:
 - **Primary Color:** Green (`#4ade80`).
 - **Background:** Deep Green/Black (`#050805`).
 - Custom scrollbars and animations are used to provide a "terminal" aesthetic.

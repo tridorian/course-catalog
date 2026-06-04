@@ -1,0 +1,661 @@
+{
+  "course_id": "agy-431",
+  "title": "AGY-431: Scale & Immutable DevOps (L400)",
+  "description": "An advanced, hands-on masterclass for DevOps Leads and Platform Engineers. Master the architecture, deployment, and orchestration of containerized Google Antigravity environments (agy-box) across remote cloud VMs. Learn how to configure private container registries behind restrictive corporate proxies, manage TLS/SSL certificate injection, and implement secure headless CI/CD execution loops with strict policy enforcement.",
+  "highlights": [
+    {
+      "icon": "🛡️",
+      "title": "Immutable Sandboxing",
+      "description": "Establish bulletproof isolation for autonomous agents using hardened OCI agy-box containers with read-only filesystems and capability drops."
+    },
+    {
+      "icon": "🌐",
+      "title": "Enterprise Proxy Integration",
+      "description": "Master certificate injection, HTTP/HTTPS proxy routing, and authentication bypass rules for air-gapped corporate environments."
+    },
+    {
+      "icon": "🤖",
+      "title": "Headless CI/CD Orchestration",
+      "description": "Build automated, non-interactive execution pipelines with the agy CLI, custom timeout handlers, and structural status checks."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Enterprise Sandbox & Host Isolation",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "The Paradigm of Immutable Agent Isolation"
+        },
+        {
+          "type": "p",
+          "content": "Traditional agent deployments execute scripts directly on the host virtual machine, presenting an unacceptable risk profile in enterprise environments. An autonomous agent with shell access can perform destructive commands, compromise host credentials, or escalate privileges. In the Antigravity architecture, we enforce Tier 3 Sandboxing using the `agy-box` OCI image. This ensures that the engine runs in an ephemeral, containerized environment, separating the agent's execution context from the host VM's kernel and metadata server."
+        },
+        {
+          "type": "info",
+          "content": "The agy-box image is built on a minimal, hardened base distro (typically Alpine or Wolfi) and runs as a rootless container. It strips unnecessary kernel capabilities, enforces strict read-only root filesystems, and locks the agent workspace to a single mapped volume."
+        },
+        {
+          "type": "h3",
+          "content": "Rootless Podman vs. Docker Sandboxing"
+        },
+        {
+          "type": "p",
+          "content": "In high-security enterprise environments, rootless Podman is the preferred container runtime. Since Podman does not rely on a root-owned daemon, it leverages Linux user namespaces (userns) to map the container's root user to an unprivileged UID on the host VM. This prevents container escape vulnerabilities from compromising the host."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Verify host support for user namespaces\nsysctl user.max_user_namespaces\n\n# Create an unprivileged system user for agy-box execution\nsudo useradd -r -s /usr/sbin/nologin agy_runner\n\n# Configure subuid and subgid mappings for rootless container execution\necho \"agy_runner:100000:65536\" | sudo tee -a /etc/subuid\necho \"agy_runner:100000:65536\" | sudo tee -a /etc/subgid\n\n# Run a diagnostic container to verify rootless execution mapping\nsudo -u agy_runner podman run --rm alpine whoami"
+        },
+        {
+          "type": "h3",
+          "content": "Firewalling & Network Egress Restrictions"
+        },
+        {
+          "type": "p",
+          "content": "AI agents must be restricted to prevent data exfiltration. The agy-box container should only have egress access to approved API endpoints (such as Google Vertex AI, GCP APIs, and private registries) while blocking access to internal databases, metadata servers, and other VMs."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Deny container access to the GCP Instance Metadata Server (169.254.169.254)\n# This prevents the agent from harvesting host service account tokens.\nsudo iptables -A OUTPUT -d 169.254.169.254 -j REJECT\n\n# Launch the agy-box container with specific network controls\npodman run -d \\\n  --name agy-sandbox \\\n  --network slirp4netns:port_forward=8080 \\\n  --cap-drop=ALL \\\n  --security-opt label=disable \\\n  --read-only \\\n  --tmpfs /tmp \\\n  -v /opt/agy/workspace:/workspace:z \\\n  gcr.io/tridorian-corp/agy-box:v1.2.0"
+        },
+        {
+          "type": "h3",
+          "content": "Google Workspace Developer Preview Program Enrollment"
+        },
+        {
+          "type": "p",
+          "content": "To use the official Google Workspace MCP servers, you must enroll your developer account and GCP projects in the Google Workspace Developer Preview Program. This public program grants access to the dedicated Workspace Model Context Protocol (MCP) servers, which expose safe, high-level endpoints for agent interaction without requiring custom API integration code. You can sign up and ensure your account is accepted into the program at: https://developers.google.com/workspace/preview."
+        },
+        {
+          "type": "h3",
+          "content": "Enabling Standard Workspace APIs & MCP Services"
+        },
+        {
+          "type": "p",
+          "content": "To use Google Workspace MCP servers, you must enable the standard Google Workspace APIs and the corresponding Google Workspace MCP Services in your GCP project. Note that some MCP servers operate independently, while others require the standard API to be enabled:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Gmail and Chat: Require both their standard APIs and their MCP services to be enabled (gmail.googleapis.com, chat.googleapis.com, gmailmcp.googleapis.com, chatmcp.googleapis.com).",
+            "Drive: Requires the standard API for certain tools and the Drive MCP Service (drive.googleapis.com, drivemcp.googleapis.com).",
+            "Calendar: Does not require the standard API; only requires the Calendar MCP Service to be enabled (calendarmcp.googleapis.com).",
+            "People API: Handles both standard access and MCP functionality, so it does not have a separate MCP service to enable (people.googleapis.com)."
+          ]
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Enable standard Google Workspace APIs\ngcloud services enable \\\n  chat.googleapis.com \\\n  drive.googleapis.com \\\n  gmail.googleapis.com \\\n  people.googleapis.com\n\n# Enable Google Workspace MCP Services\ngcloud services enable \\\n  calendarmcp.googleapis.com \\\n  chatmcp.googleapis.com \\\n  drivemcp.googleapis.com \\\n  gmailmcp.googleapis.com"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Which Google Workspace MCP service is independent and does NOT require its standard counterpart API to be enabled in the Google Cloud Console?"
+        },
+        {
+          "type": "p",
+          "content": "A) Gmail MCP (gmailmcp.googleapis.com)"
+        },
+        {
+          "type": "p",
+          "content": "B) Calendar MCP (calendarmcp.googleapis.com)"
+        },
+        {
+          "type": "p",
+          "content": "C) Chat MCP (chatmcp.googleapis.com)"
+        },
+        {
+          "type": "p",
+          "content": "D) People API (people.googleapis.com)"
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. Google Calendar MCP operates independently and does not require the standard Google Calendar API to be enabled in the GCP project."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Why must the IP address 169.254.169.254 be explicitly blocked in the output iptables rules of the sandbox container?"
+        },
+        {
+          "type": "p",
+          "content": "A) It is the default Gateway for private registries."
+        },
+        {
+          "type": "p",
+          "content": "B) It is the cloud provider metadata service IP, and blocking it prevents the agent from harvesting host service account tokens."
+        },
+        {
+          "type": "p",
+          "content": "C) It is the URL redirect callback endpoint for OAuth consent."
+        },
+        {
+          "type": "p",
+          "content": "D) It represents the external proxy server IP."
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. The GCP metadata server (169.254.169.254) distributes host credentials, which must be blocked to enforce complete sandbox isolation."
+        }
+      ]
+    },
+    {
+      "title": "2. Private Registry & Proxy Integration",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Navigating Restrictive Corporate Networks"
+        },
+        {
+          "type": "p",
+          "content": "Enterprise environments route all external traffic through forward proxies (such as Squid or Zscaler) that perform SSL interception. To deploy agy-box reliably, you must configure the container runtime to trust corporate certificates and route image pull and push requests through the appropriate proxies."
+        },
+        {
+          "type": "warning",
+          "content": "Failing to inject corporate Root CA certificates into both the host container daemon and the agy-box image itself will result in immediate SSL handshake failures (x509: certificate signed by unknown authority) when communicating with public or private APIs."
+        },
+        {
+          "type": "h3",
+          "content": "Injecting Custom SSL Certificates"
+        },
+        {
+          "type": "p",
+          "content": "To ensure the engine can download dependencies and connect to LLM endpoints, the enterprise Root CA certificate must be copied into the container during the build stage."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Custom Dockerfile extending the base agy-box image\nFROM gcr.io/tridorian-corp/agy-box:v1.2.0\n\n# Switch to root to import certificates\nUSER root\n\n# Copy corporate ROOT CA certificate\nCOPY certs/corp-root-ca.crt /usr/local/share/ca-certificates/corp-root-ca.crt\n\n# Update certificates database\nRUN chmod 644 /usr/local/share/ca-certificates/corp-root-ca.crt && \\\n    update-ca-certificates\n\n# Revert to unprivileged runner user\nUSER agy_runner"
+        },
+        {
+          "type": "h3",
+          "content": "Registry Setup & Proxy Configurations"
+        },
+        {
+          "type": "p",
+          "content": "Configure the container engine (Podman/Docker) to use the corporate proxy for pulling images, while bypassing the proxy for internal private registries."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create systemd override directory for Podman/Docker\nsudo mkdir -p /etc/systemd/system/podman.service.d/\n\n# Define proxy environment variables in systemd override configuration\ncat <<EOF | sudo tee /etc/systemd/system/podman.service.d/http-proxy.conf\n[Service]\nEnvironment=\"HTTP_PROXY=http://proxy.corp.internal:8080\"\nEnvironment=\"HTTPS_PROXY=http://proxy.corp.internal:8080\"\nEnvironment=\"NO_PROXY=localhost,127.0.0.1,private-registry.corp.internal,169.254.169.254\"\nEOF\n\n# Reload systemd daemon and restart the container service\nsudo systemctl daemon-reload\nsudo systemctl restart podman\n\n# Authenticate to the private registry using corporate credentials\npodman login private-registry.corp.internal \\\n  --username agy-deployer \\\n  --password-stdin < /etc/secrets/registry-token.txt"
+        },
+        {
+          "type": "h3",
+          "content": "Google Chat App Setup"
+        },
+        {
+          "type": "p",
+          "content": "To enable the Google Chat MCP server to search and read messages, you must register a Google Chat app configuration in your GCP project:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Search for \"Google Chat API\" in the GCP Console search bar, and select Manage > Configuration.",
+            "Set the App Name field to \"Chat MCP\".",
+            "Set the Avatar URL field to \"https://developers.google.com/chat/images/quickstart-app-avatar.png\".",
+            "Set the Description field to \"Chat MCP server\".",
+            "Under Functionality, turn off \"Enable interactive features\" (as our agents run as background services).",
+            "Under Logs, select \"Log errors to Logging\" and click Save."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "OAuth Consent branding and Granular Scopes"
+        },
+        {
+          "type": "p",
+          "content": "Google Workspace MCP servers require OAuth 2.0. In the Google Auth Platform portal, configure the OAuth Consent Screen and add the necessary scopes for each Workspace server:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Navigate to Google Auth Platform > Branding, and click Get Started.",
+            "Set App Name to \"Google Workspace MCP Servers\" and select your user support email.",
+            "Configure the Audience to Internal (restricts access to users in your organization) or External (requires adding your email under Test Users).",
+            "Under Contact Information, enter your developer email, then review and click Create.",
+            "Navigate to Data Access > Add or Remove Scopes, scroll to the bottom, and manually add the following scopes under \"Manually add scopes\":"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "content": "Google Calendar:\nhttps://www.googleapis.com/auth/calendar.calendarlist.readonly\nhttps://www.googleapis.com/auth/calendar.events.freebusy\nhttps://www.googleapis.com/auth/calendar.events.readonly\n\nGoogle Chat:\nhttps://www.googleapis.com/auth/chat.spaces.readonly\nhttps://www.googleapis.com/auth/chat.memberships.readonly\nhttps://www.googleapis.com/auth/chat.messages.readonly\nhttps://www.googleapis.com/auth/chat.users.readstate.readonly\n\nGoogle Drive:\nhttps://www.googleapis.com/auth/drive.readonly\nhttps://www.googleapis.com/auth/drive.file\n\nGmail:\nhttps://www.googleapis.com/auth/gmail.readonly\nhttps://www.googleapis.com/auth/gmail.compose\n\nPeople API:\nhttps://www.googleapis.com/auth/directory.readonly\nhttps://www.googleapis.com/auth/userinfo.profile\nhttps://www.googleapis.com/auth/contacts.readonly"
+        },
+        {
+          "type": "h3",
+          "content": "Creating Web Application Client Credentials"
+        },
+        {
+          "type": "p",
+          "content": "With scopes registered, you must generate credentials. Since Antigravity interfaces coordinate the login flow on behalf of the developer, you must create a Web application client with an exact authorized redirect URI:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Go to Google Auth Platform > Clients > Create Client.",
+            "Select Web application as the application type.",
+            "Name the client \"Antigravity\".",
+            "Under Authorized redirect URIs, click \"+ Add URI\" and enter exactly: https://antigravity.google/oauth-callback",
+            "Click Create, and copy the generated Client ID and Client Secret to a secure configuration repository."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the exact redirect URI that must be registered under the Web application credentials for Antigravity Workspace MCP integration?"
+        },
+        {
+          "type": "p",
+          "content": "A) https://antigravity.google/oauth-callback"
+        },
+        {
+          "type": "p",
+          "content": "B) http://localhost:8080/callback"
+        },
+        {
+          "type": "p",
+          "content": "C) https://developers.google.com/oauth-callback"
+        },
+        {
+          "type": "p",
+          "content": "D) urn:ietf:wg:oauth:2.0:oob"
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: A. The authorized redirect URI must be set exactly to https://antigravity.google/oauth-callback to align with Antigravity's OAuth flow."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which scope allows the Google Chat MCP server to search and read messages in space chats?"
+        },
+        {
+          "type": "p",
+          "content": "A) https://www.googleapis.com/auth/chat.spaces.readonly"
+        },
+        {
+          "type": "p",
+          "content": "B) https://www.googleapis.com/auth/chat.messages.readonly"
+        },
+        {
+          "type": "p",
+          "content": "C) https://www.googleapis.com/auth/chat.bot"
+        },
+        {
+          "type": "p",
+          "content": "D) https://www.googleapis.com/auth/chat.admin"
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. The https://www.googleapis.com/auth/chat.messages.readonly scope is required to search and read messages within space chats."
+        }
+      ]
+    },
+    {
+      "title": "3. Remote Cloud VM Setup & Deployment",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Automating Infrastructure for Agent Workloads"
+        },
+        {
+          "type": "p",
+          "content": "Scaling agent workflows requires automated VM provisioning. We use Terraform to define the target virtual machines, secure firewall rules, and metadata scripts that bootstrap the host, mount directories, configure systemd, and launch the agy-box container."
+        },
+        {
+          "type": "h3",
+          "content": "Terraform Configuration for VM Bootstrapping"
+        },
+        {
+          "type": "p",
+          "content": "The following Terraform manifest provisions a hardened GCE instance with metadata that automatically configures Podman and deploys the custom agy-box image."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "resource \"google_compute_instance\" \"agy_sandbox_vm\" {\n  name         = \"agy-sandbox-vm-prod\"\n  machine_type = \"e2-standard-4\"\n  zone         = \"us-central1-a\"\n\n  boot_disk {\n    initialize_params {\n      image = \"cos-cloud/cos-stable\" # Container-Optimized OS\n      size  = 50\n    }\n  }\n\n  network_interface {\n    network    = \"corp-vpc\"\n    subnetwork = \"secure-agents-subnet\"\n    # Omit access_config to ensure no public IP is assigned\n  }\n\n  metadata = {\n    user-data = <<-EOF\n      #cloud-config\n      write_files:\n      - path: /etc/systemd/system/agy-box.service\n        permissions: \"0644\"\n        owner: root\n        content: |\n          [Unit]\n          Description=Google Antigravity Sandbox OCI Container\n          After=network-online.target\n          Wants=network-online.target\n          [Service]\n          Restart=always\n          ExecStartPre=-/usr/bin/docker kill agy-sandbox\n          ExecStartPre=-/usr/bin/docker rm agy-sandbox\n          ExecStart=/usr/bin/docker run \\\n            --name agy-sandbox \\\n            --read-only \\\n            -v /var/opt/agy/workspace:/workspace:rw \\\n            -p 8080:8080 \\\n            gcr.io/tridorian-corp/agy-box:v1.2.0\n          ExecStop=/usr/bin/docker stop agy-sandbox\n          [Install]\n          WantedBy=multi-user.target\n    EOF\n  }\n\n  service_account {\n    email  = \"agy-runner-sa@my-project.iam.gserviceaccount.com\"\n    scopes = [\"https://www.googleapis.com/auth/cloud-platform\"]\n  }\n}"
+        },
+        {
+          "type": "h3",
+          "content": "Configuring Host systemd Service Managers"
+        },
+        {
+          "type": "p",
+          "content": "In standard Linux distributions (like RedHat, Ubuntu, or Debian), we use systemd services to guarantee high availability of the sandboxed agent server. This setup ensures that if the agent process crashes or the VM reboots, the environment is automatically rebuilt in its clean, immutable state."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Location: /etc/systemd/system/agy-sandbox.service\n[Unit]\nDescription=AGY Containerized Engine Service\nAfter=network.target network-online.target podman.socket\nRequires=podman.socket\n\n[Service]\nType=simple\nUser=agy_runner\nGroup=agy_runner\nWorkingDirectory=/opt/agy\nExecStartPre=-/usr/bin/podman kill agy-sandbox\nExecStartPre=-/usr/bin/podman rm agy-sandbox\nExecStart=/usr/bin/podman run \\\n  --name agy-sandbox \\\n  --cap-drop=ALL \\\n  --read-only \\\n  --tmpfs /tmp \\\n  -v /opt/agy/workspace:/workspace:z \\\n  -e AGY_SECRET_TOKEN_FILE=/etc/secrets/token.env \\\n  private-registry.corp.internal/agy/agy-box:latest\nExecStop=/usr/bin/podman stop agy-sandbox\nRestart=on-failure\nRestartSec=5s\n\n[Install]\nWantedBy=multi-user.target"
+        },
+        {
+          "type": "h3",
+          "content": "Workspace MCP Server Setup in mcp_config.json"
+        },
+        {
+          "type": "p",
+          "content": "Antigravity 2.0, the IDE, and the CLI share a central configuration file at ~/.gemini/config/mcp_config.json. Modify this configuration file to register the five Google Workspace MCP servers. Replace client ID and client secret placeholders with the Web client credentials created in Module 2:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"mcpServers\": {\n    \"gws-calendar\": {\n      \"serverUrl\": \"https://calendarmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-chat\": {\n      \"serverUrl\": \"https://chatmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-drive\": {\n      \"serverUrl\": \"https://drivemcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-gmail\": {\n      \"serverUrl\": \"https://gmailmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-people\": {\n      \"serverUrl\": \"https://people.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    }\n  }\n}"
+        },
+        {
+          "type": "h3",
+          "content": "Authenticating Custom MCP Servers Across Interfaces"
+        },
+        {
+          "type": "p",
+          "content": "Once mcp_config.json is saved, the configured servers will show as installed. Since OAuth tokens are managed locally on each surface, you must authenticate the servers on each interface you use:"
+        },
+        {
+          "type": "h3",
+          "content": "Surface 1: Antigravity 2.0 (Mission Control GUI)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Click Settings in the bottom-left corner of the window.",
+            "Navigate to the Customizations tab.",
+            "Under Installed MCP Servers, click Refresh.",
+            "For each server (gws-calendar, gws-chat, gws-drive, gws-gmail, gws-people), click Authenticate.",
+            "In the browser window that opens, sign in and accept scopes, click \"Copy to Clipboard\", then paste the auth code back into Antigravity 2.0 settings and click Submit. A \"Sign out\" button will appear."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Surface 2: Antigravity IDE (VS Code Fork)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Open MCP Servers via the \"...\" dropdown at the top of the side agent panel, or click \"Manage MCP Servers\".",
+            "Open Antigravity User Settings via the Editor-Specific settings menu dropdown at the top of the window.",
+            "Go to Customizations, click Refresh under Installed MCP Servers.",
+            "Click Authenticate for each server, complete the browser authorization flow, copy the auth code, paste it into the IDE settings field, and click Submit."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Surface 3: Antigravity CLI (agy)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "In your terminal, execute the command: /mcp",
+            "Use the up/down arrows to select a server (e.g., gws-gmail) and press Enter.",
+            "Use the left/right arrows to select Authenticate and press Enter.",
+            "Open the displayed OAuth URL in your browser, log in and consent, copy the authorization code.",
+            "Paste the code directly into the terminal prompt next to the \"Enter code:\" text field and press Enter. Verify the status updates to \"Authed\"."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why must we run the authentication flow separately on the CLI, the IDE, and the Standalone GUI interfaces?"
+        },
+        {
+          "type": "p",
+          "content": "A) The redirect URI is different for each interface."
+        },
+        {
+          "type": "p",
+          "content": "B) OAuth tokens are stored in the local application storage directories unique to each execution surface."
+        },
+        {
+          "type": "p",
+          "content": "C) Google Cloud allows only one active connection per application type."
+        },
+        {
+          "type": "p",
+          "content": "D) The client credentials must be refreshed manually every time."
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. Although the client credentials are the same, the actual OAuth access/refresh tokens are stored in separate directories managed by the CLI, IDE, and Standalone GUI."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which file stores the OAuth client ID and secret required for Workspace MCP integration?"
+        },
+        {
+          "type": "p",
+          "content": "A) /etc/secrets/token.env"
+        },
+        {
+          "type": "p",
+          "content": "B) ~/.gemini/config/mcp_config.json"
+        },
+        {
+          "type": "p",
+          "content": "C) ~/.config/antigravity/tokens.json"
+        },
+        {
+          "type": "p",
+          "content": "D) .gemini.md"
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. The ~/.gemini/config/mcp_config.json file configures all MCP servers and their matching client ID and client secret fields."
+        }
+      ]
+    },
+    {
+      "title": "4. Headless Pipeline Runs & CI/CD",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Executing Agent Workloads in CI/CD"
+        },
+        {
+          "type": "p",
+          "content": "To scale agentic engineering, agent loops must run unattended in continuous integration pipelines. A headless run executes without user interaction, reading task instructions, running files, performing checks, and reporting results. This requires configuring non-interactive authorization, defining timeout thresholds, and capturing build artifacts."
+        },
+        {
+          "type": "warning",
+          "content": "Because headless pipelines cannot request human-in-the-loop approvals, any CLI invocation must include the --auto-approve flag or a custom workspace rule file (.gemini.md) specifying permitted actions. Ensure strict repository branch protections are active so agents cannot run unreviewed code changes."
+        },
+        {
+          "type": "h3",
+          "content": "Pre-Authenticating and Injecting OAuth Tokens"
+        },
+        {
+          "type": "p",
+          "content": "Since headless execution environments cannot prompt for interactive browser sign-ins, you must pre-authenticate the Workspace MCP servers on a secure workstation. Extract the generated token cache files, encode them, and inject them into the target container environment at runtime."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# On your secure workstation, run /mcp to authenticate all servers.\n# Locate the generated credentials directory (usually ~/.config/antigravity/tokens)\n# Package the credentials into a base64 string\ntar -czf - -C ~/.config/antigravity/tokens . | base64 -w 0 > gws-tokens-base64.txt\n\n# Save the contents of gws-tokens-base64.txt as a protected CI/CD secret variable: GWS_AUTH_TOKENS_BASE64"
+        },
+        {
+          "type": "h3",
+          "content": "Production-Grade GitLab CI/CD Configuration"
+        },
+        {
+          "type": "p",
+          "content": "The following GitLab CI/CD snippet runs a headless agent sequence inside an ephemeral agy-box workspace, processing a pull request, querying Google Workspace, and generating a report."
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "content": "stages:\n  - analyze\n\nrun_headless_agent:\n  stage: analyze\n  image: private-registry.corp.internal/agy/agy-box:latest\n  variables:\n    AGY_WORKSPACE_DIR: \"$CI_PROJECT_DIR\"\n    AGY_HEADLESS: \"true\"\n    AGY_API_KEY: \"$AGY_PROD_API_KEY\"\n  before_script:\n    # Setup isolated temporary directory within workspace\n    mkdir -p $CI_PROJECT_DIR/.tmp\n    export TMPDIR=$CI_PROJECT_DIR/.tmp\n    \n    # Restore pre-authenticated Google Workspace tokens\n    mkdir -p /home/agy_runner/.config/antigravity/tokens\n    echo \"$GWS_AUTH_TOKENS_BASE64\" | base64 -d | tar -xzf - -C /home/agy_runner/.config/antigravity/tokens\n    \n    # Verify API authorization credentials\n    agy --version\n    agy auth verify --token $AGY_API_KEY\n  script:\n    # Execute the agent loop on the workspace.\n    # --auto-approve allows executing commands without human prompts.\n    # --timeout 600 limits execution time to 10 minutes.\n    agy run \\\n      --task \"Search Drive for 'release-notes-v2', read and summarize their contents, find the email for release-manager in Directory, and create a Gmail draft to them with the summary.\" \\\n      --auto-approve \\\n      --timeout 600 \\\n      --rules-file .gemini.md\n  artifacts:\n    name: agent-changes\n    paths:\n      - agy-report.json\n    expire_in: 7 days"
+        },
+        {
+          "type": "h3",
+          "content": "Advanced CI/CD Pipeline Automation (GitHub Actions)"
+        },
+        {
+          "type": "p",
+          "content": "GitHub Actions can also run headless agent operations. We use actions secrets to pass API keys securely and checkout only the specific pull request branch."
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "content": "name: Headless Agent Automation\non:\n  pull_request:\n    paths:\n      - 'src/**'\n\njobs:\n  run-agent:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout Repository\n        uses: actions/checkout@v3\n        with:\n          ref: ${{ github.event.pull_request.head.ref }}\n          fetch-depth: 0\n      - name: Restore Pre-Authenticated Workspace Tokens\n        run: |\n          mkdir -p $HOME/.config/antigravity/tokens\n          echo \"${{ secrets.GWS_AUTH_TOKENS_BASE64 }}\" | base64 -d | tar -xzf - -C $HOME/.config/antigravity/tokens\n      - name: Run Ephemeral AGY-Box Sandbox\n        run: |\n          docker run --rm \\\n            -v ${{ github.workspace }}:/workspace \\\n            -v $HOME/.config/antigravity/tokens:/home/agy_runner/.config/antigravity/tokens \\\n            -e AGY_API_KEY=${{ secrets.AGY_API_KEY }} \\\n            -e GOOGLE_APPLICATION_CREDENTIALS=/workspace/gcp-creds.json \\\n            private-registry.corp.internal/agy/agy-box:latest \\\n            agy run \\\n              --task \"Check the Google Calendar for any event overlaps tomorrow, look for messages containing 'blocker' in Chat Space 'incident-response', and email the summaries to the team via Gmail.\" \\\n              --auto-approve \\\n              --workspace /workspace \\\n              --output-report /workspace/agy-report.json\n      - name: Commit Agent Suggestions\n        run: |\n          git config --global user.name \"AGY Headless Runner\"\n          git config --global user.email \"agy-runner@corp.internal\"\n          git add src/\n          git diff-index --quiet HEAD || git commit -m \"style: automated agent security refactoring\"\n          git push origin HEAD:${{ github.event.pull_request.head.ref }}"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the purpose of passing the GWS_AUTH_TOKENS_BASE64 secret into the headless container's config directory?"
+        },
+        {
+          "type": "p",
+          "content": "A) To bypass the corporate proxy checks."
+        },
+        {
+          "type": "p",
+          "content": "B) To inject pre-authenticated Google Workspace OAuth tokens so the agent can execute tasks without interactive browser dialogs."
+        },
+        {
+          "type": "p",
+          "content": "C) To authorize systemd to start Podman without root privileges."
+        },
+        {
+          "type": "p",
+          "content": "D) To register the redirect URI callback endpoint."
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. Restoring pre-authenticated token cache files bypasses the interactive login requirement, enabling headless pipelines to authenticate to Google Workspace MCP servers."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which flag must be provided to the agy CLI during a headless run to prevent the pipeline from hanging indefinitely?"
+        },
+        {
+          "type": "p",
+          "content": "A) --verbose"
+        },
+        {
+          "type": "p",
+          "content": "B) --auto-approve"
+        },
+        {
+          "type": "p",
+          "content": "C) --no-sandbox"
+        },
+        {
+          "type": "p",
+          "content": "D) --headless"
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. The --auto-approve flag tells the agent to proceed with command executions without waiting for user confirmation in the terminal."
+        }
+      ]
+    },
+    {
+      "title": "5. Capstone Challenge & Review",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "The Platform Engineer Capstone Challenge"
+        },
+        {
+          "type": "p",
+          "content": "The final assessment for the L400 Platform Engineer credential is a comprehensive, hands-on integration test. You must build, configure, deploy, and verify a complete, containerized agentic development pipeline. This capstone is designed to simulate a real-world enterprise infrastructure deployment under proxy and network constraints."
+        },
+        {
+          "type": "h3",
+          "content": "Overview of Capstone Deliverables"
+        },
+        {
+          "type": "p",
+          "content": "To successfully pass this challenge and earn the Certified AGY Platform Engineer badge, you must deliver:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A custom agy-box Dockerfile containing corporate proxy settings and corporate CA certificates.",
+            "An automated deployment script using Podman and systemd on a mock remote cloud VM.",
+            "A functional mcp_config.json containing the five Google Workspace MCP servers (gws-calendar, gws-chat, gws-drive, gws-gmail, gws-people) along with Web client credentials.",
+            "A functional GitLab CI/CD or GitHub Actions workflow configuration that restores pre-authenticated OAuth tokens and executes a headless agy run in --auto-approve mode.",
+            "A verified .gemini.md rules schema restricting the agent from running any commands matching destructive patterns (e.g., rm -rf /)."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Step-by-Step Verification Script"
+        },
+        {
+          "type": "p",
+          "content": "Use the following local shell script to verify your capstone components before submitting for grading. The verification tool checks container status, mounts, proxy variables, mcp_config.json values, and runs a diagnostic CLI check verifying Workspace MCP server connectivity."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "#!/usr/bin/env bash\n# verification.sh - L400 Capstone Validation Tool\nset -euo pipefail\n\necho \"===========================================\"\necho \"🔍 Running AGY-431 Capstone Verification Script\"\necho \"===========================================\"\n\n# 1. Check container execution status\nif ! podman ps | grep -q \"agy-sandbox\"; then\n  echo \"❌ Error: Podman container 'agy-sandbox' is not running!\"\n  exit 1\nelse\n  echo \"✓ Container 'agy-sandbox' is running.\"\nfi\n\n# 2. Check proxy settings in the container environment\nPROXY_ENV=\"$(podman exec agy-sandbox env | grep -E \"HTTP_PROXY|HTTPS_PROXY\" || true)\"\nif [ -z \"$PROXY_ENV\" ]; then\n  echo \"⚠️ Warning: No HTTP/HTTPS proxy configuration detected in the container!\"\nelse\n  echo \"✓ Proxy variables mapped: \"\n  echo \"$PROXY_ENV\"\nfi\n\n# 3. Check workspace directory mount\nif ! podman exec agy-sandbox ls /workspace >/dev/null 2>&1; then\n  echo \"❌ Error: /workspace directory is not successfully mounted!\"\n  exit 1\nelse\n  echo \"✓ Workspace directory mount verified.\"\nfi\n\n# 4. Check for Google Workspace MCP servers in config file\nCONFIG_PATH=\"/home/agy_runner/.gemini/config/mcp_config.json\"\nif ! podman exec agy-sandbox cat \"$CONFIG_PATH\" | grep -q \"gws-\"; then\n  echo \"❌ Error: Google Workspace MCP configuration not found in mcp_config.json!\"\n  exit 1\nelse\n  echo \"✓ Google Workspace MCP servers detected in mcp_config.json.\"\nfi\n\n# 5. Execute headless dry run check\necho \"⚙ Running diagnostic CLI dry run inside the container...\"\npodman exec agy-sandbox agy --verify --headless\n\necho \"===========================================\"\necho \"🎉 Verification passed! Ready for certification submission.\"\necho \"===========================================\""
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the purpose of mapping the workspace folder to the container as a volume instead of copying files directly into the container image?"
+        },
+        {
+          "type": "p",
+          "content": "A) Volume mapping is faster than building images."
+        },
+        {
+          "type": "p",
+          "content": "B) Volume mapping allows files edited by the agent inside the container to persist on the host filesystem immediately, maintaining an immutable tool environment."
+        },
+        {
+          "type": "p",
+          "content": "C) To bypass SSL certificate validation."
+        },
+        {
+          "type": "p",
+          "content": "D) Docker requires all containers to map volumes."
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. Decoupling the tool environment (immutable container image) from the work directory (dynamic host volume) allows the agent to safely edit files that persist on the host, without needing to rebuild the image."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: What is checked by the capstone verification script to ensure pipeline security?"
+        },
+        {
+          "type": "p",
+          "content": "A) The presence of a graphics driver."
+        },
+        {
+          "type": "p",
+          "content": "B) Container running status, proxy environment variables, workspace volume mount, Google Workspace MCP servers, and successful dry-run validation."
+        },
+        {
+          "type": "p",
+          "content": "C) Snyk vulnerability scanning logs."
+        },
+        {
+          "type": "p",
+          "content": "D) Host root partition size."
+        },
+        {
+          "type": "info",
+          "content": "Correct Answer: B. The validation script checks container status, proxy mapping, workspace mounts, config validity, and CLI status checks to confirm environment readiness."
+        }
+      ]
+    }
+  ]
+}

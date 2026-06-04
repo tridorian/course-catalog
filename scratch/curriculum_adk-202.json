@@ -1,0 +1,193 @@
+{
+  "course_id": "adk-202",
+  "title": "ADK-202: Prompt Engineering & Custom System Instructions",
+  "description": "Write structured instructions, few-shot examples, dynamic templates, and safety rules to guide agent reasoning behavior.",
+  "highlights": [
+    {
+      "icon": "✍️",
+      "title": "System Instructions",
+      "description": "Inject operational guidelines that enforce tone, rules, and task execution constraints."
+    },
+    {
+      "icon": "📚",
+      "title": "Few-shot Prompts",
+      "description": "Embed historical samples directly in prompts to teach the agent complex multi-step reasoning."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Prompt Protection",
+      "description": "Detect and deflect user injection threats that try to leak files or override agent constraints."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Crafting system instructions and behavioral constraints",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "System Instructions & System Prompts"
+        },
+        {
+          "type": "p",
+          "content": "System instructions set the identity, style, and parameters of the agent's behavior. They are injected at the root layer of model calls and cannot be cleared by conversation updates."
+        },
+        {
+          "type": "h2",
+          "content": "Declaring instructions in agent.yaml"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "settings:\n  model: \"gemini-1.5-pro\"\n  system_instructions: |\n    You are a professional, compliance-focused credit analysis agent.\n    Your responses must be structured, objective, and contain no speculation.\n    You are forbidden from stating interest rates directly unless quoting from the lookup tool."
+        },
+        {
+          "type": "info",
+          "title": "Root Enforcement",
+          "content": "Unlike user prompts, model architectures prioritize system instructions, making them the primary layer to configure safety and style bounds."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Where are system instructions registered in an ADK application?\n- A) Inside local environment files\n- B) Under settings.system_instructions in agent.yaml\n- C) Inside the tool Python decorator code\n\nFeedback: Option B is correct. The settings block defines the agent's system prompt instructions."
+        }
+      ]
+    },
+    {
+      "title": "2. Implementing few-shot examples in system prompts",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Few-Shot Prompting"
+        },
+        {
+          "type": "p",
+          "content": "Few-shot prompting shows the model exact examples of inputs and desired outputs, improving compliance and output formats."
+        },
+        {
+          "type": "h2",
+          "content": "Few-Shot Instruction Template"
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "code": "Here are examples of how to format financial risk ratings:\n\nInput: Cash reserves are $50,000, debt is $100,000.\nOutput: [RISK: HIGH] - Debt exceeds cash reserves by 2x.\n\nInput: Cash reserves are $200,000, debt is $10,000.\nOutput: [RISK: LOW] - Cash reserves exceed debt by 20x."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary benefit of few-shot prompting?\n- A) It reduces API costs.\n- B) It teaches the model formatting patterns and complex logic by example.\n- C) It speeds up network requests.\n\nFeedback: Option B is correct. Few-shot examples define output layout structure clearly."
+        }
+      ]
+    },
+    {
+      "title": "3. Directing the agent output format",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Directing Agent Output Format"
+        },
+        {
+          "type": "p",
+          "content": "For applications consuming agent responses programmatically, standardizing outputs (like raw Markdown or structured JSON) prevents parser errors."
+        },
+        {
+          "type": "h2",
+          "content": "Formatting Directives"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "settings:\n  system_instructions: |\n    You must reply ONLY with a valid JSON array of objects. Do not include markdown wraps or backticks.\n    Example:\n    [{\"name\": \"item_name\", \"count\": 2}]"
+        },
+        {
+          "type": "warning",
+          "title": "Enforcing Formats",
+          "content": "Providing a schema pattern in the system prompt reduces generation errors. Use model response schemas where supported."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What should be avoided when requesting JSON output from an agent?\n- A) Using Pydantic models\n- B) Requesting formatting markdown code-blocks (e.g. ```json) if raw JSON is required\n- C) Defining key descriptions\n\nFeedback: Option B is correct. Markdown formatting ticks can break plain string JSON parsers."
+        }
+      ]
+    },
+    {
+      "title": "4. Mitigating hallucinations and out-of-boundary queries",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Mitigating Hallucinations"
+        },
+        {
+          "type": "p",
+          "content": "Agents must limit actions to their registered tools. They must refuse queries outside their designated parameters."
+        },
+        {
+          "type": "h2",
+          "content": "Out of Bound Directives"
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "code": "If the user asks a question that cannot be answered using the provided tools, reply with: 'I am unable to answer this question as I do not have access to the appropriate data sources.' Do not guess."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How do you prevent an agent from inventing factually incorrect statistics?\n- A) Increase the model temperature.\n- B) Enforce strict refusal parameters and lower the temperature setting.\n- C) Remove all tool definitions.\n\nFeedback: Option B is correct. Lower temperatures make outputs deterministic; strict constraints prompt refusal."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab: Authoring a structured system instruction suite",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Authoring a Structured System Instruction Suite"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will author a robust system instructions file for a financial tax calculator agent, configure the agent, and test its behavior against invalid queries."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Create the agent.yaml"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "metadata:\n  name: \"tax-calculator\"\n  version: \"1.0.0\"\nsettings:\n  model: \"gemini-1.5-flash\"\n  temperature: 0.0\n  system_instructions: |\n    You are a tax auditing assistant.\n    You are only allowed to compute taxes using the 'compute_tax' tool.\n    If asked to compute tax without using the tool, reject the request.\n    If asked about general news or sports, reply with 'Error: Out of Scope'.\ntools:\n  - name: \"compute_tax\"\n    source: \"tax_tool.py\""
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Write tax_tool.py"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from google_adk.tools import tool\n\n@tool\ndef compute_tax(income: float, rate: float) -> float:\n    \"\"\"\n    Computes the tax value by multiplying income by the rate.\n    \"\"\"\n    return income * rate"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: If you prompt the agent with 'Who won the basketball game yesterday?', what should it return?\n- A) A mock score\n- B) 'Error: Out of Scope'\n- C) A runtime python exception\n\nFeedback: Option B is correct. The system instructions explicitly force refusal on out-of-scope queries."
+        }
+      ]
+    }
+  ]
+}

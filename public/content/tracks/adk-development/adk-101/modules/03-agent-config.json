@@ -1,0 +1,56 @@
+{
+  "id": "3",
+  "title": "3. Deconstructing agent.yaml Configuration",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Anatomy of agent.yaml"
+    },
+    {
+      "type": "p",
+      "content": "Every ADK agent is defined by a primary metadata and configuration file named `agent.yaml`. This file explicitly declares the agent's identity, the execution model, model hyperparameters, registered tool modules, and conversation memory windows."
+    },
+    {
+      "type": "h2",
+      "content": "Detailed agent.yaml Structure"
+    },
+    {
+      "type": "p",
+      "content": "Below is a complete, production-grade example of an `agent.yaml` definition file:"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "version: \"1.0.0\"\nagent_id: \"document-analyzer-agent\"\ntitle: \"Enterprise Document Analyzer\"\ndescription: \"Extracts structured schema facts from uploaded financial reports.\"\n\nmodel:\n  provider: \"google-vertex\"\n  name: \"gemini-1.5-pro\"\n  parameters:\n    temperature: 0.1\n    top_p: 0.95\n    max_output_tokens: 8192\n\nmemory:\n  type: \"sliding-window\"\n  window_size: 15\n  compaction_policy: \"summarize\"\n\ntools:\n  - name: \"read_file_content\"\n    source: \"src/tools/file_ops.py\"\n    class: \"ReadFileContentTool\"\n  - name: \"regex_search\"\n    source: \"src/tools/text_regex.py\"\n    class: \"RegexSearchTool\"\n\nsecurity:\n  workspace_lock: true\n  network_access: \"restricted\"\n  allowed_domains:\n    - \"*.googleapis.com\"\n"
+    },
+    {
+      "type": "h2",
+      "content": "Key Parameters Explained"
+    },
+    {
+      "type": "list",
+      "items": [
+        "model.parameters.temperature: Determines token sampling randomness. In engineering tools, keep this low (0.0 to 0.2) to guarantee deterministic code outputs and strict schema adherence.",
+        "memory.compaction_policy: Defines how the agent compresses messages when context thresholds are exceeded. 'summarize' triggers a background call to summarize older messages, while 'truncate' deletes oldest turns.",
+        "security.workspace_lock: When set to true, restricts the agent from reading or writing files outside of its immediate execution folder."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why should an agent.yaml used for backend data migration have a temperature parameter of 0.0 or 0.1?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To reduce memory allocation size in the container.\n- B) To ensure consistent, deterministic behavior and minimize hallucinated variables during parsing.\n- C) To make the agent run twice as fast."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Lowering the temperature decreases model randomness, which is critical for structured data processing and code execution."
+    }
+  ]
+}

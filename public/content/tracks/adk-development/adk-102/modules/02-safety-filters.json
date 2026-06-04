@@ -1,0 +1,41 @@
+{
+  "id": "2",
+  "title": "2. Configuring Safety Filters and Block Thresholds",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Configuring Safety Filters"
+    },
+    {
+      "type": "p",
+      "content": "Enterprise agents must operate within ethical and security guidelines. ADK safety directives map directly to LLM content moderation categories, allowing you to reject malicious outputs."
+    },
+    {
+      "type": "h2",
+      "content": "Safety Block Configuration"
+    },
+    {
+      "type": "p",
+      "content": "You specify safety thresholds for four categories: Harassment, Hate Speech, Sexually Explicit, and Dangerous Content. Standard threshold parameters are `BLOCK_NONE`, `BLOCK_LOW_AND_ABOVE`, `BLOCK_MEDIUM_AND_ABOVE`, and `BLOCK_HIGH_AND_ABOVE`."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "safety_settings:\n  - category: \"HATE_SPEECH\"\n    threshold: \"BLOCK_LOW_AND_ABOVE\"\n  - category: \"HARASSMENT\"\n    threshold: \"BLOCK_MEDIUM_AND_ABOVE\"\n  - category: \"DANGEROUS_CONTENT\"\n    threshold: \"BLOCK_LOW_AND_ABOVE\""
+    },
+    {
+      "type": "warning",
+      "title": "Over-blocking Risks",
+      "content": "Setting thresholds to BLOCK_LOW_AND_ABOVE might cause false positives, blocking benign queries that mention industry jargon. Balance security and usability."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What category controls queries suggesting self-harm or unsafe physical acts?\n- A) HARASSMENT\n- B) DANGEROUS_CONTENT\n- C) HATE_SPEECH\n\nFeedback: Option B is correct. DANGEROUS_CONTENT includes risk-prone physical actions."
+    }
+  ]
+}

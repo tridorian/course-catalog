@@ -1,0 +1,72 @@
+{
+  "id": "5",
+  "title": "5. Lab - Deploying a Secure Customer Service Orchestrator",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Deploying Production Agents"
+    },
+    {
+      "type": "p",
+      "content": "In this final lab, you will deploy a Customer Service agent pipeline inside a sandboxed docker container. The agent connects to a Postgres Database via MCP stdio, uses secure OAuth2 helper tokens to verify orders, and outputs tracking updates to the visual panel using A2UI dashboards."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Build the Sandboxed Image"
+    },
+    {
+      "type": "p",
+      "content": "Compile the production agent and tool structures into a container image:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "docker build -t customer-service-agent:v1.0.0 ."
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Run Postgres Database MCP Server"
+    },
+    {
+      "type": "p",
+      "content": "Ensure the backend database is running and verify it is discoverable by local networks:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "docker run -d --name local-postgres -p 5432:5432 -e POSTGRES_PASSWORD=secret postgres"
+    },
+    {
+      "type": "h2",
+      "content": "Step 3: Run the sandboxed Agent Container"
+    },
+    {
+      "type": "p",
+      "content": "Start the container running in user namespace mode, mapping config files and network ports:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "docker run -d --name service-agent-run -p 8090:8090 \\\n  -v $(pwd)/config/token.json:/home/agentuser/app/token.json \\\n  customer-service-agent:v1.0.0"
+    },
+    {
+      "type": "h2",
+      "content": "Step 4: Execute Verification Checks"
+    },
+    {
+      "type": "p",
+      "content": "Send an execution payload to verify route tables, data queries, and secure compliance reporting:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "curl -X POST http://localhost:8090/execute \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"prompt\": \"Check if user order 9023 exists in database and generate tracking dashboard card.\"}'"
+    },
+    {
+      "type": "info",
+      "title": "Deployment Verification",
+      "content": "Verify container execution logs with 'docker logs service-agent-run' to ensure no authentication exceptions or parameter validation errors occurred during startup."
+    }
+  ]
+}

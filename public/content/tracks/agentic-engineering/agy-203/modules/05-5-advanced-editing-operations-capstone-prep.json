@@ -1,0 +1,110 @@
+{
+  "id": "5",
+  "title": "5. Advanced Editing Operations & Capstone Prep",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "CLI Coordination and Workspace Boundaries"
+    },
+    {
+      "type": "p",
+      "content": "Advanced operations in antigravity-ide are coordinated with the agy command line interface. This enables you to run git tracking, file system firewalls, and style verification checks directly from the integrated terminal panel. In addition, all edits made inside the IDE must comply with workspace boundaries. These boundaries are specified by workspace directory permissions and security settings configured in local workspace rules."
+    },
+    {
+      "type": "info",
+      "content": "Security Rules: If you attempt to rewrite a file located outside the permitted workspace directory, the directory firewall will block the action and throw a write permission error unless Agent Non-Workspace File Access is explicitly enabled."
+    },
+    {
+      "type": "h3",
+      "content": "Rules vs. Workflows Customization"
+    },
+    {
+      "type": "p",
+      "content": "Developers can customize agent behavior using two distinct concepts: Rules act as persistent system instructions that the agent always follows, while Workflows are saved prompts triggered on demand using the '/' key inside the side panel. Both can be configured globally or per-workspace, stored in the following locations:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Global Rule: ~/.gemini/GEMINI.md (Enforces persistent global constraints)",
+        "Global Workflow: ~/.gemini/antigravity/global_workflows/<NAME>.md (On-demand templates)",
+        "Workspace Rules: your-workspace/.agents/rules/ (Enforces project-specific standards)",
+        "Workspace Workflows: your-workspace/.agents/workflows/ (Project-specific slash commands)"
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Security Policies & Permissions Allow/Deny Lists"
+    },
+    {
+      "type": "p",
+      "content": "Antigravity implements a unified permission system to restrict what actions the agent can perform. The execution policies (Secure Mode, Review-Driven Development, Agent-Driven Development) control the defaults for terminal command, artifact review, and browser JS execution. Individual permissions are formatted as action(target) and mapped to Allow, Deny, or Ask lists:"
+    },
+    {
+      "type": "p",
+      "content": "| Permission Format | Matches | Example |\n| :--- | :--- | :--- |\n| **command(prefix)** | Terminal commands by prefix. | `command(git)` matches `git add`, `git commit`, etc. |\n| **read_file(path)** | Absolute canonical read path. | `read_file(/var/home/wtg/docs)` reads docs folder. |\n| **write_file(path)** | Absolute canonical write path. | `write_file(/var/home/wtg/workspace)` permits edits. |\n| **read_url(domain)** | Browser URL domain access. | `read_url(github.com)` allows web browsing. |\n| **mcp(server/tool)** | Model Context Protocol tool. | `mcp(gws-drive/*)` enables Workspace Drive tool. |"
+    },
+    {
+      "type": "h3",
+      "content": "CLI Diagnostic Commands"
+    },
+    {
+      "type": "p",
+      "content": "Use the following CLI commands inside the integrated terminal to run validations and audits on your workspace rules:"
+    },
+    {
+      "type": "code",
+      "content": "# Verify workspace boundaries and permissions logs\nagy --verify-workspace /var/home/wtg/my-antigravity-work\n\n# Run style validation check on your co-authored markdown files\nagy --check-style sow_draft.md\n\n# Perform a local rules compliance check against .gemini.md / .agents/rules\nagy --validate-rules",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Design-to-Code & Conversational Database Analytics"
+    },
+    {
+      "type": "p",
+      "content": "Beyond local text manipulations, antigravity-ide extends its capabilities through advanced Model Context Protocol (MCP) integrations. First, **Stitch MCP** enables a Design-to-Code workflow, bridging UI wireframes directly with the agent. By passing design schemas to the sidecar, the agent translates visual elements into structured React or HTML components. Second, **BigQuery Agents** bring conversational data analytics directly inside the IDE. Developers can write natural language prompts (e.g. 'Show monthly signups by region') and the agent generates, executes, and renders SQL query results against BigQuery data warehouses without leaving the editor."
+    },
+    {
+      "type": "h3",
+      "content": "Preparing for the Specialist Capstone Challenge"
+    },
+    {
+      "type": "p",
+      "content": "To earn the **AGY Certified Workspace Specialist** credential, you must complete the capstone challenge 'The SOW Co-Pilot'. This challenge tests your ability to co-author, format, and align a project proposal with strict corporate rules. The workflow is summarized in the table below:"
+    },
+    {
+      "type": "p",
+      "content": "| Capstone Step | Task Description | Verification Command |\n| :--- | :--- | :--- |\n| **1. Create Spec File** | Create a markdown file named `sow_draft.md` in the workspace. | `ls -la sow_draft.md` |\n| **2. Co-Author Sections** | Draft Scope, Milestones, and Financials using the sidecar. | `cat sow_draft.md` |\n| **3. Format Table** | Formulate a rate card markdown table matching style rules. | `agy --check-style sow_draft.md` |\n| **4. Apply Rule Check** | Validate SOW compliance with local `.gemini.md` security rules. | `agy --validate-rules` |"
+    },
+    {
+      "type": "h3",
+      "content": "Co-Authoring Guide: Finalizing the Workspace"
+    },
+    {
+      "type": "p",
+      "content": "Follow this procedure to finalize your workspace and submit your work for verification:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Save all active document and code changes inside the editor panes.",
+        "Run the `agy --validate-rules` command to ensure no compliance policies are violated.",
+        "Execute `git status` in the terminal to verify all edited files are staged.",
+        "Commit and push your changes to your remote repository branch."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding Quiz"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Where is a global rule file stored in Google Antigravity?\n\nA) `your-workspace/.agents/rules/`\nB) `~/.gemini/GEMINI.md`\nC) `~/.config/Antigravity/rules.json`\nD) `/usr/share/antigravity/rules.md`\n\n*Feedback*: The correct answer is B. Global rules are stored in `~/.gemini/GEMINI.md`, while workspace-specific rules are saved in `your-workspace/.agents/rules/`."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: What is the format of a command permission entry in the Allow list?\n\nA) `git-command(/var/home)`\nB) `command(prefix) or command(*)`\nC) `command:prefix`\nD) `shell_run(prefix)`\n\n*Feedback*: The correct answer is B. Terminal command permissions follow the format `command(prefix)` or `command(*)` to match terminal executables, ensuring positive security filtering."
+    }
+  ]
+}

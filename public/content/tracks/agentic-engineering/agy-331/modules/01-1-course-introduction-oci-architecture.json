@@ -1,0 +1,102 @@
+{
+  "id": "1",
+  "title": "1. Course Introduction & OCI Architecture",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "1.1 High-Autonomy Agents & Sandbox Architecture"
+    },
+    {
+      "type": "p",
+      "content": "Autonomous developer agents represent a fundamental shift in software engineering. When you execute an agent loop with high permission levels (such as utilizing the --auto-approve flag in the AGY CLI or SDK), you grant the model the ability to write scripts, execute commands, modify configuration files, and install third-party dependencies. If the agent makes a logical error, falls victim to a prompt injection attack, or attempts to resolve a broken dependency recursively, it can damage host operating systems, leak files, or compromise local networks. A hardened sandbox is mandatory."
+    },
+    {
+      "type": "info",
+      "content": "Core Security Rule: Always decouple where the AI agent runs from where the user interacts. The agy-box image isolates code execution, file mutation, and tool dependencies in a secure container layer, preventing any rogue commands from touching the physical host's system configurations."
+    },
+    {
+      "type": "h2",
+      "content": "1.2 The agy-box OCI Image Design"
+    },
+    {
+      "type": "p",
+      "content": "The standard runtime environment for Antigravity is the 'agy-box' container image. Built from 'ghcr.io/ublue-os/ubuntu-toolbox:latest', it acts as a host-integrated developer sandbox. It compiles nodejs, python, git, and key libraries into a portable image. Because standard container environments lack the dependencies for graphic rendering and secrets storage, agy-box layers specific tools to bridge this gap."
+    },
+    {
+      "type": "h3",
+      "content": "1.3 Container Blueprint: Installing Agent & Graphic Dependencies"
+    },
+    {
+      "type": "p",
+      "content": "To support both terminal automation and visual browser interactions, the container installs graphic frameworks, credentials managers, and browsers. The script below outlines the base dependency build stage:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "#!/bin/bash\n# install-agent-deps.sh - Installed during container build\nset -euo pipefail\nexport DEBIAN_FRONTEND=noninteractive\n\n# Update and install system dependencies\napt-get update && apt-get install -y --no-install-recommends \\\n    git curl wget jq gnupg python3-pip pipx \\\n    python3-keyring python3-keyrings.alt libsecret-1-0 \\\n    tini gosu xvfb x11vnc icewm novnc websockify \\\n    xterm pcmanfm nodejs npm \\\n    && apt-get clean && rm -rf /var/lib/apt/lists/*"
+    },
+    {
+      "type": "h3",
+      "content": "1.4 Chrome Wrapping for Container Stability"
+    },
+    {
+      "type": "p",
+      "content": "Chrome requires specific flags to run stably inside container environments. Without these overrides, Chrome can exhaust shared memory or crash when attempting to query hardware acceleration. We wrap Chrome to ensure high-autonomy loops remain resilient:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Wrap google-chrome-stable to force headless compatibility flags\nmv /usr/bin/google-chrome-stable /usr/bin/google-chrome-stable.orig\nprintf '#!/bin/bash\\nexec /usr/bin/google-chrome-stable.orig --disable-dev-shm-usage --disable-gpu --disable-crash-reporter --no-sandbox \"$@\"' > /usr/bin/google-chrome-stable\nchmod +x /usr/bin/google-chrome-stable"
+    },
+    {
+      "type": "h2",
+      "content": "1.5 Login Hook Sequence & Interactive Assistant"
+    },
+    {
+      "type": "p",
+      "content": "When a developer enters the agy-box container, a login hook placed at '/etc/profile.d/agy-setup-check.sh' executes. This shell script validates if the shell session is interactive and if standard inputs are open, ensuring that background scripts and non-interactive workflows (like CI/CD pipelines) bypass interactive prompts."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# check if setup flag is done and shell is interactive\nif [ ! -f \"$HOME/.config/agy-box/.setup_done\" ] && [ -t 0 ] && [ -t 1 ]; then\n    # Invoke the setup assistant\n    /usr/local/bin/agy-setup-helper\nfi"
+    },
+    {
+      "type": "h3",
+      "content": "1.6 Automated Setup Validation Gates"
+    },
+    {
+      "type": "p",
+      "content": "Upon triggering, the `agy-setup-helper` executes four critical validation gates before allowing the environment to mark setup as complete:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Host Keyring Verification: Checks if D-Bus session socket forwarding is working and libsecret can negotiate decryption queries with the host's keyring.",
+        "Antigravity API Keys: Prompts the user (using the Charm 'gum' CLI) for Gemini or Antigravity keys, saving them to '~/.config/environment.d/agy-box.conf'.",
+        "Chrome Execution: Spawns Chrome in unprivileged mode to verify that the wrapper script runs without sandbox errors.",
+        "Permissions Hardening: Scans configurations, SSH directories, and credentials paths, locking down their permissions to 600 or 700 to prevent data exposure."
+      ]
+    },
+    {
+      "type": "warning",
+      "content": "Wildcard Port Scans: The setup helper audits active TCP ports in /proc/net/tcp. If it detects a development server listening on wildcard addresses (0.0.0.0), it flags a warning to prevent network access from outside the host."
+    },
+    {
+      "type": "h2",
+      "content": "1.7 Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Answer the following questions to verify your knowledge of the containerized sandbox architecture:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Question 1: Why is Google Chrome wrapped inside the agy-box OCI build?\n  - A) To increase browser rendering performance.\n  - B) To override shared memory limits (--disable-dev-shm-usage) and disable system sandbox conflicts inside unprivileged containers.\n  - C) To enforce corporate content filters.\n\nFeedback: Option B is correct. Wrapping the browser enables Chrome to run stably within container resource bounds without requiring privileged root execution.",
+        "Question 2: What prevents the setup assistant hook from blocking automated scripts inside the container?\n  - A) A system cron job that runs the hook in the background.\n  - B) Sourcing the script in ~/.bashrc rather than /etc/profile.d/.\n  - C) Verifying interactive terminal connections ([ -t 0 ] && [ -t 1 ]) before launching the helper.\n\nFeedback: Option C is correct. Checking terminal descriptors prevents non-interactive scripts and CI/CD pipelines from getting stuck waiting for user inputs."
+      ]
+    }
+  ]
+}

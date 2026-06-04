@@ -1,0 +1,60 @@
+{
+  "id": "2",
+  "title": "2. Codifying Compliance Guardrails",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Enforcing Compliance and Code Standards"
+    },
+    {
+      "type": "p",
+      "content": "Agents can generate large volumes of code quickly, but they are prone to using deprecated APIs, introducing insecure libraries, or ignoring code style guidelines. To prevent this, architects must write clear compliance constraints. The .gemini.md rules file should contain precise language specifying target code formatting, strict TypeScript or Python configurations, naming conventions, and linting rules."
+    },
+    {
+      "type": "p",
+      "content": "An effective rules configuration must block bypass mechanisms. For example, agents often insert comments like '// eslint-disable-next-line' or '@ts-ignore' to quickly resolve compilation or linter errors. A robust workspace rule explicitly forbids the insertion of lint-disabling annotations and requires standard code style checks to pass before a task is considered complete."
+    },
+    {
+      "type": "warning",
+      "content": "Agents will often try to resolve lint errors by modifying configuration files (such as .eslintrc.json, pyproject.toml, or tsconfig.json) instead of fixing the code itself. Make sure your rules block explicitly locks configuration files from being altered by the agent, ensuring that compilation strictness remains high."
+    },
+    {
+      "type": "h3",
+      "content": "Lab: Defining Code Compliance Constraints"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, we will update our .gemini.md configuration to enforce TypeScript strict mode, block deprecated fetch APIs (such as raw XMLHttpRequest), and enforce ESLint rules. Add the following rules section to your workspace .gemini.md file:"
+    },
+    {
+      "type": "code",
+      "language": "markdown",
+      "content": "## Code Quality & Compliance Rules\n- TypeScript Configuration: Enforce strict mode (`strict: true` in tsconfig.json).\n- Forbidden APIs:\n  * Never write or approve code that uses `XMLHttpRequest` or third-party `axios` wrapper. Use native standard `fetch` API.\n- Coding Style Guidelines:\n  * Class names must use PascalCase (e.g., `UserController`).\n  * Interface names must be prefixed with `I` (e.g., `IUserService`).\n  * Every new function must contain JSDoc documentation with `@param` and `@returns` tags.\n- Lint Bypass Restrictions:\n  * You are strictly forbidden from writing `// eslint-disable-next-line` or `@ts-ignore` comments to bypass type checker or linter flags."
+    },
+    {
+      "type": "p",
+      "content": "To test the linter rule locally, run the AGY verify check. This command scans the codebase and verifies if the files adhere to the custom rules defined in .gemini.md."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "agy verify --rule-check code-quality --dir ./src"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Answer the following questions to verify your comprehension of compliance rules:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Question 1: Which of the following is a common vector used by agents to bypass linting checks, and how can it be codified against in .gemini.md?\n  - A) Agents will delete the codebase; codified against by keeping external backups.\n  - B) Agents will add lint-disabling comments (e.g., // eslint-disable-next-line); codified against by writing a rule that strictly forbids these annotations and checking for them in verify pipelines.\n  - C) Agents will switch the IDE to basic text editors; codified against by locking user settings.\n  - D) Agents will compile files manually without compiling flags.\n\nFeedback: Option B is correct. Agents frequently insert comments like // eslint-disable-next-line or @ts-ignore to bypass compilations. The .gemini.md must explicitly forbid this and CI checks must reject code with new bypass comments.",
+        "Question 2: Why should workspace rules lock configurations like tsconfig.json?\n  - A) To reduce compile speeds.\n  - B) To prevent agents from weakening typescript compiler flags to quickly make bad code compile.\n  - C) To enable javascript support.\n  - D) To let agents define custom libraries.\n\nFeedback: Option B is correct. Locking compiler configurations prevents agents from solving type compliance issues by disabling strict flags, ensuring the code standard remains high."
+      ]
+    }
+  ]
+}

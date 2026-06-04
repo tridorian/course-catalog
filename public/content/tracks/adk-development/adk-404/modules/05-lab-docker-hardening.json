@@ -1,0 +1,32 @@
+{
+  "id": "5",
+  "title": "5. Lab: Hardening a Docker run environment",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Hardening a Docker Run Environment"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will configure a shell script that launches an agent container using cgroups limits and disabled networking options."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Launch Script"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "#!/bin/bash\n# Hardened docker run script\ndocker run \\\n  --name \"hardened-agent\" \\\n  --network \"none\" \\\n  --read-only \\\n  --memory \"256m\" \\\n  --cpus \"0.5\" \\\n  -v $(pwd)/workspace:/workspace:ro \\\n  adk-agent-image:latest"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What permission boundary is set on the mounted workspace folder in the script?\n- A) Write only\n- B) Read Only (:ro)\n- C) Executable only\n\nFeedback: Option B is correct. Read-only mounting prevents agents from modifying files."
+    }
+  ]
+}

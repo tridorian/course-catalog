@@ -24,4 +24,4 @@ Implement specialized rendering components for different module types: **Lab**, 
 - Resource modules successfully display their intended content/links.
 - Existing "Lab" functionality (step-by-step blocks) remains functional and unaffected (no regressions).
 
-**Important:** Ensure all new components follow the "Tridorian" dark theme and responsive design patterns.
+**Important:** Ensure all new components follow the "tridorian" dark theme and responsive design patterns.

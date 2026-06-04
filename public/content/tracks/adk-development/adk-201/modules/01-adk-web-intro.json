@@ -1,0 +1,65 @@
+{
+  "id": "1",
+  "title": "1. Visual Debugging with adk-web Dashboard",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Introduction to adk-web"
+    },
+    {
+      "type": "p",
+      "content": "Debugging autonomous agents in terminal interfaces can be difficult due to complex JSON payloads. The `adk-web` portal provides a local, real-time graphical developer dashboard to view exactly what your agent is doing under the hood."
+    },
+    {
+      "type": "h2",
+      "content": "Launching the Console"
+    },
+    {
+      "type": "p",
+      "content": "To launch the developer console alongside an active agent instance, execute the following CLI command in your workspace root:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "# Launch the console on default port 8501\nadk dev --web\n\n# Configure a custom host and port for remote server debugging\nadk dev --web --port 9000 --host 0.0.0.0"
+    },
+    {
+      "type": "info",
+      "title": "Browser Connectivity",
+      "content": "Once executed, the command spawns a lightweight local Node.js web server. Open 'http://localhost:8501' in your browser to view the console."
+    },
+    {
+      "type": "h2",
+      "content": "Console Workspace Panes"
+    },
+    {
+      "type": "p",
+      "content": "The `adk-web` interface consists of three primary visual sections:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Run Selector (Left): A history panel showing all previous and active execution sessions.",
+        "Visual Playground (Center): A chat simulator and block interface to interact with the agent.",
+        "Inspector Drawer (Right): Tabbed dashboards showing state records, memory registers, tool calls, and model latency metrics."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the default browser port used by the local adk-web console?"
+    },
+    {
+      "type": "p",
+      "content": "- A) 8080\n- B) 8501\n- C) 3000"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. adk-web serves the graphical developer dashboard on port 8501 by default."
+    }
+  ]
+}

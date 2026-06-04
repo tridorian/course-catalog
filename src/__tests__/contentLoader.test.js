@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchCourseManifest, fetchModuleContent } from '../services/contentLoader';
+import { fetchCourseManifest, fetchModuleContent, clearCache } from '../services/contentLoader';
 
 describe('contentLoader', () => {
   beforeEach(() => {
+    clearCache();
     vi.stubGlobal('fetch', vi.fn());
   });
 
@@ -19,7 +20,7 @@ describe('contentLoader', () => {
 
     const manifest = await fetchCourseManifest('track1', 'course1');
     expect(manifest).toEqual(mockManifest);
-    expect(fetch).toHaveBeenCalledWith('./content/tracks/track1/course1/manifest.json');
+    expect(fetch).toHaveBeenCalledWith('/content/tracks/track1/course1/manifest.json');
   });
 
   it('fetchCourseManifest throws error on invalid manifest', async () => {

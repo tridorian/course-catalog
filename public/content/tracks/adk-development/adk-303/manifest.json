@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Shared state blackboard architectures",
+      "file": "modules/01-blackboard-architecture.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Sequential processing pipelines with intermediate validation",
+      "file": "modules/02-sequential-pipelines.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Implementing voting and consensus-based decisions",
+      "file": "modules/03-consensus-voting.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Conflict resolution and state syncing",
+      "file": "modules/04-conflict-resolution.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Building a collaborative document drafting team",
+      "file": "modules/05-lab-collaborative-team.json"
+    }
+  ]
+}

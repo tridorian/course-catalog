@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Understanding JSON Schema parameter descriptions",
+      "file": "modules/01-schema-descriptions.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Defining strict Pydantic structures for tool inputs",
+      "file": "modules/02-pydantic-validation.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Creating clean API tool interfaces",
+      "file": "modules/03-clean-interfaces.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Handling tool execution exceptions",
+      "file": "modules/04-tool-exceptions.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Writing a structured weather and currency conversion tool",
+      "file": "modules/05-lab-structured-tools.json"
+    }
+  ]
+}

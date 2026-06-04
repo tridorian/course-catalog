@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Slide Deck Outline - Course Introduction",
+      "file": "modules/01-1-slide-deck-outline-course-introduction.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Prerequisites & Environment Provisioning",
+      "file": "modules/02-2-prerequisites-environment-provisioning.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Lab - The Hardened Install (Tarball Method)",
+      "file": "modules/03-3-lab-the-hardened-install-tarball-method-.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Lab - Initializing Mission Control",
+      "file": "modules/04-4-lab-initializing-mission-control.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Google Doc Outline - Wrap Up & Next Steps",
+      "file": "modules/05-5-google-doc-outline-wrap-up-next-steps.json"
+    }
+  ]
+}

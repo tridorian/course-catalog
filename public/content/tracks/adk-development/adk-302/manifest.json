@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. The Supervisor-Worker design pattern",
+      "file": "modules/01-supervisor-pattern.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Building intent classifiers using semantic embedding",
+      "file": "modules/02-intent-classification.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Routing messages dynamically to specialized sub-agents",
+      "file": "modules/03-dynamic-routing.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Handling escalation pathways and fallback policies",
+      "file": "modules/04-escalation-fallbacks.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Designing a triage routing agent",
+      "file": "modules/05-lab-triage-routing.json"
+    }
+  ]
+}

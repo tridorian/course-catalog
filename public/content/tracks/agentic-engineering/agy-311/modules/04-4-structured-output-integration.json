@@ -1,0 +1,116 @@
+{
+  "id": "4",
+  "title": "4. Google Sheets & Structured Outputs",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Spreadsheets are central to database manipulation and data collection. An agent can serve as an automated analyst, reading unstructured records from a sheet, parsing them into structured JSON schema payloads, and logging verified values back into specific spreadsheet columns. In this module, we cover Google Sheets values API manipulation and structured output configuration."
+    },
+    {
+      "type": "h2",
+      "content": "Google Sheets API: Reading and Appending Ranges"
+    },
+    {
+      "type": "p",
+      "content": "The Sheets API addresses grids using standard A1 notation (e.g. 'Sheet1!A1:D10'). To retrieve spreadsheet values, use values.get. To write data, values.append is used to find the last occupied row in a table and append new rows dynamically."
+    },
+    {
+      "type": "info",
+      "content": "Value Input Options: Always set valueInputOption to 'USER_ENTERED' if your values contain dates, numbers, or Excel/Sheets formulas (e.g. '=SUM(A1:A5)'). If set to 'RAW', the API writes values as raw strings, disabling cell logic evaluation."
+    },
+    {
+      "type": "h2",
+      "content": "Enforcing Response Schemas"
+    },
+    {
+      "type": "p",
+      "content": "To guarantee that the Antigravity agent outputs a format compatible with databases or sheets, configure response schemas. This prevents conversational filler ('Here is your JSON:') and forces the response body to match the registered fields."
+    },
+    {
+      "type": "list",
+      "items": [
+        "In Python: Pass a Pydantic class to the response_schema configuration parameter inside LocalAgentConfig.",
+        "In Node.js: Define a standard JSON Schema object structure and pass it to the responseSchema parameter inside LocalAgentConfig."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Spreadsheet Analyzer Pipeline (Python)"
+    },
+    {
+      "type": "p",
+      "content": "This Python script reads rows from a Google Sheet, processes unformatted ticket details through the agent using Pydantic validation, and appends the structured results as a log entry."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "import asyncio\nimport os\nimport pydantic\nfrom google.oauth2.credentials import Credentials\nfrom googleapiclient.discovery import build\nfrom google.antigravity import Agent, LocalAgentConfig\n\n# 1. Define the Pydantic schema for structured output validation\nclass TicketAnalysis(pydantic.BaseModel):\n    category: str\n    priority_level: str\n    urgency_reason: str\n    assigned_team: str\n\nasync def run_sheets_pipeline():\n    if not os.path.exists('token.json'):\n        print(\"token.json not found! Run Module 1 first.\")\n        return\n    creds = Credentials.from_authorized_user_file('token.json')\n    sheets = build('sheets', 'v4', credentials=creds)\n    \n    # Create a mock spreadsheet if none is specified\n    spreadsheet_body = {\n        'properties': {'title': 'AGY-311 Support Log'}\n    }\n    print(\"Creating analysis spreadsheet...\")\n    sheet_file = sheets.spreadsheets().create(body=spreadsheet_body, fields='spreadsheetId').execute()\n    sheet_id = sheet_file.get('spreadsheetId')\n    \n    # Setup sheet headers\n    setup_body = {\n        'values': [\n            ['Ticket Description', 'Category', 'Priority', 'Reason', 'Assigned Team'],\n            ['Database connection timed out when loading user profile page.', '', '', '', '']\n        ]\n    }\n    sheets.spreadsheets().values().update(\n        spreadsheetId=sheet_id,\n        range=\"Sheet1!A1:E2\",\n        valueInputOption=\"USER_ENTERED\",\n        body=setup_body\n    ).execute()\n    \n    # 2. Read raw tickets from Sheet\n    print(\"Reading data rows from Sheet...\")\n    data_range = sheets.spreadsheets().values().get(spreadsheetId=sheet_id, range=\"Sheet1!A2:A2\").execute()\n    rows = data_range.get('values', [])\n    \n    if not rows:\n        print(\"No tickets found to process.\")\n        return\n    raw_ticket = rows[0][0]\n    \n    # 3. Configure Agent with Pydantic Schema\n    print(\"Invoking Antigravity Agent with response_schema...\")\n    system_instruction = \"Analyze support tickets. Categorize them and assign to Database, Frontend, Backend, or Security.\"\n    config = LocalAgentConfig(\n        system_instruction=system_instruction,\n        response_schema=TicketAnalysis\n    )\n    \n    async with Agent(config) as agent:\n        prompt = f\"Classify this ticket:\\n{raw_ticket}\"\n        response = await agent.chat(prompt)\n        \n        # Retrieve the validated data object\n        structured_data = await response.structured_output()\n        \n    # 4. Write verified values back to Google Sheet\n    print(\"Logging analysis results back to Sheet...\")\n    analysis_row = [\n        structured_data.get('category'),\n        structured_data.get('priority_level'),\n        structured_data.get('urgency_reason'),\n        structured_data.get('assigned_team')\n    ]\n    \n    sheets.spreadsheets().values().update(\n        spreadsheetId=sheet_id,\n        range=\"Sheet1!B2:E2\",\n        valueInputOption=\"USER_ENTERED\",\n        body={'values': [analysis_row]}\n    ).execute()\n    \n    print(f\"Spreadsheet updated! View at https://docs.google.com/spreadsheets/d/{sheet_id}/edit\")\n\nif __name__ == '__main__':\n    asyncio.run(run_sheets_pipeline())"
+    },
+    {
+      "type": "h2",
+      "content": "Spreadsheet Analyzer Pipeline (Node.js)"
+    },
+    {
+      "type": "p",
+      "content": "Below is the equivalent implementation in Node.js, showing how to pass a JSON Schema definition to validate outputs and update the spreadsheet cells."
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "content": "import fs from 'fs';\nimport { google } from 'googleapis';\nimport { Agent, LocalAgentConfig } from '@google/antigravity';\n\n// 1. Define JSON Schema\nconst ticketSchema = {\n  type: 'object',\n  properties: {\n    category: { type: 'string' },\n    priority_level: { type: 'string' },\n    urgency_reason: { type: 'string' },\n    assigned_team: { type: 'string' }\n  },\n  required: ['category', 'priority_level', 'urgency_reason', 'assigned_team']\n};\n\nasync function runSheetsPipeline() {\n  if (!fs.existsSync('token.json')) {\n    console.error(\"token.json not found! Run Module 1 first.\");\n    return;\n  }\n  const tokenData = JSON.parse(fs.readFileSync('token.json', 'utf8'));\n  const auth = google.auth.fromJSON(tokenData);\n  const sheets = google.sheets({ version: 'v4', auth });\n  \n  // Create sheet\n  console.log(\"Creating sheet...\");\n  const spreadsheet = await sheets.spreadsheets.create({\n    requestBody: {\n      properties: { title: 'AGY-311 Support Log' }\n    }\n  });\n  const sheetId = spreadsheet.data.spreadsheetId;\n  \n  // Setup headers\n  await sheets.spreadsheets.values.update({\n    spreadsheetId: sheetId,\n    range: 'Sheet1!A1:E2',\n    valueInputOption: 'USER_ENTERED',\n    requestBody: {\n      values: [\n        ['Ticket Description', 'Category', 'Priority', 'Reason', 'Assigned Team'],\n        ['Database connection timed out when loading user profile page.', '', '', '', '']\n      ]\n    }\n  });\n  \n  // Read ticket description\n  const responseRange = await sheets.spreadsheets.values.get({\n    spreadsheetId: sheetId,\n    range: 'Sheet1!A2:A2'\n  });\n  const rawTicket = responseRange.data.values[0][0];\n  \n  // Execute Agent with JSON Schema\n  console.log(\"Calling agent with schema...\");\n  const config = new LocalAgentConfig({\n    systemInstruction: \"Analyze support tickets. Categorize them and assign to Database, Frontend, Backend, or Security.\",\n    responseSchema: ticketSchema\n  });\n  const agent = new Agent(config);\n  await agent.start();\n  \n  let structuredData;\n  try {\n    const response = await agent.chat(`Classify this ticket:\\n${rawTicket}`);\n    structuredData = await response.structured_output();\n  } finally {\n    await agent.stop();\n  }\n  \n  // Update Sheet cells with structured data\n  console.log(\"Updating analysis columns...\");\n  const analysisRow = [\n    structuredData.category,\n    structuredData.priority_level,\n    structuredData.urgency_reason,\n    structuredData.assigned_team\n  ];\n  \n  await sheets.spreadsheets.values.update({\n    spreadsheetId: sheetId,\n    range: 'Sheet1!B2:E2',\n    valueInputOption: 'USER_ENTERED',\n    requestBody: {\n      values: [analysisRow]\n    }\n  });\n  console.log(`Spreadsheet complete! View at https://docs.google.com/spreadsheets/d/${sheetId}/edit`);\n}\n\nrunSheetsPipeline().catch(console.error);"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What does valueInputOption='USER_ENTERED' indicate to the Google Sheets API?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The sheet requires manual human confirmation in a browser window before saving."
+    },
+    {
+      "type": "p",
+      "content": "- B) Input strings are processed as if they were entered directly by a user into the UI, ensuring formatting is parsed and formula codes are evaluated."
+    },
+    {
+      "type": "p",
+      "content": "- C) The spreadsheet restricts editing capabilities to only registered OAuth users."
+    },
+    {
+      "type": "p",
+      "content": "- D) Cell changes are kept in memory and are discarded when the script terminates."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. USER_ENTERED allows dates to convert, numbers to float, and formula expressions starting with '=' to execute."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What happens if the Antigravity agent output violates the configured Pydantic or JSON schema?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The SDK automatically retries the query infinitely."
+    },
+    {
+      "type": "p",
+      "content": "- B) The response.structured_output() method returns None (Python) or null (Node.js) due to parsing errors."
+    },
+    {
+      "type": "p",
+      "content": "- C) The script deletes the target Google Sheet."
+    },
+    {
+      "type": "p",
+      "content": "- D) The model falls back to formatting the output as an HTML file."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. Schema validation mismatches yield null, and developers must design scripts to catch empty structured responses."
+    }
+  ]
+}

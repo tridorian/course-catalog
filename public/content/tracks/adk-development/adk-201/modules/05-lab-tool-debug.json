@@ -1,0 +1,62 @@
+{
+  "id": "5",
+  "title": "5. Lab - Debugging a Failing Tool using Trace Analysis",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Debugging Failed Tools"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will run an agent that fails when interacting with a local inventory database. You will use `adk-web` trace diagnostics to identify the parameter format bug, correct the source code, and verify execution success."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Run the Broken Agent"
+    },
+    {
+      "type": "p",
+      "content": "Trigger the agent to retrieve stock information from a database file. The query fails silently or returns an error response:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk run --prompt \"Retrieve stock details for item id 8802 and export schema report.\""
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Inspect adk-web traces"
+    },
+    {
+      "type": "p",
+      "content": "Open `http://localhost:8501` in your browser. Inspect the last run history pane. Under 'Tool Failures', locate the active error logs:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"error\": \"TypeError: expected string or bytes-like object, got int\",\n  \"tool\": \"fetch_stock_details\",\n  \"arguments\": {\n    \"item_id\": 8802\n  }\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Step 3: Correct the Tool Schema Definition"
+    },
+    {
+      "type": "p",
+      "content": "The model passed `8802` as an integer, but the python code was expecting a string format. We will update the tool's python signature type hint to accept both `int` and `str` parameters:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "# Before:\n# def fetch_stock_details(item_id: str)\n\n# After (corrected type definition):\ndef fetch_stock_details(item_id: int | str):\n    \"\"\"\n    Retrieves local inventory stock numbers.\n    Args:\n        item_id (int | str): The ID of the item.\n    \"\"\"\n    # Code handles integer string conversion safely\n    sanitized_id = str(item_id)\n    # Run database query...\n"
+    },
+    {
+      "type": "h2",
+      "content": "Step 4: Re-run diagnostics"
+    },
+    {
+      "type": "p",
+      "content": "Execute the agent once more. Review the transaction history in adk-web to confirm a green success tag is displayed next to the tool invocation step."
+    }
+  ]
+}

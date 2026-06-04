@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. agy CLI Binary & Syntax Foundations",
+      "file": "modules/01-1-agy-cli-binary-syntax-foundations.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Boundary Enforcement & Input Piping",
+      "file": "modules/02-2-boundary-enforcement-input-piping.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Bulk Modifications & Refactoring",
+      "file": "modules/03-3-bulk-modifications-refactoring.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Running Rapid Query Batch Jobs",
+      "file": "modules/04-4-running-rapid-query-batch-jobs.json"
+    },
+    {
+      "id": "5",
+      "title": "5. CLI Pipelines & Capstone Challenge",
+      "file": "modules/05-5-cli-pipelines-capstone-challenge.json"
+    }
+  ]
+}

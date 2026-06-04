@@ -1,4 +1,4 @@
-# Agent Instructions — Tridorian Course Platform
+# Agent Instructions — tridorian Course Platform
 
 This document defines the rules, conventions, and context an AI coding agent needs to work effectively on this codebase.
 
@@ -6,7 +6,7 @@ This document defines the rules, conventions, and context an AI coding agent nee
 
 ## 1. Project Overview
 
-This is a **React + Vite** interactive course platform with a dark "Tridorian" terminal theme. Content is stored as JSON files and loaded dynamically at runtime — the app is completely decoupled from its content.
+This is a **React + Vite** interactive course platform with a dark "tridorian" terminal theme. Content is stored as JSON files and loaded dynamically at runtime — the app is completely decoupled from its content.
 
 ### Tech Stack
 
@@ -24,7 +24,7 @@ This is a **React + Vite** interactive course platform with a dark "Tridorian" t
 
 ```
 Track (e.g., "agentic-engineering")
- └── Course (e.g., "agv-101", "gemini-cli")
+ └── Course (e.g., "agy-101", "gemini-cli")
       └── Module (e.g., "01-course-introduction.json")
            └── Step/Block (content blocks inside a module)
 ```
@@ -152,6 +152,17 @@ The following files must be kept in sync with code changes:
 
 ## 4. Development Workflow
 
+### Configuring Jules Environment Setup
+
+Jules runs codebase tasks within an isolated VM. To optimize VM startup times and cache dependencies (like `puppeteer` for screenshots), use the provided setup script:
+
+1. Go to the codebase configuration on the **Jules Web Interface** (https://jules.google).
+2. Set the **Initial Setup** command field to:
+   ```bash
+   ./scripts/setup-jules.sh
+   ```
+3. Click **Run and Snapshot** to validate the script and create a cached environment snapshot.
+
 ### Starting the Dev Server
 
 ```bash
@@ -266,8 +277,8 @@ The app uses `HashRouter` (for GitHub Pages compatibility):
 |---------|------|---------|
 | `/#/` | Dashboard (all tracks) | `/#/` |
 | `/#/:trackId` | Track page (all courses) | `/#/agentic-engineering` |
-| `/#/:trackId/:courseId` | Course Map | `/#/agentic-engineering/agv-101` |
-| `/#/:trackId/:courseId/:moduleId` | Module view | `/#/agentic-engineering/agv-101/1` |
+| `/#/:trackId/:courseId` | Course Map | `/#/agentic-engineering/agy-101` |
+| `/#/:trackId/:courseId/:moduleId` | Module view | `/#/agentic-engineering/agy-101/1` |
 
 ---
 
@@ -275,7 +286,7 @@ The app uses `HashRouter` (for GitHub Pages compatibility):
 
 1. **`app.js` is legacy** — The root-level `app.js` is the original monolithic version with hardcoded JSX content. It is NOT used by the current app. Do not modify it. It will be removed in a future cleanup.
 
-2. **Google services are Phase 4** — `googleAuth.js` and `googleDrive.js` exist but are not yet integrated. Do not import them into active components until Phase 4.
+2. **Google services are Phase 4** — `googleAuth.js` and `googleDrive.js` are now functional but integration into the main UI components is still pending. Use the refined `googleDrive.js` for all persistence needs.
 
 3. **Tailwind JIT purging** — Dynamic class names constructed via string interpolation may be purged. Always use full class strings or pass via `style` prop.
 

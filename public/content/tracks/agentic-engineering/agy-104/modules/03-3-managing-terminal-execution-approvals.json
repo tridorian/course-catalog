@@ -1,0 +1,129 @@
+{
+  "id": "3",
+  "title": "3. Terminal Execution Approvals",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Giving an AI agent access to your file system, terminal, and browser is a double-edged sword. It enables autonomous code generation, debugging, and deployment but also opens vectors for prompt injection and data exfiltration. Antigravity addresses this through a robust permissions and policy framework."
+    },
+    {
+      "type": "h2",
+      "content": "The Three Core Agent Policies"
+    },
+    {
+      "type": "p",
+      "content": "Antigravity relies on three main policy dimensions configured in settings under the **Agent** section:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Artifact Review Policy:** Governs how artifacts (plans, diffs, results) are approved. Options are: *Always Proceed* (agent never asks for reviews, highest risk), *Agent Decides* (agent prompts for review based on task complexity), and *Request Review* (always prompts the user before executing changes - recommended).",
+        "**Terminal Command Auto Execution Policy:** Dictates whether shell commands are executed automatically. Options are: *Always Proceed* (commands execute immediately unless matching the Deny list), and *Request Review* (always asks for confirmation unless matching the Allow list).",
+        "**JavaScript Execution Policy:** Controls browser-based JS operations. Options are: *Always Proceed* (runs JS in visual scraper tests automatically), *Request Review* (stops for approval before running JS), and *Disabled* (never executes JS inside the agent browser)."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Unified Permissions System: action(target)"
+    },
+    {
+      "type": "p",
+      "content": "Every agent action is evaluated against three priority lists: **Allow** (auto-approved), **Deny** (blocked immediately), and **Ask** (pauses for manual approval). Rules follow the format `action(target)` where:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "`command(prefix)`: Matches terminal commands by prefix. E.g. `command(git)` matches `git add`, `git commit`.",
+        "`read_file(/absolute/path)`: Matches files/directories under the absolute path. No globs or `~` are supported.",
+        "`write_file(/absolute/path)`: Matches file write targets (implicitly grants `read_file` for that path).",
+        "`read_url(domain)`: Matches specific domains and subdomains (e.g. `read_url(github.com)`).",
+        "`mcp(server/tool)`: Matches specific Model Context Protocol tools (e.g. `mcp(filesystem/*)`)."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Positive vs. Negative Security Models"
+    },
+    {
+      "type": "p",
+      "content": "Using these policies, you can design two security postures:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Positive Security Model (Safe):** Set the terminal policy to *Request Review* and configure a whitelist in the Allow section (e.g. `command(ls)`, `command(git status)`). All other commands require explicit manual approval. This prevents catastrophic command executions.",
+        "**Negative Security Model (Risky):** Set the terminal policy to *Always Proceed* and configure a blacklist in the Deny section (e.g. `command(rm)`). While fast, this relies on you anticipating and pre-blocking every possible dangerous command. Use only inside a containerized sandbox."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"execution\": {\n    \"sandbox_tier\": 3,\n    \"firewall_rules\": {\n      \"outbound_network\": \"restricted\",\n      \"allowed_domains\": [\"github.com\", \"npmjs.org\"]\n    },\n    \"approvals\": {\n      \"terminal_commands\": \"manual\",\n      \"file_write\": \"auto\",\n      \"network_access\": \"manual\"\n    }\n  }\n}"
+    },
+    {
+      "type": "warning",
+      "content": "Running the agent with the --auto-approve flag on a Tier 1 native installation grants full shell control to the LLM. If the model hallucinates and runs a dangerous script, it can compromise your workstation. Always use containerized sandboxes like agy-box for auto-approve workflows."
+    },
+    {
+      "type": "h2",
+      "content": "🔐 Cryptographically Signed, Immutable Action Logs"
+    },
+    {
+      "type": "p",
+      "content": "Manual validation of agent proposals is vital, but security audits require an untamperable audit trail. If an agent executes commands or attempts to write files, Antigravity records all events into a cryptographically signed log file. Each log entry is hashed and chained to the hash of the preceding entry (forming a hash chain), and the entire block is signed using the developer's verified GPG key or a hardware security module (HSM)."
+    },
+    {
+      "type": "p",
+      "content": "This prevents either a compromised agent session or local shell bypass from editing or erasing its historical records, assuring absolute audit integrity for corporate compliance teams."
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"event_id\": 105,\n  \"timestamp\": \"2026-06-03T19:25:00Z\",\n  \"action\": \"run_command\",\n  \"command\": \"npm run build\",\n  \"previous_hash\": \"c7b139ec42b918a93...\",\n  \"hash\": \"9e742df8b321c1724...\",\n  \"signature\": \"MEYCIQCcPjW48a...\"\n}"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Verify the integrity and cryptographic signatures of the local execution log\nagy audit verify --log-file ~/.antigravity/logs/session-active.jsonl --public-key keys/developer-audit.pub"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Under what condition is it safe to use the `--auto-approve` execution flag?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Anytime the developer is too busy to click 'Approve'",
+        "B) Only when running inside an isolated sandbox container (such as agy-box) protected by a strict container firewall",
+        "C) Only when running as a superuser/root on a production host",
+        "D) Never, under any circumstances"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Auto-approve mode eliminates human confirmation prompts. It should only be active inside containerized sandboxes (like agy-box) that insulate your host system from execution anomalies."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Which configuration represents a positive security model in Antigravity?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Setting policies to 'Always Proceed' and adding 'command(rm)' to the Deny list",
+        "B) Disabling the agent completely",
+        "C) Setting policies to 'Request Review' and defining whitelisted commands in the Allow list",
+        "D) Granting the agent root access while disabling network interfaces"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** A positive security model is based on whitelisting: we start by requesting review for everything and explicitly allow only verified, safe prefixes (e.g. `command(ls)` or `command(git)`)."
+    }
+  ]
+}

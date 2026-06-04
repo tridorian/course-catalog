@@ -1,0 +1,139 @@
+{
+  "id": "2",
+  "title": "2. Streaming & Prompt Structuring",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "When executing complex workflows, waiting for a model to generate its entire response before displaying or parsing it can cause long latencies. The Google Antigravity SDK supports real-time streaming of both final response text and intermediate reasoning thoughts. Furthermore, to make these loops reliable, developers must master prompt structuring to feed contextual inputs correctly."
+    },
+    {
+      "type": "h2",
+      "content": "Streaming Text and Thoughts"
+    },
+    {
+      "type": "p",
+      "content": "For reasoning-capable models, the response contains two distinct outputs: the model's internal thinking trajectory (reasoning chain) and the actual user-facing text answer. The SDK exposes these as separate streaming interfaces, allowing you to display intermediate reasoning blocks in real time."
+    },
+    {
+      "type": "h2",
+      "content": "Asynchronous Streaming in Python"
+    },
+    {
+      "type": "p",
+      "content": "The following Python script illustrates how to instantiate an agent and stream thoughts followed by text content using asynchronous iterators."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "import asyncio\nfrom google.antigravity import Agent, LocalAgentConfig\n\nasync def run_streaming_demo():\n    # Default configuration loads gemini-3.5-flash which supports streaming\n    config = LocalAgentConfig()\n    \n    async with Agent(config) as agent:\n        response = await agent.chat(\"Explain the difference between a list and a set in Python, including time complexity.\")\n        \n        print(\"--- Agent Reasoning Thoughts ---\")\n        # Access thoughts stream (only populated for reasoning-enabled models)\n        async for thought in response.thoughts:\n            print(thought, end='', flush=True)\n        print(\"\\n\")\n        \n        print(\"--- Agent Text Response ---\")\n        # Stream the final user-facing text tokens\n        async for token in response:\n            print(token, end='', flush=True)\n        print(\"\\n\")\n\nif __name__ == '__main__':\n    asyncio.run(run_streaming_demo())"
+    },
+    {
+      "type": "h2",
+      "content": "Asynchronous Streaming in Node.js"
+    },
+    {
+      "type": "p",
+      "content": "Below is the equivalent implementation in Node.js, iterating over the thoughts stream and standard text stream using `for await...of` construct."
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';\n\nasync function runStreaming() {\n  const config = new LocalAgentConfig();\n  const agent = new Agent(config);\n  await agent.start();\n  \n  try {\n    const response = await agent.chat(\"Explain the difference between a list and a set in Python, including time complexity.\");\n    \n    console.log(\"--- Agent Reasoning Thoughts ---\");\n    for await (const thought of response.thoughts) {\n      process.stdout.write(thought);\n    }\n    console.log(\"\\n\");\n    \n    console.log(\"--- Agent Text Response ---\");\n    for await (const token of response) {\n      process.stdout.write(token);\n    }\n    console.log(\"\\n\");\n  } finally {\n    await agent.stop();\n  }\n}\n\nrunStreaming().catch(console.error);"
+    },
+    {
+      "type": "h2",
+      "content": "Structuring Agent Prompts programmatically"
+    },
+    {
+      "type": "p",
+      "content": "Standardizing prompt inputs prevents agents from wandering outside operational rules. A robust prompt design pattern separates the System Instructions (the immutable boundaries and behavior instructions) from the User Context and Target Input."
+    },
+    {
+      "type": "warning",
+      "content": "Do not mix system instructions and dynamic user-supplied context in a single concatenated string. Doing so increases the risk of prompt injection, where user content overrides instructions."
+    },
+    {
+      "type": "p",
+      "content": "Use the following programmatic structure to build prompts:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "System Instructions: Define the role (e.g. 'You are a Google Docs format inspector'), response rules, and formatting outputs.",
+        "Variables and XML tags: Encapsulate runtime inputs (like doc text, file dates) inside clearly labeled delimiters (e.g., <document_content>...</document_content>).",
+        "Task Statement: A final, clear instruction explaining exactly what processing action the agent must perform on the context."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Prompt Construction (Python)"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "import asyncio\nfrom google.antigravity import Agent, LocalAgentConfig\n\nasync def run_prompt_structuring():\n    system_instruction = (\n        \"You are a technical document editor. Your task is to clean up raw transcriptions. \"\n        \"Remove filler words, format command lines into markdown code blocks, and maintain a professional tone.\"\n    )\n    \n    # Initialize configuration with system instructions\n    config = LocalAgentConfig(system_instruction=system_instruction)\n    \n    raw_input = \"uh, so first you run python setup.py install and then, like, you execute agy --verify, you know?\"\n    \n    # Programmatic context construction using clean XML boundaries\n    prompt = (\n        \"Please rewrite the following transcription matching your instructions:\\n\\n\"\n        f\"<transcription>\\n{raw_input}\\n</transcription>\\n\\n\"\n        \"Output only the cleaned-up markdown formatting.\"\n    )\n    \n    async with Agent(config) as agent:\n        response = await agent.chat(prompt)\n        text = await response.text()\n        print(text)\n\nif __name__ == '__main__':\n    asyncio.run(run_prompt_structuring())"
+    },
+    {
+      "type": "h2",
+      "content": "Prompt Construction (Node.js)"
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "content": "import { Agent, LocalAgentConfig } from '@google/antigravity';\n\nasync function runPromptStructuring() {\n  const systemInstruction = \n    \"You are a technical document editor. Your task is to clean up raw transcriptions. \" +\n    \"Remove filler words, format command lines into markdown code blocks, and maintain a professional tone.\";\n\n  const config = new LocalAgentConfig({ systemInstruction });\n  const agent = new Agent(config);\n  await agent.start();\n  \n  const rawInput = \"uh, so first you run python setup.py install and then, like, you execute agy --verify, you know?\";\n  \n  const prompt = \n    \"Please rewrite the following transcription matching your instructions:\\n\\n\" +\n    `<transcription>\\n${rawInput}\\n</transcription>\\n\\n` +\n    \"Output only the cleaned-up markdown formatting.\";\n\n  try {\n    const response = await agent.chat(prompt);\n    console.log(await response.text());\n  } finally {\n    await agent.stop();\n  }\n}\n\nrunPromptStructuring().catch(console.error);"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What does the thoughts property on the agent response object return?"
+    },
+    {
+      "type": "p",
+      "content": "- A) A list of all historical conversations."
+    },
+    {
+      "type": "p",
+      "content": "- B) An asynchronous iterator yielding the reasoning steps generated by reasoning-enabled models."
+    },
+    {
+      "type": "p",
+      "content": "- C) An array of safety warning messages."
+    },
+    {
+      "type": "p",
+      "content": "- D) The raw HTTP response header status codes."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. The thoughts property is an async iterator yielding reasoning tokens, enabling monitoring of reasoning chains."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Why are XML tag enclosures recommended when injecting dynamic variables into agent prompts?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The model parses them as HTML markup to generate styled text."
+    },
+    {
+      "type": "p",
+      "content": "- B) They act as distinct structural boundaries, separating instruction parameters from external input values to improve instruction adherence."
+    },
+    {
+      "type": "p",
+      "content": "- C) They reduce the token count of the prompt."
+    },
+    {
+      "type": "p",
+      "content": "- D) They trigger automatic data encryption."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. XML boundaries provide clear visual separation between system directives and context variables, reducing command confusion."
+    }
+  ]
+}

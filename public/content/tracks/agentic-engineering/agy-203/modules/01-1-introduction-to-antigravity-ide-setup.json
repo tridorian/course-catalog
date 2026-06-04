@@ -1,0 +1,110 @@
+{
+  "id": "1",
+  "title": "1. Introduction to antigravity-ide & Setup",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Welcome to Interactive Workspaces"
+    },
+    {
+      "type": "p",
+      "content": "The Google Antigravity IDE (antigravity-ide) is a customized, agent-first fork of VS Code. While standard extensions treat AI assistants as secondary chat panels, antigravity-ide integrates the Gemini engine as a first-class collaborative editor. The workspace environment allows for real-time synchronous side-by-side editing, active carets, and deep filesystem integration governed by security rules. This module covers the core environment architecture, the interface layout, and how to verify your setup before launching code sessions."
+    },
+    {
+      "type": "info",
+      "content": "Design Pattern: Split-pane focus. In antigravity-ide, the primary draft document or code pane stays pinned to the left side, while the agentic chat and command sidecar panel runs on the right. This prevents context switching and allows the developer or writer to monitor the agent's keystrokes in real time."
+    },
+    {
+      "type": "h3",
+      "content": "Decoupled Architecture & UI Surfaces"
+    },
+    {
+      "type": "p",
+      "content": "Google Antigravity decouples where the engine runs (Installation Surfaces) from how the user interacts with the system (User Interfaces). The backend execution surfaces consist of Native Local Install (configured via agy-easy-install), Hardened Workstation Standalone Tarball (user-space extraction in air-gapped environments), and Containerized Sandbox (agy-box image). The decoupled user interfaces include the agy CLI (lightweight terminal actions), antigravity (Agent-First UI standalone desktop board), and antigravity-ide (Classic IDE VS Code fork)."
+    },
+    {
+      "type": "h3",
+      "content": "Workspace Architecture Comparison"
+    },
+    {
+      "type": "p",
+      "content": "Understanding the difference between standard IDE configurations and interactive workspaces is critical for productivity. Below is a comparative matrix outlining the differences:"
+    },
+    {
+      "type": "p",
+      "content": "| Feature | Standard VS Code Extensions | antigravity-ide (Classic IDE) |\n| :--- | :--- | :--- |\n| **Session Model** | Chat window operates in isolation from the editor state. | Shared editor caret and synchronized multi-file workspace state. |\n| **Caret Control** | Agent reads cursor position but cannot drive keyboard events. | Dual carets: Agent caret (green) and Human caret (blue) run in real time. |\n| **Workspace Boundaries** | Open access to host files; easy to overwrite system files. | Directory-locking sandbox boundaries configured via global rules or workspace `.agents/rules/`. |\n| **Diff Resolution** | Manual copy-paste or whole-file overrides. | Contiguous or multi-chunk inline replacements with rollback capability. |"
+    },
+    {
+      "type": "h3",
+      "content": "Editor Productivity Helpers"
+    },
+    {
+      "type": "p",
+      "content": "As you type or modify code within antigravity-ide, the agent-driven editor provides three core assisting behaviors:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Auto-complete: Context-aware suggestions appear inline as gray text; press Tab to accept.",
+        "Tab to Import: The editor detects missing dependencies or libraries and suggests importing them automatically.",
+        "Tab to Jump: Moves the cursor to the next logical location (such as block endings or argument spots) to maintain writing speed."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Keyboard Shortcuts & Panel Toggling"
+    },
+    {
+      "type": "p",
+      "content": "Efficiently navigating the IDE requires mastering keybinding shortcuts. The following table describes how to toggle panel focus and navigate between the editor and manager modes:"
+    },
+    {
+      "type": "p",
+      "content": "| Panel / Action | Keyboard Shortcut (Mac) | Keyboard Shortcut (Linux/Windows) | Functionality |\n| :--- | :--- | :--- | :--- |\n| **Toggle Agent Panel** | Cmd + L | Ctrl + L | Open or close the persistent sidecar chat panel on the right. |\n| **Toggle Terminal Panel** | Ctrl + ` | Ctrl + ` | Open or close the integrated terminal panel. |\n| **Toggle Editor & Manager** | Cmd + E | Ctrl + E | Toggle between full Editor view and full Agent Manager view. |"
+    },
+    {
+      "type": "h3",
+      "content": "Verifying Dependencies & Environment Verification"
+    },
+    {
+      "type": "p",
+      "content": "The IDE relies on Google Chrome browser and the Chrome DevTools Protocol (CDP) for rendering web views and live preview canvases. Run the following terminal commands to check that your system is correctly configured with credentials and configuration files before starting the application."
+    },
+    {
+      "type": "code",
+      "content": "# Check system application default credentials location\nls -l ~/.gcloud_config/application_default_credentials.json\n\n# Inspect the configuration file settings for the Antigravity engine\ncat ~/.config/Antigravity/settings.json 2>/dev/null || echo \"Settings file not found. Let's create one!\"\n\n# Launch antigravity-ide targeting your workspace directory\nantigravity-ide --workspace /var/home/wtg/my-antigravity-work",
+      "language": "bash"
+    },
+    {
+      "type": "h3",
+      "content": "Co-Authoring Guide: Launching a Collaborative Session"
+    },
+    {
+      "type": "p",
+      "content": "To initiate a collaborative writing session with the agent, follow these steps:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Verify your environment credentials are active by running the easy-install verification diagnostics.",
+        "Open your terminal and run the launch command specifying your workspace folder path: antigravity-ide --workspace /var/home/wtg/my-antigravity-work",
+        "Check that the sidecar chat panel on the right side of the screen displays the status 'Connected to Gemini' (toggle with Cmd+L or Ctrl+L).",
+        "Sign in to Google: When prompted, authenticate in the browser using your personal Gmail account to retrieve developer quota.",
+        "Open a markdown file and type a Heading 1 line; the agent will immediately detect the active document context."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding Quiz"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: How does the Dual Caret model function in antigravity-ide?\n\nA) It runs only when the user is disconnected from the internet.\nB) It displays a blue caret for the human developer and a green caret for the agent co-author, showing live keystrokes and typing.\nC) It forces the user to write code in a separate terminal panel.\nD) It prevents the agent from making suggestions inside the code editor.\n\n*Feedback*: The correct answer is B. antigravity-ide features a synchronized dual-caret model showing human (blue) and agent (green) caret positions synchronously to enable real-time collaboration."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: What is the keyboard shortcut to toggle between the full editor canvas and the Agent Manager (Mission Control) view?\n\nA) Cmd + I (Mac) / Ctrl + I (Windows/Linux)\nB) Cmd + L (Mac) / Ctrl + L (Windows/Linux)\nC) Cmd + E (Mac) / Ctrl + E (Windows/Linux)\nD) Cmd + Shift + B (Mac) / Ctrl + Shift + B (Windows/Linux)\n\n*Feedback*: The correct answer is C. Use Cmd + E (Mac) or Ctrl + E (Windows/Linux) to toggle between the co-authoring Editor view and the Agent Manager Mission Control dashboard."
+    }
+  ]
+}

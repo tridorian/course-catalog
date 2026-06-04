@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import ModuleRenderer from '../../components/ModuleRenderer';
 
@@ -36,5 +36,22 @@ describe('ModuleRenderer', () => {
     render(<ModuleRenderer module={moduleData} />);
     expect(screen.getByText('Resource description')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /open resource/i })).toHaveAttribute('href', moduleData.url);
+  });
+
+  it('integrates the quiz parser and renders an interactive quiz when lab has check your understanding', () => {
+    const moduleData = {
+      type: 'lab',
+      title: 'Lab with Quiz',
+      blocks: [
+        { type: 'h2', content: 'Check your understanding' },
+        { type: 'p', content: 'Question 1: What is 2+2?' },
+        { type: 'list', items: ['A) 3', 'B) 4', 'C) 5'] },
+        { type: 'p', content: 'Correct Answer: B' }
+      ]
+    };
+    const mockOnQuizPassed = vi.fn();
+    render(<ModuleRenderer module={moduleData} onQuizPassed={mockOnQuizPassed} />);
+    expect(screen.getByText('What is 2+2?')).toBeInTheDocument();
+    expect(screen.getByText('4')).toBeInTheDocument();
   });
 });

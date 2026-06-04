@@ -1,0 +1,70 @@
+{
+  "id": "4",
+  "title": "4. Wrapping Microservices & APIs",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Exposing APIs and Microservices to Agents"
+    },
+    {
+      "type": "p",
+      "content": "AI agents frequently need to query external microservices, update records in CRMs, or interact with issue-tracking databases. MCP servers can act as proxies to these systems. The server handles authentication, constructs the requests, and returns sanitized data to the agent's context window."
+    },
+    {
+      "type": "info",
+      "content": "Never send API authentication keys directly to the LLM. Keep authentication layers inside the MCP server process, drawing values from environment variables or secure vault systems."
+    },
+    {
+      "type": "h3",
+      "content": "Mapping API Endpoints to Tools"
+    },
+    {
+      "type": "p",
+      "content": "The following server maps contact information lookups from an internal CRM REST API to an MCP tool. It handles token propagation, processes API errors, and filters response payloads to optimize token usage:"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport {\n  CallToolRequestSchema,\n  ListToolsRequestSchema\n} from \"@modelcontextprotocol/sdk/types.js\";\n\n// Fetch the API Token from local environment variables\nconst CRM_API_KEY = process.env.CRM_API_KEY;\nconst CRM_API_URL = process.env.CRM_API_URL || \"https://api.crm.internal/v1\";\n\nif (!CRM_API_KEY) {\n  console.error(\"Warning: CRM_API_KEY environment variable is not defined\");\n}\n\nconst server = new Server(\n  {\n    name: \"crm-gateway-mcp\",\n    version: \"1.0.0\"\n  },\n  {\n    capabilities: {\n      tools: {}\n    }\n  }\n);\n\n// Register tools\nserver.setRequestHandler(ListToolsRequestSchema, async () => {\n  return {\n    tools: [\n      {\n        name: \"get_crm_contact\",\n        description: \"Retrieves CRM contact profile details by email address\",\n        inputSchema: {\n          type: \"object\",\n          properties: {\n            email: {\n              type: \"string\",\n              description: \"The email address of the customer contact\"\n            }\n          },\n          required: [\"email\"]\n        }\n      }\n    ]\n  };\n});\n\n// Handle execution\nserver.setRequestHandler(CallToolRequestSchema, async (request) => {\n  if (request.params.name === \"get_crm_contact\") {\n    const email = request.params.arguments?.email;\n    if (!email || typeof email !== \"string\") {\n      throw new Error(\"Email parameter is required and must be a string\");\n    }\n\n    try {\n      const response = await fetch(`${CRM_API_URL}/contacts?email=${encodeURIComponent(email)}`, {\n        headers: {\n          \"Authorization\": `Bearer ${CRM_API_KEY}`,\n          \"Accept\": \"application/json\"\n        }\n      });\n\n      if (!response.ok) {\n        throw new Error(`CRM API responded with status: ${response.status}`);\n      }\n\n      const data = await response.json();\n\n      // Filter sensitive details out to preserve context window and privacy\n      const filteredData = {\n        id: data.id,\n        name: data.name,\n        company: data.company,\n        status: data.status,\n        lastContacted: data.last_contacted\n      };\n\n      return {\n        content: [\n          {\n            type: \"text\",\n            text: JSON.stringify(filteredData)\n          }\n        ]\n      };\n    } catch (error: any) {\n      return {\n        content: [\n          {\n            type: \"text\",\n            text: `Failed to query contact. API Error: ${error.message}`\n          }\n        ],\n        isError: true\n      };\n    }\n  }\n  throw new Error(\"Tool not found\");\n});\n\nconst transport = new StdioServerTransport();\nawait server.connect(transport);"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why should an MCP server filter data before returning it in the tool response to the client?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. To prevent JSON-RPC transport syntax errors.",
+        "B. To hide API key strings that might have leaked into server memory.",
+        "C. To protect sensitive user data (privacy) and reduce context token usage by stripping out unnecessary keys.",
+        "D. To trigger the initialization capabilities handshake."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: C is correct. Filtering API payloads preserves data privacy (excluding fields like passwords or SSNs) and reduces context size, preventing prompt bloating and saving tokens."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Where should external API keys (like CRM_API_KEY) be stored when configuring a server for execution?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. Inside standard environment variables or cloud secret managers, drawn by the host process.",
+        "B. Written directly inside the agent's natural language system prompt.",
+        "C. Checked into public repositories inside the config files.",
+        "D. Encrypted within the JSON-RPC initialize payload."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: A is correct. Credentials must always live outside the source code, injected dynamically into environment variables or drawn from secret vaults during execution."
+    }
+  ]
+}

@@ -1,66 +1,79 @@
+let cache = new Map();
+
+// Allow tests to clear the cache
+export function clearCache() {
+  cache.clear();
+}
+
+async function fetchWithCache(path, errorMessagePrefix, validateFn) {
+  if (cache.has(path)) {
+    // Return a deeply cloned object to avoid reference mutations by consumers
+    const data = await cache.get(path);
+    return JSON.parse(JSON.stringify(data));
+  }
+
+  const promise = fetch(path).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`${errorMessagePrefix}: ${response.statusText}`);
+    }
+    const data = await response.json();
+    if (validateFn) {
+      validateFn(data);
+    }
+    return data;
+  }).catch(err => {
+    cache.delete(path);
+    throw err;
+  });
+
+  cache.set(path, promise);
+  // Return a cloned copy so the cache remains unmutated
+  const data = await promise;
+  return JSON.parse(JSON.stringify(data));
+}
 
 /**
  * Fetches the root catalog listing all available tracks.
  */
 export async function fetchCatalog() {
-  const path = `./content/catalog.json`;
-  const response = await fetch(path);
-  if (!response.ok) {
-    throw new Error(`Failed to load catalog: ${response.statusText}`);
-  }
-  return response.json();
+  const path = `/content/catalog.json`;
+  return fetchWithCache(path, `Failed to load catalog`);
 }
 
 /**
  * Fetches a track manifest listing all courses in a track.
  */
 export async function fetchTrackManifest(trackId) {
-  const path = `./content/tracks/${trackId}/track.json`;
-  const response = await fetch(path);
-  if (!response.ok) {
-    throw new Error(`Track not found: ${trackId}`);
-  }
-  return response.json();
+  const path = `/content/tracks/${trackId}/track.json`;
+  // Preserving exact previous error message
+  return fetchWithCache(path, `Track not found`).catch(err => {
+      if (err.message.startsWith('Track not found:')) throw err;
+      throw new Error(`Track not found: ${trackId}`);
+  });
 }
 
 /**
  * Fetches the course manifest.
  */
 export async function fetchCourseManifest(trackId, courseId) {
-  const path = `./content/tracks/${trackId}/${courseId}/manifest.json`;
-  const response = await fetch(path);
-  if (!response.ok) {
-    throw new Error(`Failed to load manifest: ${response.statusText}`);
-  }
-  const manifest = await response.json();
-  validateManifest(manifest);
-  return manifest;
+  const path = `/content/tracks/${trackId}/${courseId}/manifest.json`;
+  return fetchWithCache(path, `Failed to load manifest`, validateManifest);
 }
 
 /**
  * Fetches course metadata.
  */
 export async function fetchCourseMetadata(trackId, courseId, metadataFile) {
-  const path = `./content/tracks/${trackId}/${courseId}/${metadataFile}`;
-  const response = await fetch(path);
-  if (!response.ok) {
-    throw new Error(`Failed to load metadata: ${response.statusText}`);
-  }
-  return response.json();
+  const path = `/content/tracks/${trackId}/${courseId}/${metadataFile}`;
+  return fetchWithCache(path, `Failed to load metadata`);
 }
 
 /**
  * Fetches module content.
  */
 export async function fetchModuleContent(trackId, courseId, moduleFile) {
-  const path = `./content/tracks/${trackId}/${courseId}/${moduleFile}`;
-  const response = await fetch(path);
-  if (!response.ok) {
-    throw new Error(`Failed to load module content: ${response.statusText}`);
-  }
-  const moduleData = await response.json();
-  validateModule(moduleData);
-  return moduleData;
+  const path = `/content/tracks/${trackId}/${courseId}/${moduleFile}`;
+  return fetchWithCache(path, `Failed to load module content`, validateModule);
 }
 
 /**
@@ -83,20 +96,10 @@ function validateModule(moduleData) {
     throw new Error('Invalid module: missing title');
   }
   if (!moduleData.type) {
-    // throw new Error('Invalid module: missing type');
-    // For now, let's be lenient if it's missing type but has blocks (legacy/incomplete)
-    // Actually, no, let's default it to 'lab' if it looks like one, or just warn.
-    // Given the task is to implement schema validation, I should probably enforce it.
-    // Wait, the current content files DON'T have type.
     moduleData.type = 'lab';
   }
   // Lab modules should have blocks
   if (moduleData.type === 'lab' && !Array.isArray(moduleData.blocks)) {
     throw new Error('Invalid lab module: missing blocks array');
-  }
-  // Presentation modules should have url (or blocks if they have notes)
-  if (moduleData.type === 'presentation' && !moduleData.url) {
-    // throw new Error('Invalid presentation module: missing url');
-    // Actually, some might just have content. But let's stick to the spec.
   }
 }

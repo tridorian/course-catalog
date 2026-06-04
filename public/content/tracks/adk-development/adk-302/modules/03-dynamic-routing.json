@@ -1,0 +1,32 @@
+{
+  "id": "3",
+  "title": "3. Routing messages dynamically to specialized sub-agents",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Dynamic Multi-Agent Routing"
+    },
+    {
+      "type": "p",
+      "content": "Once the supervisor identifies the target worker agent, it formats the task payload and sends it using the A2AServer routing system."
+    },
+    {
+      "type": "h2",
+      "content": "A2A Dynamic Dispatch Code"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from google_adk.a2a import A2AServer\n\nasync def route_task(target_agent: str, task_desc: str):\n    server = A2AServer()\n    # Send request to sub-agent worker channel\n    response = await server.send_message(\n        recipient=target_agent,\n        message=task_desc\n    )\n    return response"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What protocol facilitates programmatic dispatching between agents?\n- A) HTTP OAuth2\n- B) A2A (Agent-to-Agent)\n- C) TCP Socket\n\nFeedback: Option B is correct. A2A handles multi-agent messages."
+    }
+  ]
+}

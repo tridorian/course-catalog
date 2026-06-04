@@ -1,0 +1,41 @@
+{
+  "id": "1",
+  "title": "1. Understanding JSON Schema parameter descriptions",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "JSON Schema Descriptions"
+    },
+    {
+      "type": "p",
+      "content": "The LLM backend reads function descriptions and argument descriptions to decide which tool to call. If your descriptions are ambiguous, the LLM will hallucinate arguments or pick the wrong tool."
+    },
+    {
+      "type": "h2",
+      "content": "Schema Reflection"
+    },
+    {
+      "type": "p",
+      "content": "ADK translates language docstrings and types to a JSON Schema parameter declaration:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "@tool\ndef lookup_user_id(email: str) -> str:\n    \"\"\"\n    Retrieves the unique UUID for an active database customer record.\n    \n    Args:\n        email: The raw email address, e.g., 'user@example.com'.\n    \"\"\"\n    return \"usr_8f4a12b\""
+    },
+    {
+      "type": "info",
+      "title": "Docstring Formatting",
+      "content": "ADK expects standard docstring structures (such as Google Style or Sphinx) to successfully map description fields to JSON arguments."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the main source of description information for tool arguments?\n- A) Global metadata dictionaries\n- B) Function docstrings and comments\n- C) Local system configurations\n\nFeedback: Option B is correct. Docstrings describe the tool's usage to the LLM."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Model Context Protocol (MCP) Integration",
+      "file": "modules/01-mcp-protocol.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Configuring OAuth2 for Enterprise APIs",
+      "file": "modules/02-oauth-flows.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Headless Deployment in Virtualized Sandboxes",
+      "file": "modules/03-sandbox-deployment.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Enterprise Auditing & Compliance Tracking",
+      "file": "modules/04-production-hardening.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab - Deploying a Secure Customer Service Orchestrator",
+      "file": "modules/05-lab-customer-service.json"
+    }
+  ]
+}

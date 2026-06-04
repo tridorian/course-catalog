@@ -1,0 +1,229 @@
+{
+  "course_id": "adk-102",
+  "title": "ADK-102: Advanced Configs & Multi-model Setup",
+  "description": "Dive deep into agent.yaml properties. Configure model backends, safety filters, context parameters, temperature, and tokens.",
+  "highlights": [
+    {
+      "icon": "⚙️",
+      "title": "YAML Schema",
+      "description": "Examine the nested schema fields of agent.yaml, including settings, safety filters, and execution properties."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Safety Thresholds",
+      "description": "Set block limits for hate speech, harassment, sexually explicit content, and dangerous scenarios."
+    },
+    {
+      "icon": "🤖",
+      "title": "Backend Selection",
+      "description": "Learn to alternate between models like Gemini Flash, Gemini Pro, and configure secondary fallbacks."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Exploring agent.yaml Directives and Schema Options",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Exploring agent.yaml Directives"
+        },
+        {
+          "type": "p",
+          "content": "The `agent.yaml` file is the declarative manifest for any ADK agent. It dictates behavior parameters, safety thresholds, active tool registrations, and execution limits. Understanding the layout structure is vital for enterprise control."
+        },
+        {
+          "type": "h2",
+          "content": "YAML Schema Anatomy"
+        },
+        {
+          "type": "p",
+          "content": "A standard `agent.yaml` includes metadata headers, model directives, and parameter limits. Here is a configuration snippet highlighting these properties:"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "metadata:\n  name: \"enterprise-assistant\"\n  version: \"1.2.0\"\nsettings:\n  model: \"gemini-1.5-pro\"\n  temperature: 0.2\n  max_tokens: 4096\n  concurrency_limit: 5"
+        },
+        {
+          "type": "info",
+          "title": "Configuration Validation",
+          "content": "ADK validates the YAML properties against a strict JSON Schema at runtime. Invalid or unrecognized top-level keys will raise a validation error."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Which of the following defines the operational bounds like concurrency and temperature in ADK?\n- A) The metadata section\n- B) The settings block\n- C) The tool definition list\n\nFeedback: Option B is correct. Settings dictate execution parameters."
+        }
+      ]
+    },
+    {
+      "title": "2. Configuring Safety Filters and Block Thresholds",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Configuring Safety Filters"
+        },
+        {
+          "type": "p",
+          "content": "Enterprise agents must operate within ethical and security guidelines. ADK safety directives map directly to LLM content moderation categories, allowing you to reject malicious outputs."
+        },
+        {
+          "type": "h2",
+          "content": "Safety Block Configuration"
+        },
+        {
+          "type": "p",
+          "content": "You specify safety thresholds for four categories: Harassment, Hate Speech, Sexually Explicit, and Dangerous Content. Standard threshold parameters are `BLOCK_NONE`, `BLOCK_LOW_AND_ABOVE`, `BLOCK_MEDIUM_AND_ABOVE`, and `BLOCK_HIGH_AND_ABOVE`."
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "safety_settings:\n  - category: \"HATE_SPEECH\"\n    threshold: \"BLOCK_LOW_AND_ABOVE\"\n  - category: \"HARASSMENT\"\n    threshold: \"BLOCK_MEDIUM_AND_ABOVE\"\n  - category: \"DANGEROUS_CONTENT\"\n    threshold: \"BLOCK_LOW_AND_ABOVE\""
+        },
+        {
+          "type": "warning",
+          "title": "Over-blocking Risks",
+          "content": "Setting thresholds to BLOCK_LOW_AND_ABOVE might cause false positives, blocking benign queries that mention industry jargon. Balance security and usability."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What category controls queries suggesting self-harm or unsafe physical acts?\n- A) HARASSMENT\n- B) DANGEROUS_CONTENT\n- C) HATE_SPEECH\n\nFeedback: Option B is correct. DANGEROUS_CONTENT includes risk-prone physical actions."
+        }
+      ]
+    },
+    {
+      "title": "3. Temperature, Top-k, Top-p, and Max Tokens",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Model Tuning Parameters"
+        },
+        {
+          "type": "p",
+          "content": "Hyperparameters dictate the diversity and randomness of the model's text generation loops. Small adjustments drastically shift response formats."
+        },
+        {
+          "type": "grid",
+          "items": [
+            {
+              "icon": "Cpu",
+              "title": "Temperature",
+              "content": "Controls response randomness. 0.0 is deterministic; 1.0 is creative.",
+              "border": "#4ade80"
+            },
+            {
+              "icon": "Activity",
+              "title": "Top-P",
+              "content": "Nucleus sampling threshold, selecting tokens from a cumulative probability pool.",
+              "border": "#3b82f6"
+            },
+            {
+              "icon": "Sliders",
+              "title": "Top-K",
+              "content": "Selects next token from top K most probable options.",
+              "border": "#ef4444"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Tuning YAML Setup"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "settings:\n  model: \"gemini-1.5-flash\"\n  temperature: 0.1\n  top_p: 0.95\n  top_k: 40\n  max_output_tokens: 1024"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: For code generation, what is the recommended temperature range?\n- A) High (0.8 - 1.0)\n- B) Low (0.0 - 0.2)\n- C) Variable (0.5 - 0.7)\n\nFeedback: Option B is correct. Code requires precise syntax, making low temperature settings optimal."
+        }
+      ]
+    },
+    {
+      "title": "4. Configuring Multi-model Backends",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Multi-Model Backends"
+        },
+        {
+          "type": "p",
+          "content": "ADK allows defining secondary fallback models. If the primary model encounters rate limits (HTTP 429) or latency anomalies, the runner shifts tasks to the secondary provider."
+        },
+        {
+          "type": "h2",
+          "content": "Fallback Directives"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "settings:\n  model: \"gemini-1.5-pro\"\n  fallback_models:\n    - \"gemini-1.5-flash\"\n    - \"claude-3-5-sonnet\""
+        },
+        {
+          "type": "info",
+          "title": "Key Provisioning",
+          "content": "Fallback models require matching API keys in the environment variables (e.g. GEMINI_API_KEY, ANTHROPIC_API_KEY) to authorize requests dynamically."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What happens if the primary model throws a quota exceeded error and no fallbacks are configured?\n- A) The runner sleeps indefinitely.\n- B) The agent execution terminates immediately with a runtime error.\n- C) The agent uses local static fallback templates.\n\nFeedback: Option B is correct. Without fallback routing, standard exceptions fail the execution."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab - Multi-Model Configuration Switcher",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Multi-Model Configuration Switcher"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will build a Python program that dynamically generates `agent.yaml` files depending on environment variables (e.g., swapping to flash for testing, pro for production)."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the Python Switcher"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import yaml\nimport os\n\ndef generate_config(env='development'):\n    config = {\n        'metadata': {\n            'name': 'dynamic-agent',\n            'version': '1.0.0'\n        },\n        'settings': {\n            'model': 'gemini-1.5-flash' if env == 'development' else 'gemini-1.5-pro',\n            'temperature': 0.1 if env == 'development' else 0.4,\n            'max_tokens': 2048\n        }\n    }\n    \n    with open('agent.yaml', 'w') as f:\n        yaml.safe_dump(config, f, default_flow_style=False)\n    print(f\"Created config for {env} environment.\")\n\nif __name__ == '__main__':\n    env_mode = os.getenv('AGENT_ENV', 'development')\n    generate_config(env_mode)"
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Run the switcher and verify"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "export AGENT_ENV=production\npython switcher.py\ncat agent.yaml"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why is separating configurations dynamically useful in CI/CD chains?\n- A) It speeds up code compiler loops.\n- B) It allows testing with low-cost model backends in staging and high-accuracy models in prod.\n- C) It removes the need for OAuth credentials.\n\nFeedback: Option B is correct. Dynamic configurations save costs and optimize testing."
+        }
+      ]
+    }
+  ]
+}

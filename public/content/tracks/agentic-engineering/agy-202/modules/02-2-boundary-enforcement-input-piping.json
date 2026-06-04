@@ -1,0 +1,128 @@
+{
+  "id": "2",
+  "title": "2. Boundary Enforcement & Input Piping",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [2. Boundary Enforcement & Input Piping]"
+    },
+    {
+      "type": "h2",
+      "content": "Workspace Boundary Locking & Security Controls"
+    },
+    {
+      "type": "p",
+      "content": "To prevent autonomous agents from performing unauthorized filesystem actions, the agy CLI implements a dual-layered security architecture: local workspace boundary locking (via `.gemini.md`) and folder trust policies (via `settings.json`). In this module, you will learn how to lock directories, configure trusted workspaces, manage permissions in headless CI pipelines, and pipe terminal outputs directly into agent execution context streams."
+    },
+    {
+      "type": "h3",
+      "content": "Local Directory Boundaries (.gemini.md)"
+    },
+    {
+      "type": "p",
+      "content": "The agy execution engine reads a local `.gemini.md` configuration file placed in the root of the workspace directory. This file dictates the absolute read, write, and execute permissions granted to the agent. If the agent attempts to read a file outside this directory (such as `/etc/passwd` or `~/.ssh/id_rsa`), the CLI's filesystem broker intercepts the request and blocks it immediately to prevent directory traversal attacks."
+    },
+    {
+      "type": "warning",
+      "content": "Security Boundary Warning: Run agy verify in any new workspace directory to confirm that file boundaries are active. If `.gemini.md` is missing, the binary client will enforce strict read-only access and block any filesystem modifications unless running with the --sandbox flag or in a containerized environment (agy-box)."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Create a secure playground directory\nmkdir -p /var/home/wtg/Repos/secure-sandbox\ncd /var/home/wtg/Repos/secure-sandbox\n\n# Establish explicit write and read permissions for the agent\necho \"permissions:\n  read-only: [./config/]\n  read-write: [./src/, ./tests/]\n  blocked: [/etc/, ~/.ssh/]\" > .gemini.md\n\n# Run boundary verification\nagy verify"
+    },
+    {
+      "type": "h3",
+      "content": "The Folder Trust Security Model"
+    },
+    {
+      "type": "p",
+      "content": "To prevent untrusted code repositories from executing arbitrary tools, you can enable Folder Trust in your global `~/.gemini/antigravity-cli/settings.json` configuration:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"security\": {\n    \"folderTrust\": {\n      \"enabled\": true\n    }\n  }\n}"
+    },
+    {
+      "type": "p",
+      "content": "When Folder Trust is active, opening a directory for the first time triggers a **Discovery Phase**. The CLI scans the workspace folder for:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Custom Commands: Reusable task definitions written in .toml files.",
+        "Model Context Protocol (MCP) Servers: External data and tool integrations.",
+        "System Hooks: Scripts that intercept and override execution loops.",
+        "Setting Overrides: Project-specific workspace configs.",
+        "Security Warnings & Errors: Warnings about bypassed sandboxes or invalid settings JSONs."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "If you mark a folder as **untrusted** (or run in an untrusted directory), the CLI runs in a restricted **Safe Mode** where workspace settings are ignored, environment variables from `.env` are blocked, extension operations are locked, auto-accept is disabled, and MCP servers are disconnected."
+    },
+    {
+      "type": "info",
+      "content": "Managing Folder Trust: You can change the trust level of the current directory at any time by running the /permissions command inside the REPL. This updates your rules stored centrally in `~/.gemini/trustedFolders.json`."
+    },
+    {
+      "type": "h3",
+      "content": "Bypassing Trust Checks in Headless Pipelines"
+    },
+    {
+      "type": "p",
+      "content": "In automated environments like GitHub Actions or GitLab CI, there is no interactive TTY to display the trust dialog. If Folder Trust is enabled globally and an untrusted folder is executed, the CLI throws a `FatalUntrustedWorkspaceError` and aborts."
+    },
+    {
+      "type": "p",
+      "content": "To proceed in these environments, you can bypass the trust check using one of the following mechanisms:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Command-Line Flag: Execute commands using the --skip-trust option.",
+        "Environment Variable: Set the environment variable GEMINI_CLI_TRUST_WORKSPACE=true before running agy."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Run agy safely in non-interactive pipeline using environment variable bypass\nexport GEMINI_CLI_TRUST_WORKSPACE=true\nagy -p \"Scan codebase for linting errors\"\n\n# Alternatively, bypass using the skip-trust flag\nagy --skip-trust -p \"Audit the dependency package trees\""
+    },
+    {
+      "type": "h3",
+      "content": "Piping Terminal Outputs to agent Contexts"
+    },
+    {
+      "type": "p",
+      "content": "Because agy reads from standard input (stdin) and prints to standard output (stdout), it integrates seamlessly into Unix shell pipes. This allows you to pass directory structures, log details, or code diffs directly into the agent context."
+    },
+    {
+      "type": "list",
+      "items": [
+        "Piping Directory Trees: Stream output from find or tree commands to let the agent evaluate project layouts.",
+        "Piping Log Content: Pipe log streams to audit system errors or check warnings.",
+        "Piping Code Diffs: Pipe git diff outputs to automate code reviews."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Pipe directory structure to create a module map\ntree -L 2 /var/home/wtg/Repos/secure-sandbox | agy -p \"Write a folder overview summarizing this tree structure:\"\n\n# Pipe a raw error log to isolate the root failure\ncat logs/error.log | agy -p \"Extract the stack trace error message and explain the cause.\"\n\n# Pipe git differences to write a conventional commit message\ngit diff | agy -p \"Write a short Git commit message summarizing these code changes.\""
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: What happens when Folder Trust is active and a folder is marked as untrusted by the user?\n\nA) The agy CLI client refuses to open the directory and throws an authentication error.\nB) The client runs in restricted Safe Mode, ignoring local configurations, env files, and MCP servers.\nC) The CLI deletes all .env and settings files in that folder.\nD) The client runs only inside the Docker container sandbox.\n\n*Feedback*: The correct answer is B. Untrusted folders run in Safe Mode, disabling local settings, env variables, custom commands, and MCP servers to protect your workstation."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: How can you bypass folder trust dialog warnings when executing agy commands in a headless CI/CD pipeline script?\n\nA) Run the command with the --dangerously-skip-permissions flag.\nB) Set the environment variable `GEMINI_CLI_TRUST_WORKSPACE=true` or use the `--skip-trust` flag.\nC) Initialize the folder using the `agy install` subcommand.\nD) Run the script from the root user directory.\n\n*Feedback*: The correct answer is B. Setting `GEMINI_CLI_TRUST_WORKSPACE=true` or using the `--skip-trust` flag trusts the folder for the active session, preventing headless execution failures."
+    }
+  ]
+}

@@ -1,0 +1,637 @@
+{
+  "course_id": "agy-101",
+  "title": "AGY-101: Secure Agentic Development: Installation & Setup",
+  "description": "Welcome to the foundational course for Google Antigravity. This L100 module covers the secure installation, setup, and initialization of the Antigravity developer platform. Learners will understand installation surface tiers (Tiers 1, 2, and 3), navigate the initial launch configuration (setup flows, editor profiles), master execution policies (terminal execution, review, and JavaScript policies), select appropriate agent autonomy modes (secure mode vs review-driven development), and verify their environment through workspace testing.",
+  "highlights": [
+    {
+      "icon": "⚙️",
+      "title": "Multi-Tier Installation",
+      "description": "Select between Native Installer (Tier 1), Standalone Tarball (Tier 2), or Containerized OCI Sandbox (Tier 3) based on corporate IT security constraints."
+    },
+    {
+      "icon": "🔒",
+      "title": "Autonomy & Safety Policies",
+      "description": "Establish workspace security boundaries using terminal execution, artifact review, and JavaScript run policies."
+    },
+    {
+      "icon": "🔬",
+      "title": "Workspace Verification",
+      "description": "Validate the active toolchain and run permissions tests with an autonomous agent verifying environment read, write, and execution capabilities."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Slide Deck Outline - Course Introduction",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Course Introduction: Secure Agentic Development"
+        },
+        {
+          "type": "p",
+          "content": "Instructor Note: Use this outline to present the core concepts of Google Antigravity before beginning the hands-on labs. Emphasize that agent-first development is a paradigm shift from traditional auto-complete coding assistants."
+        },
+        {
+          "type": "h2",
+          "content": "Slide 1: Welcome to Secure Agentic Development (L100)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Visual:** Antigravity branding showing the transition from IDE extensions to autonomous execution environments.",
+            "**Talking Track:** \"Welcome to AGY-101: Setup & Initialization. Today, we establish the foundation for your agentic development environment. We are focused on installing, securing, and validating the Antigravity engine under strict enterprise policies.\""
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Slide 2: Evolving to the Agent-First Era"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Visual:** Diagram contrasting traditional autocomplete (which suggests a line of code) with Antigravity agents (which accept a high-level goal, plan a path, write files, run tests, and check browser behavior).",
+            "**Talking Track:** \"Antigravity is not just a coding assistant. It is a Mission Control for managing autonomous agents. The AI behaves as an active developer that plans, writes, executes, and validates code under user-defined guidelines.\""
+          ]
+        },
+        {
+          "type": "info",
+          "content": "An agent-first platform presupposes that the AI is an autonomous actor. Instead of a linear chatbot where you wait for generation, Antigravity lets you dispatch multiple agents asynchronously to handle different workspace tasks simultaneously."
+        },
+        {
+          "type": "h2",
+          "content": "Slide 3: Version Constraints & Parity"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Visual:** Warning banner highlighting the strict version boundary between Antigravity v1.x and v2.x.",
+            "**Talking Track:** \"We have a critical constraint: you must use Antigravity version v1.23.2 or lower. Version v2.0.0 and higher represent a different product model and are incompatible with the policies, local execution targets, and browser subagents configured in this course.\""
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Always check your version before installing. Standard workstation packages that automatically update may push you to v2.0.0+, breaking your workspace boundaries and local verification toolchains."
+        },
+        {
+          "type": "h2",
+          "content": "Slide 4: The Three Installation Surfaces (Tiers)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Tier 1: Native Local Workstation:** Standard developer workstations using the interactive `agy-easy-install` helper script (v0.2.12+) to configure dependencies.",
+            "**Tier 2: Hardened Workstation Flow:** A manual local Standalone Tarball extraction method tailored for highly secure, air-gapped corporate environments (such as internal Linux Cloudtops) where curl-to-bash execution is blocked.",
+            "**Tier 3: Containerized OCI Sandbox (agy-box):** Running the entire toolchain inside an OCI container (Docker, Podman, Distrobox) for maximum host isolation and risk mitigation."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Slide 5: Autonomy Profiles and Policies"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Terminal Execution Policy:** Controls whether the agent can execute commands in your terminal (Always proceed vs Request review).",
+            "**Review Policy:** Determines when the agent pauses to request approval for plans and artifacts (Always proceed, Agent decides, or Request review).",
+            "**JavaScript Execution Policy:** Restricts browser agent JavaScript capabilities (Always proceed, Request review, or Disabled).",
+            "**Profiles:** Secure Mode (highest restriction), Review-Driven Development (balanced/recommended), and Agent-Driven Development (maximum autonomy)."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why must learners ensure their Antigravity version is v1.23.2 or lower for this course?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Version v1.23.2 is the only version that supports Python and Node.js dependencies."
+        },
+        {
+          "type": "p",
+          "content": "- B) Newer versions (v2.0.0+) introduce a different architecture, interface model, and set of capabilities that are incompatible with this curriculum's exercises."
+        },
+        {
+          "type": "p",
+          "content": "- C) v1.23.2 is a lightweight command-line-only tool while v2.0.0+ is a graphical-only application."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Antigravity v1.23.2 or lower contains the specific local execution agent, browser subagent, and workspace policies taught in this curriculum."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which installation tier is appropriate for highly secure, air-gapped corporate workstations where interactive online scripts are blocked?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Tier 1: Native Local Workstation"
+        },
+        {
+          "type": "p",
+          "content": "- B) Tier 2: Hardened Workstation Flow (Standalone Tarball)"
+        },
+        {
+          "type": "p",
+          "content": "- C) Tier 3: Containerized Sandbox (agy-box)"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Tier 2 uses manual standalone tarball extraction to bypass script execution and download blocks in restricted/air-gapped environments."
+        }
+      ]
+    },
+    {
+      "title": "2. Prerequisites & Environment Provisioning",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Prerequisites & Environment Provisioning"
+        },
+        {
+          "type": "p",
+          "content": "Before launching an autonomous agent in your workspace, you must ensure your system meets all environment prerequisites and has access to the correct accounts. Bypassing external blocks requires setting up standard system toolchains first."
+        },
+        {
+          "type": "h2",
+          "content": "📝 2.1 Course Materials & Guides"
+        },
+        {
+          "type": "list",
+          "items": [
+            "[AGY Easy Install Interactive Guide](https://wtg-codes.github.io/agy-easy-install/)",
+            "[AGY Easy Install GitHub Repository](https://github.com/wtg-codes/agy-easy-install)",
+            "[Corporate Workstation Override Guide](https://docs.google.com/document/d/1S49zfOm8nSb1k1TvSUM3zvumClMExCqcHE9XArbXWec/edit?usp=sharing)"
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "⚙️ 2.2 Environment & Package Dependencies"
+        },
+        {
+          "type": "p",
+          "content": "Antigravity requires several core languages and tools to compile and execute local subagent scripts. Verify that these are present on your machine before beginning the installation."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Python 3.10+:** Required for running local code generation agents, code refactoring tools, and executing pytest test suites.",
+            "**Node.js 18+:** Required for running the package runners (npx, npm) and driving workspace automation targets.",
+            "**Chrome Web Browser:** Mandatory for running the visual browser subagent, which interacts with pages, captures screenshots, and records sessions.",
+            "**cURL & Tar:** Required for retrieving and extracting the official binaries from secure locations."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "🔑 2.3 Account Entitlements"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Personal Gmail Account:** A personal, non-google.com Gmail account is required. The Antigravity preview uses this account to grant you access to Google's premier models (Gemini 3 Pro) with a free testing quota.",
+            "**Target Workstation:** A Linux workstation or Google-internal Cloudtop VM is recommended for this setup. Ensure your terminal has sudo access to extract files if installing globally, or verify that your local path (`~/.local/bin`) is writeable."
+          ]
+        },
+        {
+          "type": "info",
+          "content": "If you use a corporate Google profile in your default browser, the authentication flow might default to it and fail. Be prepared to copy the authentication link and run it in an Incognito browser window or separate profile signed in with your personal Gmail account."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What type of Google Account is required to access the free preview quota and premier models in Antigravity v1.23.2?"
+        },
+        {
+          "type": "p",
+          "content": "- A) A corporate google.com workspace account."
+        },
+        {
+          "type": "p",
+          "content": "- B) A personal, non-google.com Gmail account."
+        },
+        {
+          "type": "p",
+          "content": "- C) A GCP Service Account key."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Currently, the preview mode of Antigravity is accessible using personal Gmail accounts, which receive a free quota for testing premier models."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Why is Google Chrome required as a prerequisite for using Antigravity's browser tools?"
+        },
+        {
+          "type": "p",
+          "content": "- A) The browser subagent uses a specialized Chrome extension to control page interactions, capture DOM state, and record video playback."
+        },
+        {
+          "type": "p",
+          "content": "- B) Antigravity is a web-only application that cannot run on other browsers."
+        },
+        {
+          "type": "p",
+          "content": "- C) The Antigravity CLI compiles all of its code into Chrome V8 bytecode."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option A is correct. The browser subagent requires Chrome to deploy the Antigravity extension, which allows it to scroll, click, type, and record sessions."
+        }
+      ]
+    },
+    {
+      "title": "3. Lab - The Hardened Install (Tarball Method)",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab 1: The Hardened Install"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will deploy the Antigravity v1.23.2 binary on your system. Depending on your corporate security limits, you can choose between Tier 1 (Interactive Scripted) or Tier 2 (Manual Hardened Tarball extraction)."
+        },
+        {
+          "type": "h2",
+          "content": "🚀 Option A: Tier 1 - Verified script install (Standard Workstations)"
+        },
+        {
+          "type": "p",
+          "content": "For workstations with direct outbound internet access, you must avoid executing remote scripts via `curl | bash` without inspection. Instead, download the install script, verify its checksum and signature against a known hash, and run it:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Download the script and signature/checksum files\ncurl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agy-easy-install/main/antigravity-manager.sh\" -o antigravity-manager.sh\ncurl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agy-easy-install/main/antigravity-manager.sh.sha256\" -o antigravity-manager.sh.sha256\n\n# Verify the SHA-256 checksum\nsha256sum --check --status antigravity-manager.sh.sha256\n\n# Verify the GPG signature\ngpg --verify antigravity-manager.sh.sig antigravity-manager.sh\n\n# Once verified, execute the installer\nbash antigravity-manager.sh"
+        },
+        {
+          "type": "info",
+          "content": "Verifying scripts ensures that code has not been tampered with in transit. The interactive helper script auto-detects dependencies and presents an installation menu."
+        },
+        {
+          "type": "h2",
+          "content": "🔒 Option B: Tier 2 - Hardened manual tarball install (Restricted/Cloudtop VM)"
+        },
+        {
+          "type": "p",
+          "content": "For air-gapped VMs or systems where external curl-to-bash execution is blocked, download and cryptographically verify the official package before manually extracting it. Run this secure sequence:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create a dedicated application directory\nmkdir -p ~/.local/antigravity\n\n# Download the package, checksum, and GPG signature\nwget https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz -O /tmp/antigravity.tar.gz\nwget https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz.sha256 -O /tmp/antigravity.tar.gz.sha256\nwget https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz.sig -O /tmp/antigravity.tar.gz.sig\n\n# Verify the checksum integrity\necho \"$(cat /tmp/antigravity.tar.gz.sha256)  /tmp/antigravity.tar.gz\" | sha256sum --check\n\n# Verify the cryptographic signature\ngpg --keyserver hkps://keys.openpgp.org --recv-keys 0xKEYID\ngpg --verify /tmp/antigravity.tar.gz.sig /tmp/antigravity.tar.gz\n\n# Extract to the application folder\ntar -xzf /tmp/antigravity.tar.gz -C ~/.local/antigravity\n\n# Create a symlink to user binary folder\nmkdir -p ~/.local/bin\nln -sf ~/.local/antigravity/bin/antigravity ~/.local/bin/antigravity\nln -sf ~/.local/antigravity/bin/agy ~/.local/bin/agy"
+        },
+        {
+          "type": "warning",
+          "content": "Corporate firewall proxy configuration: If your wget command fails with a connection timeout, verify that you have exported your corporate proxy variables (`http_proxy` and `https_proxy`) in your active shell before running the download."
+        },
+        {
+          "type": "h2",
+          "content": "🛠️ Option C: Tier 3 - Containerized Sandbox (agy-box)"
+        },
+        {
+          "type": "p",
+          "content": "To run in a completely isolated sandboxed environment with Docker or Podman, deploy using the official container image. This isolates agent commands entirely from your host workstation files:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Pull the container image\ndocker pull github.com/wtg-codes/agy-box:v1.23.2\n\n# Run the sandboxed workspace, mounting your local project folder\ndocker run -it -v $(pwd):/workspace github.com/wtg-codes/agy-box:v1.23.2 /bin/bash"
+        },
+        {
+          "type": "h2",
+          "content": "❄️ Option D: Tier 4 - Declarative, Auditable, and Reversible Setups (Nix / Ansible)"
+        },
+        {
+          "type": "p",
+          "content": "To eliminate manual setup errors and guarantee auditable rollbacks when dependency updates break local packages, use declarative configuration management systems."
+        },
+        {
+          "type": "h3",
+          "content": "Method 1: Nix Flake Environment"
+        },
+        {
+          "type": "p",
+          "content": "Pin local workstation toolchains (Python, Node.js, Chrome) to exact versions. Nix allows atomic rollbacks to a previous system generation if any change breaks execution."
+        },
+        {
+          "type": "code",
+          "language": "nix",
+          "content": "# flake.nix\n{\n  description = \"Secure Antigravity Dev Environment\";\n  inputs.nixpkgs.url = \"github:NixOS/nixpkgs/nixos-23.11\";\n\n  outputs = { self, nixpkgs }:\n    let\n      system = \"x86_64-linux\";\n      pkgs = nixpkgs.legacyPackages.${system};\n    in {\n      devShells.${system}.default = pkgs.mkShell {\n        buildInputs = [\n          pkgs.python310\n          pkgs.nodejs-18_x\n          pkgs.google-chrome\n        ];\n        shellHook = ''\n          export PATH=$PATH:~/.local/bin\n          echo \"Declarative Antigravity environment loaded via Nix.\"\n        '';\n      };\n    };\n}"
+        },
+        {
+          "type": "h3",
+          "content": "Method 2: Ansible Playbook Setup"
+        },
+        {
+          "type": "p",
+          "content": "Deploy the setup using an Ansible task playbook. Ansible enforces cryptographic verification of downloaded packages and automates local directory permission locks."
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "content": "- name: Provision Antigravity Workstation\n  hosts: localhost\n  connection: local\n  tasks:\n    - name: Download verified tarball\n      get_url:\n        url: https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz\n        dest: /tmp/antigravity.tar.gz\n        checksum: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n    - name: Create secure directory structure\n      file:\n        path: \"{{ item }}\"\n        state: directory\n        mode: '0700'\n      loop:\n        - \"{{ ansible_env.HOME }}/.local/antigravity\"\n        - \"{{ ansible_env.HOME }}/.local/bin\"\n\n    - name: Extract package\n      unarchive:\n        src: /tmp/antigravity.tar.gz\n        dest: \"{{ ansible_env.HOME }}/.local/antigravity\"\n        remote_src: yes"
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary benefit of the Tier 2 Standalone Tarball installation method?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It runs twice as fast as the Tier 1 native installation."
+        },
+        {
+          "type": "p",
+          "content": "- B) It allows installation on air-gapped, highly restricted corporate workstations without executing external installer shell scripts that might be blocked by IT."
+        },
+        {
+          "type": "p",
+          "content": "- C) It automatically installs the containerized Docker sandbox."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. The Standalone Tarball method is a manual extraction process, meaning it bypasses network-dependent installer scripts and respects air-gapped security policies."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Where are the user binaries typically placed after a successful manual extraction or script install to ensure they can be executed without root permissions?"
+        },
+        {
+          "type": "p",
+          "content": "- A) `/usr/bin/`"
+        },
+        {
+          "type": "p",
+          "content": "- B) `/etc/antigravity/`"
+        },
+        {
+          "type": "p",
+          "content": "- C) `~/.local/bin/`"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option C is correct. Local user binaries are best stored in `~/.local/bin` to avoid requiring administrative (`sudo`) privileges for system folders."
+        }
+      ]
+    },
+    {
+      "title": "4. Lab - Initializing Mission Control",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab 2: Initializing Mission Control"
+        },
+        {
+          "type": "p",
+          "content": "Now that the binaries are installed, you will configure Antigravity's safety policies, log in with your account, set up a secure local workspace, and verify agent permissions."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Launch and Configure Safety Policies"
+        },
+        {
+          "type": "p",
+          "content": "Start the Antigravity application. During the first launch wizard, configure the initial setup options:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Choose setup flow:** Select a fresh start (bypassing imports from other IDEs).",
+            "**Choose theme:** Select your preferred visual style (e.g. Dark Theme).",
+            "**Configure Agent Policies:** Choose how the agent interacts with your terminal, browser, and files."
+          ]
+        },
+        {
+          "type": "info",
+          "content": "**Policy Breakdown:**\n1. **Terminal Execution Policy:** Determines if the agent can execute commands (Always proceed vs Request review).\n2. **Review Policy:** Dictates when you must approve plans and implementation details (Always proceed, Agent decides, or Request review).\n3. **JavaScript Execution Policy:** Controls if the browser subagent can execute custom JS on active pages (Always proceed, Request review, or Disabled)."
+        },
+        {
+          "type": "p",
+          "content": "Select the **Review-driven development (recommended)** profile. This sets a secure balance, allowing the agent to formulate plans but requiring manual approval before executing terminal operations or modifying codebase files."
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Authenticate with Google"
+        },
+        {
+          "type": "p",
+          "content": "When prompted, sign in with your personal Gmail account. This step authorizes the application and sets up your token bucket for the Gemini 3 Pro model preview."
+        },
+        {
+          "type": "warning",
+          "content": "If the sign-in redirect fails or opens your corporate browser profile, copy the authentication URL, open an Incognito browser window, sign in with your personal Gmail, and complete the authorization challenge there."
+        },
+        {
+          "type": "h2",
+          "content": "Step 3: Create and Open your Workspace"
+        },
+        {
+          "type": "p",
+          "content": "Open a terminal on your host workstation and initialize a clean directory where the agent can build and test. **Do not use your home directory or root folders as a workspace boundary.**"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create a dedicated project directory\nmkdir -p ~/my-agy-workspace\ncd ~/my-agy-workspace"
+        },
+        {
+          "type": "p",
+          "content": "In the Antigravity GUI, click **Open Folder** on the main dashboard (or select File > Open Folder) and navigate to `~/my-agy-workspace`."
+        },
+        {
+          "type": "h2",
+          "content": "Step 4: Verify the Toolchain & Fix Path Scope"
+        },
+        {
+          "type": "p",
+          "content": "Verify that your runtime engine and Antigravity CLI are correctly mapped. Open the integrated terminal within Antigravity (Ctrl+` or Cmd+`) and execute:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "python3 --version\nagy --version"
+        },
+        {
+          "type": "warning",
+          "content": "**Troubleshooting PATH issues:** If the terminal returns `command not found: agy`, the terminal environment hasn't sourced your local path correctly. Fix this by ensuring your login profile sources your shell configuration file:\n\n1. Open or create `~/.bash_profile` in the editor.\n2. Add the following command:\n   `source ~/.bashrc`\n3. Save the file and restart Antigravity."
+        },
+        {
+          "type": "h2",
+          "content": "Step 5: Execute your First Agent Permissions Test"
+        },
+        {
+          "type": "p",
+          "content": "Open the **Agent Panel** in Antigravity (Cmd+L or click the agent icon) and issue a basic verification command to test read, write, and terminal execute privileges:"
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "content": "Create a file named `hello_agy.py` that prints \"Antigravity environment is fully secured and operational!\". Run the file in the terminal and verify the output."
+        },
+        {
+          "type": "p",
+          "content": "**Success Verification:** Watch the agent build an implementation plan, create the file, run it in the terminal, and output the printed confirmation. Click Approve on the plan and the command execution prompt to allow the agent to proceed."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the main characteristic of the \"Review-driven development\" profile recommended during initial setup?"
+        },
+        {
+          "type": "p",
+          "content": "- A) The agent is blocked from writing any files to disk."
+        },
+        {
+          "type": "p",
+          "content": "- B) The agent will frequently pause and prompt the user for approval on created plans and execution steps, balancing safety and automation."
+        },
+        {
+          "type": "p",
+          "content": "- C) The agent will operate with full autonomy without requiring any human intervention."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Review-driven development configures policies to prompt the developer for approvals at key junctions (like execution of terminal commands and artifact creation)."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: If commands like `agy` or `npx` return \"Command not found\" inside the Antigravity integrated terminal, what is the recommended fix?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Reinstall your operating system from scratch."
+        },
+        {
+          "type": "p",
+          "content": "- B) Force execution of the commands using the root shell."
+        },
+        {
+          "type": "p",
+          "content": "- C) Add `source ~/.bashrc` to your `~/.bash_profile` file and restart the application to ensure shell environment variables are loaded."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option C is correct. Antigravity's integrated terminal loads as a login shell on some platforms; sourcing `~/.bashrc` ensures user-specific path modifications (such as `~/.local/bin`) are correctly inherited."
+        }
+      ]
+    },
+    {
+      "title": "5. Google Doc Outline - Wrap Up & Next Steps",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Post-Session Wrap Up & Next Steps"
+        },
+        {
+          "type": "p",
+          "content": "Instructor Note: Use this outline to create the follow-up email, Google Doc, or announcement to be distributed to learners after they complete the setup session. Ensure all paths and links match the workspace settings."
+        },
+        {
+          "type": "h2",
+          "content": "🏆 5.1 Congratulations & Mission Accomplished"
+        },
+        {
+          "type": "p",
+          "content": "Congratulations! You have successfully mastered the L100 installation of Google Antigravity in a secure development environment. You have navigated corporate IT boundaries, selected the correct installation surface tier, established execution and review safety policies, and verified your agent's execution abilities. 'No install, no magic' – and you have just unlocked the magic."
+        },
+        {
+          "type": "h2",
+          "content": "📋 5.2 Verification Checklist"
+        },
+        {
+          "type": "p",
+          "content": "Before proceeding to the next courses in the track, verify that your environment passes all of the following checks:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Workstation Check:** Linux workspace or Cloudtop VM is active and writeable.",
+            "**Version Check:** Running Antigravity version v1.23.2 or lower.",
+            "**Entitlement Check:** Signed into the Mission Control dashboard using a personal Gmail account.",
+            "**Binary Check:** Sourced local path correctly, allowing `agy --version` to run in the terminal.",
+            "**Agent Check:** Verified read, write, and execute permissions by running the `hello_agy.py` script challenge."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "🛣️ 5.3 Learning Track Progression"
+        },
+        {
+          "type": "p",
+          "content": "Your path to becoming a certified Agentic Engineer continues with the following courses:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**AGY-102: The UI Landscape & Selection (L100):** A comparative tour of the three major interfaces: the visual board (antigravity), the CLI (agy), and the workspace editor (antigravity-ide).",
+            "**AGY-103: Workspace Design & File Security (L100):** Defining workspace boundaries, directory locking, and building folder firewalls.",
+            "**AGY-104: Agent-Human Collaboration Loops (L100):** Constructing instructions, managing approvals, and learning how to pause, steer, and resume tasks."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "📊 5.4 Persona Survey Request"
+        },
+        {
+          "type": "p",
+          "content": "To help us tailor the L200 interface electives and L300/L400 advanced integration tracks to your specific work style, please complete the **Persona Survey**. Indicate whether you focus on frontend prototyping, backend API design, or scale platform engineering so we can direct you to the correct specialist path."
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the main purpose of the \".bash_profile\" configuration completed during workspace setup?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It optimizes Python runtime execution speed."
+        },
+        {
+          "type": "p",
+          "content": "- B) It ensures that local environment variables and local path directories like `~/.local/bin` are loaded automatically every time the Antigravity integrated terminal is initialized."
+        },
+        {
+          "type": "p",
+          "content": "- C) It grants administrative root permissions to the browser subagent."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Sourcing `~/.bashrc` inside `~/.bash_profile` ensures that path maps are resolved in the login-style terminal environment."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which course is the immediate next step in the learning track, providing a comparative tour of the three major command interfaces?"
+        },
+        {
+          "type": "p",
+          "content": "- A) AGY-102: The UI Landscape & Selection"
+        },
+        {
+          "type": "p",
+          "content": "- B) AGY-311: Scripting with the SDK"
+        },
+        {
+          "type": "p",
+          "content": "- C) AGY-411: Custom MCP Servers"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option A is correct. AGY-102 is the next foundations course, providing a tour of the three major interfaces: the visual board, the command line client, and the interactive workspace editor."
+        }
+      ]
+    }
+  ]
+}

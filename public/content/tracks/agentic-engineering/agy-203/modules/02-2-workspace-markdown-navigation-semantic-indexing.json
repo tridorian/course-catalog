@@ -1,0 +1,81 @@
+{
+  "id": "2",
+  "title": "2. Navigation & Semantic Indexing",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "The Semantic Indexing Pipeline"
+    },
+    {
+      "type": "p",
+      "content": "When you open a workspace directory, antigravity-ide immediately runs a semantic indexing pipeline. This local process builds a lightweight knowledge graph of all text, markdown, and code files. By extracting structural elements (such as Markdown headings, table structures, and code function definitions), the agent sidecar can answer questions, find code blocks, and locate references using semantic search instead of simple keyword grep."
+    },
+    {
+      "type": "warning",
+      "content": "High CPU Warn: Large build output directories (such as node_modules, dist, or .git folders) can trigger indexing loops. You must configure exclusions in the workspace settings to prevent the semantic parser from scanning compiled build assets."
+    },
+    {
+      "type": "h3",
+      "content": "Exclusion Configuration Settings"
+    },
+    {
+      "type": "p",
+      "content": "To configure directory exclusion and indexing depth, edit your workspace settings file (`.vscode/settings.json`) to include the following configuration parameters:"
+    },
+    {
+      "type": "code",
+      "content": "{\n  \"search.exclude\": {\n    \"**/node_modules\": true,\n    \"**/dist\": true,\n    \"**/.git\": true\n  },\n  \"antigravity.index.depth\": 3,\n  \"antigravity.index.include\": [\"*.md\", \"*.py\", \"*.js\", \"*.json\"]\n}",
+      "language": "json"
+    },
+    {
+      "type": "h3",
+      "content": "Markdown Navigation & URI Patterns"
+    },
+    {
+      "type": "p",
+      "content": "Within an active workspace, you can navigate documents and direct the agent using standardized markdown syntax and specialized URI patterns. These patterns let you cite specific files, folders, lines, and rules inside your prompt. The table below outlines how navigation patterns resolve within the IDE:"
+    },
+    {
+      "type": "p",
+      "content": "| Navigation Feature | Markdown Syntax / Pattern | antigravity-ide Behavior |\n| :--- | :--- | :--- |\n| **Workspace Link** | `[Link Text](file:///absolute/path/to/file.md)` | Direct navigation to the target file; opens tab instantly. |\n| **Line-Range Link** | `[Lines 10-25](file:///path/to/file.py#L10-L25)` | Opens file and highlights specific lines for agent reference. |\n| **Rule Anchor** | `[Rule Key](rule://.gemini.md#security-rules)` | Resolves rule definition in the workspace security dictionary. |\n| **Semantic Mention** | `@file:README.md` | Passes the file contents directly into the agent's context. |"
+    },
+    {
+      "type": "h3",
+      "content": "Spec-Driven Development (SDD) & Spec-kit"
+    },
+    {
+      "type": "p",
+      "content": "To prevent 'vibe coding' (ad-hoc prompt-based code generation) and ensure high-fidelity software engineering, Antigravity introduces Spec-kit—a toolkit that enforces Spec-Driven Development (SDD). The SDD workflow guides the agent and developer through a disciplined cycle: Specify (write a formal `spec.md`), Clarify (resolve design ambiguities), Plan (build task graphs), Tasks (generate step-by-step checklists), Analyze (evaluate existing patterns), and Implement (execute code changes). By anchoring the agent's work in a formal specification, code drift is minimized and verification loops are deterministic."
+    },
+    {
+      "type": "h3",
+      "content": "Co-Authoring Guide: Linking Files and References"
+    },
+    {
+      "type": "p",
+      "content": "When guiding the agent through a multi-file workspace, follow these best practices to maintain reference parity:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Always write out relative paths explicitly: use './docs/architecture.md' rather than just 'architecture.md' to assist the indexing engine.",
+        "When referencing a bug or function, use the line-range hash anchor format (e.g. #L45-L60) to highlight the relevant code segment for the agent.",
+        "Mention workspace rules files using @file:.gemini.md in the chat sidecar to verify current compliance boundaries.",
+        "Toggle the agent side panel using Cmd+L / Ctrl+L to submit reference-rich instructions."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding Quiz"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Which markdown link syntax is recognized by antigravity-ide to jump to lines 50 to 75 of a script?\n\nA) `[Script](script.py?lines=50-75)`\nB) `[Script](file:///absolute/path/to/script.py#L50-L75)`\nC) `[Script](file://script.py::50::75)`\nD) `[Script](line-range:50-75:script.py)`\n\n*Feedback*: The correct answer is B. The IDE uses standard file:// URI syntax followed by the `#L<start>-L<end>` hash anchor to direct focus and highlight specific line ranges."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: How can you prevent antigravity-ide from indexing massive build directories like `node_modules`?\n\nA) By deleting the folders completely.\nB) By configuring exclusions in the workspace configuration JSON under `search.exclude`.\nC) By running the command `agy stop-index`.\nD) By hiding the files in your OS file manager.\n\n*Feedback*: The correct answer is B. Adding folders to `search.exclude` in the configuration settings ensures the semantic indexing engine skips those directories, avoiding high CPU loads."
+    }
+  ]
+}

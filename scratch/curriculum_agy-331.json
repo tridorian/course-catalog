@@ -1,0 +1,492 @@
+{
+  "course_id": "agy-331",
+  "title": "AGY-331: Advanced Container Sandboxing (L300)",
+  "description": "Configuring local distrobox or devcontainers environments using the portable agy-box OCI image to run high-autonomy agent loops safely.",
+  "highlights": [
+    {
+      "icon": "ShieldAlert",
+      "title": "Host Isolation",
+      "description": "Lock down agent execution environments using rootless Podman and user namespaces to prevent host compromise."
+    },
+    {
+      "icon": "Terminal",
+      "title": "Distrobox Integration",
+      "description": "Configure distrobox for seamless terminal development while enforcing strict home directory isolation."
+    },
+    {
+      "icon": "Settings",
+      "title": "Devcontainers Spec",
+      "description": "Implement enterprise-grade .devcontainer.json configs to run agents safely in VS Code with limited permissions."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Course Introduction & OCI Architecture",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "1.1 High-Autonomy Agents & Sandbox Architecture"
+        },
+        {
+          "type": "p",
+          "content": "Autonomous developer agents represent a fundamental shift in software engineering. When you execute an agent loop with high permission levels (such as utilizing the --auto-approve flag in the AGY CLI or SDK), you grant the model the ability to write scripts, execute commands, modify configuration files, and install third-party dependencies. If the agent makes a logical error, falls victim to a prompt injection attack, or attempts to resolve a broken dependency recursively, it can damage host operating systems, leak files, or compromise local networks. A hardened sandbox is mandatory."
+        },
+        {
+          "type": "info",
+          "content": "Core Security Rule: Always decouple where the AI agent runs from where the user interacts. The agy-box image isolates code execution, file mutation, and tool dependencies in a secure container layer, preventing any rogue commands from touching the physical host's system configurations."
+        },
+        {
+          "type": "h2",
+          "content": "1.2 The agy-box OCI Image Design"
+        },
+        {
+          "type": "p",
+          "content": "The standard runtime environment for Antigravity is the 'agy-box' container image. Built from 'ghcr.io/ublue-os/ubuntu-toolbox:latest', it acts as a host-integrated developer sandbox. It compiles nodejs, python, git, and key libraries into a portable image. Because standard container environments lack the dependencies for graphic rendering and secrets storage, agy-box layers specific tools to bridge this gap."
+        },
+        {
+          "type": "h3",
+          "content": "1.3 Container Blueprint: Installing Agent & Graphic Dependencies"
+        },
+        {
+          "type": "p",
+          "content": "To support both terminal automation and visual browser interactions, the container installs graphic frameworks, credentials managers, and browsers. The script below outlines the base dependency build stage:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "#!/bin/bash\n# install-agent-deps.sh - Installed during container build\nset -euo pipefail\nexport DEBIAN_FRONTEND=noninteractive\n\n# Update and install system dependencies\napt-get update && apt-get install -y --no-install-recommends \\\n    git curl wget jq gnupg python3-pip pipx \\\n    python3-keyring python3-keyrings.alt libsecret-1-0 \\\n    tini gosu xvfb x11vnc icewm novnc websockify \\\n    xterm pcmanfm nodejs npm \\\n    && apt-get clean && rm -rf /var/lib/apt/lists/*"
+        },
+        {
+          "type": "h3",
+          "content": "1.4 Chrome Wrapping for Container Stability"
+        },
+        {
+          "type": "p",
+          "content": "Chrome requires specific flags to run stably inside container environments. Without these overrides, Chrome can exhaust shared memory or crash when attempting to query hardware acceleration. We wrap Chrome to ensure high-autonomy loops remain resilient:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Wrap google-chrome-stable to force headless compatibility flags\nmv /usr/bin/google-chrome-stable /usr/bin/google-chrome-stable.orig\nprintf '#!/bin/bash\\nexec /usr/bin/google-chrome-stable.orig --disable-dev-shm-usage --disable-gpu --disable-crash-reporter --no-sandbox \"$@\"' > /usr/bin/google-chrome-stable\nchmod +x /usr/bin/google-chrome-stable"
+        },
+        {
+          "type": "h2",
+          "content": "1.5 Login Hook Sequence & Interactive Assistant"
+        },
+        {
+          "type": "p",
+          "content": "When a developer enters the agy-box container, a login hook placed at '/etc/profile.d/agy-setup-check.sh' executes. This shell script validates if the shell session is interactive and if standard inputs are open, ensuring that background scripts and non-interactive workflows (like CI/CD pipelines) bypass interactive prompts."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# check if setup flag is done and shell is interactive\nif [ ! -f \"$HOME/.config/agy-box/.setup_done\" ] && [ -t 0 ] && [ -t 1 ]; then\n    # Invoke the setup assistant\n    /usr/local/bin/agy-setup-helper\nfi"
+        },
+        {
+          "type": "h3",
+          "content": "1.6 Automated Setup Validation Gates"
+        },
+        {
+          "type": "p",
+          "content": "Upon triggering, the `agy-setup-helper` executes four critical validation gates before allowing the environment to mark setup as complete:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Host Keyring Verification: Checks if D-Bus session socket forwarding is working and libsecret can negotiate decryption queries with the host's keyring.",
+            "Antigravity API Keys: Prompts the user (using the Charm 'gum' CLI) for Gemini or Antigravity keys, saving them to '~/.config/environment.d/agy-box.conf'.",
+            "Chrome Execution: Spawns Chrome in unprivileged mode to verify that the wrapper script runs without sandbox errors.",
+            "Permissions Hardening: Scans configurations, SSH directories, and credentials paths, locking down their permissions to 600 or 700 to prevent data exposure."
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Wildcard Port Scans: The setup helper audits active TCP ports in /proc/net/tcp. If it detects a development server listening on wildcard addresses (0.0.0.0), it flags a warning to prevent network access from outside the host."
+        },
+        {
+          "type": "h2",
+          "content": "1.7 Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Answer the following questions to verify your knowledge of the containerized sandbox architecture:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: Why is Google Chrome wrapped inside the agy-box OCI build?\n  - A) To increase browser rendering performance.\n  - B) To override shared memory limits (--disable-dev-shm-usage) and disable system sandbox conflicts inside unprivileged containers.\n  - C) To enforce corporate content filters.\n\nFeedback: Option B is correct. Wrapping the browser enables Chrome to run stably within container resource bounds without requiring privileged root execution.",
+            "Question 2: What prevents the setup assistant hook from blocking automated scripts inside the container?\n  - A) A system cron job that runs the hook in the background.\n  - B) Sourcing the script in ~/.bashrc rather than /etc/profile.d/.\n  - C) Verifying interactive terminal connections ([ -t 0 ] && [ -t 1 ]) before launching the helper.\n\nFeedback: Option C is correct. Checking terminal descriptors prevents non-interactive scripts and CI/CD pipelines from getting stuck waiting for user inputs."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "2. Docker & Podman Setup for Host Isolation",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "2.1 Rootless Runtimes & The Isolation Model"
+        },
+        {
+          "type": "p",
+          "content": "Running containers as root is a significant vulnerability for agent deployments. If the container engine runs with root privileges (as is common with default Docker configurations), any container breakout vulnerability instantly yields root control over the host. L300 platform engineering mandates rootless container execution. Under Podman, the container engine runs entirely within the unprivileged user's namespace, mapping the container's virtual root user to a standard unprivileged user ID on the host. This prevents host filesystem takeover and root privilege escalation."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# 1. Install Podman on the host workstation\nsudo apt-get update && sudo apt-get install -y podman\n\n# 2. Verify Podman is running in rootless mode for the current user\npodman info | grep -i rootless\n# Expected output: rootless: true\n\n# 3. Configure the rootless network backend (pasta or slirp4netns) to prevent host interface access\ncat << 'EOF' > ~/.config/containers/containers.conf\n[network]\ndefault_network = \"podman\"\nnetwork_backend = \"netavark\"\nEOF"
+        },
+        {
+          "type": "info",
+          "content": "Rootless Mappings: When running rootless, a process executing as UID 0 (root) inside the container is mapped directly to UID 1000 (your host user) on the host machine. If an agent manages to escape the container, it only gains the rights of your unprivileged host user."
+        },
+        {
+          "type": "h2",
+          "content": "2.2 Configuring subuid and subgid Files"
+        },
+        {
+          "type": "p",
+          "content": "Rootless container runtimes map virtual UIDs inside the container to ranges of subordinate UIDs on the host system. These allocations are controlled by `/etc/subuid` and `/etc/subgid`. If allocations are missing, you must generate them to allow namespace mapping:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Allocate a range of 65536 subordinate UIDs/GIDs starting at 100000 for your user\n# Execute this on the host system:\nsudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USER\n\n# Update namespaces config to activate the mappings\npodman system migrate\n\n# Verify subordinate maps\ncat /etc/subuid\ncat /etc/subgid"
+        },
+        {
+          "type": "h2",
+          "content": "2.3 Dropping Administrative Capabilities"
+        },
+        {
+          "type": "p",
+          "content": "Linux kernels partition traditional root privileges into distinct units called 'capabilities' (e.g., CAP_SYS_ADMIN, CAP_NET_ADMIN, CAP_SYS_CHROOT). By default, standard container runtimes grant a subset of these capabilities. For AI agent sandboxes, we must drop ALL administrative capabilities to prevent system clock modifications, network routing overrides, or driver configurations."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Drop all capabilities and enforce no-new-privileges\npodman run -d --name agy-sandbox-01 \\\n  --cap-drop=ALL \\\n  --security-opt no-new-privileges \\\n  local/agy-box:latest"
+        },
+        {
+          "type": "h2",
+          "content": "2.4 Implementing custom Seccomp Profiles"
+        },
+        {
+          "type": "p",
+          "content": "Seccomp (Secure Computing Mode) acts as an internal system call firewall. It defines which system commands (like read, write, unshare, mount) a process can send to the kernel. We write a custom seccomp profile to restrict calls that are unnecessary for developer work but present risk (such as running ptrace or unshare)."
+        },
+        {
+          "type": "h3",
+          "content": "Custom Seccomp Blueprint: seccomp-agent.json"
+        },
+        {
+          "type": "p",
+          "content": "Save this JSON file in your configuration directory and apply it during container startup:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"defaultAction\": \"SCMP_ACT_ALLOW\",\n  \"architectures\": [\n    \"SCMP_ARCH_X86_64\",\n    \"SCMP_ARCH_X86\",\n    \"SCMP_ARCH_X32\"\n  ],\n  \"syscalls\": [\n    {\n      \"names\": [\n        \"ptrace\",\n        \"syslog\",\n        \"sys_boot\",\n        \"sys_chroot\",\n        \"mount\",\n        \"umount2\",\n        \"unshare\",\n        \"kexec_load\"\n      ],\n      \"action\": \"SCMP_ACT_ERRNO\"\n    }\n  ]\n}"
+        },
+        {
+          "type": "warning",
+          "content": "The Socket Exposure Vulnerability: Never mount '/var/run/docker.sock' or '/run/user/1000/podman/podman.sock' into your sandbox container. An agent that gains access to this socket can send API requests to the host daemon to spawn new, fully privileged containers, bypassing all container sandboxing bounds."
+        },
+        {
+          "type": "h2",
+          "content": "2.5 Keyring Fallback Decryption on Headless Hosts"
+        },
+        {
+          "type": "p",
+          "content": "Google Chrome and Antigravity store credentials in keyrings using D-Bus. In headless systems or remote VMs where D-Bus session keyrings are unreachable, authentication fails. The agy-box provides a file-based encrypted keyring fallback utilizing 'keyrings.alt.file.EncryptedKeyring'."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Export the fallback master password to your environment variables\nexport KEYRING_CRYPT_PASSWORD=\"your-hardened-master-password\"\n\n# Configure python keyring to use the file-based backend alternative\nexport PYTHON_KEYRING_BACKEND=\"keyrings.alt.file.EncryptedKeyring\""
+        },
+        {
+          "type": "info",
+          "content": "Credentials configuration and passwords must be stored inside '~/.config/environment.d/agy-box.conf' with tight permissions (chmod 600) so the shell hook automatically sources them in subsequent sessions."
+        },
+        {
+          "type": "h2",
+          "content": "2.6 Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Review your understanding of rootless execution and system call filtering:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What occurs when a container runs with the '--cap-drop=ALL' flag?\n  - A) It prevents the container from writing files to its own virtual drive.\n  - B) It strips the container's processes of all administrative capabilities, blocking actions like network routing changes or device configuration modifications.\n  - C) It disables internet access inside the container.\n\nFeedback: Option B is correct. Dropping all capabilities ensures that even if a process inside the container becomes root, it lacks the administrative rights to execute commands like configuring hardware or overriding network interfaces.",
+            "Question 2: What is the risk of mounting the host's container daemon socket (docker.sock) inside the sandbox?\n  - A) The agent will consume all host memory.\n  - B) The agent can bypass all sandbox boundaries by commanding the host daemon to start new containers with host root privileges.\n  - C) The container filesystem becomes read-only.\n\nFeedback: Option B is correct. Access to the container socket is equivalent to having root privileges on the host system, enabling immediate sandbox escape."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "3. Local Workspace Sandboxing with Distrobox",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "3.1 Distrobox Integrations & Security Vulnerabilities"
+        },
+        {
+          "type": "p",
+          "content": "Distrobox is a powerful tool that enables developers to run any Linux distribution inside a container. To create a seamless development environment, Distrobox automatically mounts the user's host home directory ($HOME), forwards Wayland/X11 sockets for GUI rendering, shares network interfaces, and maps local IPC and USB devices. While these default integrations are convenient for human developers, they are highly insecure for running autonomous AI agents. If an agent executes a destructive command or a prompt injection payload attempts to modify files, your host ssh keys, shell configurations (.bashrc), and personal files are vulnerable. We must harden these default integrations."
+        },
+        {
+          "type": "info",
+          "content": "The Isolation Strategy: To safely run agents inside Distrobox, we must override the default home directory mounting by designating an isolated, empty directory on the host to act as the container's $HOME, and disable shared device and network namespaces."
+        },
+        {
+          "type": "h2",
+          "content": "3.2 Declarative Configuration: distrobox.ini"
+        },
+        {
+          "type": "p",
+          "content": "Instead of executing ad-hoc commands with complex arguments, we define our sandbox using a declarative configuration file ('distrobox.ini'). This allows system administrators to version-control the sandbox configurations, map distinct project workspace directories, and drop host integrations."
+        },
+        {
+          "type": "h3",
+          "content": "3.3 Hardened distrobox.ini Blueprint"
+        },
+        {
+          "type": "p",
+          "content": "Save this configuration file in your home directory as '/var/home/wtg/distrobox.ini':"
+        },
+        {
+          "type": "code",
+          "language": "ini",
+          "content": "[agy-sandbox]\nimage=ghcr.io/wtg-codes/agy-box-image:v1.23.2\n# Redirect the container's home directory to a dedicated sandbox folder\nhome=/var/home/wtg/sandbox_home\nstart_now=true\ninit=false\nnvidia=false\npull=false\n\n# Drop host integrations and isolate namespaces\nunshare_netns=true\nunshare_ipc=true\nunshare_dev=true\n\n# Mount ONLY the target project workspace folder instead of the entire home directory\nvolume=/var/home/wtg/workspace:/workspace:rw\n\n# Confine the container using AppArmor and SELinux labels\nsecurity_opt=apparmor=distrobox-hardened\nsecurity_opt=label=type:container_t,label=level:s0:c100,c200"
+        },
+        {
+          "type": "h3",
+          "content": "3.4 Hardening with AppArmor and SELinux Profiles"
+        },
+        {
+          "type": "p",
+          "content": "To prevent an agent that achieves code execution from exploiting kernel vulnerabilities, enforce MAC (Mandatory Access Control) policies using AppArmor or SELinux on the host system."
+        },
+        {
+          "type": "p",
+          "content": "**1. Hardening with AppArmor:** Write a custom profile restricting the container engine from executing risky operations. Define the profile `/etc/apparmor.d/containers/distrobox-hardened`:"
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "content": "# /etc/apparmor.d/containers/distrobox-hardened\nprofile distrobox-hardened flags=(attach_disconnected,mediate_deleted) {\n  # Inherit default container permissions\n  include <abstractions/base>\n  include <abstractions/nameservice>\n\n  # Deny raw sockets, trace operations, and mount overrides\n  deny network raw,\n  deny ptrace,\n  deny mount,\n  deny /sys/firmware/** r,\n  deny /proc/sysrq-trigger w,\n}"
+        },
+        {
+          "type": "p",
+          "content": "Load the profile into the kernel: `sudo apparmor_parser -r /etc/apparmor.d/containers/distrobox-hardened`."
+        },
+        {
+          "type": "p",
+          "content": "**2. Hardening with SELinux:** When running Podman on Fedora/RHEL hosts, assign a targeted domain (`container_t`) and set explicit MCS (Multi-Category Security) categories (like `s0:c100,c200`) using Podman security flags. This confines the agent process so it cannot read other containers' data or write to host system contexts."
+        },
+        {
+          "type": "h3",
+          "content": "3.5 Assembling and Launching the Sandbox"
+        },
+        {
+          "type": "p",
+          "content": "First, create the dedicated empty home folder to avoid permissions issues. Then, initialize the container using the Distrobox assembly commands:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create dedicated sandbox home and workspace directories on host\nmkdir -p /var/home/wtg/sandbox_home\nmkdir -p /var/home/wtg/workspace\n\n# Assemble and build the distrobox container from the configuration file\ndistrobox assemble create --file /var/home/wtg/distrobox.ini\n\n# Enter the isolated distrobox container session\ndistrobox enter agy-sandbox"
+        },
+        {
+          "type": "h2",
+          "content": "3.6 Inside the Sandbox: Verification Checklist"
+        },
+        {
+          "type": "p",
+          "content": "Once inside the distrobox container terminal, you must verify that the host directories are inaccessible and security boundaries are enforced. Run these validation checks:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Verify home directory is restricted to the sandbox_home path\necho $HOME\n# Output should be: /var/home/wtg/sandbox_home (not your host home /var/home/wtg)\n\n# Verify you cannot see host SSH keys or git configurations\nls -la $HOME/.ssh\n# Output: ls: cannot access '/var/home/wtg/sandbox_home/.ssh': No such file or directory\n\n# Verify write permissions are functional in the mapped workspace folder\ntouch /workspace/test.txt && rm /workspace/test.txt\n\n# Verify network namespace is unshared (cannot reach local host ports)\ncurl http://localhost:8080\n# Output: curl: (7) Failed to connect to localhost port 8080: Connection refused"
+        },
+        {
+          "type": "warning",
+          "content": "Permissions Sync: When using Docker as the execution backend instead of Podman, files created inside the container are owned by root on the host. Ensure you use Podman to benefit from native user namespace mappings, or configure rootless Docker modes."
+        },
+        {
+          "type": "h2",
+          "content": "3.7 Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Test your knowledge of Distrobox sandboxing configuration:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is the primary security flaw of using standard default Distrobox containers for running autonomous agents?\n  - A) The container runtime slows down command execution.\n  - B) Distrobox mounts your host's entire $HOME directory, exposing your host's SSH keys, API keys, and shell configurations to the agent.\n  - C) Distrobox does not support Python runtimes.\n\nFeedback: Option B is correct. By default, Distrobox shares the user's home folder. For agents, you must redirect the home directory to a dedicated sandbox folder using the 'home' property.",
+            "Question 2: What is the purpose of setting 'unshare_netns=true' in distrobox.ini?\n  - A) It speeds up dependency updates.\n  - B) It prevents the container from sharing the host's network interfaces, blocking the agent from accessing local host loopback services.\n  - C) It enables the agent to configure public DNS records.\n\nFeedback: Option B is correct. Unsharing the network namespace prevents containerized processes from talking to localhost services running on your host workstation."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "4. Secure Devcontainers Environments",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "4.1 The Devcontainers Security Challenge"
+        },
+        {
+          "type": "p",
+          "content": "VS Code and the Antigravity IDE support the Devcontainers standard, allowing developers to run their IDE workspace inside a containerized sandbox. While devcontainers provide excellent workspace parity, they present unique security challenges when integrating autonomous AI agents. By default, devcontainers often mount the host's active SSH agent, automatically mount global configuration folders (~/.gitconfig, ~/.aws, ~/.kube), share the host network namespace, and grant administrative root privileges. An agent executing inside this environment can access host credentials and authenticate to remote servers. We must apply strict containment boundaries."
+        },
+        {
+          "type": "info",
+          "content": "Devcontainer Isolation: The goal is to establish a container boundary that allows you to write code side-by-side with the agent, while stripping the agent of any capability to access your host machine's secrets or communicate with external servers using your keys."
+        },
+        {
+          "type": "h2",
+          "content": "4.2 Hardened .devcontainer.json Configuration Blueprint"
+        },
+        {
+          "type": "p",
+          "content": "To secure the IDE workspace, save this hardened configuration file inside your project repository as '.devcontainer/devcontainer.json':"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"name\": \"Hardened AGY Workspace\",\n  \"image\": \"ghcr.io/wtg-codes/agy-box-image:latest\",\n  \"remoteUser\": \"developer\",\n  \"workspaceMount\": \"source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached\",\n  \"workspaceFolder\": \"/workspace\",\n  \"runArgs\": [\n    \"--cap-drop=ALL\",\n    \"--security-opt=no-new-privileges\",\n    \"--userns=keep-id:uid=1000,gid=1000\"\n  ],\n  \"containerEnv\": {\n    \"AGY_SANDBOX_LEVEL\": \"3\",\n    \"AGY_AUTO_APPROVE\": \"false\"\n  },\n  \"customizations\": {\n    \"vscode\": {\n      \"settings\": {\n        \"terminal.integrated.defaultProfile.linux\": \"bash\",\n        \"security.workspace.trust.enabled\": true\n      },\n      \"extensions\": [\n        \"ms-python.python\",\n        \"dbaeumer.vscode-eslint\"\n      ]\n    }\n  },\n  \"mounts\": [],\n  \"forwardPorts\": []\n}"
+        },
+        {
+          "type": "h2",
+          "content": "4.3 Analysis of Hardening Parameters"
+        },
+        {
+          "type": "p",
+          "content": "Let's review the critical configuration fields that enforce isolation in the blueprint:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "remoteUser: Forces VS Code and the agent engine to execute all tasks under the unprivileged 'developer' account rather than defaulting to 'root'.",
+            "workspaceMount: Explicitly mounts only the active project directory, preventing the container from mapping parent directories on the host drive.",
+            "runArgs: Drops administrative kernel privileges (--cap-drop=ALL) and prevents the unprivileged user from escalating privileges inside the container via setuid binaries (--security-opt=no-new-privileges).",
+            "mounts: Leaving this array empty is critical. It overrides the default behavior of mounting host folders like ~/.ssh, ~/.aws, or ~/.kube, completely hiding host access credentials from the agent loop.",
+            "forwardPorts: Disables automatic port mapping, ensuring that development servers started by the agent are not exposed to the local network."
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "SSH Agent Forwarding Warning: Do not add configurations that map host sockets to '/tmp/vscode-ssh-auth*' or configure SSH agent forwarding ('forwardPorts' or 'mounts' mapping to SSH sockets). An autonomous agent can use these forwarded sockets to sign commits, push code modifications to remote repositories, or connect to internal cloud servers under your identity."
+        },
+        {
+          "type": "h2",
+          "content": "4.4 Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Verify your comprehension of secure devcontainers configurations:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is the primary purpose of setting the 'mounts' parameter to an empty array in the secure devcontainer blueprint?\n  - A) To increase directory read speed inside the container.\n  - B) To block VS Code from mounting host credentials folders like ~/.ssh, ~/.aws, and ~/.kube, isolating the agent from your host accounts.\n  - C) To disable package installations.\n\nFeedback: Option B is correct. By default, devcontainer systems mount host credentials so tools can access git repositories. Setting 'mounts' to empty blocks this, protecting your host credentials.",
+            "Question 2: Why do we specify '--security-opt=no-new-privileges' in runArgs?\n  - A) To prevent processes from executing administrative tasks or transitioning to root via setuid executables.\n  - B) To disable graphic rendering.\n  - C) To isolate local network sockets.\n\nFeedback: Option A is correct. This security parameter blocks the developer user from transitioning to root privilege inside the container, preventing a breakout exploit path."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "5. Network Segregation & Loop Control",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "5.1 The Cloud Metadata Service Vulnerability"
+        },
+        {
+          "type": "p",
+          "content": "When executing developer agents on cloud-hosted workstations (such as Google Cloud Shell, Compute Engine VMs, or AWS instances), the sandbox container by default inherits access to host network interfaces. This includes access to the Cloud Metadata Service endpoint at '169.254.169.254'. This endpoint serves instance details, configuration settings, and temporary OAuth 2.0 credentials for the machine's service account. If an autonomous agent or a malicious prompt injection payload queries this endpoint, it can retrieve access tokens, granting immediate read/write access to your cloud project resources."
+        },
+        {
+          "type": "warning",
+          "content": "Metadata Security Threat: If an agent runs 'curl -H \"Metadata-Flavor: Google\" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token', it can extract active security credentials. Blocking this endpoint on the host is a critical platform requirement."
+        },
+        {
+          "type": "h2",
+          "content": "5.2 Implementing Host-Level Firewall Segregation"
+        },
+        {
+          "type": "p",
+          "content": "To prevent containerized agents from accessing the cloud metadata endpoint and corporate private subnets (RFC 1918), we configure forwarding firewall rules (using iptables) on the host workstation. This ensures the container retains standard public internet access for package updates (like npm or pip), while blocking internal traffic."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "#!/usr/bin/env bash\n# configure-agent-firewall.sh - Run on the host system\nCONTAINER_INTERFACE=\"cni-podman0\"\nMETADATA_IP=\"169.254.169.254\"\n\n# Block access to the cloud metadata service IP\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d $METADATA_IP -j REJECT\n\n# Block access to private network subnets (RFC 1918)\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 10.0.0.0/8 -j REJECT\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 172.16.0.0/12 -j REJECT\nsudo iptables -I FORWARD -i $CONTAINER_INTERFACE -d 192.168.0.0/16 -j REJECT\n\n# Save rules and print forward table rules\nsudo iptables -L FORWARD -v -n"
+        },
+        {
+          "type": "h2",
+          "content": "5.3 Headless VDI Display Routing & noVNC"
+        },
+        {
+          "type": "p",
+          "content": "When running agents on remote VMs or SSH sessions, host display forwarding (X11/Wayland sharing) is unavailable. The agy-box includes a built-in virtual desktop infrastructure (VDI) subsystem. Instead of compiling applications with a physical screen, display signals are routed in-memory using a Virtual Framebuffer (Xvfb) and streamed via noVNC to standard host browsers."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Display routing pipeline steps:\n# 1. Start Xvfb (Virtual Framebuffer) on display :99\nXvfb :99 -screen 0 1920x1080x24 &\n\n# 2. Launch the IceWM Window Manager to handle window sizing\nDISPLAY=:99 icewm-session &\n\n# 3. Start x11vnc to stream framebuffer updates on port 5900\nx11vnc -display :99 -nopw -listen 127.0.0.1 -forever &\n\n# 4. Proxy the VNC stream to WebSockets on port 6080 via websockify\n/usr/share/novnc/utils/launch.sh --vnc 127.0.0.1:5900 --listen 6080"
+        },
+        {
+          "type": "info",
+          "content": "This configuration enables headless GUI interaction: open 'http://localhost:6080/vnc.html?autoconnect=true' in your host browser to view and control the agent's active Chrome browser session."
+        },
+        {
+          "type": "h2",
+          "content": "5.4 Resolving Chrome Singleton Locks"
+        },
+        {
+          "type": "p",
+          "content": "When recreating container sandboxes or swapping host environments, Google Chrome and Electron-based applications frequently crash at startup. This occurs because stale lock files named 'SingletonLock' are left inside Chrome profile folders, mapped to a host name that no longer exists. The agy-box entrypoint helper automatically audits and cleans these stale files:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Clean stale SingletonLock files from Chrome config directories\nfind $HOME/.config/google-chrome/ -name \"SingletonLock\" -type l -delete"
+        },
+        {
+          "type": "h2",
+          "content": "5.5 Execution Loop Constraints & Timeout Safeguards"
+        },
+        {
+          "type": "p",
+          "content": "To prevent runaway execution loops, agents should always be governed by strict resource boundaries. You can define maximum execution timeouts and iteration counts when launching tasks through the AGY CLI:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Launch a command-line task with timeout, iteration bounds, and disabled auto-approval\nagy run --task \"Audit python security configurations and compile updates\" \\\n  --timeout=300 \\\n  --max-iterations=10 \\\n  --auto-approve=false"
+        },
+        {
+          "type": "h2",
+          "content": "5.6 Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Review your understanding of network segregation and execution boundaries:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Question 1: What is the security risk associated with the IP address 169.254.169.254?\n  - A) It causes container resource exhaustion.\n  - B) It is the cloud metadata endpoint which houses temporary access tokens, potentially allowing the agent to compromise the entire cloud project.\n  - C) It is a public database port.\n\nFeedback: Option B is correct. 169.254.169.254 is the link-local metadata address. Blocking it blocks the container from extracting the machine's cloud credentials.",
+            "Question 2: How does the agy-box VDI stream graphical applications to a headless web browser?\n  - A) It runs a VNC server directly on the host machine.\n  - B) It maps Wayland compositor sockets using Docker volumes.\n  - C) It routes GUI signals to a Virtual Framebuffer (Xvfb), streams them via x11vnc, and proxies the frames via websockify (noVNC).\n\nFeedback: Option C is correct. The Xvfb-to-noVNC pipeline translates graphical signals into a WebSocket stream readable by standard host browsers."
+          ]
+        }
+      ]
+    }
+  ]
+}

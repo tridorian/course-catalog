@@ -1,0 +1,52 @@
+{
+  "id": "4",
+  "title": "4. Enterprise Auditing & Compliance Tracking",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Enterprise Auditing & Hardening"
+    },
+    {
+      "type": "p",
+      "content": "To comply with corporate governance requirements, agents must generate immutable audit logs. Compliance teams require tracing showing which user prompted the agent, what code was executed, and what database edits were committed."
+    },
+    {
+      "type": "h2",
+      "content": "Consolidating Logs"
+    },
+    {
+      "type": "p",
+      "content": "Enable structured syslog logging in `agent.yaml` to stream logs directly to Cloud Logging (such as GCP Google Cloud Logging or AWS CloudWatch):"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "logging:\n  format: \"json\"\n  destination: \"syslog\"\n  syslog_endpoint: \"tcp://log-aggregator.internal:514\"\n  levels:\n    tool_execution: \"INFO\"\n    model_raw_input: \"WARNING\"\n    state_transition: \"INFO\"\n"
+    },
+    {
+      "type": "h2",
+      "content": "Reviewing Audit Timelines"
+    },
+    {
+      "type": "p",
+      "content": "An audit trail record maps every agent decision step, saving state parameters and trace hashes. This guarantees audit capability when investigating unexpected pipeline modifications."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What logging configuration format is best suited for automated log analysis tools like Cloud Logging or Splunk?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Raw multiline plaintext format.\n- B) Structured JSON format.\n- C) Binary byte buffer dumps."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Structured JSON logging allows indexers to parse and query log keys (like tool names or status codes) easily."
+    }
+  ]
+}

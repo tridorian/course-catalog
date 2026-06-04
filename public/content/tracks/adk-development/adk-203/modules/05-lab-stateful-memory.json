@@ -1,0 +1,32 @@
+{
+  "id": "5",
+  "title": "5. Lab: Building a stateful memory management agent",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Building a Stateful Memory Management Agent"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will build a Python program that saves session histories to a local SQLite database, loading and resuming them dynamically."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the SQLite Memory Manager"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import sqlite3\nimport json\n\nclass SQLiteMemoryStore:\n    def __init__(self, db_path=\"chats.db\"):\n        self.conn = sqlite3.connect(db_path)\n        self.conn.execute(\"CREATE TABLE IF NOT EXISTS history (session_id TEXT, messages TEXT)\")\n        self.conn.commit()\n        \n    def save_session(self, session_id, messages):\n        msg_str = json.dumps(messages)\n        cursor = self.conn.cursor()\n        cursor.execute(\"INSERT OR REPLACE INTO history (session_id, messages) VALUES (?, ?)\", (session_id, msg_str))\n        self.conn.commit()\n        \n    def load_session(self, session_id):\n        cursor = self.conn.cursor()\n        cursor.execute(\"SELECT messages FROM history WHERE session_id = ?\", (session_id,))\n        row = cursor.fetchone()\n        return json.loads(row[0]) if row else []\n\nif __name__ == '__main__':\n    store = SQLiteMemoryStore()\n    sample_msgs = [{\"role\": \"user\", \"content\": \"Hi\"}, {\"role\": \"model\", \"content\": \"Hello!\"}]\n    store.save_session(\"sess_100\", sample_msgs)\n    print(\"Loaded Session:\", store.load_session(\"sess_100\"))"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What database is used in the script above to store the conversation messages?\n- A) MongoDB\n- B) PostgreSQL\n- C) SQLite\n\nFeedback: Option C is correct. SQLite is used to store and restore session history."
+    }
+  ]
+}

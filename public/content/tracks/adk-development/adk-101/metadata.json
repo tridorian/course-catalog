@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-101",
+  "title": "ADK-101: ADK Foundations",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Master the basics of Google's Agent Development Kit (ADK). Setup your local environment, install the CLI, configure agent.yaml, and run your first agent.",
+  "features": [
+    {
+      "icon": "⚙️",
+      "title": "CLI Installation",
+      "description": "Learn to install the ADK command line interface across native systems and sandboxed containers."
+    },
+    {
+      "icon": "📝",
+      "title": "YAML Configurations",
+      "description": "Master the schema design of agent.yaml to register tools, parameters, and memory parameters."
+    },
+    {
+      "icon": "🛠️",
+      "title": "Tool Authoring",
+      "description": "Write custom tools using Python or TypeScript decorators with strict parameter typing schemas."
+    }
+  ]
+}

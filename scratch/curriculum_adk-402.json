@@ -1,0 +1,296 @@
+{
+  "course_id": "adk-402",
+  "title": "ADK-402: Enterprise Integration & MCP",
+  "description": "Deploy production agents connected to Model Context Protocol (MCP) servers, configure OAuth2 integrations, and execute securely inside virtualized sandboxes.",
+  "highlights": [
+    {
+      "icon": "🌐",
+      "title": "Model Context Protocol",
+      "description": "Connect agents to standardized database APIs and documentation repositories using MCP tool hosts."
+    },
+    {
+      "icon": "🔑",
+      "title": "OAuth Security",
+      "description": "Configure secure token handshakes and user identity redirection flows for enterprise systems."
+    },
+    {
+      "icon": "📦",
+      "title": "Virtualized Sandboxes",
+      "description": "Deploy agent loops within sandboxed container environments using distrobox and isolated OCI nodes."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Model Context Protocol (MCP) Integration",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Enterprise MCP Integration"
+        },
+        {
+          "type": "p",
+          "content": "Enterprise agents require secure, real-time access to databases, cloud storage, and APIs. The Model Context Protocol (MCP) provides a standardized, open connection specification to link models to database context tables and active tooling."
+        },
+        {
+          "type": "h2",
+          "content": "Why use MCP in ADK?"
+        },
+        {
+          "type": "p",
+          "content": "Instead of writing customized HTTP request logic for every new database client, MCP exposes clean wrappers. The ADK framework acts as an MCP client, discovering tools, resources, and prompt templates shared by any active MCP server host."
+        },
+        {
+          "type": "h2",
+          "content": "MCP Connection Architecture"
+        },
+        {
+          "type": "p",
+          "content": "ADK agents establish connections to MCP hosts using either standard input/output (stdio) pipelines or HTTP SSE (Server-Sent Events) network transports:"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "# Connect your ADK agent to an external Postgres MCP server in agent.yaml\nmcp_servers:\n  postgres-db-host:\n    transport: \"stdio\"\n    command: \"npx\"\n    args:\n      - \"-y\"\n      - \"@modelcontextprotocol/server-postgres\"\n      - \"postgresql://dev:secret@localhost:5432/inventory\"\n"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary architectural benefit of integrating ADK with MCP servers?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It compiles Python script files into Go binaries automatically.\n- B) It standardizes how models connect to external data sources, tools, and prompts using a unified protocol framework.\n- C) It is a replacement for Tailwind styling files."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. MCP provides a standardized specification to link model endpoints to context databases and API tools."
+        }
+      ]
+    },
+    {
+      "title": "2. Configuring OAuth2 for Enterprise APIs",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Enterprise OAuth2 Authentication"
+        },
+        {
+          "type": "p",
+          "content": "To execute actions on behalf of employees (such as modifying Google Drive sheets or emailing status updates), agents must authenticate using OAuth 2.0 flows, storing token sets securely to preserve authorization boundaries."
+        },
+        {
+          "type": "h2",
+          "content": "OAuth Token Exchange Handshake"
+        },
+        {
+          "type": "p",
+          "content": "The ADK runtime manages the redirect handshake loop:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Agent identifies a request requiring authentication.",
+            "Agent redirects user web client to authorization server (authorization flow redirect).",
+            "User signs in, granting application permissions.",
+            "Authorization server returns code parameter to agent's local callback endpoint.",
+            "Agent exchanges code for token pair (access token + refresh token), saving them securely."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Implementing Token Management"
+        },
+        {
+          "type": "p",
+          "content": "Store refresh tokens inside hardware keychains or encrypted database vaults. Never log or output token keys to diagnostic tracing panels."
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# Retrieve authenticated client sessions securely in python tools\nfrom google_adk.auth import get_oauth_session\n\ndef fetch_user_drive_docs(user_id: str):\n    session = get_oauth_session(user_id=user_id, service=\"google-drive\")\n    # session object handles auto-refresh transparently\n    files = session.get(\"https://www.googleapis.com/drive/v3/files\").json()\n    return files"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Where should OAuth refresh tokens be stored securely in a production ADK agent deployment?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Written directly as hardcoded string variables in tools.py.\n- B) Within encrypted vault systems or secure credential keychains.\n- C) Exported to the public transaction logs folder."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Credential keys and refresh tokens must be kept in encrypted databases or vaults to prevent token theft."
+        }
+      ]
+    },
+    {
+      "title": "3. Headless Deployment in Virtualized Sandboxes",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Sandboxed OCI Deployments"
+        },
+        {
+          "type": "p",
+          "content": "Running agents with file write permissions directly on production host machines presents major security risks. Production deployments run headlessly in isolated sandboxes using container runtimes (such as distrobox, gVisor, or Docker)."
+        },
+        {
+          "type": "h2",
+          "content": "Authoring a Hardened Dockerfile"
+        },
+        {
+          "type": "p",
+          "content": "Use this multi-stage Dockerfile to compile tools and run the agent workspace as a non-privileged system user:"
+        },
+        {
+          "type": "code",
+          "language": "dockerfile",
+          "code": "FROM python:3.11-slim as builder\n\nWORKDIR /build\nCOPY requirements.txt .\nRUN pip install --no-cache-dir --user -r requirements.txt\n\nFROM python:3.11-slim as runner\n\n# Create system group and non-root user\nRUN groupadd -g 1001 agentgroup && \\\n    useradd -r -u 1001 -g agentgroup agentuser\n\nWORKDIR /home/agentuser/app\nCOPY --from=builder /root/.local /home/agentuser/.local\nCOPY --chown=agentuser:agentgroup . .\n\nENV PATH=/home/agentuser/.local/bin:$PATH\nUSER agentuser\n\nEXPOSE 8090\nENTRYPOINT [\"adk\", \"serve\", \"--config\", \"agent.yaml\", \"--port\", \"8090\"]"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why is running the agent container process as a non-root user (e.g. agentuser) considered a critical production requirement?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Root processes execute 20% slower inside containers.\n- B) It limits vulnerability impacts by preventing the agent from executing privileged system commands or modifying host files if container escape occurs.\n- C) It is required for Python module decorators."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Restricting root privileges is a core security defense-in-depth practice to prevent containment escape."
+        }
+      ]
+    },
+    {
+      "title": "4. Enterprise Auditing & Compliance Tracking",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Enterprise Auditing & Hardening"
+        },
+        {
+          "type": "p",
+          "content": "To comply with corporate governance requirements, agents must generate immutable audit logs. Compliance teams require tracing showing which user prompted the agent, what code was executed, and what database edits were committed."
+        },
+        {
+          "type": "h2",
+          "content": "Consolidating Logs"
+        },
+        {
+          "type": "p",
+          "content": "Enable structured syslog logging in `agent.yaml` to stream logs directly to Cloud Logging (such as GCP Google Cloud Logging or AWS CloudWatch):"
+        },
+        {
+          "type": "code",
+          "language": "yaml",
+          "code": "logging:\n  format: \"json\"\n  destination: \"syslog\"\n  syslog_endpoint: \"tcp://log-aggregator.internal:514\"\n  levels:\n    tool_execution: \"INFO\"\n    model_raw_input: \"WARNING\"\n    state_transition: \"INFO\"\n"
+        },
+        {
+          "type": "h2",
+          "content": "Reviewing Audit Timelines"
+        },
+        {
+          "type": "p",
+          "content": "An audit trail record maps every agent decision step, saving state parameters and trace hashes. This guarantees audit capability when investigating unexpected pipeline modifications."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What logging configuration format is best suited for automated log analysis tools like Cloud Logging or Splunk?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Raw multiline plaintext format.\n- B) Structured JSON format.\n- C) Binary byte buffer dumps."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Structured JSON logging allows indexers to parse and query log keys (like tool names or status codes) easily."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab - Deploying a Secure Customer Service Orchestrator",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Deploying Production Agents"
+        },
+        {
+          "type": "p",
+          "content": "In this final lab, you will deploy a Customer Service agent pipeline inside a sandboxed docker container. The agent connects to a Postgres Database via MCP stdio, uses secure OAuth2 helper tokens to verify orders, and outputs tracking updates to the visual panel using A2UI dashboards."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Build the Sandboxed Image"
+        },
+        {
+          "type": "p",
+          "content": "Compile the production agent and tool structures into a container image:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "docker build -t customer-service-agent:v1.0.0 ."
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Run Postgres Database MCP Server"
+        },
+        {
+          "type": "p",
+          "content": "Ensure the backend database is running and verify it is discoverable by local networks:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "docker run -d --name local-postgres -p 5432:5432 -e POSTGRES_PASSWORD=secret postgres"
+        },
+        {
+          "type": "h2",
+          "content": "Step 3: Run the sandboxed Agent Container"
+        },
+        {
+          "type": "p",
+          "content": "Start the container running in user namespace mode, mapping config files and network ports:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "docker run -d --name service-agent-run -p 8090:8090 \\\n  -v $(pwd)/config/token.json:/home/agentuser/app/token.json \\\n  customer-service-agent:v1.0.0"
+        },
+        {
+          "type": "h2",
+          "content": "Step 4: Execute Verification Checks"
+        },
+        {
+          "type": "p",
+          "content": "Send an execution payload to verify route tables, data queries, and secure compliance reporting:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "curl -X POST http://localhost:8090/execute \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"prompt\": \"Check if user order 9023 exists in database and generate tracking dashboard card.\"}'"
+        },
+        {
+          "type": "info",
+          "title": "Deployment Verification",
+          "content": "Verify container execution logs with 'docker logs service-agent-run' to ensure no authentication exceptions or parameter validation errors occurred during startup."
+        }
+      ]
+    }
+  ]
+}

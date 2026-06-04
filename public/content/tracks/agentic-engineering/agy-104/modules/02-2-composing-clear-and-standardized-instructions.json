@@ -1,0 +1,62 @@
+{
+  "id": "2",
+  "title": "2. Composing Standardized Instructions",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Agents are highly sensitive to prompt structure, context delimiters, and target outputs. Composing clear instructions is key to preventing agents from going down infinite loops or misinterpreting goals. The main tool for configuring local workspace boundaries and instructions is the local rule file, typically called `.gemini.md` or a customized `instructions.md` in the root workspace."
+    },
+    {
+      "type": "p",
+      "content": "When formatting instructions, you must define: (1) The precise objectives of the task, (2) The directory boundaries (the file system sandbox), (3) Allowed vs. prohibited CLI tools, and (4) The exact output expectations. Below is an example of a standardized workspace instruction file."
+    },
+    {
+      "type": "code",
+      "language": "markdown",
+      "content": "# Workspace Execution Rules & Guidelines\n\n## 1. Directory Boundaries\n- Primary Workspace: `/var/home/wtg/Repos/project-sandbox`\n- PROHIBITED DIRECTORIES: Do NOT access directories outside the workspace (e.g., `/etc`, `/tmp`, `/home/wtg/.ssh`, `/var/log`).\n\n## 2. Command Permissions\n- ALLOWED: `npm run build`, `npm test`, `git status`, `git diff`\n- PROHIBITED: `rm -rf` on parent directories, `curl` executing remote scripts, `chmod` modifications.\n\n## 3. Execution Verification\n- After making modifications to any code, the agent MUST run the test suite using `npm test` and output the test summary before requesting completion."
+    },
+    {
+      "type": "p",
+      "content": "By establishing these boundaries in a structured format, the agent parses the rules as a system instruction before every step, reducing the risk of security violations or out-of-scope work."
+    },
+    {
+      "type": "h2",
+      "content": "🛡️ Git Version Control for Workspace Rules"
+    },
+    {
+      "type": "p",
+      "content": "To prevent unauthorized local modifications, shell overrides, or prompt injection tampering, workspace rule files (`.gemini.md`) MUST be tracked in Git. Treating rules as code ensures that every boundary alteration goes through a rigorous peer-review and CI/CD validation process. Commits that modify rules should be cryptographically signed using GPG."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# 1. Initialize git tracking for workspace instructions\ngit init\ngit add .gemini.md\n\n# 2. Commit the peer-reviewed rules using a GPG signed commit\ngit commit -S -m \"security: enforce approved agent workspace rules\"\n\n# 3. Use pre-commit hooks to verify .gemini.md has not been altered without review\ncat << 'EOF' > .git/hooks/pre-commit\n#!/bin/sh\n# Check if .gemini.md matches approved security hash\nAPPROVED_HASH=\"a6d34e9e0...\"\nCURRENT_HASH=$(sha256sum .gemini.md | awk '{print $1}')\nif [ \"$CURRENT_HASH\" != \"$APPROVED_HASH\" ]; then\n  echo \"[ERROR] Unauthorized modification to .gemini.md rules detected!\"\n  exit 1\nfi\nEOF\nchmod +x .git/hooks/pre-commit"
+    },
+    {
+      "type": "warning",
+      "content": "If you write instructions that allow file writing or command execution outside the workspace, you bypass the default security boundaries. Only use absolute, literal paths in folder rule definitions to avoid path traversal bugs."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Why is it critical to explicitly specify prohibited directories in workspace instructions and track the rules file in Git?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) It speeds up the agent's computation by narrowing the search space",
+        "B) It prevents the agent from accessing sensitive files, and Git tracking prevents unauthorized local overrides or malicious rule modifications",
+        "C) It is a hard requirement for the agent to boot up",
+        "D) It enables the agent to automatically gain administrator permissions"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Explicit folder rules prevent path traversal, and tracking these rules under Git version control ensures auditability and peer reviews, preventing malicious local modifications or prompt-based bypasses."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "5",
+  "title": "5. Lab: Building a collaborative document drafting team",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Building a Collaborative Document Drafting Team"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will build a Python program that defines a sequential pipeline. You will run a Writer Agent that produces text and a Reviewer Agent that flags missing details."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Pipeline Script"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "class Writer:\n    def draft(self):\n        return \"Title: ADK Security. We use tools to run code.\"\n\nclass Reviewer:\n    def review(self, text):\n        issues = []\n        if \"sandbox\" not in text.lower():\n            issues.append(\"Missing details about sandboxed execution.\")\n        return issues\n\nif __name__ == '__main__':\n    w = Writer()\n    r = Reviewer()\n    \n    doc = w.draft()\n    problems = r.review(doc)\n    print(\"Draft:\", doc)\n    print(\"Review Issues:\", problems)"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What detail was reported as missing by the Reviewer Agent?\n- A) ADK installation steps\n- B) Details about sandboxed execution\n- C) Code indentation rules\n\nFeedback: Option B is correct. The text draft did not contain the word 'sandbox'."
+    }
+  ]
+}

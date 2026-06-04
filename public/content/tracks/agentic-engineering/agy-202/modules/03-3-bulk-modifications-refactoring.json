@@ -1,0 +1,95 @@
+{
+  "id": "3",
+  "title": "3. Bulk Modifications & Refactoring",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [3. Bulk Modifications & Refactoring]"
+    },
+    {
+      "type": "h2",
+      "content": "Executing Code Mutations and Safe Refactoring"
+    },
+    {
+      "type": "p",
+      "content": "When directing an agent to perform bulk modifications or code refactoring across a project, maintaining codebase integrity is paramount. Since the agent can modify multiple files in a single execution loop, you must enforce strict staging, isolation, and verification practices. In this module, you will learn how to set up clean Git baselines, isolate agent runs using Git worktrees, execute under sandbox limits, and verify generated changes using test runners."
+    },
+    {
+      "type": "h3",
+      "content": "Maintaining a Clean Git Baseline"
+    },
+    {
+      "type": "p",
+      "content": "Before launching any bulk modification task, always verify that your local Git repository state is completely clean. This ensures that any logic errors, syntax mistakes, or unexpected modifications introduced by the agent can be reverted immediately without losing your own unsaved code changes."
+    },
+    {
+      "type": "warning",
+      "content": "Workstation Rollbacks: If the agent generates broken code or incorrect refactoring logic, do not attempt to prompt the agent to fix it on top of dirty files. Instead, instantly revert the workspace back to your clean baseline using standard git rollback commands."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Step 1: Ensure there are no untracked or modified files\ngit status\n\n# Step 2: Request the bulk refactoring operation via agy\naps-clean-test\nagy -p \"Scan all python files in src/utils/ and replace deprecated time.clock() calls with time.perf_counter().\"\n\n# Step 3: Audit changes using git diff\ngit diff\n\n# Step 4: Revert changes if the agent made mistakes\n# WARNING: This discards all unstaged changes in the directory\ngit checkout . && git clean -fd"
+    },
+    {
+      "type": "h3",
+      "content": "Isolating Agent Tasks with Git Worktrees"
+    },
+    {
+      "type": "p",
+      "content": "To prevent the agent from modifying your active development branch, the agy CLI provides a native integration to run tasks inside separate Git worktrees. Passing the `--worktree <name>` option instructs the client to automatically create a new Git worktree directory, link it to a clean branch, execute the agent's tasks inside it, and present the final diff."
+    },
+    {
+      "type": "p",
+      "content": "This isolates all code mutations in a temporary workspace, allowing you to review and merge the resulting commits using standard Pull Request reviews."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Launch a refactoring session inside a clean worktree named 'refactor-logging'\nagy --worktree refactor-logging -p \"Update all console.log calls in src/ to use a unified Winston logger import.\"\n\n# After completion, list active worktrees to verify isolation\ngit worktree list"
+    },
+    {
+      "type": "h3",
+      "content": "Executing under Sandbox Restrictions"
+    },
+    {
+      "type": "p",
+      "content": "For safety, the agy CLI allows running agent loops within an isolated execution sandbox. When running with the `--sandbox` flag, the CLI places restrictions on terminal command executions, network access, and system calls."
+    },
+    {
+      "type": "p",
+      "content": "In sandbox mode, the agent cannot execute commands that could compromise the host workstation (such as modifying system configurations, downloading external executables, or editing files outside the active workspace boundaries)."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Execute a refactoring task under strict sandbox constraints\nagy --sandbox -p \"Refactor code in src/handlers/ to use async/await syntax.\""
+    },
+    {
+      "type": "h3",
+      "content": "Automated Testing and Verification Loops"
+    },
+    {
+      "type": "p",
+      "content": "After an agent completes a bulk modification task, never assume the generated code is correct. You must immediately execute the project's automated test suite to ensure that no compilation errors, typing mismatches, or logical regressions were introduced."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Example verification loop following an agent run\nagy -p \"Add type annotations to all parameters in src/math.js\"\n\n# Immediately execute the TypeScript compiler and test runner\nnpx tsc --noEmit && npm test"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Which agy CLI option isolates agent modifications by running the session inside a separate Git worktree folder?\n\nA) `--sandbox`\nB) `--worktree <name>`\nC) `--add-dir`\nD) `--dangerously-skip-permissions`\n\n*Feedback*: The correct answer is B. The `--worktree` option isolates changes inside a dedicated git worktree, keeping your main branch clean during edits."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: Why should you run the test suite immediately after an agent completes a bulk refactoring task?\n\nA) To verify that no syntax errors or logical regressions were introduced by the agent's modifications.\nB) To compile the agy binary on the host workstation.\nC) To authorize the client session with GCP credentials.\nD) To clean up the temporary log files automatically.\n\n*Feedback*: The correct answer is A. Test suites act as a logic firewall, validating that the agent's edits didn't break existing codebase behaviors."
+    }
+  ]
+}

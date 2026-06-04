@@ -58,7 +58,7 @@ const courseSteps = [
     content: (
       <div className="space-y-6">
         <h1 className="text-4xl font-extrabold text-white mb-6">Course Introduction</h1>
-        <p className="text-lg text-[#bbf7d0]">Welcome to the future of software engineering. This course introduces you to Google Antigravity (AGV) and the Tridorian standard for Secure Agentic Development.</p>
+        <p className="text-lg text-[#bbf7d0]">Welcome to the future of software engineering. This course introduces you to Google Antigravity (AGY) and the tridorian standard for Secure Agentic Development.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div className="bg-[#132617] p-6 rounded-xl border border-[#1f3d25]">
@@ -76,7 +76,7 @@ const courseSteps = [
         <h2 className="text-2xl font-bold text-white mt-8 mb-4 border-b border-[#1f3d25] pb-2">Course Roadmap</h2>
         <ul className="space-y-3 text-[#bbf7d0]">
           <li className="flex items-center gap-3"><CheckCircle2 className="text-[#4ade80]" size={18}/> <strong>Setup:</strong> Establish a secure deployment path.</li>
-          <li className="flex items-center gap-3"><CheckCircle2 className="text-[#4ade80]" size={18}/> <strong>Configuration:</strong> Apply AGV Execution Guardrails.</li>
+          <li className="flex items-center gap-3"><CheckCircle2 className="text-[#4ade80]" size={18}/> <strong>Configuration:</strong> Apply AGY Execution Guardrails.</li>
           <li className="flex items-center gap-3"><CheckCircle2 className="text-[#4ade80]" size={18}/> <strong>Micro-AI:</strong> Master editor-level AI assistance.</li>
           <li className="flex items-center gap-3"><CheckCircle2 className="text-[#4ade80]" size={18}/> <strong>Orchestration:</strong> Use Agent Manager to build an app.</li>
           <li className="flex items-center gap-3"><CheckCircle2 className="text-[#4ade80]" size={18}/> <strong>Disaster Recovery:</strong> Learn to use the Panic Button.</li>
@@ -99,7 +99,7 @@ const courseSteps = [
           <div className="p-4 border border-[#1f3d25] rounded-lg bg-[#0a120c]">
             <h4 className="font-bold text-white mb-2">▶ TIER 1: Easy (Direct Binary Install)</h4>
             <p className="text-sm text-[#86efac] mb-3">Best for getting up and running quickly on a personal machine.</p>
-            <CodeBlock language="bash" code={`# macOS & Linux\ncurl -sL https://dl.google.com/agv/install.sh | bash\n\n# Windows (Winget)\nwinget install Google.Antigravity`} />
+            <CodeBlock language="bash" code={`# macOS & Linux\ncurl -sL https://dl.google.com/agy/install.sh | bash\n\n# Windows (Winget)\nwinget install Google.Antigravity`} />
           </div>
 
           <div className="p-4 border border-[#1f3d25] rounded-lg bg-[#0a120c]">
@@ -123,11 +123,11 @@ const courseSteps = [
         <h3 className="text-xl font-bold text-[#4ade80] mt-8 mb-2">Initialize Your Workspace</h3>
         <p className="text-[#bbf7d0]">Open your terminal and initialize your environment. If using Tier 3, run the following to map a local volume and enter the sandbox:</p>
         
-        <CodeBlock language="bash" code={`mkdir -p ~/my-agv-work\n\ndocker run -it --rm --name agv-sandbox \\\n  --network host \\\n  -v ~/my-agv-work:/workspace \\\n  ghcr.io/bluefin-wtg-org/agv-workspace:latest`} />
+        <CodeBlock language="bash" code={`mkdir -p ~/my-agy-work\n\ndocker run -it --rm --name agy-sandbox \\\n  --network host \\\n  -v ~/my-agy-work:/workspace \\\n  ghcr.io/bluefin-wtg-org/agy-workspace:latest`} />
 
         <InfoBox title="Verify the Toolchain">
           Once inside, verify everything is staged perfectly without installing a single package:
-          <CodeBlock language="bash" code={`python3 --version\nagv --version\npython3 -c "from playwright.sync_api import sync_playwright; print('✅ Playwright is ready.')"`} />
+          <CodeBlock language="bash" code={`python3 --version\nagy --version\npython3 -c "from playwright.sync_api import sync_playwright; print('✅ Playwright is ready.')"`} />
         </InfoBox>
       </div>
     )
@@ -139,7 +139,7 @@ const courseSteps = [
     content: (
       <div className="space-y-6">
         <h1 className="text-4xl font-extrabold text-white mb-6">Initializing Mission Control</h1>
-        <p className="text-lg text-[#bbf7d0]">Configure the AGV Editor and establish strict Execution Policies for AI agents.</p>
+        <p className="text-lg text-[#bbf7d0]">Configure the AGY Editor and establish strict Execution Policies for AI agents.</p>
 
         <ol className="list-decimal pl-5 space-y-6 text-[#bbf7d0] mt-6">
           <li>
@@ -147,7 +147,7 @@ const courseSteps = [
             <CodeBlock language="bash" code={`mkdir -p my-agent-app\ncd my-agent-app`} />
           </li>
           <li>
-            <strong className="text-white">Launch AGV:</strong> On your Host Machine, launch the Antigravity Editor and sign in with your Google Workspace Account.
+            <strong className="text-white">Launch AGY:</strong> On your Host Machine, launch the Antigravity Editor and sign in with your Google Workspace Account.
           </li>
           <li>
             <strong className="text-white">Open Workspace:</strong> Click <em>Open Folder</em> and select the <code>my-agent-app</code> directory.
@@ -171,7 +171,7 @@ const courseSteps = [
     content: (
       <div className="space-y-6">
         <h1 className="text-4xl font-extrabold text-white mb-6">Editor Mechanics & Micro-AI</h1>
-        <p className="text-lg text-[#bbf7d0]">Master the micro-level developer tools in AGV before moving on to fully autonomous agents.</p>
+        <p className="text-lg text-[#bbf7d0]">Master the micro-level developer tools in AGY before moving on to fully autonomous agents.</p>
 
         <div className="space-y-8 mt-6">
           <div className="bg-[#0a120c] p-6 rounded-xl border border-[#1f3d25]">
@@ -189,7 +189,7 @@ const courseSteps = [
             <div className="bg-black/50 p-3 rounded text-[#86efac] font-mono text-sm border-l-2 border-[#4ade80]">
               Prompt: "What is wrong with this code?"
             </div>
-            <p className="text-sm text-gray-400 mt-2">Notice how AGV automatically attaches the highlighted code block as context to the agent's side panel.</p>
+            <p className="text-sm text-gray-400 mt-2">Notice how AGY automatically attaches the highlighted code block as context to the agent's side panel.</p>
           </div>
 
           <div className="bg-[#0a120c] p-6 rounded-xl border border-[#1f3d25]">
@@ -310,7 +310,7 @@ const courseSteps = [
 
         <h3 className="text-xl font-bold text-white mt-8 mb-4">1. Create a Rule</h3>
         <p className="text-[#bbf7d0]">Create the hidden directory and a rule file in your terminal:</p>
-        <CodeBlock language="bash" code={`mkdir -p .agents/rules\n\ncat << 'EOF' > .agents/rules/style.md\nAlways prepend the text \`# Copyright 2026 Tridorian\` as a comment at the top of any new source file you generate.\nEOF`} />
+        <CodeBlock language="bash" code={`mkdir -p .agents/rules\n\ncat << 'EOF' > .agents/rules/style.md\nAlways prepend the text \`# Copyright 2026 tridorian\` as a comment at the top of any new source file you generate.\nEOF`} />
 
         <h3 className="text-xl font-bold text-white mt-8 mb-4">2. Create a Workflow</h3>
         <p className="text-[#bbf7d0]">Create a custom slash-command to generate tests automatically:</p>
@@ -340,7 +340,7 @@ const courseSteps = [
 
         <h3 className="text-xl font-bold text-white mt-8 mb-4">1. Break the Environment</h3>
         <p className="text-[#bbf7d0]">Intentionally delete core system binaries:</p>
-        <CodeBlock language="bash" code={`rm -rf $(which agv)\nrm -rf $(which python3)`} />
+        <CodeBlock language="bash" code={`rm -rf $(which agy)\nrm -rf $(which python3)`} />
         <p className="text-[#bbf7d0]">Verify failure by running <code>python3 --version</code>. It will fail. <strong>Don't panic.</strong></p>
 
         <h3 className="text-xl font-bold text-white mt-8 mb-4">2. The Panic Button</h3>
@@ -385,7 +385,7 @@ const courseSteps = [
             <li className="flex items-start gap-3">
               <ChevronRight className="text-[#4ade80] mt-1 flex-shrink-0" size={20}/> 
               <div>
-                <strong className="text-white">Explore the Marketplace:</strong> Check out the community-driven Rules and Workflows available for AGV to speed up your specific technology stack.
+                <strong className="text-white">Explore the Marketplace:</strong> Check out the community-driven Rules and Workflows available for AGY to speed up your specific technology stack.
               </div>
             </li>
           </ul>
@@ -444,7 +444,7 @@ export default function App() {
       `}>
         <div className="p-6 hidden md:block border-b border-[#1f3d25]">
           <div className="font-extrabold text-xl text-[#4ade80] tracking-[0.2em]">TRIDORIAN</div>
-          <div className="text-xs text-[#86efac] mt-1 font-mono">LABS // AGV-01</div>
+          <div className="text-xs text-[#86efac] mt-1 font-mono">LABS // AGY-01</div>
         </div>
         
         <div className="p-4 flex-1">
@@ -533,22 +533,7 @@ export default function App() {
         </footer>
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
-        /* Custom Scrollbar for sidebar to match theme */
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #0a120c;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #1f3d25;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #4ade80;
-        }
-      `}} />
+
     </div>
   );
 }

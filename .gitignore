@@ -2,4 +2,9 @@ node_modules/
 dist/
 .vercel/
 .cache/
+cache/
+*.json.bak
 *.log
+.env
+.env.*
+!.env.example

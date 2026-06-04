@@ -2,7 +2,7 @@
 
 [![Build and Deploy](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml/badge.svg)](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml)
 
-The course catalog demo. This project showcases the capabilities of  the Tridorian standard for  an interactive web-based course.
+The course catalog demo. This project showcases the capabilities of  the tridorian standard for  an interactive web-based course.
 
 **[🚀 Launch Live Course Catalog](https://wtg-codes.github.io/course-catalog/)**
 
@@ -58,6 +58,12 @@ This project is configured for automated deployment to GitHub Pages via GitHub A
 ## Architecture
 
 See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed architecture documentation.
+
+Key architectural decisions are documented as Architecture Decision Records (ADRs) under [docs/adr/](./docs/adr/):
+- [ADR 0001: Core Content Hierarchy & Schema Validation](./docs/adr/0001-core-content-hierarchy-schema-validation.md)
+- [ADR 0002: Multi-Type Module Rendering](./docs/adr/0002-multi-type-module-rendering.md)
+- [ADR 0003: Dynamic Routing & Breadcrumb Navigation](./docs/adr/0003-dynamic-routing-breadcrumb-navigation.md)
+- [ADR 0004: Progress Persistence & Drive Synchronization](./docs/adr/0004-progress-persistence-drive-synchronization.md)
 
 ## Documentation
 

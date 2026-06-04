@@ -1,0 +1,46 @@
+{
+  "id": "4",
+  "title": "4. Evaluating agent accuracy and regression metrics",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Regression & Accuracy Metrics"
+    },
+    {
+      "type": "p",
+      "content": "As prompts and tools are modified, you must ensure the agent doesn't regress. Regression testing compares active runs against a benchmark list of known Q&A test cases."
+    },
+    {
+      "type": "grid",
+      "items": [
+        {
+          "icon": "FileText",
+          "title": "Cosine Similarity",
+          "content": "Measures semantic overlap of response embeddings against a golden standard.",
+          "border": "#4ade80"
+        },
+        {
+          "icon": "Shield",
+          "title": "Tool Call Auditing",
+          "content": "Verifies the agent executes the correct tools in the correct order.",
+          "border": "#3b82f6"
+        },
+        {
+          "icon": "Check",
+          "title": "Assertion Passes",
+          "content": "Runs boolean validation checks on returned data tables.",
+          "border": "#ef4444"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is a 'golden dataset' in agent evaluation?\n- A) An expensive dataset hosted on cloud nodes.\n- B) A static collection of validated input-output pairs used to track regression.\n- C) A system database storing user passwords.\n\nFeedback: Option B is correct. Golden datasets benchmark model outputs."
+    }
+  ]
+}

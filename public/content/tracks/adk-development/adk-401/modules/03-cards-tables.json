@@ -1,0 +1,49 @@
+{
+  "id": "3",
+  "title": "3. Structuring Cards, Lists, and Data Tables",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Cards, Lists, & Data Tables"
+    },
+    {
+      "type": "p",
+      "content": "Rendering structured records (like server lists or database tables) inside markdown text blocks is hard to read. A2UI tables support sorting metadata and visual column formatting."
+    },
+    {
+      "type": "h2",
+      "content": "A2UI Table Definition Schema"
+    },
+    {
+      "type": "p",
+      "content": "Use the following schema format to represent inventory query records dynamically inside the visual panel:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"type\": \"data-table\",\n  \"headers\": [\n    {\"key\": \"item_id\", \"label\": \"ID\", \"sortable\": true},\n    {\"key\": \"status\", \"label\": \"Status\", \"sortable\": false},\n    {\"key\": \"quantity\", \"label\": \"In Stock\", \"sortable\": true}\n  ],\n  \"rows\": [\n    {\"item_id\": \"8802\", \"status\": \"Active\", \"quantity\": 150},\n    {\"item_id\": \"8803\", \"status\": \"Low Stock\", \"quantity\": 4},\n    {\"item_id\": \"8804\", \"status\": \"Discontinued\", \"quantity\": 0}\n  ]\n}"
+    },
+    {
+      "type": "info",
+      "title": "Client rendering",
+      "content": "Tables rendered via A2UI automatically include user interface wrappers for local pagination, column resizing, and row selections."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How can you specify that a column header in an A2UI data table should be sortable by the end-user?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Set 'sortable': true within the header configuration object.\n- B) Include a custom CSS script in the layout configuration.\n- C) Prefix the column header label with an asterisk."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option A is correct. Adding 'sortable': true to a header object tells the client-side renderer to add sorting triggers for that column."
+    }
+  ]
+}

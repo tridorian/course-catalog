@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Setting up Python ADK SDK bindings",
+      "file": "modules/01-python-sdk.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Implementing Node.js ADK SDK bindings",
+      "file": "modules/02-nodejs-sdk.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Executing the Agent run loop programmatically",
+      "file": "modules/03-run-loop.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Capturing agent hooks and execution events",
+      "file": "modules/04-sdk-hooks.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Bootstrapping a custom SDK-based Slack bot",
+      "file": "modules/05-lab-slack-bot.json"
+    }
+  ]
+}

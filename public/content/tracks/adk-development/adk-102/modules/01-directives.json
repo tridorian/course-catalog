@@ -1,0 +1,41 @@
+{
+  "id": "1",
+  "title": "1. Exploring agent.yaml Directives and Schema Options",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Exploring agent.yaml Directives"
+    },
+    {
+      "type": "p",
+      "content": "The `agent.yaml` file is the declarative manifest for any ADK agent. It dictates behavior parameters, safety thresholds, active tool registrations, and execution limits. Understanding the layout structure is vital for enterprise control."
+    },
+    {
+      "type": "h2",
+      "content": "YAML Schema Anatomy"
+    },
+    {
+      "type": "p",
+      "content": "A standard `agent.yaml` includes metadata headers, model directives, and parameter limits. Here is a configuration snippet highlighting these properties:"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "metadata:\n  name: \"enterprise-assistant\"\n  version: \"1.2.0\"\nsettings:\n  model: \"gemini-1.5-pro\"\n  temperature: 0.2\n  max_tokens: 4096\n  concurrency_limit: 5"
+    },
+    {
+      "type": "info",
+      "title": "Configuration Validation",
+      "content": "ADK validates the YAML properties against a strict JSON Schema at runtime. Invalid or unrecognized top-level keys will raise a validation error."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which of the following defines the operational bounds like concurrency and temperature in ADK?\n- A) The metadata section\n- B) The settings block\n- C) The tool definition list\n\nFeedback: Option B is correct. Settings dictate execution parameters."
+    }
+  ]
+}

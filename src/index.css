@@ -1,3 +1,825 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ========================================
+   TRIDORIAN THEME ENGINE
+   5 themes via CSS custom properties
+   ======================================== */
+
+/* Default: tridorian Dark (green accent on dark bg) */
+:root {
+  color-scheme: dark;
+  --bg-base: #050805;
+  --bg-panel: #0a120c;
+  --bg-muted: #132617;
+  --bg-elevated: #1a3520;
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
+  --border-main: #1f3d25;
+  --border-subtle: #132617;
+  --accent-bg: #4ade80;
+  --accent-fg: #000000;
+  --accent-text: #4ade80;
+  --accent-muted: rgba(74, 222, 128, 0.1);
+  --accent-border: rgba(74, 222, 128, 0.3);
+  --shadow-accent: 0 0 15px rgba(74, 222, 128, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --quiz-correct-bg: rgba(16, 185, 129, 0.15);
+  --quiz-correct-text: #34d399;
+  --quiz-correct-border: rgba(16, 185, 129, 0.4);
+  --quiz-incorrect-bg: rgba(244, 63, 94, 0.15);
+  --quiz-incorrect-text: #fda4af;
+  --quiz-incorrect-border: rgba(244, 63, 94, 0.4);
+}
+
+/* Light Theme */
+.theme-light {
+  color-scheme: light;
+  --bg-base: #f8faf9;
+  --bg-panel: #ffffff;
+  --bg-muted: #ecfdf5;
+  --bg-elevated: #ffffff;
+  --text-main: #0f1f15;
+  --text-muted: #4b6e5a;
+  --border-main: #d1e7dd;
+  --border-subtle: #ecfdf5;
+  --accent-bg: #16a34a;
+  --accent-fg: #ffffff;
+  --accent-text: #15803d;
+  --accent-muted: rgba(22, 163, 74, 0.08);
+  --accent-border: rgba(22, 163, 74, 0.25);
+  --shadow-accent: 0 0 15px rgba(22, 163, 74, 0.15);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --quiz-correct-bg: rgba(25, 135, 84, 0.08);
+  --quiz-correct-text: #0f5132;
+  --quiz-correct-border: rgba(25, 135, 84, 0.25);
+  --quiz-incorrect-bg: rgba(220, 53, 69, 0.08);
+  --quiz-incorrect-text: #842029;
+  --quiz-incorrect-border: rgba(220, 53, 69, 0.25);
+}
+
+/* Rainbow Kitten — warm playful pinks, WCAG AA compliant */
+.theme-kitten {
+  color-scheme: light;
+  --bg-base: #fef4f8;
+  --bg-panel: #ffffff;
+  --bg-muted: #fde8ef;
+  --bg-elevated: #fffafc;
+  --text-main: #2d0b1a;
+  --text-muted: #8e1d50;
+  --border-main: #f4b8cc;
+  --border-subtle: #fde8ef;
+  --accent-bg: #e91e8c;
+  --accent-fg: #ffffff;
+  --accent-text: #c2185b;
+  --accent-muted: rgba(233, 30, 140, 0.08);
+  --accent-border: rgba(233, 30, 140, 0.25);
+  --shadow-accent: 0 0 15px rgba(233, 30, 140, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --quiz-correct-bg: rgba(25, 135, 84, 0.08);
+  --quiz-correct-text: #0f5132;
+  --quiz-correct-border: rgba(25, 135, 84, 0.25);
+  --quiz-incorrect-bg: rgba(220, 53, 69, 0.08);
+  --quiz-incorrect-text: #842029;
+  --quiz-incorrect-border: rgba(220, 53, 69, 0.25);
+}
+
+/* Caribbean Mood — warm tropical teal, WCAG AA compliant */
+.theme-caribbean {
+  color-scheme: light;
+  --bg-base: #e6f9f5;
+  --bg-panel: #ffffff;
+  --bg-muted: #ccf2ea;
+  --bg-elevated: #f5fffe;
+  --text-main: #0a2922;
+  --text-muted: #1a6b5e;
+  --border-main: #7ad4c6;
+  --border-subtle: #ccf2ea;
+  --accent-bg: #0d9e8a;
+  --accent-fg: #ffffff;
+  --accent-text: #0b7d6d;
+  --accent-muted: rgba(13, 158, 138, 0.08);
+  --accent-border: rgba(13, 158, 138, 0.25);
+  --shadow-accent: 0 0 15px rgba(13, 158, 138, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --quiz-correct-bg: rgba(25, 135, 84, 0.08);
+  --quiz-correct-text: #0f5132;
+  --quiz-correct-border: rgba(25, 135, 84, 0.25);
+  --quiz-incorrect-bg: rgba(220, 53, 69, 0.08);
+  --quiz-incorrect-text: #842029;
+  --quiz-incorrect-border: rgba(220, 53, 69, 0.25);
+}
+
+/* Lunar Vibe — monochrome, focused, white on black */
+.theme-lunar {
+  color-scheme: dark;
+  --bg-base: #000000;
+  --bg-panel: #0c0c0c;
+  --bg-muted: #161616;
+  --bg-elevated: #1e1e1e;
+  --text-main: #f5f5f5;
+  --text-muted: #b0b0b0;
+  --border-main: #2a2a2a;
+  --border-subtle: #161616;
+  --accent-bg: #e8e8e8;
+  --accent-fg: #000000;
+  --accent-text: #e0e0e0;
+  --accent-muted: rgba(232, 232, 232, 0.07);
+  --accent-border: rgba(232, 232, 232, 0.18);
+  --shadow-accent: 0 0 15px rgba(255, 255, 255, 0.06);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --quiz-correct-bg: rgba(16, 185, 129, 0.15);
+  --quiz-correct-text: #34d399;
+  --quiz-correct-border: rgba(16, 185, 129, 0.4);
+  --quiz-incorrect-bg: rgba(244, 63, 94, 0.15);
+  --quiz-incorrect-text: #fda4af;
+  --quiz-incorrect-border: rgba(244, 63, 94, 0.4);
+}
+
+/* Jurassic Jeep — Jurassic Park Jeep Jamboree: deep forest green, hazard yellow, and crimson red */
+.theme-jungle {
+  color-scheme: dark;
+  --bg-base: #060e0a;
+  --bg-panel: #0c1a12;
+  --bg-muted: #132a1e;
+  --bg-elevated: #1b3a2a;
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
+  --border-main: #204d37;
+  --border-subtle: #132a1e;
+  --accent-bg: #f5c518;
+  --accent-fg: #000000;
+  --accent-text: #f5c518;
+  --accent-muted: rgba(245, 197, 24, 0.08);
+  --accent-border: rgba(245, 197, 24, 0.25);
+  --accent-red: #b91c1c;
+  --shadow-accent: 0 0 15px rgba(245, 197, 24, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --quiz-correct-bg: rgba(16, 185, 129, 0.15);
+  --quiz-correct-text: #34d399;
+  --quiz-correct-border: rgba(16, 185, 129, 0.4);
+  --quiz-incorrect-bg: rgba(185, 28, 28, 0.15);
+  --quiz-incorrect-text: #fca5a5;
+  --quiz-incorrect-border: rgba(185, 28, 28, 0.4);
+  --theme-pattern-bg: url("/jurassic_jeep_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
+}
+
+/* EVA-01 — mecha theme with cybernetic purple & neon green */
+.theme-genesis {
+  color-scheme: dark;
+  --bg-base: #0a0512;
+  --bg-panel: #110920;
+  --bg-muted: #190f2d;
+  --bg-elevated: #24163f;
+  --text-main: #f3e8ff;
+  --text-muted: #d8b4fe;
+  --border-main: #341e57;
+  --border-subtle: #190f2d;
+  --accent-bg: #39ff14; /* Neon Green */
+  --accent-fg: #000000;
+  --accent-text: #39ff14;
+  --accent-muted: rgba(57, 255, 20, 0.08);
+  --accent-border: rgba(57, 255, 20, 0.25);
+  --shadow-accent: 0 0 15px rgba(57, 255, 20, 0.25);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --quiz-correct-bg: rgba(16, 185, 129, 0.15);
+  --quiz-correct-text: #34d399;
+  --quiz-correct-border: rgba(16, 185, 129, 0.4);
+  --quiz-incorrect-bg: rgba(244, 63, 94, 0.15);
+  --quiz-incorrect-text: #fda4af;
+  --quiz-incorrect-border: rgba(244, 63, 94, 0.4);
+  --theme-pattern-bg: url("/neon_genesis_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.15;
+}
+
+/* Themed Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-panel);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-text);
+}
+
+/* Core Utility Classes */
+.accent-btn {
+  @apply transition-all duration-200 ease-in-out font-bold;
+  background-color: var(--accent-bg);
+  color: var(--accent-fg);
+  box-shadow: var(--shadow-sm);
+}
+.accent-btn:hover {
+  @apply brightness-110;
+  box-shadow: var(--shadow-accent);
+}
+.accent-btn:active {
+  @apply brightness-95;
+}
+.accent-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+@layer base {
+  body {
+    @apply antialiased;
+    background-color: var(--bg-base);
+    background-image: var(--bg-gradient, none);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease, background-image 0.3s ease;
+  }
+  button:disabled {
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+/* ========================================
+   CUSTOM SCROLLBARS PER THEME
+   ======================================== */
+.theme-kitten ::-webkit-scrollbar-thumb {
+  background: var(--accent-bg);
+  border: 2px solid var(--bg-panel);
+}
+.theme-kitten ::-webkit-scrollbar-track {
+  background: var(--bg-muted);
+}
+
+.theme-caribbean ::-webkit-scrollbar-thumb {
+  background: var(--accent-text);
+  border-radius: 4px;
+}
+.theme-caribbean ::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+.theme-lunar ::-webkit-scrollbar-thumb {
+  background: var(--accent-bg);
+  border-radius: 0px;
+}
+.theme-lunar ::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+.theme-jungle ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b91c1c 0%, #eab308 100%);
+  border: 2px solid var(--bg-panel);
+  border-radius: 6px;
+}
+.theme-jungle ::-webkit-scrollbar-track {
+  background: var(--bg-muted);
+}
+
+.theme-genesis ::-webkit-scrollbar-thumb {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-text);
+  border-radius: 0px;
+}
+.theme-genesis ::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+/* ========================================
+   THEME PATTERN & GRID OVERLAYS
+   ======================================== */
+.theme-pattern-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: var(--test-pattern-opacity, var(--theme-pattern-opacity, 0.4));
+  background-image: var(--test-pattern-bg, var(--theme-pattern-bg, none));
+  background-size: var(--test-pattern-size, var(--theme-pattern-size, auto));
+  transition: opacity 0.3s ease, background-size 0.2s ease;
+}
+
+body:not(.theme-light):not(.theme-kitten):not(.theme-caribbean):not(.theme-lunar):not(.theme-custom):not(.theme-jungle):not(.theme-genesis) {
+  --theme-pattern-bg: url("/tridorian_dark_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.15;
+}
+
+.theme-light {
+  --theme-pattern-bg: url("/clean_light_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
+}
+
+.theme-kitten {
+  --theme-pattern-bg: url("/rainbow_kitten_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
+}
+
+.theme-caribbean {
+  --theme-pattern-bg: url("/caribbean_mood_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
+}
+
+.theme-lunar {
+  --theme-pattern-bg: url("/lunar_vibe_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.15;
+}
+
+/* ========================================
+   CUSTOM INTERACTIVE CURSORS
+   ======================================== */
+body:not([class*="theme-"]) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='0' y='2' width='8' height='12' fill='%234ade80'/%3E%3C/svg%3E") 4 8, auto;
+}
+body:not([class*="theme-"]) a,
+body:not([class*="theme-"]) button,
+body:not([class*="theme-"]) [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='0' y='2' width='8' height='12' fill='%234ade80' opacity='0.7'/%3E%3Cpath d='M4,10 L12,10' stroke='%234ade80' stroke-width='2'/%3E%3C/svg%3E") 4 8, pointer;
+}
+
+body.theme-light {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='5' fill='none' stroke='%2316a34a' stroke-width='2'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%2316a34a'/%3E%3C/svg%3E") 10 10, auto;
+}
+body.theme-light a,
+body.theme-light button,
+body.theme-light [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='7' fill='none' stroke='%2315803d' stroke-width='1.5'/%3E%3Cpath d='M10,3 C10,3 7,7 10,12 C13,7 10,3 10,3' fill='%2315803d'/%3E%3C/svg%3E") 10 10, pointer;
+}
+
+body.theme-kitten {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16,14 C12,14 10,17 10,21 C10,25 13,27 16,27 C19,27 22,25 22,21 C22,17 20,14 16,14 Z' fill='%23e91e8c'/%3E%3Ccircle cx='9' cy='11' r='3.5' fill='%23e91e8c'/%3E%3Ccircle cx='13.5' cy='7.5' r='3.5' fill='%23e91e8c'/%3E%3Ccircle cx='18.5' cy='7.5' r='3.5' fill='%23e91e8c'/%3E%3Ccircle cx='23' cy='11' r='3.5' fill='%23e91e8c'/%3E%3C/svg%3E") 16 16, auto;
+}
+body.theme-kitten a,
+body.theme-kitten button,
+body.theme-kitten [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16,14 C12,14 10,17 10,21 C10,25 13,27 16,27 C19,27 22,25 22,21 C22,17 20,14 16,14 Z' fill='%23c2185b'/%3E%3Ccircle cx='9' cy='11' r='3.5' fill='%23c2185b'/%3E%3Ccircle cx='13.5' cy='7.5' r='3.5' fill='%23c2185b'/%3E%3Ccircle cx='18.5' cy='7.5' r='3.5' fill='%23c2185b'/%3E%3Ccircle cx='23' cy='11' r='3.5' fill='%23c2185b'/%3E%3Cpath d='M16,14 L16,9' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, pointer;
+}
+
+body.theme-caribbean {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='rgba(13, 158, 138, 0.2)' stroke='%230d9e8a' stroke-width='2'/%3E%3Ccircle cx='9' cy='9' r='2' fill='white'/%3E%3C/svg%3E") 12 12, auto;
+}
+body.theme-caribbean a,
+body.theme-caribbean button,
+body.theme-caribbean [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='rgba(13, 158, 138, 0.4)' stroke='%230b7d6d' stroke-width='2'/%3E%3Cpath d='M8,8 C11,10 13,10 16,8' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+body.theme-lunar {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='6' fill='none' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='12' y1='2' x2='12' y2='6' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='12' y1='18' x2='12' y2='22' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='2' y1='12' x2='6' y2='12' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3Cline x1='18' y1='12' x2='22' y2='12' stroke='%23e8e8e8' stroke-width='1.5'/%3E%3C/svg%3E") 12 12, auto;
+}
+body.theme-lunar a,
+body.theme-lunar button,
+body.theme-lunar [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='6' fill='%23e8e8e8'/%3E%3Ccircle cx='10' cy='10' r='5' fill='%230c0c0c'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+body.theme-jungle {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23eab308' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23b91c1c'/%3E%3Cline x1='12' y1='2' x2='12' y2='6' stroke='%23eab308' stroke-width='1.5'/%3E%3Cline x1='12' y1='18' x2='12' y2='22' stroke='%23eab308' stroke-width='1.5'/%3E%3Cline x1='2' y1='12' x2='6' y2='12' stroke='%23eab308' stroke-width='1.5'/%3E%3Cline x1='18' y1='12' x2='22' y2='12' stroke='%23eab308' stroke-width='1.5'/%3E%3C/svg%3E") 12 12, auto;
+}
+body.theme-jungle a,
+body.theme-jungle button,
+body.theme-jungle [role="button"],
+body.theme-jungle select,
+body.theme-jungle input {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='rgba(234,179,8,0.2)' stroke='%23eab308' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='21' stroke='%23eab308' stroke-width='2'/%3E%3Cline x1='3' y1='12' x2='21' y2='12' stroke='%23eab308' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%23b91c1c' stroke='%23eab308' stroke-width='1'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+body.theme-genesis {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 22,22 12,18 2,22' fill='%2339ff14' stroke='%23ff5500' stroke-width='1.5'/%3E%3C/svg%3E") 12 2, auto;
+}
+body.theme-genesis a,
+body.theme-genesis button,
+body.theme-genesis [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 22,22 12,18 2,22' fill='%23ff5500' stroke='%2339ff14' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='2' fill='white'/%3E%3C/svg%3E") 12 2, pointer;
+}
+
+/* ========================================
+   THEME HOVER EFFECTS & MICRO-INTERACTIONS
+   ======================================== */
+
+/* tridorian Dark Hover */
+body:not([class*="theme-"]) .accent-btn {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+@keyframes terminal-blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* tridorian Dark Progress Glow & Scan */
+body:not([class*="theme-"]) .progress-bar-fill {
+  background: linear-gradient(90deg, #22c55e 0%, #4ade80 50%, #22c55e 100%);
+  background-size: 200% 100%;
+  animation: matrix-scan 2s linear infinite;
+}
+
+@keyframes matrix-scan {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
+
+/* tridorian Dark Checkbox Glitch */
+body:not([class*="theme-"]) .group:hover svg.text-accent-text {
+  animation: cyber-glitch 0.3s ease;
+}
+
+@keyframes cyber-glitch {
+  0% { transform: translate(0) skew(0deg); }
+  20% { transform: translate(-2px, 2px) skew(-5deg); filter: hue-rotate(90deg); }
+  40% { transform: translate(2px, -2px) skew(5deg); }
+  60% { transform: translate(-1px, -1px) skew(-2deg); }
+  80% { transform: translate(1px, 1px) skew(2deg); }
+  100% { transform: translate(0) skew(0deg); }
+}
+
+@keyframes cyber-glitch-sporadic {
+  0%, 60%, 70%, 90%, 100% {
+    transform: translate(0) skew(0deg);
+    filter: none;
+  }
+  62% {
+    transform: translate(-3px, 1px) skew(-3deg);
+    filter: hue-rotate(60deg) brightness(1.25);
+  }
+  64% {
+    transform: translate(2px, -2px) skew(4deg);
+    filter: hue-rotate(120deg) contrast(1.3);
+  }
+  66% {
+    transform: translate(0) skew(0deg);
+    filter: none;
+  }
+  92% {
+    transform: translate(3px, 2px) skew(5deg);
+    filter: hue-rotate(180deg) brightness(0.95);
+  }
+  94% {
+    transform: translate(-2px, -1px) skew(-4deg);
+  }
+  96% {
+    transform: translate(0) skew(0deg);
+    filter: none;
+  }
+}
+
+/* Clean Light Leaf-Spring Hover */
+body.theme-light button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-light a:not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-light .rounded-xl:hover,
+body.theme-light .rounded-2xl:hover {
+  transform: scale(1.03) translateY(-2px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body.theme-light svg.text-accent-text {
+  animation: leaf-bloom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes leaf-bloom {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.2) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+body.theme-light .progress-bar-fill {
+  background: linear-gradient(90deg, #16a34a 0%, #4ade80 100%);
+  position: relative;
+  overflow: hidden;
+}
+body.theme-light .progress-bar-fill::after {
+  content: '🌿';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  animation: leaf-sway 2s ease-in-out infinite alternate;
+}
+
+@keyframes leaf-sway {
+  0% { transform: translateY(-50%) rotate(-10deg); }
+  100% { transform: translateY(-50%) rotate(15deg); }
+}
+
+/* Rainbow Kitten Wobble/Jiggle */
+body.theme-kitten button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-kitten a:not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-kitten nav div.group:hover,
+body.theme-kitten .rounded-xl:hover,
+body.theme-kitten .rounded-2xl:hover {
+  animation: jiggle 0.4s ease-in-out;
+}
+
+@keyframes jiggle {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.05) rotate(-2deg); }
+  50% { transform: scale(0.96) rotate(2deg); }
+  75% { transform: scale(1.02) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+body.theme-kitten .border-accent {
+  border-image: linear-gradient(45deg, #ff9a9e, #fecfef, #a1c4fd, #fecfef) 1;
+  animation: rainbow-border-flow 3s linear infinite;
+}
+
+@keyframes rainbow-border-flow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+body.theme-kitten .progress-bar-fill {
+  background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 25%, #a1c4fd 50%, #fecfef 75%, #ff9a9e 100%);
+  background-size: 200% auto;
+  animation: rainbow-wave 2s linear infinite;
+  position: relative;
+}
+
+@keyframes rainbow-wave {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+body.theme-kitten .progress-bar-fill::after {
+  content: '🧶';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  animation: spin-yarn 1.5s linear infinite;
+}
+
+@keyframes spin-yarn {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Caribbean Mood sea sway */
+body.theme-caribbean nav div.group:hover,
+body.theme-caribbean .rounded-xl:hover,
+body.theme-caribbean .rounded-2xl:hover {
+  transform: translateY(-2px);
+  animation: sea-sway 3s ease-in-out infinite alternate;
+}
+
+@keyframes sea-sway {
+  0% { transform: translateY(-2px) rotate(-0.5deg); }
+  100% { transform: translateY(-3px) rotate(0.5deg); }
+}
+
+body.theme-caribbean .accent-btn,
+body.theme-caribbean button.bg-accent:not(:disabled):not(.rounded-xl):not(.rounded-2xl),
+body.theme-caribbean a.bg-accent:not(.rounded-xl):not(.rounded-2xl) {
+  position: relative;
+  overflow: hidden;
+  background-size: 100% 200%;
+  background-image: linear-gradient(to top, var(--accent-bg) 50%, #7ad4c6 100%);
+  transition: background-position 0.5s ease;
+}
+body.theme-caribbean .accent-btn:hover,
+body.theme-caribbean button.bg-accent:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-caribbean a.bg-accent:not(.rounded-xl):not(.rounded-2xl):hover {
+  background-position: 0 100%;
+}
+
+body.theme-caribbean svg.text-accent-text {
+  animation: bubble-burst 0.6s ease-out;
+}
+
+@keyframes bubble-burst {
+  0% { transform: scale(0.6); filter: brightness(1.5); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+body.theme-caribbean .progress-bar-fill {
+  background: linear-gradient(90deg, #0d9e8a 0%, #ccf2ea 50%, #0d9e8a 100%);
+  background-size: 200% 100%;
+  animation: matrix-scan 3s ease-in-out infinite;
+}
+
+/* Lunar Vibe stark hover */
+body.theme-lunar .rounded-xl:hover,
+body.theme-lunar .rounded-2xl:hover,
+body.theme-lunar nav div.group:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.theme-lunar .accent-btn:hover,
+body.theme-lunar button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-lunar a:not(.rounded-xl):not(.rounded-2xl):hover {
+  box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.3);
+}
+
+body.theme-lunar svg.text-accent-text {
+  animation: cosmic-spark 0.8s ease-in-out;
+}
+
+@keyframes cosmic-spark {
+  0% { filter: drop-shadow(0 0 0 white); opacity: 0; }
+  50% { filter: drop-shadow(0 0 8px white); opacity: 1; }
+  100% { filter: drop-shadow(0 0 2px white); }
+}
+
+body.theme-lunar .progress-bar-fill {
+  position: relative;
+  background-color: var(--accent-bg);
+  overflow: hidden;
+}
+body.theme-lunar .progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shooting-star 1.8s ease-in-out infinite;
+}
+
+@keyframes shooting-star {
+  0% { left: -50%; }
+  100% { left: 150%; }
+}
+
+/* ========================================
+   CELEBRATION PHYSICS CLASSES
+   ======================================== */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-50px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+.animate-fall {
+  animation: fall linear infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.group:hover .group-hover\:animate-shimmer {
+  animation: shimmer 1.2s ease-in-out;
+}
+/* Jungle Safari Hover animations */
+body.theme-jungle button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-jungle a:not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-jungle nav div.group:hover,
+body.theme-jungle .rounded-xl:hover,
+body.theme-jungle .rounded-2xl:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3), 0 0 0 1px #eab308;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+body.theme-jungle .progress-bar-fill {
+  background: repeating-linear-gradient(
+    -45deg,
+    #b91c1c,
+    #b91c1c 8px,
+    #eab308 8px,
+    #eab308 16px
+  );
+  background-size: 40px 40px;
+  animation: hazard-move 4s linear infinite;
+}
+@keyframes hazard-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+/* EVA-01 HUD animations */
+body.theme-genesis button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-genesis a:not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-genesis nav div.group:hover {
+  animation: cyber-glitch 0.25s linear infinite alternate;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+}
+body.theme-genesis .rounded-xl:hover,
+body.theme-genesis .rounded-2xl:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.25);
+  transition: all 0.3s ease;
+}
+body.theme-genesis .progress-bar-fill {
+  background: linear-gradient(90deg, #c084fc 0%, #39ff14 100%);
+  background-size: 200% 100%;
+  animation: matrix-scan 2.5s linear infinite;
+}
+
+/* Custom Cursor Override Switch */
+body.disable-custom-cursor,
+body.disable-custom-cursor * {
+  cursor: auto !important;
+}
+body.disable-custom-cursor a,
+body.disable-custom-cursor button,
+body.disable-custom-cursor [role="button"],
+body.disable-custom-cursor select,
+body.disable-custom-cursor input {
+  cursor: pointer !important;
+}
+
+/* Quiz Option Contrast & Readability Overrides */
+.quiz-option {
+  color: var(--text-main) !important;
+  background-color: var(--bg-panel) !important;
+  border-color: var(--border-main) !important;
+}
+.quiz-option span {
+  color: inherit !important;
+}
+.quiz-option:hover:not(:disabled) {
+  background-color: var(--bg-elevated) !important;
+  color: var(--accent-text) !important;
+}
+.quiz-option.quiz-selected {
+  background-color: var(--bg-muted) !important;
+  border-color: var(--accent-bg) !important;
+  color: var(--accent-text) !important;
+}
+.quiz-option.quiz-selected span {
+  color: var(--accent-text) !important;
+}
+.quiz-option:disabled {
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+  color: inherit !important;
+}
+.quiz-option.quiz-correct {
+  background-color: var(--quiz-correct-bg) !important;
+  border-color: var(--quiz-correct-border) !important;
+  color: var(--quiz-correct-text) !important;
+}
+.quiz-option.quiz-correct span {
+  color: var(--quiz-correct-text) !important;
+}
+.quiz-option.quiz-incorrect {
+  background-color: var(--quiz-incorrect-bg) !important;
+  border-color: var(--quiz-incorrect-border) !important;
+  color: var(--quiz-incorrect-text) !important;
+}
+.quiz-option.quiz-incorrect span {
+  color: var(--quiz-incorrect-text) !important;
+}
+.quiz-option.quiz-unselected {
+  opacity: 0.85 !important;
+  color: var(--text-muted) !important;
+}
+.quiz-option.quiz-unselected span {
+  color: var(--text-muted) !important;
+}
+
+/* Custom Scrollbar for sidebar to match theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-bg);
+}

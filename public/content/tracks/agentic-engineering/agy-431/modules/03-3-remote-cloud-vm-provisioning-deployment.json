@@ -1,0 +1,155 @@
+{
+  "id": "3",
+  "title": "3. Remote Cloud VM Setup & Deployment",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Automating Infrastructure for Agent Workloads"
+    },
+    {
+      "type": "p",
+      "content": "Scaling agent workflows requires automated VM provisioning. We use Terraform to define the target virtual machines, secure firewall rules, and metadata scripts that bootstrap the host, mount directories, configure systemd, and launch the agy-box container."
+    },
+    {
+      "type": "h3",
+      "content": "Terraform Configuration for VM Bootstrapping"
+    },
+    {
+      "type": "p",
+      "content": "The following Terraform manifest provisions a hardened GCE instance with metadata that automatically configures Podman and deploys the custom agy-box image."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "resource \"google_compute_instance\" \"agy_sandbox_vm\" {\n  name         = \"agy-sandbox-vm-prod\"\n  machine_type = \"e2-standard-4\"\n  zone         = \"us-central1-a\"\n\n  boot_disk {\n    initialize_params {\n      image = \"cos-cloud/cos-stable\" # Container-Optimized OS\n      size  = 50\n    }\n  }\n\n  network_interface {\n    network    = \"corp-vpc\"\n    subnetwork = \"secure-agents-subnet\"\n    # Omit access_config to ensure no public IP is assigned\n  }\n\n  metadata = {\n    user-data = <<-EOF\n      #cloud-config\n      write_files:\n      - path: /etc/systemd/system/agy-box.service\n        permissions: \"0644\"\n        owner: root\n        content: |\n          [Unit]\n          Description=Google Antigravity Sandbox OCI Container\n          After=network-online.target\n          Wants=network-online.target\n          [Service]\n          Restart=always\n          ExecStartPre=-/usr/bin/docker kill agy-sandbox\n          ExecStartPre=-/usr/bin/docker rm agy-sandbox\n          ExecStart=/usr/bin/docker run \\\n            --name agy-sandbox \\\n            --read-only \\\n            -v /var/opt/agy/workspace:/workspace:rw \\\n            -p 8080:8080 \\\n            gcr.io/tridorian-corp/agy-box:v1.2.0\n          ExecStop=/usr/bin/docker stop agy-sandbox\n          [Install]\n          WantedBy=multi-user.target\n    EOF\n  }\n\n  service_account {\n    email  = \"agy-runner-sa@my-project.iam.gserviceaccount.com\"\n    scopes = [\"https://www.googleapis.com/auth/cloud-platform\"]\n  }\n}"
+    },
+    {
+      "type": "h3",
+      "content": "Configuring Host systemd Service Managers"
+    },
+    {
+      "type": "p",
+      "content": "In standard Linux distributions (like RedHat, Ubuntu, or Debian), we use systemd services to guarantee high availability of the sandboxed agent server. This setup ensures that if the agent process crashes or the VM reboots, the environment is automatically rebuilt in its clean, immutable state."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Location: /etc/systemd/system/agy-sandbox.service\n[Unit]\nDescription=AGY Containerized Engine Service\nAfter=network.target network-online.target podman.socket\nRequires=podman.socket\n\n[Service]\nType=simple\nUser=agy_runner\nGroup=agy_runner\nWorkingDirectory=/opt/agy\nExecStartPre=-/usr/bin/podman kill agy-sandbox\nExecStartPre=-/usr/bin/podman rm agy-sandbox\nExecStart=/usr/bin/podman run \\\n  --name agy-sandbox \\\n  --cap-drop=ALL \\\n  --read-only \\\n  --tmpfs /tmp \\\n  -v /opt/agy/workspace:/workspace:z \\\n  -e AGY_SECRET_TOKEN_FILE=/etc/secrets/token.env \\\n  private-registry.corp.internal/agy/agy-box:latest\nExecStop=/usr/bin/podman stop agy-sandbox\nRestart=on-failure\nRestartSec=5s\n\n[Install]\nWantedBy=multi-user.target"
+    },
+    {
+      "type": "h3",
+      "content": "Workspace MCP Server Setup in mcp_config.json"
+    },
+    {
+      "type": "p",
+      "content": "Antigravity 2.0, the IDE, and the CLI share a central configuration file at ~/.gemini/config/mcp_config.json. Modify this configuration file to register the five Google Workspace MCP servers. Replace client ID and client secret placeholders with the Web client credentials created in Module 2:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"mcpServers\": {\n    \"gws-calendar\": {\n      \"serverUrl\": \"https://calendarmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-chat\": {\n      \"serverUrl\": \"https://chatmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-drive\": {\n      \"serverUrl\": \"https://drivemcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-gmail\": {\n      \"serverUrl\": \"https://gmailmcp.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    },\n    \"gws-people\": {\n      \"serverUrl\": \"https://people.googleapis.com/mcp/v1\",\n      \"oauth\": {\n        \"clientId\": \"<YOUR_CLIENT_ID>\",\n        \"clientSecret\": \"<YOUR_CLIENT_SECRET>\"\n      }\n    }\n  }\n}"
+    },
+    {
+      "type": "h3",
+      "content": "Authenticating Custom MCP Servers Across Interfaces"
+    },
+    {
+      "type": "p",
+      "content": "Once mcp_config.json is saved, the configured servers will show as installed. Since OAuth tokens are managed locally on each surface, you must authenticate the servers on each interface you use:"
+    },
+    {
+      "type": "h3",
+      "content": "Surface 1: Antigravity 2.0 (Mission Control GUI)"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Click Settings in the bottom-left corner of the window.",
+        "Navigate to the Customizations tab.",
+        "Under Installed MCP Servers, click Refresh.",
+        "For each server (gws-calendar, gws-chat, gws-drive, gws-gmail, gws-people), click Authenticate.",
+        "In the browser window that opens, sign in and accept scopes, click \"Copy to Clipboard\", then paste the auth code back into Antigravity 2.0 settings and click Submit. A \"Sign out\" button will appear."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Surface 2: Antigravity IDE (VS Code Fork)"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Open MCP Servers via the \"...\" dropdown at the top of the side agent panel, or click \"Manage MCP Servers\".",
+        "Open Antigravity User Settings via the Editor-Specific settings menu dropdown at the top of the window.",
+        "Go to Customizations, click Refresh under Installed MCP Servers.",
+        "Click Authenticate for each server, complete the browser authorization flow, copy the auth code, paste it into the IDE settings field, and click Submit."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Surface 3: Antigravity CLI (agy)"
+    },
+    {
+      "type": "list",
+      "items": [
+        "In your terminal, execute the command: /mcp",
+        "Use the up/down arrows to select a server (e.g., gws-gmail) and press Enter.",
+        "Use the left/right arrows to select Authenticate and press Enter.",
+        "Open the displayed OAuth URL in your browser, log in and consent, copy the authorization code.",
+        "Paste the code directly into the terminal prompt next to the \"Enter code:\" text field and press Enter. Verify the status updates to \"Authed\"."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why must we run the authentication flow separately on the CLI, the IDE, and the Standalone GUI interfaces?"
+    },
+    {
+      "type": "p",
+      "content": "A) The redirect URI is different for each interface."
+    },
+    {
+      "type": "p",
+      "content": "B) OAuth tokens are stored in the local application storage directories unique to each execution surface."
+    },
+    {
+      "type": "p",
+      "content": "C) Google Cloud allows only one active connection per application type."
+    },
+    {
+      "type": "p",
+      "content": "D) The client credentials must be refreshed manually every time."
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: B. Although the client credentials are the same, the actual OAuth access/refresh tokens are stored in separate directories managed by the CLI, IDE, and Standalone GUI."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which file stores the OAuth client ID and secret required for Workspace MCP integration?"
+    },
+    {
+      "type": "p",
+      "content": "A) /etc/secrets/token.env"
+    },
+    {
+      "type": "p",
+      "content": "B) ~/.gemini/config/mcp_config.json"
+    },
+    {
+      "type": "p",
+      "content": "C) ~/.config/antigravity/tokens.json"
+    },
+    {
+      "type": "p",
+      "content": "D) .gemini.md"
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: B. The ~/.gemini/config/mcp_config.json file configures all MCP servers and their matching client ID and client secret fields."
+    }
+  ]
+}

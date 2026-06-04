@@ -1,0 +1,93 @@
+{
+  "id": "5",
+  "title": "5. Verification & Safety Drills",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Active Verification Drills"
+    },
+    {
+      "type": "p",
+      "content": "To ensure your workspace boundaries and folder firewalls are correctly configured, you must run verification checks and safety drills. By simulating an agent attempting to access a forbidden file, you can verify that the AGY SDK policies and system permissions are active."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "import asyncio\nfrom google.antigravity import Agent, LocalAgentConfig, CapabilitiesConfig\nfrom google.antigravity.hooks import policy\n\n# Define a simulated verification drill\nasync def run_safety_drill():\n    # Setup policies targeting SSH credentials\n    policies = [\n        policy.deny(\"view_file\", when=lambda a: \".ssh\" in str(a.get(\"AbsolutePath\", \"\")), name=\"deny_ssh\"),\n        policy.workspace_only([\"/var/home/wtg/workspace_agy_project\"])\n    ]\n    \n    config = LocalAgentConfig(\n        system_instructions=\"You are a validation bot.\",\n        capabilities=CapabilitiesConfig(file_management=True),\n        workspaces=[\"/var/home/wtg/workspace_agy_project\"],\n        policies=policies\n    )\n    \n    agent = Agent(config)\n    print(\"Initiating safety drill...\")\n    \n    # Simulate the agent attempting to call view_file on a restricted path\n    try:\n        await agent.execute_tool(\n            \"view_file\",\n            {\"AbsolutePath\": \"/var/home/wtg/.ssh/id_rsa\"}\n        )\n        print(\"[FAIL] Security Breach! The agent successfully read the restricted file.\")\n    except Exception as e:\n        print(f\"[PASS] Access blocked as expected. Policy message: {e}\")\n\nasyncio.run(run_safety_drill())"
+    },
+    {
+      "type": "p",
+      "content": "The AGY command-line interface includes a built-in verification command `agy --verify`. This tool runs file system diagnostics, checking that workspace directory permissions are secure and that the directory locks are active."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Execute the AGY CLI security verification tool\nagy --verify --workspace /var/home/wtg/workspace_agy_project\n\n# Expected diagnostic output:\n# [+] Auditing directory permissions... OK (Permissions: 700)\n# [+] Testing SSH credential exposures... OK (Path ~/.ssh is locked)\n# [+] Evaluating active AGY SDK policies... OK (policy.workspace_only is active)\n# [SUCCESS] Workspace security verification complete. Safe for agent execution."
+    },
+    {
+      "type": "warning",
+      "content": "Continuous Validation. Always run validation checks after making changes to your local environment, updating packages, or modifying user groups. Changes to system access control lists or group memberships can unintentionally expose host paths to the agent's execution context."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What does running the `agy --verify` command validate in a workspace environment?"
+    },
+    {
+      "type": "p",
+      "content": "A) It checks the response latency of the Gemini model APIs."
+    },
+    {
+      "type": "p",
+      "content": "B) It checks workspace path permissions, verifies private folder restrictions, and confirms the active SDK policy configurations."
+    },
+    {
+      "type": "p",
+      "content": "C) It counts the number of files in the workspace directory."
+    },
+    {
+      "type": "p",
+      "content": "D) It uploads execution logs to the cloud."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "info",
+      "content": "Feedback: The `agy --verify` command audits workspace security settings by verifying folder permissions, verifying that sensitive folders are locked, and validating active SDK security policies."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: In a secure deployment workflow, when should security verification checks be performed?"
+    },
+    {
+      "type": "p",
+      "content": "A) Only during the initial application setup."
+    },
+    {
+      "type": "p",
+      "content": "B) Continuously and automatically after environment modifications, dependency updates, or group configuration changes."
+    },
+    {
+      "type": "p",
+      "content": "C) Only when the agent crashes."
+    },
+    {
+      "type": "p",
+      "content": "D) At the end of every programming sprint."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "info",
+      "content": "Feedback: Security configurations must be validated continuously. Any system updates, user additions, or changes to OS groups can impact discretionary access controls, making ongoing automated audits via `agy --verify` a critical best practice."
+    }
+  ]
+}

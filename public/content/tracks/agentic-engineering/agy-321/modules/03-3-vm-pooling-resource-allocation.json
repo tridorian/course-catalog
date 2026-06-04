@@ -1,0 +1,100 @@
+{
+  "id": "3",
+  "title": "3. VM Pooling & Resource Allocation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Efficient resource utilization is critical when scaling agentic builds. In this module, we will focus on VM pooling rules, which determine how instances are grouped, scaled, and allocated to incoming tasks. Solution Architects must design pooling rules that balance pipeline execution speed with infrastructure costs."
+    },
+    {
+      "type": "h2",
+      "content": "Understanding VM Pools"
+    },
+    {
+      "type": "p",
+      "content": "A VM Pool is a logical collection of virtual machines sharing identical hardware shapes, network settings, and security profiles. Instead of spawning a VM from scratch for every job (which takes minutes), jobs are instantly routed to warm standby instances in the appropriate pool (taking under 3 seconds)."
+    },
+    {
+      "type": "h2",
+      "content": "Defining Pooling Rules"
+    },
+    {
+      "type": "p",
+      "content": "VM pooling rules are codified in a JSON policy document, typically managed by the Pool Manager. The policy outlines the min/max limits, scaling policies, resource costing parameters, tracking tags, and priority classes. Below is an example pool configuration:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"pool_id\": \"fast-testing-pool\",\n  \"display_name\": \"Isolated Fast Testing Pool\",\n  \"resource_limits\": {\n    \"machine_type\": \"c2-standard-4\",\n    \"cpu_quota\": 64,\n    \"memory_limit_gb\": 256,\n    \"max_monthly_budget_usd\": 500,\n    \"max_instance_runtime_seconds\": 600\n  },\n  \"billing_metadata\": {\n    \"cost_center\": \"agentic-engineering\",\n    \"project_id\": \"isolated-testing\",\n    \"tags\": {\n      \"owner\": \"devops-team\",\n      \"env\": \"sandbox-vpc\"\n    }\n  },\n  \"scaling_policy\": {\n    \"min_warm_instances\": 2,\n    \"max_instances\": 16,\n    \"scale_out_threshold_percent\": 85,\n    \"idle_timeout_seconds\": 300\n  },\n  \"routing_rules\": {\n    \"allowed_job_tags\": [\"unit-test\", \"lint\", \"security-scan\"],\n    \"priority_weight\": 100,\n    \"preemption_allowed\": true\n  }\n}"
+    },
+    {
+      "type": "info",
+      "content": "Key Design Rule: Preemption and Cost Tagging. Use preemptible VMs (or spot instances) for pools running quick testing and linting jobs to save up to 80% on compute costs. Always attach resource usage tags (like cost_center) to instances to ensure accurate chargeback tracking."
+    },
+    {
+      "type": "h2",
+      "content": "Resource Quotas, VPC Segmentation & Egress Rules"
+    },
+    {
+      "type": "p",
+      "content": "Architects must segment the network by deploying pools inside an isolated VPC, entirely separate from the corporate intranet. The following commands establish a segmented subnet, configure a default-deny egress firewall, and whitelists access to a trusted local artifact proxy."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# 1. Create a dedicated sandbox VPC network\ngcloud compute networks create jules-sandbox-vpc --subnet-mode=custom\n\n# 2. Add a segmented subnet for pool instances\ngcloud compute networks subnets create jules-sandbox-subnet \\\n  --network=jules-sandbox-vpc \\\n  --region=us-central1 \\\n  --range=10.240.0.0/24\n\n# 3. Apply default-deny egress rule to isolate VMs from the internet and internal networks\ngcloud compute firewall-rules create deny-all-egress \\\n  --network=\"jules-sandbox-vpc\" \\\n  --action=\"DENY\" \\\n  --rules=\"all\" \\\n  --destination-ranges=\"0.0.0.0/0\" \\\n  --target-tags=\"jules-agent-vm\" \\\n  --priority=1000\n\n# 4. Whitelist egress only to the local repository proxy IP\ngcloud compute firewall-rules create allow-proxy-egress \\\n  --network=\"jules-sandbox-vpc\" \\\n  --action=\"ALLOW\" \\\n  --rules=\"tcp:443\" \\\n  --destination-ranges=\"10.128.0.50/32\" \\\n  --target-tags=\"jules-agent-vm\" \\\n  --priority=900"
+    },
+    {
+      "type": "h2",
+      "content": "Hands-on Lab Exercise: Configuring Pool Policies & Firewalls"
+    },
+    {
+      "type": "list",
+      "items": [
+        "1. Create a JSON file named `test-pool-policy.json` with a pool configuration similar to the example shown above, setting `min_warm_instances` to 1 and configuring `billing_metadata`.",
+        "2. Apply the policy to the Jules VM Pool Manager using the CLI command: `agy pool apply --config test-pool-policy.json`.",
+        "3. Verify that the warm standby VM is provisioned and tagged: `agy pool status --id fast-testing-pool`.",
+        "4. Run the gcloud firewall commands in your GCP terminal to establish the isolated VPC, segmented subnet, and default-deny egress rules.",
+        "5. Spawn a test VM on the segmented subnet and verify that egress to `10.128.0.50` is allowed while all other public internet traffic is dropped.",
+        "6. Check cost tracking diagnostics by executing `agy billing track --pool fast-testing-pool` to verify cost aggregation based on billing tags."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** What is the primary purpose of maintaining `min_warm_instances` in a VM pool scaling policy?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To ensure there is always a backup server in case of a crash.\n- B) To completely eliminate VM boot cold-starts for incoming tasks by keeping instances pre-warmed.\n- C) To run local workspace validation scripts.\n- D) To guarantee maximum security isolation."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** Warm instances are already booted and running the Jules agent daemon. When a task is dispatched, the manager can route it to a warm instance immediately, bypassing the guest OS startup latency."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Which firewall configuration strategy is recommended to secure a Jules VM pool that runs third-party untrusted testing scripts?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Open all ports to make debugging easier.\n- B) Apply a default-deny egress firewall rule, allowing traffic only to designated internal repository proxies.\n- C) Route all traffic through a public NAT gateway with no restrictions.\n- D) Disable VPC peering on the main network."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** A default-deny egress rule prevents compromised code from exfiltrating data, scanning internal networks, or establishing reverse shells to unauthorized destinations."
+    }
+  ]
+}

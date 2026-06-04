@@ -1,0 +1,24 @@
+{
+  "course_id": "agy-203",
+  "title": "AGY-203: Interactive Workspaces (L200)",
+  "version": "0.1.0",
+  "author": "tridorian Labs & Google Cloud",
+  "description": "Welcome to AGY-203: Interactive Workspaces! This elective course is designed for Writers, Developers, and Editor Enthusiasts who want to master synchronous side-by-side co-authoring, workspace markdown navigation, and live text rewriting or code refactoring inside antigravity-ide. Learners will acquire hands-on experience using the agentic sidecar, managing workspace security boundaries, and collaborating with autonomous AI agents to construct high-quality technical documentation and codebases.",
+  "features": [
+    {
+      "icon": "🤝",
+      "title": "Side-by-Side Co-Authoring",
+      "description": "Work synchronously with AI agents in a split-editor view to draft documents, specs, and proposals in real-time."
+    },
+    {
+      "icon": "🧭",
+      "title": "Markdown Workspace Navigation",
+      "description": "Explore and query large document directories using semantic index searches and folder boundaries."
+    },
+    {
+      "icon": "🔄",
+      "title": "Live Refactoring & Rewriting",
+      "description": "Execute precision edits, code refactoring, and text rewriting directly inside active files with minimum-diff logic."
+    }
+  ]
+}

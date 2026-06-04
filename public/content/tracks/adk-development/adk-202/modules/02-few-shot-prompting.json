@@ -1,0 +1,32 @@
+{
+  "id": "2",
+  "title": "2. Implementing few-shot examples in system prompts",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Few-Shot Prompting"
+    },
+    {
+      "type": "p",
+      "content": "Few-shot prompting shows the model exact examples of inputs and desired outputs, improving compliance and output formats."
+    },
+    {
+      "type": "h2",
+      "content": "Few-Shot Instruction Template"
+    },
+    {
+      "type": "code",
+      "language": "markdown",
+      "code": "Here are examples of how to format financial risk ratings:\n\nInput: Cash reserves are $50,000, debt is $100,000.\nOutput: [RISK: HIGH] - Debt exceeds cash reserves by 2x.\n\nInput: Cash reserves are $200,000, debt is $10,000.\nOutput: [RISK: LOW] - Cash reserves exceed debt by 20x."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary benefit of few-shot prompting?\n- A) It reduces API costs.\n- B) It teaches the model formatting patterns and complex logic by example.\n- C) It speeds up network requests.\n\nFeedback: Option B is correct. Few-shot examples define output layout structure clearly."
+    }
+  ]
+}

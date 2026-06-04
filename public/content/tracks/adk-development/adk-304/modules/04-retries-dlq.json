@@ -1,0 +1,46 @@
+{
+  "id": "4",
+  "title": "4. Implementing retry policies, transaction rollbacks, and DLQs",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Retries & Dead Letter Queues"
+    },
+    {
+      "type": "p",
+      "content": "If a worker crashes 5 times on the same message (e.g. malformed inputs causing parser errors), it should not loop forever. You must limit retries and route the message to a Dead Letter Queue (DLQ) for audit."
+    },
+    {
+      "type": "grid",
+      "items": [
+        {
+          "icon": "RotateCw",
+          "title": "Retry Limit",
+          "content": "Attempt a failed message a maximum of 3 times with exponential delays.",
+          "border": "#3b82f6"
+        },
+        {
+          "icon": "XCircle",
+          "title": "DLQ Route",
+          "content": "Redirect messages exceeding retry counts to a 'dlq_queue' channel.",
+          "border": "#ef4444"
+        },
+        {
+          "icon": "AlertTriangle",
+          "title": "Audit Trail",
+          "content": "Alert developers of DLQ entries for debugging.",
+          "border": "#4ade80"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary role of a Dead Letter Queue (DLQ)?\n- A) To accelerate execution speed.\n- B) To store messages that failed to process successfully after multiple retry attempts.\n- C) To handle user passwords.\n\nFeedback: Option B is correct. DLQs store persistently failing tasks."
+    }
+  ]
+}

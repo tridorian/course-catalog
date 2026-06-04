@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-203",
+  "title": "ADK-203: Stateful Conversation Memory",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Implement conversation storage adapters for sliding windows, summarization, Redis caches, and persistent Postgres backends.",
+  "features": [
+    {
+      "icon": "🧠",
+      "title": "Memory Windows",
+      "description": "Design conversational sliding windows that maintain recent context without exceeding token quotas."
+    },
+    {
+      "icon": "⚡",
+      "title": "Redis Cache",
+      "description": "Setup fast memory caches that save session chats with custom TTL timeouts."
+    },
+    {
+      "icon": "🗄️",
+      "title": "PostgreSQL Store",
+      "description": "Build relational persistence models that store, fetch, and restore multi-user conversations."
+    }
+  ]
+}

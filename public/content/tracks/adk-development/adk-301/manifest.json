@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. The Multi-Agent Paradigm & Orchestration Topologies",
+      "file": "modules/01-orchestration-concepts.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Launching the A2AServer Routing Daemon",
+      "file": "modules/02-a2a-server.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Remote Agent Integration with RemoteA2aAgent",
+      "file": "modules/03-remote-agent.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Dynamic Discovery with Agent Cards and Manifests",
+      "file": "modules/04-agent-manifest.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab - Implementing Collaborative Planning and Execution",
+      "file": "modules/05-lab-multi-agent.json"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id": "4",
+  "title": "4. Active Steering & Pausing",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "During long-running agent tasks (such as crawling documentation or performing refactoring across multiple files), the agent may drift from the intended scope or get stuck in a diagnostic loop. Active steering allows the user to intercept the execution flow, pause the task, redirect the agent, and resume."
+    },
+    {
+      "type": "p",
+      "content": "When a task is running asynchronously (e.g. launched via the visual dashboard `antigravity` or run in the background terminal), you can interact with it using key controls. In the `antigravity` GUI, you can click the 'Pause' button, type corrective instructions in the chat, and click 'Resume'. In the command-line interface, you can manage running tasks using standard CLI instructions."
+    },
+    {
+      "type": "h2",
+      "content": "CLI Task Control Commands"
+    },
+    {
+      "type": "p",
+      "content": "Let's look at the CLI commands used to list, pause, send input to redirect, and resume agentic tasks in a terminal interface:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# List all active background tasks running in the workspace\nagy task list\n\n# Check the status of a specific task (e.g. task_7384)\nagy task status --id task_7384\n\n# Pause the execution loop of a running task\nagy task pause --id task_7384\n\n# Send feedback input to redirect the agent's logic\nagy task feedback --id task_7384 --message \"Stop searching the docs directory. Focus only on index.js and check the regex pattern on line 42.\"\n\n# Resume the execution of the paused task\nagy task resume --id task_7384"
+    },
+    {
+      "type": "info",
+      "content": "Steering is most effective when done early. If you see the agent proposing incorrect terminal commands or writing redundant test files, pause the task, inspect the files, provide feedback, and resume."
+    },
+    {
+      "type": "h2",
+      "content": "Steering Use Cases"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Infinite Debugging Loops:** When the agent repeatedly executes the same compile or test command, trying the same failed fix. Pausing and pointing the agent to the actual bug saves significant token usage.",
+        "**Directory Crawl Drift:** When the agent begins scanning system or node_modules files. Pause, send a feedback redirect, and instruct it to stick to specific file paths.",
+        "**Unintended Code Refactoring:** When the agent starts rewriting files outside the task scope. Pause, instruct it to revert non-essential changes, and resume."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** If an agent is stuck in an infinite debugging loop trying to fix a test failure, what is the best collaborative response?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Force quit the entire terminal and start the workspace setup over",
+        "B) Pause the task, send feedback redirecting the agent to the specific bug location, and resume",
+        "C) Let it run indefinitely until it resolves the error or runs out of tokens",
+        "D) Change the testing rules to ignore all failures"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Pausing the task, sending target feedback to correct the agent's logic, and resuming is the definition of active steering. It saves tokens and guides the agent toward the correct fix."
+    }
+  ]
+}

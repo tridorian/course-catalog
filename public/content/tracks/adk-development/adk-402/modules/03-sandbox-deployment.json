@@ -1,0 +1,44 @@
+{
+  "id": "3",
+  "title": "3. Headless Deployment in Virtualized Sandboxes",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Sandboxed OCI Deployments"
+    },
+    {
+      "type": "p",
+      "content": "Running agents with file write permissions directly on production host machines presents major security risks. Production deployments run headlessly in isolated sandboxes using container runtimes (such as distrobox, gVisor, or Docker)."
+    },
+    {
+      "type": "h2",
+      "content": "Authoring a Hardened Dockerfile"
+    },
+    {
+      "type": "p",
+      "content": "Use this multi-stage Dockerfile to compile tools and run the agent workspace as a non-privileged system user:"
+    },
+    {
+      "type": "code",
+      "language": "dockerfile",
+      "code": "FROM python:3.11-slim as builder\n\nWORKDIR /build\nCOPY requirements.txt .\nRUN pip install --no-cache-dir --user -r requirements.txt\n\nFROM python:3.11-slim as runner\n\n# Create system group and non-root user\nRUN groupadd -g 1001 agentgroup && \\\n    useradd -r -u 1001 -g agentgroup agentuser\n\nWORKDIR /home/agentuser/app\nCOPY --from=builder /root/.local /home/agentuser/.local\nCOPY --chown=agentuser:agentgroup . .\n\nENV PATH=/home/agentuser/.local/bin:$PATH\nUSER agentuser\n\nEXPOSE 8090\nENTRYPOINT [\"adk\", \"serve\", \"--config\", \"agent.yaml\", \"--port\", \"8090\"]"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why is running the agent container process as a non-root user (e.g. agentuser) considered a critical production requirement?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Root processes execute 20% slower inside containers.\n- B) It limits vulnerability impacts by preventing the agent from executing privileged system commands or modifying host files if container escape occurs.\n- C) It is required for Python module decorators."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Restricting root privileges is a core security defense-in-depth practice to prevent containment escape."
+    }
+  ]
+}

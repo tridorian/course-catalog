@@ -1,0 +1,34 @@
+{
+  "course_id": "agy-321",
+  "title": "AGY-321: Jules VM Orchestration (L300)",
+  "version": "0.1.0",
+  "author": "tridorian Labs & Google Cloud",
+  "description": "Welcome to AGY-321: Jules VM Orchestration. This course is specifically designed for Solutions Architects who are responsible for designing, deploying, and managing secure, high-performance execution environments for autonomous AI agents. In this course, you will learn to orchestrate remote pools of isolated, ephemeral virtual machine instances (Jules VMs) to execute complex, untrusted build pipelines and testing jobs. You will master VM provisioning configurations, pool resource policies, security firewalls, programmatic SDK integrations, and governance auditing.",
+  "features": [
+    {
+      "icon": "🧭",
+      "title": "Architecture & Isolation",
+      "description": "Learn to decouple the local AGY orchestrator from remote secure VM sandboxes."
+    },
+    {
+      "icon": "🛠️",
+      "title": "Provisioning & Lifecycles",
+      "description": "Master writing YAML templates and CLI commands to spawn and verify ephemeral VMs."
+    },
+    {
+      "icon": "📦",
+      "title": "Resource Pooling Rules",
+      "description": "Define scaling policies, preemption quotas, and egress rules for VM pools."
+    },
+    {
+      "icon": "🚀",
+      "title": "SDK & Pipeline Control",
+      "description": "Write Python and Node.js code to programmatically dispatch isolated jobs."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Governance & Audits",
+      "description": "Implement .gemini.md security policies and perform compliance trace audits."
+    }
+  ]
+}

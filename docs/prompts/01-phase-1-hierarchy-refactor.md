@@ -1,7 +1,7 @@
 # Phase 1: Core Hierarchy & Schema Validation
 
 ## Goal
-Refactor the content loading system in the Tridorian Course Platform to support a 4-tier hierarchy: **Track > Course > Module > Step**.
+Refactor the content loading system in the tridorian Course Platform to support a 4-tier hierarchy: **Track > Course > Module > Step**.
 
 ## Context
 - The project follows a strict **Test-First** methodology.

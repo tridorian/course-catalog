@@ -1,0 +1,83 @@
+{
+  "id": "3",
+  "title": "3. Secure Database Connectors",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Designing Safe Database Connectors"
+    },
+    {
+      "type": "p",
+      "content": "Giving AI agents access to databases creates powerful opportunities, but exposing tables without security controls risks data loss or exfiltration. Because AI models are vulnerable to prompt injection, a user could manipulate the model to execute destructive DDL commands (e.g., 'DROP TABLE') or read sensitive data. As a Systems Integrator, you must design a secure layer to mitigate these risks."
+    },
+    {
+      "type": "warning",
+      "content": "Never connect an MCP server to a database using administrator credentials. Implement read-only database user accounts and use parameterized inputs to prevent SQL injection."
+    },
+    {
+      "type": "h3",
+      "content": "Access Layer Design Principles"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Least Privilege User: Use credentials that restrict the server's database access to a whitelist of tables.",
+        "Parameterized Query Construction: Never construct queries by concatenating raw strings. Always use bind parameters.",
+        "Dynamic Schema Exposure: Query database metadata tables to dynamically list schemas as Resources, guiding the model's queries.",
+        "Execution Limits: Enforce limits on row counts (e.g., LIMIT 50) and statement timeouts (e.g., 500ms) to prevent performance issues."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Implementing the Database Server"
+    },
+    {
+      "type": "p",
+      "content": "The following TypeScript server connects to PostgreSQL with read-only credentials, exposing schemas as Read-only Resources and using parameterized queries to fetch data safely:"
+    },
+    {
+      "type": "code",
+      "language": "typescript",
+      "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport {\n  CallToolRequestSchema,\n  ListResourcesRequestSchema,\n  ListToolsRequestSchema,\n  ReadResourceRequestSchema\n} from \"@modelcontextprotocol/sdk/types.js\";\nimport pg from \"pg\";\n\nconst { Pool } = pg;\n\n// Initialize db pool using environment configuration\nconst pool = new Pool({\n  connectionString: process.env.DATABASE_URL,\n  statement_timeout: 500 // Enforce statement execution limits\n});\n\nconst server = new Server(\n  {\n    name: \"secure-postgres-mcp\",\n    version: \"1.0.0\"\n  },\n  {\n    capabilities: {\n      resources: {},\n      tools: {}\n    }\n  }\n);\n\n// Expose dynamic schema as resource\nserver.setRequestHandler(ListResourcesRequestSchema, async () => {\n  return {\n    resources: [\n      {\n        uri: \"postgres://schema/customer_summary\",\n        name: \"Customer Summary Table Schema\",\n        mimeType: \"application/json\",\n        description: \"Schema layout and columns of the customer_summary table\"\n      }\n    ]\n  };\n});\n\n// Read schema metadata\nserver.setRequestHandler(ReadResourceRequestSchema, async (request) => {\n  if (request.params.uri === \"postgres://schema/customer_summary\") {\n    const res = await pool.query(\n      \"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'customer_summary'\"\n    );\n    return {\n      contents: [\n        {\n          uri: request.params.uri,\n          mimeType: \"application/json\",\n          text: JSON.stringify(res.rows)\n        }\n      ]\n    };\n  }\n  throw new Error(\"Resource not found\");\n});\n\n// Register query tool\nserver.setRequestHandler(ListToolsRequestSchema, async () => {\n  return {\n    tools: [\n      {\n        name: \"query_customer_data\",\n        description: \"Queries safe customer details by customer ID\",\n        inputSchema: {\n          type: \"object\",\n          properties: {\n            customerId: {\n              type: \"integer\",\n              description: \"Customer ID\"\n            }\n          },\n          required: [\"customerId\"]\n        }\n      }\n    ]\n  };\n});\n\n// Handle execution safely via parameterized inputs\nserver.setRequestHandler(CallToolRequestSchema, async (request) => {\n  if (request.params.name === \"query_customer_data\") {\n    const customerId = request.params.arguments?.customerId;\n    if (typeof customerId !== \"number\") {\n      throw new Error(\"Invalid customerId input parameter type\");\n    }\n\n    const res = await pool.query(\n      \"SELECT id, name, email, region FROM customer_summary WHERE id = $1 LIMIT 1\",\n      [customerId]\n    );\n\n    return {\n      content: [\n        {\n          type: \"text\",\n          text: JSON.stringify(res.rows)\n        }\n      ]\n    };\n  }\n  throw new Error(\"Tool not found\");\n});\n\nconst transport = new StdioServerTransport();\nawait server.connect(transport);"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why is string concatenation (e.g. \"SELECT * FROM users WHERE id = \" + input) extremely dangerous in custom database MCP servers?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. The JSON-RPC transport parser will reject concatenated string messages.",
+        "B. It exposes the database to SQL injection attacks, allowing users or model prompt injections to bypass access filters.",
+        "C. It consumes significantly more model context tokens.",
+        "D. It prevents the model from subscribing to schema resources."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: B is correct. String concatenation allows raw input characters to manipulate statement syntax. Parameterized queries (using placeholders like $1) isolate inputs from queries, preventing SQL injection."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which parameter inside the pg Pool configuration enforces query execution timeouts to prevent denial of service (DoS)?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. statement_timeout",
+        "B. connectionTimeoutMillis",
+        "C. query_limit_seconds",
+        "D. idleTimeoutMillis"
+      ]
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: A is correct. The 'statement_timeout' parameter defines the maximum execution duration in milliseconds. If a query runs longer than the threshold, the database automatically cancels it."
+    }
+  ]
+}

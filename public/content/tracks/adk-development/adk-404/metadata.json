@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-404",
+  "title": "ADK-404: Enterprise Sandbox Security & Isolation",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Isolate agent execution nodes with gVisor, enforce strict syscall filter policies, limit egress connections, and monitor trails.",
+  "features": [
+    {
+      "icon": "🔒",
+      "title": "gVisor Isolation",
+      "description": "Deploy agents using gVisor container runtimes to intercept host kernel requests from custom tools."
+    },
+    {
+      "icon": "🚫",
+      "title": "Syscall Filtering",
+      "description": "Enforce strict seccomp filtering to block file system write or executing permissions from agents."
+    },
+    {
+      "icon": "🚨",
+      "title": "Egress Controls",
+      "description": "Restrict outbound network ports, locking agent tool operations within internal network zones."
+    }
+  ]
+}

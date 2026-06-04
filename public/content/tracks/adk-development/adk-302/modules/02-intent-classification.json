@@ -1,0 +1,32 @@
+{
+  "id": "2",
+  "title": "2. Building intent classifiers using semantic embedding",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Intent Classification via Embeddings"
+    },
+    {
+      "type": "p",
+      "content": "Before invoking the agent loop, comparing the cosine similarity of the user's query against a dataset of labeled intent vectors allows choosing the best agent configuration quickly."
+    },
+    {
+      "type": "h2",
+      "content": "Classification Python Mock"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "def classify_intent(query: str) -> str:\n    # Simple semantic rule router\n    q = query.lower()\n    if any(k in q for k in [\"pay\", \"invoice\", \"card\", \"billing\"]):\n        return \"billing_agent\"\n    if any(k in q for k in [\"bug\", \"broken\", \"error\", \"crash\"]):\n        return \"tech_agent\"\n    return \"general_agent\""
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why use intent classification prior to triggering model execution?\n- A) It encrypts the user's input.\n- B) It skips querying the expensive reasoning LLM for simple path routing.\n- C) It compiles custom tool modules.\n\nFeedback: Option B is correct. Pre-routing limits token costs."
+    }
+  ]
+}

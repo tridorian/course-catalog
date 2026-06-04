@@ -1,0 +1,202 @@
+{
+  "course_id": "adk-204",
+  "title": "ADK-204: Local Mocking & Agent Testing",
+  "description": "Design regression suites, unit test tool integrations, and mock model endpoints to establish robust agent CI/CD pipelines.",
+  "highlights": [
+    {
+      "icon": "🧪",
+      "title": "Unit Testing Tools",
+      "description": "Write local unit tests for tool functions to verify response accuracy without querying LLMs."
+    },
+    {
+      "icon": "🃏",
+      "title": "Model Mocking",
+      "description": "Use mock responses to capture agent states and token payloads, avoiding live API invocation fees."
+    },
+    {
+      "icon": "🚀",
+      "title": "CI Pipeline Integration",
+      "description": "Build regression testing scripts that integrate with GitHub Actions build verification steps."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Designing unit tests for custom tools",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Testing Philosophy for Agents"
+        },
+        {
+          "type": "p",
+          "content": "Agent tests are divided into tool function verification and orchestration flow verification. Unit testing your tool functions ensures bugs in your backend logic are caught independently of the LLM."
+        },
+        {
+          "type": "h2",
+          "content": "Tool Function Unit Test Example"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import unittest\nfrom tools.math_tool import add_numbers\n\nclass TestMathTool(unittest.TestCase):\n    def test_addition(self):\n        result = add_numbers(2.5, 3.5)\n        self.assertEqual(result, 6.0)"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why test tool functions separately from the main agent routing logic?\n- A) The LLM requires compiled Python binaries.\n- B) It isolates programmatic logic bugs from stochastic LLM behavior.\n- C) It avoids OAuth verification procedures.\n\nFeedback: Option B is correct. Unit testing tools isolates system bugs from LLM randomness."
+        }
+      ]
+    },
+    {
+      "title": "2. Mocking model responses and external API calls",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Mocking Model Responses"
+        },
+        {
+          "type": "p",
+          "content": "Querying LLM APIs during unit tests increases expenses and introduces network dependencies. Mocking endpoints returns pre-configured strings, enabling offline tests."
+        },
+        {
+          "type": "h2",
+          "content": "Mocking with Pytest"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "from unittest.mock import MagicMock\nfrom google_adk import AgentRuntime\n\ndef test_agent_with_mock():\n    runtime = AgentRuntime(config_path=\"agent.yaml\")\n    # Mock the internal execute method\n    runtime.execute = MagicMock(return_value=MagicMock(content=\"Mocked response\"))\n    \n    res = runtime.execute(prompt=\"Hello\")\n    assert res.content == \"Mocked response\""
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the main benefit of mocking model responses in local test suites?\n- A) It guarantees the model is 100% accurate.\n- B) It prevents billing charges and network dependency errors during testing.\n- C) It compiles Javascript dependencies.\n\nFeedback: Option B is correct. Mocking makes tests cheap, deterministic, and fast."
+        }
+      ]
+    },
+    {
+      "title": "3. Automated integration testing",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Automated Integration Testing"
+        },
+        {
+          "type": "p",
+          "content": "Integration tests run the complete agent cycle (loading config, picking tools, calling models) using a sandbox server to assert overall task completion."
+        },
+        {
+          "type": "h2",
+          "content": "Integration Test Suite Script"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "def test_end_to_end_flow():\n    runtime = AgentRuntime(\"agent.yaml\")\n    # The query requires a calculator tool\n    res = runtime.execute(\"Solve: 125 * 4\")\n    assert \"500\" in res.content"
+        },
+        {
+          "type": "warning",
+          "title": "Flaky Tests",
+          "content": "LLMs can return varying text layouts. Use fuzzy assertions (like asserting substring existence) rather than absolute string matches."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why should you avoid strict string equality checks on agent text outputs?\n- A) The SDK does not support strings.\n- B) LLMs might rephrase responses slightly, leading to fragile, flaky tests.\n- C) Responses are encrypted in memory.\n\nFeedback: Option B is correct. Rephrasing makes exact matching unreliable; use substring checks or semantic evaluations."
+        }
+      ]
+    },
+    {
+      "title": "4. Evaluating agent accuracy and regression metrics",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Regression & Accuracy Metrics"
+        },
+        {
+          "type": "p",
+          "content": "As prompts and tools are modified, you must ensure the agent doesn't regress. Regression testing compares active runs against a benchmark list of known Q&A test cases."
+        },
+        {
+          "type": "grid",
+          "items": [
+            {
+              "icon": "FileText",
+              "title": "Cosine Similarity",
+              "content": "Measures semantic overlap of response embeddings against a golden standard.",
+              "border": "#4ade80"
+            },
+            {
+              "icon": "Shield",
+              "title": "Tool Call Auditing",
+              "content": "Verifies the agent executes the correct tools in the correct order.",
+              "border": "#3b82f6"
+            },
+            {
+              "icon": "Check",
+              "title": "Assertion Passes",
+              "content": "Runs boolean validation checks on returned data tables.",
+              "border": "#ef4444"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is a 'golden dataset' in agent evaluation?\n- A) An expensive dataset hosted on cloud nodes.\n- B) A static collection of validated input-output pairs used to track regression.\n- C) A system database storing user passwords.\n\nFeedback: Option B is correct. Golden datasets benchmark model outputs."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab: Creating a continuous integration workflow",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Creating a Continuous Integration Workflow"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will configure a pytest configuration script that automatically tests custom math tools, executing them locally."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write tests/test_agent.py"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import pytest\nfrom google_adk.tools import tool\n\n@tool\ndef dummy_add(a: int, b: int) -> int:\n    \"\"\"Adds two integers.\"\"\"\n    return a + b\n\ndef test_dummy_add():\n    res = dummy_add(10, 20)\n    assert res == 30\n    \n# Verify parameter schema registration\ndef test_tool_metadata():\n    schema = dummy_add.schema\n    assert schema[\"name\"] == \"dummy_add\"\n    assert \"a\" in schema[\"parameters\"]"
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Run Pytest"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "pip install pytest google-adk\npytest tests/test_agent.py"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What does test_tool_metadata confirm?\n- A) That the LLM returns the right calculations.\n- B) That the function correctly parses to the expected JSON schema parameter structure.\n- C) That the API key is active.\n\nFeedback: Option B is correct. It tests the schema reflection engine."
+        }
+      ]
+    }
+  ]
+}

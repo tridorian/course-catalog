@@ -1,0 +1,316 @@
+{
+  "course_id": "adk-201",
+  "title": "ADK-201: Developer Tooling & adk-web",
+  "description": "Inspect and debug active agent runs using the adk-web developer console. Review execution traces, memory states, transaction logs, and step playbacks.",
+  "highlights": [
+    {
+      "icon": "🖥️",
+      "title": "Visual Dashboard",
+      "description": "Spin up local graphical developer web-portals to track real-time agent execution processes."
+    },
+    {
+      "icon": "🔄",
+      "title": "Step Auditing",
+      "description": "Audit individual model reasoning cycles, prompt expansions, and tool call outputs."
+    },
+    {
+      "icon": "📊",
+      "title": "Metrics Analysis",
+      "description": "Inspect model token metrics, model execution times, and network network transport latency graphs."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Visual Debugging with adk-web Dashboard",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Introduction to adk-web"
+        },
+        {
+          "type": "p",
+          "content": "Debugging autonomous agents in terminal interfaces can be difficult due to complex JSON payloads. The `adk-web` portal provides a local, real-time graphical developer dashboard to view exactly what your agent is doing under the hood."
+        },
+        {
+          "type": "h2",
+          "content": "Launching the Console"
+        },
+        {
+          "type": "p",
+          "content": "To launch the developer console alongside an active agent instance, execute the following CLI command in your workspace root:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Launch the console on default port 8501\nadk dev --web\n\n# Configure a custom host and port for remote server debugging\nadk dev --web --port 9000 --host 0.0.0.0"
+        },
+        {
+          "type": "info",
+          "title": "Browser Connectivity",
+          "content": "Once executed, the command spawns a lightweight local Node.js web server. Open 'http://localhost:8501' in your browser to view the console."
+        },
+        {
+          "type": "h2",
+          "content": "Console Workspace Panes"
+        },
+        {
+          "type": "p",
+          "content": "The `adk-web` interface consists of three primary visual sections:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Run Selector (Left): A history panel showing all previous and active execution sessions.",
+            "Visual Playground (Center): A chat simulator and block interface to interact with the agent.",
+            "Inspector Drawer (Right): Tabbed dashboards showing state records, memory registers, tool calls, and model latency metrics."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the default browser port used by the local adk-web console?"
+        },
+        {
+          "type": "p",
+          "content": "- A) 8080\n- B) 8501\n- C) 3000"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. adk-web serves the graphical developer dashboard on port 8501 by default."
+        }
+      ]
+    },
+    {
+      "title": "2. Transaction Auditing & Step Playback",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Transaction Auditing & Playback"
+        },
+        {
+          "type": "p",
+          "content": "Every model request, model output, and tool response is recorded as an immutable transaction log. The transaction auditor allows you to scrub backward and forward in execution time, playing back steps exactly as they occurred."
+        },
+        {
+          "type": "h2",
+          "content": "Scrubbing Execution Logs"
+        },
+        {
+          "type": "p",
+          "content": "In the 'Transaction' tab of the dashboard drawer, choose an active or completed session. The visual playback timeline displays:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "User input prompt payload.",
+            "Agent internal reasoning chain (thoughts, planning steps).",
+            "Tool call argument mapping (arguments and parameter verification).",
+            "Tool response outputs returned from local code execution.",
+            "Final compiled message returned to the client user."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Analyzing Tool Call JSON Schemas"
+        },
+        {
+          "type": "p",
+          "content": "Click on any tool transaction box to inspect the raw JSON exchange. This is vital to debug schema parsing issues:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"transaction_id\": \"tx-99238\",\n  \"step\": 3,\n  \"type\": \"tool_call\",\n  \"tool_name\": \"validate_csv_columns\",\n  \"arguments\": {\n    \"file_path\": \"src/test/customer_records.csv\",\n    \"expected_cols\": [\"id\", \"name\", \"email\"]\n  },\n  \"response_payload\": {\n    \"status\": \"success\",\n    \"valid\": true\n  }\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How does inspecting raw JSON transaction payloads in adk-web help debug failed tool executions?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It automatically repairs Python syntax bugs.\n- B) It shows the exact arguments sent by the model to your tool function, allowing you to check for schema or naming mismatch errors.\n- C) It compiles the project to a static website."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Checking the tool call JSON helps isolate whether parameter structure mismatches caused runtime exceptions."
+        }
+      ]
+    },
+    {
+      "title": "3. Inspecting Memory & Conversation States",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Memory & State Inspections"
+        },
+        {
+          "type": "p",
+          "content": "Agents maintain conversation context using memory strategies. The Memory tab of `adk-web` provides a real-time view of active variables, context buffers, and sliding window indices."
+        },
+        {
+          "type": "h2",
+          "content": "Visualizing the Context Window"
+        },
+        {
+          "type": "p",
+          "content": "The memory visualizer maps active messages loaded in current model requests vs compressed history blocks. You can view:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Context buffer index parameters.",
+            "System instruction weights.",
+            "Compacted summary notes injected as system context.",
+            "Active session keys (such as user authentication metadata)."
+          ]
+        },
+        {
+          "type": "info",
+          "title": "Compaction Thresholds",
+          "content": "The compaction indicator flashes yellow when the current conversation history approaches 80% of the configured sliding window limit, warning that a context compression run is imminent."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What indicator tells you that the agent's active memory is approaching compaction?"
+        },
+        {
+          "type": "p",
+          "content": "- A) The server restarts automatically.\n- B) The compaction indicator changes color (yellow warning) as history size nears 80% of the window limits.\n- C) The adk CLI commands return error codes."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. adk-web highlights context size usage warnings visual indicator when nearing compression boundaries."
+        }
+      ]
+    },
+    {
+      "title": "4. Performance Tracking: Token Usage & Latency Benchmarks",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Performance Metrics & Latencies"
+        },
+        {
+          "type": "p",
+          "content": "Optimizing agent loops for production requires tracing system latency bottlenecks and token metrics. The Performance dashboard aggregates data per run, showing costs and response times."
+        },
+        {
+          "type": "h2",
+          "content": "Analyzing Performance Charts"
+        },
+        {
+          "type": "p",
+          "content": "Open the 'Traces' view to evaluate trace timings:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Time-to-first-token latency: Measures model prompt response speed.",
+            "Tool execution latency: Isolates network delays or database query bottlenecks in your custom python/node scripts.",
+            "Total Turn execution time: Combines model planning loops and tool execution times."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Token Auditing Configuration"
+        },
+        {
+          "type": "p",
+          "content": "Review token counters to track Gemini execution costs: input tokens, generated output tokens, cached tokens, and total token usage per prompt step."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "# Configure local logger to output verbose traces to standard out\nadk run --verbose-perf-traces"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Which trace latency measurement isolates database queries or API execution bottlenecks from model inference delays?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Time-to-first-token latency\n- B) Tool execution latency\n- C) Compiler compile time"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Tool execution latency tracks the absolute runtime duration of your custom tools."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab - Debugging a Failing Tool using Trace Analysis",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Debugging Failed Tools"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will run an agent that fails when interacting with a local inventory database. You will use `adk-web` trace diagnostics to identify the parameter format bug, correct the source code, and verify execution success."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Run the Broken Agent"
+        },
+        {
+          "type": "p",
+          "content": "Trigger the agent to retrieve stock information from a database file. The query fails silently or returns an error response:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk run --prompt \"Retrieve stock details for item id 8802 and export schema report.\""
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Inspect adk-web traces"
+        },
+        {
+          "type": "p",
+          "content": "Open `http://localhost:8501` in your browser. Inspect the last run history pane. Under 'Tool Failures', locate the active error logs:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"error\": \"TypeError: expected string or bytes-like object, got int\",\n  \"tool\": \"fetch_stock_details\",\n  \"arguments\": {\n    \"item_id\": 8802\n  }\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Step 3: Correct the Tool Schema Definition"
+        },
+        {
+          "type": "p",
+          "content": "The model passed `8802` as an integer, but the python code was expecting a string format. We will update the tool's python signature type hint to accept both `int` and `str` parameters:"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "# Before:\n# def fetch_stock_details(item_id: str)\n\n# After (corrected type definition):\ndef fetch_stock_details(item_id: int | str):\n    \"\"\"\n    Retrieves local inventory stock numbers.\n    Args:\n        item_id (int | str): The ID of the item.\n    \"\"\"\n    # Code handles integer string conversion safely\n    sanitized_id = str(item_id)\n    # Run database query...\n"
+        },
+        {
+          "type": "h2",
+          "content": "Step 4: Re-run diagnostics"
+        },
+        {
+          "type": "p",
+          "content": "Execute the agent once more. Review the transaction history in adk-web to confirm a green success tag is displayed next to the tool invocation step."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "5",
+  "title": "5. Lab: Implementing a real-time data visualization card",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Implementing a Real-Time Data Visualization Card"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will define a custom schema block for an agent. The agent will return this schema to display sales metrics."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Schema Response"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"type\": \"a2ui-layout\",\n  \"version\": \"1.0\",\n  \"components\": [\n    {\n      \"type\": \"card\",\n      \"title\": \"Q1 Revenue Report\",\n      \"content\": \"Total Sales: $450,000\",\n      \"border\": \"#3b82f6\"\n    }\n  ]\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the main wrapper key for layouts returned in A2UI?\n- A) root-layout\n- B) a2ui-layout\n- C) canvas-frame\n\nFeedback: Option B is correct. a2ui-layout starts layout definitions."
+    }
+  ]
+}

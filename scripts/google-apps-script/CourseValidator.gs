@@ -1,5 +1,5 @@
 /**
- * Tridorian Course Validator
+ * tridorian Course Validator
  * Version: 1.0.0
  *
  * Instructions:
@@ -7,12 +7,12 @@
  * 2. Go to Extensions > Apps Script.
  * 3. Paste this code into Code.gs.
  * 4. Save and refresh the Google Doc.
- * 5. Use the "Tridorian" menu to validate.
+ * 5. Use the "tridorian" menu to validate.
  */
 
 function onOpen() {
   const ui = DocumentApp.getUi();
-  ui.createMenu('Tridorian')
+  ui.createMenu('tridorian')
       .addItem('Validate Course Structure', 'validateCourse')
       .addToUi();
 }
@@ -121,5 +121,5 @@ function showResults(errors, warnings) {
   const output = HtmlService.createHtmlOutput('<pre style="font-family: sans-serif; white-space: pre-wrap;">' + message + '</pre>')
       .setWidth(450)
       .setHeight(300);
-  ui.showModalDialog(output, 'Tridorian Validation Results');
+  ui.showModalDialog(output, 'tridorian Validation Results');
 }

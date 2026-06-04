@@ -1,0 +1,69 @@
+{
+  "id": "4",
+  "title": "4. Secure Devcontainers Environments",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "4.1 The Devcontainers Security Challenge"
+    },
+    {
+      "type": "p",
+      "content": "VS Code and the Antigravity IDE support the Devcontainers standard, allowing developers to run their IDE workspace inside a containerized sandbox. While devcontainers provide excellent workspace parity, they present unique security challenges when integrating autonomous AI agents. By default, devcontainers often mount the host's active SSH agent, automatically mount global configuration folders (~/.gitconfig, ~/.aws, ~/.kube), share the host network namespace, and grant administrative root privileges. An agent executing inside this environment can access host credentials and authenticate to remote servers. We must apply strict containment boundaries."
+    },
+    {
+      "type": "info",
+      "content": "Devcontainer Isolation: The goal is to establish a container boundary that allows you to write code side-by-side with the agent, while stripping the agent of any capability to access your host machine's secrets or communicate with external servers using your keys."
+    },
+    {
+      "type": "h2",
+      "content": "4.2 Hardened .devcontainer.json Configuration Blueprint"
+    },
+    {
+      "type": "p",
+      "content": "To secure the IDE workspace, save this hardened configuration file inside your project repository as '.devcontainer/devcontainer.json':"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"name\": \"Hardened AGY Workspace\",\n  \"image\": \"ghcr.io/wtg-codes/agy-box-image:latest\",\n  \"remoteUser\": \"developer\",\n  \"workspaceMount\": \"source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached\",\n  \"workspaceFolder\": \"/workspace\",\n  \"runArgs\": [\n    \"--cap-drop=ALL\",\n    \"--security-opt=no-new-privileges\",\n    \"--userns=keep-id:uid=1000,gid=1000\"\n  ],\n  \"containerEnv\": {\n    \"AGY_SANDBOX_LEVEL\": \"3\",\n    \"AGY_AUTO_APPROVE\": \"false\"\n  },\n  \"customizations\": {\n    \"vscode\": {\n      \"settings\": {\n        \"terminal.integrated.defaultProfile.linux\": \"bash\",\n        \"security.workspace.trust.enabled\": true\n      },\n      \"extensions\": [\n        \"ms-python.python\",\n        \"dbaeumer.vscode-eslint\"\n      ]\n    }\n  },\n  \"mounts\": [],\n  \"forwardPorts\": []\n}"
+    },
+    {
+      "type": "h2",
+      "content": "4.3 Analysis of Hardening Parameters"
+    },
+    {
+      "type": "p",
+      "content": "Let's review the critical configuration fields that enforce isolation in the blueprint:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "remoteUser: Forces VS Code and the agent engine to execute all tasks under the unprivileged 'developer' account rather than defaulting to 'root'.",
+        "workspaceMount: Explicitly mounts only the active project directory, preventing the container from mapping parent directories on the host drive.",
+        "runArgs: Drops administrative kernel privileges (--cap-drop=ALL) and prevents the unprivileged user from escalating privileges inside the container via setuid binaries (--security-opt=no-new-privileges).",
+        "mounts: Leaving this array empty is critical. It overrides the default behavior of mounting host folders like ~/.ssh, ~/.aws, or ~/.kube, completely hiding host access credentials from the agent loop.",
+        "forwardPorts: Disables automatic port mapping, ensuring that development servers started by the agent are not exposed to the local network."
+      ]
+    },
+    {
+      "type": "warning",
+      "content": "SSH Agent Forwarding Warning: Do not add configurations that map host sockets to '/tmp/vscode-ssh-auth*' or configure SSH agent forwarding ('forwardPorts' or 'mounts' mapping to SSH sockets). An autonomous agent can use these forwarded sockets to sign commits, push code modifications to remote repositories, or connect to internal cloud servers under your identity."
+    },
+    {
+      "type": "h2",
+      "content": "4.4 Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Verify your comprehension of secure devcontainers configurations:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Question 1: What is the primary purpose of setting the 'mounts' parameter to an empty array in the secure devcontainer blueprint?\n  - A) To increase directory read speed inside the container.\n  - B) To block VS Code from mounting host credentials folders like ~/.ssh, ~/.aws, and ~/.kube, isolating the agent from your host accounts.\n  - C) To disable package installations.\n\nFeedback: Option B is correct. By default, devcontainer systems mount host credentials so tools can access git repositories. Setting 'mounts' to empty blocks this, protecting your host credentials.",
+        "Question 2: Why do we specify '--security-opt=no-new-privileges' in runArgs?\n  - A) To prevent processes from executing administrative tasks or transitioning to root via setuid executables.\n  - B) To disable graphic rendering.\n  - C) To isolate local network sockets.\n\nFeedback: Option A is correct. This security parameter blocks the developer user from transitioning to root privilege inside the container, preventing a breakout exploit path."
+      ]
+    }
+  ]
+}

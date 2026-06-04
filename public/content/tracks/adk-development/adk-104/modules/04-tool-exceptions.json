@@ -1,0 +1,32 @@
+{
+  "id": "4",
+  "title": "4. Handling tool execution exceptions",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Handling Tool Exceptions"
+    },
+    {
+      "type": "p",
+      "content": "If a tool makes an HTTP request that returns a 500 error or throws a database connection error, it must handle the issue and provide semantic error descriptions."
+    },
+    {
+      "type": "h2",
+      "content": "Exception Safe Python Tool"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import requests\nfrom google_adk.tools import tool\n\n@tool\ndef fetch_user_dashboard(uid: str) -> dict:\n    \"\"\"\n    Fetches the user dashboard info.\n    \"\"\"\n    try:\n        r = requests.get(f\"https://api.internal/dash/{uid}\", timeout=5)\n        r.raise_for_status()\n        return {\"status\": \"success\", \"data\": r.json()}\n    except requests.exceptions.HTTPError as he:\n        return {\"status\": \"failed\", \"error\": f\"HTTP Error: {he.response.status_code}\"}\n    except Exception as e:\n        return {\"status\": \"error\", \"error\": str(e)}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How should a tool handle a failed HTTP request?\n- A) Exit the process using sys.exit(1).\n- B) Catch the error and return a JSON dictionary containing the error message.\n- C) Throw a raw exception and let the program crash.\n\nFeedback: Option B is correct. Returning errors as standard tool outputs allows the agent to handle the failure gracefully."
+    }
+  ]
+}

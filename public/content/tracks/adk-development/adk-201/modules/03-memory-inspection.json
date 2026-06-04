@@ -1,0 +1,53 @@
+{
+  "id": "3",
+  "title": "3. Inspecting Memory & Conversation States",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Memory & State Inspections"
+    },
+    {
+      "type": "p",
+      "content": "Agents maintain conversation context using memory strategies. The Memory tab of `adk-web` provides a real-time view of active variables, context buffers, and sliding window indices."
+    },
+    {
+      "type": "h2",
+      "content": "Visualizing the Context Window"
+    },
+    {
+      "type": "p",
+      "content": "The memory visualizer maps active messages loaded in current model requests vs compressed history blocks. You can view:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Context buffer index parameters.",
+        "System instruction weights.",
+        "Compacted summary notes injected as system context.",
+        "Active session keys (such as user authentication metadata)."
+      ]
+    },
+    {
+      "type": "info",
+      "title": "Compaction Thresholds",
+      "content": "The compaction indicator flashes yellow when the current conversation history approaches 80% of the configured sliding window limit, warning that a context compression run is imminent."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What indicator tells you that the agent's active memory is approaching compaction?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The server restarts automatically.\n- B) The compaction indicator changes color (yellow warning) as history size nears 80% of the window limits.\n- C) The adk CLI commands return error codes."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. adk-web highlights context size usage warnings visual indicator when nearing compression boundaries."
+    }
+  ]
+}

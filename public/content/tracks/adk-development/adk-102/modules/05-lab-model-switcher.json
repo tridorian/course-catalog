@@ -1,0 +1,41 @@
+{
+  "id": "5",
+  "title": "5. Lab - Multi-Model Configuration Switcher",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Multi-Model Configuration Switcher"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will build a Python program that dynamically generates `agent.yaml` files depending on environment variables (e.g., swapping to flash for testing, pro for production)."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Python Switcher"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import yaml\nimport os\n\ndef generate_config(env='development'):\n    config = {\n        'metadata': {\n            'name': 'dynamic-agent',\n            'version': '1.0.0'\n        },\n        'settings': {\n            'model': 'gemini-1.5-flash' if env == 'development' else 'gemini-1.5-pro',\n            'temperature': 0.1 if env == 'development' else 0.4,\n            'max_tokens': 2048\n        }\n    }\n    \n    with open('agent.yaml', 'w') as f:\n        yaml.safe_dump(config, f, default_flow_style=False)\n    print(f\"Created config for {env} environment.\")\n\nif __name__ == '__main__':\n    env_mode = os.getenv('AGENT_ENV', 'development')\n    generate_config(env_mode)"
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Run the switcher and verify"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "export AGENT_ENV=production\npython switcher.py\ncat agent.yaml"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why is separating configurations dynamically useful in CI/CD chains?\n- A) It speeds up code compiler loops.\n- B) It allows testing with low-cost model backends in staging and high-accuracy models in prod.\n- C) It removes the need for OAuth credentials.\n\nFeedback: Option B is correct. Dynamic configurations save costs and optimize testing."
+    }
+  ]
+}

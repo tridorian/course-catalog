@@ -1,0 +1,273 @@
+{
+  "course_id": "adk-401",
+  "title": "ADK-401: Dynamic Interfaces with A2UI",
+  "description": "Create interactive user interfaces generated dynamically by agents. Learn the A2UI schema format to build cards, forms, tables, and secure callbacks.",
+  "highlights": [
+    {
+      "icon": "🖥️",
+      "title": "Declarative Layouts",
+      "description": "Design rich structural visual component blocks (forms, cards, tables) in agent JSON payloads."
+    },
+    {
+      "icon": "📥",
+      "title": "Input Capturing",
+      "description": "Implement secure data submission handlers to collect user responses and pass them back."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Sandboxed UI",
+      "description": "Enforce strict XSS and code injection checks on all agent-generated interfaces."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. The A2UI Declarative Layout Protocol",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Introduction to A2UI Protocol"
+        },
+        {
+          "type": "p",
+          "content": "Text inputs and markdown outputs are insufficient for complex actions like scheduling meetings or reviewing code changes. The Agent-to-User Interface (A2UI) protocol allows agents to emit structured JSON UI components that are rendered as clean, native visual elements in client browsers."
+        },
+        {
+          "type": "h2",
+          "content": "Core Design Philosophy"
+        },
+        {
+          "type": "p",
+          "content": "A2UI separates interface definitions from the rendering engine. The agent outputs UI blocks defined by a strict JSON Schema, and the client frontend platform converts these definitions into styling-consistent React or HTML widgets."
+        },
+        {
+          "type": "h2",
+          "content": "A2UI Container Example Schema"
+        },
+        {
+          "type": "p",
+          "content": "Below is the layout JSON for a basic A2UI block describing a system alert card:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"a2ui_version\": \"2.0.0\",\n  \"layout\": \"vertical\",\n  \"components\": [\n    {\n      \"type\": \"card\",\n      \"title\": \"Security Patch Required\",\n      \"status\": \"critical\",\n      \"body\": \"A critical vulnerability has been identified in packages.json.\"\n    }\n  ]\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary benefit of the A2UI protocol over standard raw markdown text outputs?"
+        },
+        {
+          "type": "p",
+          "content": "- A) It speeds up the LLM text generation latency.\n- B) It allows agents to generate structured, interactive UI blocks like forms, calendars, and tables rendered natively on the client.\n- C) It translates agent codes into Go."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. A2UI gives the agent the ability to define functional, structured interface layouts that render as native browser widgets."
+        }
+      ]
+    },
+    {
+      "title": "2. Building Forms and Processing Input Paybacks",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Form Components & Input Capture"
+        },
+        {
+          "type": "p",
+          "content": "To capture parameters from the user securely, agents construct forms using the A2UI input widgets. When the user submits, a callback request payload is routed back to the agent session."
+        },
+        {
+          "type": "h2",
+          "content": "A2UI Form Schema Example"
+        },
+        {
+          "type": "p",
+          "content": "This schema defines a user settings form with a text input, selection dropdown, and a submit button:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"type\": \"form\",\n  \"form_id\": \"user-auth-settings\",\n  \"controls\": [\n    {\n      \"type\": \"text-input\",\n      \"id\": \"username_field\",\n      \"label\": \"Service Username\",\n      \"placeholder\": \"Enter corporate ID\"\n    },\n    {\n      \"type\": \"dropdown\",\n      \"id\": \"auth_level\",\n      \"label\": \"Access Tier\",\n      \"options\": [\n        {\"label\": \"Read-Only\", \"value\": \"ro\"},\n        {\"label\": \"Read-Write\", \"value\": \"rw\"}\n      ]\n    },\n    {\n      \"type\": \"button\",\n      \"action_id\": \"submit-auth-credentials\",\n      \"label\": \"Apply and Connect\"\n    }\n  ]\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Understanding Callback Paybacks"
+        },
+        {
+          "type": "p",
+          "content": "When the button is clicked, the UI generates a callback payload containing values from the input fields:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"event_type\": \"a2ui_submit\",\n  \"form_id\": \"user-auth-settings\",\n  \"action_id\": \"submit-auth-credentials\",\n  \"values\": {\n    \"username_field\": \"dev-user-009\",\n    \"auth_level\": \"rw\"\n  }\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What format does A2UI use to return user-entered form data to the agent?"
+        },
+        {
+          "type": "p",
+          "content": "- A) As a raw text message containing prompt inputs.\n- B) As a structured JSON callback envelope mapping input IDs to values.\n- C) As a CSV spreadsheet export."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Data collected from A2UI forms is returned in a structured JSON callback payload with the input values mapped to control IDs."
+        }
+      ]
+    },
+    {
+      "title": "3. Structuring Cards, Lists, and Data Tables",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Cards, Lists, & Data Tables"
+        },
+        {
+          "type": "p",
+          "content": "Rendering structured records (like server lists or database tables) inside markdown text blocks is hard to read. A2UI tables support sorting metadata and visual column formatting."
+        },
+        {
+          "type": "h2",
+          "content": "A2UI Table Definition Schema"
+        },
+        {
+          "type": "p",
+          "content": "Use the following schema format to represent inventory query records dynamically inside the visual panel:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "code": "{\n  \"type\": \"data-table\",\n  \"headers\": [\n    {\"key\": \"item_id\", \"label\": \"ID\", \"sortable\": true},\n    {\"key\": \"status\", \"label\": \"Status\", \"sortable\": false},\n    {\"key\": \"quantity\", \"label\": \"In Stock\", \"sortable\": true}\n  ],\n  \"rows\": [\n    {\"item_id\": \"8802\", \"status\": \"Active\", \"quantity\": 150},\n    {\"item_id\": \"8803\", \"status\": \"Low Stock\", \"quantity\": 4},\n    {\"item_id\": \"8804\", \"status\": \"Discontinued\", \"quantity\": 0}\n  ]\n}"
+        },
+        {
+          "type": "info",
+          "title": "Client rendering",
+          "content": "Tables rendered via A2UI automatically include user interface wrappers for local pagination, column resizing, and row selections."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: How can you specify that a column header in an A2UI data table should be sortable by the end-user?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Set 'sortable': true within the header configuration object.\n- B) Include a custom CSS script in the layout configuration.\n- C) Prefix the column header label with an asterisk."
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option A is correct. Adding 'sortable': true to a header object tells the client-side renderer to add sorting triggers for that column."
+        }
+      ]
+    },
+    {
+      "title": "4. Secure Action Handlers & Event Routing",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Event Security & Verification"
+        },
+        {
+          "type": "p",
+          "content": "Because A2UI elements route events directly back to agents, executing scripts within these components presents security risks. Enforcing sandboxed execution policies prevents malicious inputs from executing commands."
+        },
+        {
+          "type": "h2",
+          "content": "Threat Vector: Callback Injection"
+        },
+        {
+          "type": "p",
+          "content": "An attacker could manipulate form submission values to send shell escape sequences, hoping the agent runs them directly in tools. Security policies must follow three rules:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Input Type Enforcement: Validate that numerical fields contain only integers/decimals prior to dispatching tools.",
+            "CSRF Token Protection: Attach a session token header to all UI action events to verify the click originated from an active workspace interface.",
+            "Sanitization Filters: Strip potential script elements and command pipeline operators (e.g. ;, &&, |) from text inputs."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Which security mechanism validates that an A2UI submission event originated from the active user's session and not a spoofed network request?"
+        },
+        {
+          "type": "p",
+          "content": "- A) Python type hints\n- B) Session CSRF tokens in event headers\n- C) Markdown validation filters"
+        },
+        {
+          "type": "p",
+          "content": "Feedback: Option B is correct. Event routing uses CSRF tokens to verify session authenticity."
+        }
+      ]
+    },
+    {
+      "title": "5. Lab - Creating an Agent-Driven Approval Dashboard",
+      "blocks": [
+        {
+          "type": "h1",
+          "content": "Lab: Deploying an Approval Interface"
+        },
+        {
+          "type": "p",
+          "content": "In this lab, you will write an agent that reviews expense report submissions and generates an interactive A2UI card with 'Approve' and 'Reject' buttons for manager validation."
+        },
+        {
+          "type": "h2",
+          "content": "Step 1: Write the Dashboard Script"
+        },
+        {
+          "type": "p",
+          "content": "Create `src/agents/approval_manager.py` to generate the A2UI approval card layout payload:"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "code": "import json\nfrom google_adk import Agent\n\ndef create_approval_card(report_details: dict) -> str:\n    # Define the structured A2UI card with action buttons\n    card_layout = {\n        \"a2ui_version\": \"2.0.0\",\n        \"components\": [\n            {\n                \"type\": \"card\",\n                \"title\": \"Expense Approval Required\",\n                \"body\": f\"Review submission from {report_details['submitter']}: ${report_details['amount']}\",\n                \"status\": \"warning\"\n            },\n            {\n                \"type\": \"button_group\",\n                \"buttons\": [\n                    {\"label\": \"Approve Request\", \"action_id\": \"approve_expense\", \"variant\": \"success\"},\n                    {\"label\": \"Reject Request\", \"action_id\": \"reject_expense\", \"variant\": \"danger\"}\n                ]\n            }\n        ]\n    }\n    return json.dumps(card_layout)"
+        },
+        {
+          "type": "h2",
+          "content": "Step 2: Start the agent server"
+        },
+        {
+          "type": "p",
+          "content": "Launch your local agent host server to listen for events:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "adk serve --agent approval_manager.py --port 8096"
+        },
+        {
+          "type": "h2",
+          "content": "Step 3: Test action callbacks"
+        },
+        {
+          "type": "p",
+          "content": "Interact with the generated visual interface card. Click **Approve**. Review system console log to verify that the callback event routing triggers the correct backend handler function:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "code": "[adk-server] Received event: a2ui_submit -> action_id: approve_expense. Processing payment ledger update..."
+        }
+      ]
+    }
+  ]
+}

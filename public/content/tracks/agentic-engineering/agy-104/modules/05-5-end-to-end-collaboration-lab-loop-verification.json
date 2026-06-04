@@ -1,0 +1,89 @@
+{
+  "id": "5",
+  "title": "5. End-to-End Collaboration Lab",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Now that you have learned the concepts of instruction writing, execution approvals, and steering, you will perform a hands-on lab exercise. In this lab, we will simulate a project repair workflow. You will provide the initial instructions, review commands manually, pause and redirect the agent, and verify the final outcome."
+    },
+    {
+      "type": "h2",
+      "content": "Lab Objectives"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Initialize a simulated local workspace with target files.",
+        "Run a task with manual approval controls.",
+        "Approve standard commands and reject a dangerous command.",
+        "Pause, redirect, and resume execution to fix a code bug.",
+        "Verify task completion and workspace boundaries."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Step-by-Step Lab Guide"
+    },
+    {
+      "type": "p",
+      "content": "**Step 1: Set up the workspace**\nCreate a new folder and add a simple javascript file that contains a syntax bug. Also create an instructions file."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Create the workspace folder\nmkdir -p /var/home/wtg/Repos/lab-collab-loop\ncd /var/home/wtg/Repos/lab-collab-loop\n\n# Create a javascript file with a syntax bug (missing parenthesis)\necho \"function calculateTotal(price) { return price * 1.08\" > calculator.js\n\n# Create the workspace rules file\ncat << 'EOF' > .gemini.md\n# Workspace Rules\n- Always run code tests via node command\n- Do NOT delete calculator.js\n- Do NOT access folders outside /var/home/wtg/Repos/lab-collab-loop\nEOF"
+    },
+    {
+      "type": "p",
+      "content": "**Step 2: Trigger the task with Manual approvals**\nStart the agent task to refactor the code and verify its output, enabling manual approval prompts."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "agy task run --task \"Fix the syntax bug in calculator.js and run node calculator.js to test\" --approvals manual"
+    },
+    {
+      "type": "p",
+      "content": "**Step 3: Review and Approve/Reject Commands**\nDuring execution, the agent will suggest a command to test the file. Review the prompt carefully. If it suggests a safe command, approve it. If it proposes to delete files, reject it."
+    },
+    {
+      "type": "info",
+      "content": "If the agent proposes `node calculator.js`, enter `y` (Yes). If the agent proposes a dangerous or non-compliant command (such as `rm calculator.js` or attempting to list external directories), enter `n` (No) and type corrective feedback."
+    },
+    {
+      "type": "p",
+      "content": "**Step 4: Steering Interrupt**\nSuppose the agent starts reading logs outside the workspace. Pause the agent, provide redirection, and resume execution:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Pause the running task\nagy task pause\n\n# Redirect the agent\nagy task feedback --message \"Do not read system logs. Use calculator.js directly.\"\n\n# Resume the task\nagy task resume"
+    },
+    {
+      "type": "p",
+      "content": "Once the agent fixes the parenthesis in `calculator.js` and successfully tests it, verify the file contents to ensure the work matches instructions."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** If the agent proposes a command that you reject during manual approval, what should you do?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Press Ctrl+C to kill the engine and reinstall",
+        "B) Reject the command, select the option to provide feedback, and explain why the command is rejected so the agent can propose an alternative",
+        "C) Approve the command anyway and fix the damage afterward",
+        "D) Ignore the prompt and wait for it to time out"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** When you reject a command in manual approval mode, the system allows you to submit feedback. The agent receives this explanation, refines its reasoning, and proposes a corrected approach."
+    }
+  ]
+}

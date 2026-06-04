@@ -1,0 +1,628 @@
+{
+  "course_id": "agy-411",
+  "title": "AGY-411: Custom MCP Servers (L400)",
+  "description": "A high-level systems integration and architecture course covering the design, hosting, implementation, and deployment of custom Model Context Protocol (MCP) servers. Students will master how to securely build and maintain MCP interfaces that allow autonomous AI agents to query database layers, REST microservices, and ticketing platforms under strict enterprise network boundaries, access constraints, and credential management standards.",
+  "highlights": [
+    {
+      "icon": "🔌",
+      "title": "Protocol Specifications",
+      "description": "Deep dive into JSON-RPC 2.0 message schemas, lifecycle dynamics, and stdio vs. SSE (Server-Sent Events) transports."
+    },
+    {
+      "icon": "🗄️",
+      "title": "Secure DB Connectors",
+      "description": "Design pattern implementation for relational databases (PostgreSQL/SQLite) using read-only roles, parameterized queries, and query count boundaries."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Enterprise API Gateways",
+      "description": "Secure API credential management, token propagation, payload size throttling, and mapping REST endpoints to safe agent tools."
+    },
+    {
+      "icon": "🚀",
+      "title": "Hardened Container Sandbox",
+      "description": "Compile and bundle MCP servers in OCI-compliant containers, deploy behind SSE reverse proxies, and execute automated diagnostic scripts."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Protocol Architecture & Lifecycle Spec",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Understanding the Model Context Protocol (MCP)"
+        },
+        {
+          "type": "p",
+          "content": "The Model Context Protocol (MCP) is an open-standard, JSON-RPC 2.0 based transport protocol designed to establish a standardized interface between AI client applications (such as the AGY CLI or the antigravity dashboard) and target data sources, servers, or external development tooling. Rather than bundling custom API connections and database drivers into the core model wrappers, MCP provides a decoupled runtime interface. This allows AI agents to interact with third-party software securely and deterministically."
+        },
+        {
+          "type": "h3",
+          "content": "JSON-RPC 2.0 Transport Layers"
+        },
+        {
+          "type": "p",
+          "content": "MCP defines two main communication methods to run data transfers: Standard Input/Output (stdio) and Server-Sent Events (SSE) over HTTP/HTTPS. In local-first workstation architectures (like Tier 1 and Tier 2 setups), stdio transport is preferred. The client spawns the server process directly, communicating through pipes (stdin/stdout). This ensures no local network port is opened, drastically reducing the system's attack surface."
+        },
+        {
+          "type": "info",
+          "content": "When writing custom stdio servers, remember that stdout is reserved for JSON-RPC 2.0 messages. Any extra logs, print statements, or console messages must go through stderr, or else the client's parser will fail and the session will crash."
+        },
+        {
+          "type": "h3",
+          "content": "The Session Lifecycle Flow"
+        },
+        {
+          "type": "p",
+          "content": "Every MCP session transitions through a set of defined protocol states. Standard clients and servers must adhere to this sequence to guarantee session integrity:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Handshake Initialize: The client sends an 'initialize' request detailing the protocolVersion, clientInfo, and clientCapabilities.",
+            "Handshake Result: The server responds with its serverCapabilities (resources, tools, prompts) and serverInfo (name, version).",
+            "Readiness Notification: The client sends an 'initialized' notification to finalize capabilities negotiations.",
+            "Resource/Tool Discovery: The client queries available assets using requests like 'tools/list' or 'resources/list'.",
+            "Runtime Loop: The agent triggers operations using 'tools/call' or 'resources/read' schemas.",
+            "Session Termination: The client triggers a 'shutdown' request, followed by an 'exit' notification to gracefully terminate the server process."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Protocol JSON Schema Structures"
+        },
+        {
+          "type": "p",
+          "content": "Here is the exact schema representation of a client's initialize request sent at the start of a session:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {\n      \"roots\": {\n        \"listChanged\": true\n      },\n      \"sampling\": {}\n    },\n    \"clientInfo\": {\n      \"name\": \"antigravity-client\",\n      \"version\": \"1.0.0\"\n    }\n  }\n}"
+        },
+        {
+          "type": "p",
+          "content": "The server returns its handshake response, declaring which operations it supports. In this case, the server registers resource read and list tools capabilities:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"result\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {\n      \"resources\": {\n        \"subscribe\": true,\n        \"listChanged\": true\n      },\n      \"tools\": {\n        \"listChanged\": true\n      }\n    },\n    \"serverInfo\": {\n      \"name\": \"custom-postgres-connector\",\n      \"version\": \"0.1.0\"\n    }\n  }\n}"
+        },
+        {
+          "type": "h3",
+          "content": "The Three MCP Primitives"
+        },
+        {
+          "type": "p",
+          "content": "MCP structures all features into three base primitives to standardize how models digest contextual information:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Resources: Read-only data schemas that are referenced via custom URIs (e.g., db://active_users). Think of them as file attachments for the LLM.",
+            "Tools: Executable logic definitions that the model can request to execute with specific arguments. Tools represent active write/modify capabilities.",
+            "Prompts: Parameterized templates that help format prompt interactions or package complex workflows."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: What is the primary transport mechanism used by default in a secure, local-only workstation deployment of an MCP server?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. WebSockets (ws://)",
+            "B. Standard Input/Output (stdio) pipes",
+            "C. Server-Sent Events (SSE) over public HTTP",
+            "D. gRPC over Unix Domain Sockets"
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: B is correct. Standard Input/Output (stdio) pipes are the default local transport for MCP, as they allow the client to spawn the server process directly and communicate securely without opening local network ports."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which JSON-RPC method initiates the capabilities negotiation between an MCP client and server?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. tools/list",
+            "B. connection/negotiate",
+            "C. initialize",
+            "D. session/start"
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: C is correct. The 'initialize' method is the standard handshake starter, where client and server exchange capabilities, protocol versions, and metadata before any tools or resources can be accessed."
+        }
+      ]
+    },
+    {
+      "title": "2. Developer Workspace & SDK Setup",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Prerequisites and Developer Environment Setup"
+        },
+        {
+          "type": "p",
+          "content": "Building production-ready MCP servers requires setting up node runtimes and virtual environments. We support both Node.js (TypeScript) and Python SDKs. These SDKs handle the details of JSON-RPC schema validation and stdio streaming under the hood. In this section, we will first walk through setting up an official cloud-backed MCP server—the Google Developer Knowledge MCP—to understand configuration, and then build custom servers using Node.js and Python."
+        },
+        {
+          "type": "h2",
+          "content": "Hands-on Lab: Configuring the Google Developer Knowledge MCP"
+        },
+        {
+          "type": "p",
+          "content": "The Google Developer Knowledge MCP server provides real-time, canonical access to Google's public developer documentation. Rather than relying on outdated model training data or brittle web scraping, configuring this server connects the AI agent directly to live documentation. This is an essential step for building high-quality Integrator agent flows."
+        },
+        {
+          "type": "h3",
+          "content": "Step 1: Enabling the Developer Knowledge API"
+        },
+        {
+          "type": "p",
+          "content": "To query Google's developer knowledge base, you must enable its API in the Google Cloud Console:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Navigate to the Google Cloud Console (console.cloud.google.com).",
+            "Select an existing Google Cloud project or create a new one (billing is not required).",
+            "Go to the API Library and search for 'Developer Knowledge API'.",
+            "Click 'Enable' and wait for the process to complete."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Step 2: Generating and Restricting the API Key"
+        },
+        {
+          "type": "p",
+          "content": "Authentication is performed using a Google Cloud API key. For security, you must restrict the API key so it only has permission to query the Developer Knowledge API:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "In the Google Cloud Console, navigate to 'APIs & Services' > 'Credentials'.",
+            "Click '+ Create credentials' at the top of the screen and select 'API key'.",
+            "Once created, click the three vertical dots next to the key to edit it.",
+            "Change the name of the key to 'Antigravity-DevKnowledge-Key'.",
+            "Under 'API restrictions', select 'Restrict key'.",
+            "Type 'Developer Knowledge API' in the filter box, select it, and click OK.",
+            "Click 'Save' and copy the generated API key string to your clipboard."
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "API keys are sensitive credentials. Never expose them in public Git repositories, frontend client bundles, or share them in cleartext. Keep them stored in environment variables, secret managers, or local configuration files."
+        },
+        {
+          "type": "h3",
+          "content": "Step 3: Configuring the Central mcp_config.json"
+        },
+        {
+          "type": "p",
+          "content": "All three Antigravity user interfaces (antigravity desktop app, antigravity-ide, and the agy CLI) share a central configuration file located at '~/.gemini/config/mcp_config.json'. Open this file in your text editor and declare the 'google-developer-knowledge' server:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"mcpServers\": {\n    \"google-developer-knowledge\": {\n      \"headers\": {\n        \"X-Goog-Api-Key\": \"<YOUR_API_KEY_HERE>\"\n      },\n      \"serverUrl\": \"https://developerknowledge.googleapis.com/mcp\"\n    }\n  }\n}"
+        },
+        {
+          "type": "p",
+          "content": "Replace '<YOUR_API_KEY_HERE>' with the restricted API key you copied from the Google Cloud Console, then save the file."
+        },
+        {
+          "type": "h3",
+          "content": "Step 4: Validating Setup across the Decoupled Interfaces"
+        },
+        {
+          "type": "p",
+          "content": "To ensure Antigravity has successfully loaded the Google Developer Knowledge MCP, use the validation paths corresponding to your active interface surface:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Antigravity 2.0 (Standalone Desktop UI): Navigate to Settings (gear icon) -> Customizations. Under Installed MCP Servers, click 'Refresh'. Look for 'google-developer-knowledge' to verify it is active.",
+            "Antigravity IDE: Open the VS Code-based editor, go to User Settings via the agent panel menu -> Customizations -> click Refresh under Installed MCP Servers.",
+            "Antigravity CLI (agy): Open a terminal, start the CLI session by running 'agy', then type the diagnostic command '/mcp' and press enter. You should see 'google-developer-knowledge' listed under configured servers."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Step 5: Testing with Natural Language Prompts"
+        },
+        {
+          "type": "p",
+          "content": "To verify that the agent can actively query the developer knowledge base, start a session and execute a query. When you run a query using the developer knowledge base for the first time, Antigravity will display a prompt asking for approval. You must click 'Allow' to proceed."
+        },
+        {
+          "type": "info",
+          "content": "The approval flow is a critical security guardrail. Antigravity requires explicit user confirmation before executing third-party tools, preventing unvetted code execution in secure environments."
+        },
+        {
+          "type": "p",
+          "content": "Try testing the integration with the following natural language prompts:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "\"Based on the Google Developer Knowledge, does Google Workspace support MCP servers?\"",
+            "\"Give me a list of the Google Workspace and Cloud Run API names. Make it super short.\"",
+            "\"Based on the Google Developer Knowledge, create a new Python script to upload a file to Google Drive.\""
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Initializing a Node.js TypeScript Workspace"
+        },
+        {
+          "type": "p",
+          "content": "To construct a custom TypeScript MCP server from scratch, initialize the npm environment and install the required compiler tools:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Create project folder\nmkdir -p ~/workspace/agy-mcp-server-ts\ncd ~/workspace/agy-mcp-server-ts\n\n# Initialize package\nnpm init -y\n\n# Install standard dependencies\nnpm install @modelcontextprotocol/sdk\n\n# Install development dependencies\nnpm install -D typescript @types/node tsx\n\n# Generate default configuration\nnpx tsc --init"
+        },
+        {
+          "type": "p",
+          "content": "Edit the generated tsconfig.json file to utilize ESM imports and modern JS targets:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"module\": \"NodeNext\",\n    \"moduleResolution\": \"NodeNext\",\n    \"esModuleInterop\": true,\n    \"strict\": true,\n    \"skipLibCheck\": true,\n    \"outDir\": \"./dist\"\n  },\n  \"include\": [\"src/**/*\"]\n}"
+        },
+        {
+          "type": "h2",
+          "content": "Writing the TypeScript Server"
+        },
+        {
+          "type": "p",
+          "content": "Create 'src/index.ts'. This script instantiates a basic Server class registering a system resource URI and a diagnostic echo tool:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport {\n  CallToolRequestSchema,\n  ListResourcesRequestSchema,\n  ListToolsRequestSchema,\n  ReadResourceRequestSchema\n} from \"@modelcontextprotocol/sdk/types.js\";\n\n// Instantiate server\nconst server = new Server(\n  {\n    name: \"diagnostic-server\",\n    version: \"1.0.0\"\n  },\n  {\n    capabilities: {\n      resources: {},\n      tools: {}\n    }\n  }\n);\n\n// List resources handler\nserver.setRequestHandler(ListResourcesRequestSchema, async () => {\n  return {\n    resources: [\n      {\n        uri: \"diagnostic://metrics\",\n        name: \"System Performance Metrics\",\n        mimeType: \"application/json\",\n        description: \"Live system diagnostic statistics\"\n      }\n    ]\n  };\n});\n\n// Read resource handler\nserver.setRequestHandler(ReadResourceRequestSchema, async (request) => {\n  if (request.params.uri === \"diagnostic://metrics\") {\n    return {\n      contents: [\n        {\n          uri: request.params.uri,\n          mimeType: \"application/json\",\n          text: JSON.stringify({\n            status: \"HEALTHY\",\n            cpu_usage_pct: 12.5,\n            memory_free_gb: 8.4,\n            timestamp: new Date().toISOString()\n          })\n        }\n      ]\n    };\n  }\n  throw new Error(\"Resource not found\");\n});\n\n// List tools handler\nserver.setRequestHandler(ListToolsRequestSchema, async () => {\n  return {\n    tools: [\n      {\n        name: \"echo_diagnostics\",\n        description: \"Echoes back status metrics with custom user label\",\n        inputSchema: {\n          type: \"object\",\n          properties: {\n            label: {\n              type: \"string\",\n              description: \"A custom label for the audit logs\"\n            }\n          },\n          required: [\"label\"]\n        }\n      }\n    ]\n  };\n});\n\n// Call tool handler\nserver.setRequestHandler(CallToolRequestSchema, async (request) => {\n  if (request.params.name === \"echo_diagnostics\") {\n    const label = request.params.arguments?.label || \"default\";\n    return {\n      content: [\n        {\n          type: \"text\",\n          text: `Diagnostics generated with label: [${label}]. All systems nominal.`\n        }\n      ]\n    };\n  }\n  throw new Error(\"Tool not found\");\n});\n\n// Start the server\nasync function run() {\n  const transport = new StdioServerTransport();\n  await server.connect(transport);\n  console.error(\"Diagnostic MCP Server running on stdio\");\n}\n\nrun().catch((error) => {\n  console.error(\"Fatal error:\", error);\n  process.exit(1);\n});"
+        },
+        {
+          "type": "h2",
+          "content": "Alternative Python SDK & FastMCP Setup"
+        },
+        {
+          "type": "p",
+          "content": "Python developers can deploy MCP servers with less boilerplate using the FastMCP framework. Run the terminal commands to install and verify dependencies:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Setup virtual environment\nmkdir -p ~/workspace/agy-mcp-server-py\ncd ~/workspace/agy-mcp-server-py\npython3 -m venv venv\nsource venv/bin/activate\n\n# Install the Python SDK\npip install mcp mcp[cli]"
+        },
+        {
+          "type": "p",
+          "content": "Create 'server.py' to implement the python equivalent using standard decorators:"
+        },
+        {
+          "type": "code",
+          "language": "python",
+          "content": "from mcp.server.fastmcp import FastMCP\n\n# Initialize FastMCP Server\nmcp = FastMCP(\"Calculators\")\n\n@mcp.tool()\ndef add_numbers(a: int, b: int) -> str:\n    \"\"\"Adds two integers and returns the formatted sum.\"\"\"\n    return f\"The sum of {a} and {b} is {a + b}\"\n\n@mcp.resource(\"config://app\")\ndef get_config() -> str:\n    \"\"\"Returns application configuration file data.\"\"\"\n    return \"app_version=1.0.0\\nenvironment=development\\ndebug_enabled=true\"\n\nif __name__ == \"__main__\":\n    mcp.run()"
+        },
+        {
+          "type": "h2",
+          "content": "Verifying Setup with the Inspector CLI"
+        },
+        {
+          "type": "p",
+          "content": "Verify that the servers build and compile correctly, and run them through the official modelcontextprotocol inspector web tool to validate transport parsing:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "content": "# Compile TS to JS\nnpx tsc\n\n# Start the inspector interface locally\nnpx @modelcontextprotocol/inspector node dist/index.js"
+        },
+        {
+          "type": "warning",
+          "content": "Ensure console.log statements are removed from the server code before connecting to stdio. The inspector will fail if standard output receives unexpected data."
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why must diagnostic logging inside an MCP server process run via console.error instead of console.log?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. console.log is intercepted by OS security sandboxes.",
+            "B. console.log output interferes with JSON-RPC communication on stdout, which crashes the transport parser.",
+            "C. console.error executes synchronously, preventing memory leaks.",
+            "D. The AGY client only parses standard error stream logs."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: B is correct. In stdio transport, stdout is reserved strictly for protocol frames. Extra text from console.log corrupts the JSON-RPC parsing structure, leading to protocol errors."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: In mcp_config.json, which key is used to supply authentication keys to the server headers block?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. Authorization",
+            "B. X-Goog-Api-Key",
+            "C. api_key",
+            "D. Bearer-Token"
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: B is correct. For Google Cloud APIs exposed as MCP, the custom headers block requires the 'X-Goog-Api-Key' parameter to properly authenticate queries."
+        }
+      ]
+    },
+    {
+      "title": "3. Secure Database Connectors",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Designing Safe Database Connectors"
+        },
+        {
+          "type": "p",
+          "content": "Giving AI agents access to databases creates powerful opportunities, but exposing tables without security controls risks data loss or exfiltration. Because AI models are vulnerable to prompt injection, a user could manipulate the model to execute destructive DDL commands (e.g., 'DROP TABLE') or read sensitive data. As a Systems Integrator, you must design a secure layer to mitigate these risks."
+        },
+        {
+          "type": "warning",
+          "content": "Never connect an MCP server to a database using administrator credentials. Implement read-only database user accounts and use parameterized inputs to prevent SQL injection."
+        },
+        {
+          "type": "h3",
+          "content": "Access Layer Design Principles"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Least Privilege User: Use credentials that restrict the server's database access to a whitelist of tables.",
+            "Parameterized Query Construction: Never construct queries by concatenating raw strings. Always use bind parameters.",
+            "Dynamic Schema Exposure: Query database metadata tables to dynamically list schemas as Resources, guiding the model's queries.",
+            "Execution Limits: Enforce limits on row counts (e.g., LIMIT 50) and statement timeouts (e.g., 500ms) to prevent performance issues."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Implementing the Database Server"
+        },
+        {
+          "type": "p",
+          "content": "The following TypeScript server connects to PostgreSQL with read-only credentials, exposing schemas as Read-only Resources and using parameterized queries to fetch data safely:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport {\n  CallToolRequestSchema,\n  ListResourcesRequestSchema,\n  ListToolsRequestSchema,\n  ReadResourceRequestSchema\n} from \"@modelcontextprotocol/sdk/types.js\";\nimport pg from \"pg\";\n\nconst { Pool } = pg;\n\n// Initialize db pool using environment configuration\nconst pool = new Pool({\n  connectionString: process.env.DATABASE_URL,\n  statement_timeout: 500 // Enforce statement execution limits\n});\n\nconst server = new Server(\n  {\n    name: \"secure-postgres-mcp\",\n    version: \"1.0.0\"\n  },\n  {\n    capabilities: {\n      resources: {},\n      tools: {}\n    }\n  }\n);\n\n// Expose dynamic schema as resource\nserver.setRequestHandler(ListResourcesRequestSchema, async () => {\n  return {\n    resources: [\n      {\n        uri: \"postgres://schema/customer_summary\",\n        name: \"Customer Summary Table Schema\",\n        mimeType: \"application/json\",\n        description: \"Schema layout and columns of the customer_summary table\"\n      }\n    ]\n  };\n});\n\n// Read schema metadata\nserver.setRequestHandler(ReadResourceRequestSchema, async (request) => {\n  if (request.params.uri === \"postgres://schema/customer_summary\") {\n    const res = await pool.query(\n      \"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'customer_summary'\"\n    );\n    return {\n      contents: [\n        {\n          uri: request.params.uri,\n          mimeType: \"application/json\",\n          text: JSON.stringify(res.rows)\n        }\n      ]\n    };\n  }\n  throw new Error(\"Resource not found\");\n});\n\n// Register query tool\nserver.setRequestHandler(ListToolsRequestSchema, async () => {\n  return {\n    tools: [\n      {\n        name: \"query_customer_data\",\n        description: \"Queries safe customer details by customer ID\",\n        inputSchema: {\n          type: \"object\",\n          properties: {\n            customerId: {\n              type: \"integer\",\n              description: \"Customer ID\"\n            }\n          },\n          required: [\"customerId\"]\n        }\n      }\n    ]\n  };\n});\n\n// Handle execution safely via parameterized inputs\nserver.setRequestHandler(CallToolRequestSchema, async (request) => {\n  if (request.params.name === \"query_customer_data\") {\n    const customerId = request.params.arguments?.customerId;\n    if (typeof customerId !== \"number\") {\n      throw new Error(\"Invalid customerId input parameter type\");\n    }\n\n    const res = await pool.query(\n      \"SELECT id, name, email, region FROM customer_summary WHERE id = $1 LIMIT 1\",\n      [customerId]\n    );\n\n    return {\n      content: [\n        {\n          type: \"text\",\n          text: JSON.stringify(res.rows)\n        }\n      ]\n    };\n  }\n  throw new Error(\"Tool not found\");\n});\n\nconst transport = new StdioServerTransport();\nawait server.connect(transport);"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why is string concatenation (e.g. \"SELECT * FROM users WHERE id = \" + input) extremely dangerous in custom database MCP servers?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. The JSON-RPC transport parser will reject concatenated string messages.",
+            "B. It exposes the database to SQL injection attacks, allowing users or model prompt injections to bypass access filters.",
+            "C. It consumes significantly more model context tokens.",
+            "D. It prevents the model from subscribing to schema resources."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: B is correct. String concatenation allows raw input characters to manipulate statement syntax. Parameterized queries (using placeholders like $1) isolate inputs from queries, preventing SQL injection."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Which parameter inside the pg Pool configuration enforces query execution timeouts to prevent denial of service (DoS)?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. statement_timeout",
+            "B. connectionTimeoutMillis",
+            "C. query_limit_seconds",
+            "D. idleTimeoutMillis"
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: A is correct. The 'statement_timeout' parameter defines the maximum execution duration in milliseconds. If a query runs longer than the threshold, the database automatically cancels it."
+        }
+      ]
+    },
+    {
+      "title": "4. Wrapping Microservices & APIs",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Exposing APIs and Microservices to Agents"
+        },
+        {
+          "type": "p",
+          "content": "AI agents frequently need to query external microservices, update records in CRMs, or interact with issue-tracking databases. MCP servers can act as proxies to these systems. The server handles authentication, constructs the requests, and returns sanitized data to the agent's context window."
+        },
+        {
+          "type": "info",
+          "content": "Never send API authentication keys directly to the LLM. Keep authentication layers inside the MCP server process, drawing values from environment variables or secure vault systems."
+        },
+        {
+          "type": "h3",
+          "content": "Mapping API Endpoints to Tools"
+        },
+        {
+          "type": "p",
+          "content": "The following server maps contact information lookups from an internal CRM REST API to an MCP tool. It handles token propagation, processes API errors, and filters response payloads to optimize token usage:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "content": "import { Server } from \"@modelcontextprotocol/sdk/server/index.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport {\n  CallToolRequestSchema,\n  ListToolsRequestSchema\n} from \"@modelcontextprotocol/sdk/types.js\";\n\n// Fetch the API Token from local environment variables\nconst CRM_API_KEY = process.env.CRM_API_KEY;\nconst CRM_API_URL = process.env.CRM_API_URL || \"https://api.crm.internal/v1\";\n\nif (!CRM_API_KEY) {\n  console.error(\"Warning: CRM_API_KEY environment variable is not defined\");\n}\n\nconst server = new Server(\n  {\n    name: \"crm-gateway-mcp\",\n    version: \"1.0.0\"\n  },\n  {\n    capabilities: {\n      tools: {}\n    }\n  }\n);\n\n// Register tools\nserver.setRequestHandler(ListToolsRequestSchema, async () => {\n  return {\n    tools: [\n      {\n        name: \"get_crm_contact\",\n        description: \"Retrieves CRM contact profile details by email address\",\n        inputSchema: {\n          type: \"object\",\n          properties: {\n            email: {\n              type: \"string\",\n              description: \"The email address of the customer contact\"\n            }\n          },\n          required: [\"email\"]\n        }\n      }\n    ]\n  };\n});\n\n// Handle execution\nserver.setRequestHandler(CallToolRequestSchema, async (request) => {\n  if (request.params.name === \"get_crm_contact\") {\n    const email = request.params.arguments?.email;\n    if (!email || typeof email !== \"string\") {\n      throw new Error(\"Email parameter is required and must be a string\");\n    }\n\n    try {\n      const response = await fetch(`${CRM_API_URL}/contacts?email=${encodeURIComponent(email)}`, {\n        headers: {\n          \"Authorization\": `Bearer ${CRM_API_KEY}`,\n          \"Accept\": \"application/json\"\n        }\n      });\n\n      if (!response.ok) {\n        throw new Error(`CRM API responded with status: ${response.status}`);\n      }\n\n      const data = await response.json();\n\n      // Filter sensitive details out to preserve context window and privacy\n      const filteredData = {\n        id: data.id,\n        name: data.name,\n        company: data.company,\n        status: data.status,\n        lastContacted: data.last_contacted\n      };\n\n      return {\n        content: [\n          {\n            type: \"text\",\n            text: JSON.stringify(filteredData)\n          }\n        ]\n      };\n    } catch (error: any) {\n      return {\n        content: [\n          {\n            type: \"text\",\n            text: `Failed to query contact. API Error: ${error.message}`\n          }\n        ],\n        isError: true\n      };\n    }\n  }\n  throw new Error(\"Tool not found\");\n});\n\nconst transport = new StdioServerTransport();\nawait server.connect(transport);"
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: Why should an MCP server filter data before returning it in the tool response to the client?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. To prevent JSON-RPC transport syntax errors.",
+            "B. To hide API key strings that might have leaked into server memory.",
+            "C. To protect sensitive user data (privacy) and reduce context token usage by stripping out unnecessary keys.",
+            "D. To trigger the initialization capabilities handshake."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: C is correct. Filtering API payloads preserves data privacy (excluding fields like passwords or SSNs) and reduces context size, preventing prompt bloating and saving tokens."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: Where should external API keys (like CRM_API_KEY) be stored when configuring a server for execution?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. Inside standard environment variables or cloud secret managers, drawn by the host process.",
+            "B. Written directly inside the agent's natural language system prompt.",
+            "C. Checked into public repositories inside the config files.",
+            "D. Encrypted within the JSON-RPC initialize payload."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: A is correct. Credentials must always live outside the source code, injected dynamically into environment variables or drawn from secret vaults during execution."
+        }
+      ]
+    },
+    {
+      "title": "5. Production Staging & Governance",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Staging & Deploying Custom MCP Servers"
+        },
+        {
+          "type": "p",
+          "content": "Deploying MCP servers in production requires strict sandboxing, containerized runtimes, and clear configuration rules. Moving from local development (stdio pipes on a developer workspace) to enterprise-wide staging involves compiling the code into an immutable Docker image, locking permissions, and configuring registry accesses."
+        },
+        {
+          "type": "h3",
+          "content": "Dockerfile Setup for TypeScript Servers"
+        },
+        {
+          "type": "p",
+          "content": "Create a Dockerfile in the project root to build your server inside a container sandbox. This configures a multi-stage build that excludes development source files and limits execution to a non-privileged system user:"
+        },
+        {
+          "type": "code",
+          "language": "dockerfile",
+          "content": "FROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json tsconfig.json ./\nRUN npm ci\nCOPY src ./src\nRUN npm run build\n\nFROM node:18-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\nCOPY --from=builder /app/dist ./dist\n\n# Run container process as non-root user for security\nUSER node\nENTRYPOINT [\"node\", \"dist/index.js\"]"
+        },
+        {
+          "type": "h3",
+          "content": "Staging Dockerized Servers in mcp_config.json"
+        },
+        {
+          "type": "p",
+          "content": "Once the server is packaged as a container image, configure Antigravity to run it by calling the docker CLI directly. This isolates database connections and credentials within the container filesystem:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "content": "{\n  \"mcpServers\": {\n    \"secure-postgres-mcp\": {\n      \"command\": \"docker\",\n      \"args\": [\n        \"run\",\n        \"-i\",\n        \"--rm\",\n        \"--network=host\",\n        \"-e\",\n        \"DATABASE_URL=postgresql://readonly:password@db.internal:5432/production\",\n        \"custom-mcp-postgres:latest\"\n      ]\n    }\n  }\n}"
+        },
+        {
+          "type": "warning",
+          "content": "Always pass the '-i' (interactive) flag to docker run to ensure the standard input stream remains open, allowing JSON-RPC communication pipes to operate. Include the '--rm' flag to clean up container filesystems on exit and prevent system memory leak accumulation."
+        },
+        {
+          "type": "h2",
+          "content": "Hands-on Capstone Lab: Registering & Verifying the Server"
+        },
+        {
+          "type": "p",
+          "content": "This capstone lab walks through testing the custom MCP postgres server in the AGY sandbox. The developer registers the server, starts an AGY CLI session, and triggers a query through the agent to verify performance."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Build the docker image: Run 'docker build -t custom-mcp-postgres:latest .'",
+            "Add the server config: Open '~/.gemini/config/mcp_config.json' and copy the config block above.",
+            "Verify the installation: Start an agy session and check if the server is active by running '/mcp'.",
+            "Execute agent query: Run 'agy query --prompt \"Retrieve table schema customer_summary using secure-postgres-mcp server and show columns.\"'",
+            "Inspect the run log: Check terminal logs to verify JSON-RPC 2.0 initialize sequence succeeded and that credentials remained hidden."
+          ]
+        },
+        {
+          "type": "h2",
+          "content": "Check Your Understanding"
+        },
+        {
+          "type": "p",
+          "content": "Question 1: When deploying a local stdio MCP server inside a Docker container, why are the docker run arguments '-i --rm' critical?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. They compile-check the TypeScript source code.",
+            "B. '-i' (interactive) keeps stdin open for communication, and '--rm' ensures clean container destruction when the agent terminates the session.",
+            "C. They route network traffic through the container firewall.",
+            "D. They enable SSL validation over the standard output stream."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: B is correct. Standard input must stay open ('-i') for the JSON-RPC pipe to process incoming model requests, and container cleanup ('--rm') prevents system memory leak buildup."
+        },
+        {
+          "type": "p",
+          "content": "Question 2: What is the main security purpose of configuring an unprivileged user (e.g. USER node) inside the Dockerfile of an MCP server?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "A. It guarantees OAuth tokens are encrypted automatically.",
+            "B. It restricts the process execution boundary, protecting host files and avoiding potential container escape vulnerabilities.",
+            "C. It forces the server to use SSE instead of stdio.",
+            "D. It compiles the JavaScript compiler modules."
+          ]
+        },
+        {
+          "type": "p",
+          "content": "Answer Feedback: B is correct. Limiting server process privileges ensures that even if a prompt injection exploit compromises the server runtime, the attacker cannot access the host machine filesystem or run root system calls."
+        }
+      ]
+    }
+  ]
+}

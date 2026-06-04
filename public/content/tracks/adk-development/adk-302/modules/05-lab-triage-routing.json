@@ -1,0 +1,32 @@
+{
+  "id": "5",
+  "title": "5. Lab: Designing a triage routing agent",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Designing a Triage Routing Agent"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will write a complete triage routing program in Python that reads queries, classifies them, and dispatches messages to the appropriate agent worker."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the routing logic"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "class TriageSupervisor:\n    def __init__(self):\n        self.workers = {\n            \"billing\": lambda q: f\"Billing Worker processed: {q}\",\n            \"support\": lambda q: f\"Support Worker processed: {q}\"\n        }\n        \n    def route(self, query: str) -> str:\n        if \"price\" in query or \"invoice\" in query:\n            return self.workers[\"billing\"](query)\n        else:\n            return self.workers[\"support\"](query)\n\nif __name__ == '__main__':\n    supervisor = TriageSupervisor()\n    print(supervisor.route(\"Can you check my invoice details?\"))\n    print(supervisor.route(\"How do I reset my password?\"))"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which worker handled the invoice query in the script?\n- A) Support Worker\n- B) Billing Worker\n- C) None\n\nFeedback: Option B is correct. Billing Worker matched the 'invoice' keyword."
+    }
+  ]
+}

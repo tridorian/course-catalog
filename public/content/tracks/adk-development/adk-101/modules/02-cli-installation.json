@@ -1,0 +1,75 @@
+{
+  "id": "2",
+  "title": "2. Installing the CLI and Environment Setup",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Installing the ADK CLI Tool"
+    },
+    {
+      "type": "p",
+      "content": "The ADK system is administered using the `adk` command line interface. This tool manages project bootstrapping, agent testing, local server execution, and production deployments."
+    },
+    {
+      "type": "h2",
+      "content": "Option A: Native Script Installation"
+    },
+    {
+      "type": "p",
+      "content": "For standard development workstations, install the CLI globally using the direct package managers or the secure bootstrap script:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "# Installing via NPM global package manager\nnpm install -g @google/adk-cli\n\n# Alternative: Python package installation for script-heavy environments\npip install google-adk-cli"
+    },
+    {
+      "type": "h2",
+      "content": "Option B: Sandboxed distrobox execution (Tier 3 Hardening)"
+    },
+    {
+      "type": "p",
+      "content": "For locked-down corporate workstations, run the installer inside a local OCI distrobox sandbox container. This avoids local workspace contamination:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "# Initialize a distrobox shell using the official ADK base image\ndistrobox create -n adk-box --image gcr.io/google-adk/adk-box:latest\n\n# Enter the sandboxed shell to run the ADK toolchain\ndistrobox enter adk-box"
+    },
+    {
+      "type": "h2",
+      "content": "Verifying the Installation"
+    },
+    {
+      "type": "p",
+      "content": "Run the diagnostics suite to confirm the CLI is authenticated and has correct file access permissions:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk doctor"
+    },
+    {
+      "type": "info",
+      "title": "Diagnostic Logs",
+      "content": "The 'adk doctor' command checks model connectivity, runs local permissions verification in ~/.adk/cache, and reports dependency versions."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What command should you run to verify that your system paths, Python models, and security dependencies are ready for ADK development?"
+    },
+    {
+      "type": "p",
+      "content": "- A) adk check\n- B) adk doctor\n- C) adk verify --all"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. 'adk doctor' is the official built-in CLI diagnostic suite."
+    }
+  ]
+}

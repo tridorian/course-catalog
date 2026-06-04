@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-401",
+  "title": "ADK-401: Dynamic Interfaces with A2UI",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Create interactive user interfaces generated dynamically by agents. Learn the A2UI schema format to build cards, forms, tables, and secure callbacks.",
+  "features": [
+    {
+      "icon": "🖥️",
+      "title": "Declarative Layouts",
+      "description": "Design rich structural visual component blocks (forms, cards, tables) in agent JSON payloads."
+    },
+    {
+      "icon": "📥",
+      "title": "Input Capturing",
+      "description": "Implement secure data submission handlers to collect user responses and pass them back."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Sandboxed UI",
+      "description": "Enforce strict XSS and code injection checks on all agent-generated interfaces."
+    }
+  ]
+}

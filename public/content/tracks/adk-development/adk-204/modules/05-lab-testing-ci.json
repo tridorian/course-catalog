@@ -1,0 +1,41 @@
+{
+  "id": "5",
+  "title": "5. Lab: Creating a continuous integration workflow",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Creating a Continuous Integration Workflow"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will configure a pytest configuration script that automatically tests custom math tools, executing them locally."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write tests/test_agent.py"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import pytest\nfrom google_adk.tools import tool\n\n@tool\ndef dummy_add(a: int, b: int) -> int:\n    \"\"\"Adds two integers.\"\"\"\n    return a + b\n\ndef test_dummy_add():\n    res = dummy_add(10, 20)\n    assert res == 30\n    \n# Verify parameter schema registration\ndef test_tool_metadata():\n    schema = dummy_add.schema\n    assert schema[\"name\"] == \"dummy_add\"\n    assert \"a\" in schema[\"parameters\"]"
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Run Pytest"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "pip install pytest google-adk\npytest tests/test_agent.py"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What does test_tool_metadata confirm?\n- A) That the LLM returns the right calculations.\n- B) That the function correctly parses to the expected JSON schema parameter structure.\n- C) That the API key is active.\n\nFeedback: Option B is correct. It tests the schema reflection engine."
+    }
+  ]
+}

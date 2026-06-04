@@ -1,6 +1,6 @@
-# Tridorian Document Specification (TDS) v1.0
+# tridorian Document Specification (TDS) v1.0
 
-This document defines the format for creating course materials in Google Docs for synchronization with the Tridorian Course Platform.
+This document defines the format for creating course materials in Google Docs for synchronization with the tridorian Course Platform.
 
 ## 1. Document Structure
 
@@ -10,7 +10,7 @@ The Google Doc must use **Tabs** to organize content.
 - **Purpose:** Metadata and course-wide settings.
 - **Format:** A single 2-column table.
 - **Required Keys:**
-  - `course_id`: A unique URL-friendly slug (e.g., `agv-101`).
+  - `course_id`: A unique URL-friendly slug (e.g., `agy-101`).
   - `title`: The display name of the course.
   - `version`: Semver versioning (e.g., `1.0.0`).
   - `author`: Name of the creator.
@@ -48,7 +48,13 @@ The sync engine maps Google Doc elements to React components:
 
 ## 3. Validation
 
-Before syncing, use the **Tridorian Validator** Apps Script (Extensions > Apps Script) to ensure the document is compliant. The validator checks for:
+Before syncing, use the **tridorian Validator** Apps Script (Extensions > Apps Script) to ensure the document is compliant. The validator checks for:
 - Existence of `[Config]` and `[Intro]` tabs.
 - Presence of required metadata in the Config table.
 - Heading 1 and Heading 2 in every module tab.
+
+## 4. References
+
+For technical decisions and implementation details regarding hierarchy structure, schema validation, and drive synchronization, refer to:
+- [ADR 0001: Core Content Hierarchy & Schema Validation](./adr/0001-core-content-hierarchy-schema-validation.md)
+- [ADR 0004: Progress Persistence & Drive Synchronization](./adr/0004-progress-persistence-drive-synchronization.md)

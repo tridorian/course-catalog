@@ -1,0 +1,473 @@
+{
+  "course_id": "agy-203",
+  "title": "AGY-203: Interactive Workspaces (L200)",
+  "description": "Welcome to AGY-203: Interactive Workspaces! This elective course is designed for Writers, Developers, and Editor Enthusiasts who want to master synchronous side-by-side co-authoring, workspace markdown navigation, and live text rewriting or code refactoring inside antigravity-ide. Learners will acquire hands-on experience using the agentic sidecar, managing workspace security boundaries, and collaborating with autonomous AI agents to construct high-quality technical documentation and codebases.",
+  "highlights": [
+    {
+      "icon": "🤝",
+      "title": "Side-by-Side Co-Authoring",
+      "description": "Work synchronously with AI agents in a split-editor view to draft documents, specs, and proposals in real-time."
+    },
+    {
+      "icon": "🧭",
+      "title": "Markdown Workspace Navigation",
+      "description": "Explore and query large document directories using semantic index searches and folder boundaries."
+    },
+    {
+      "icon": "🔄",
+      "title": "Live Refactoring & Rewriting",
+      "description": "Execute precision edits, code refactoring, and text rewriting directly inside active files with minimum-diff logic."
+    }
+  ],
+  "modules": [
+    {
+      "title": "1. Introduction to antigravity-ide & Setup",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Welcome to Interactive Workspaces"
+        },
+        {
+          "type": "p",
+          "content": "The Google Antigravity IDE (antigravity-ide) is a customized, agent-first fork of VS Code. While standard extensions treat AI assistants as secondary chat panels, antigravity-ide integrates the Gemini engine as a first-class collaborative editor. The workspace environment allows for real-time synchronous side-by-side editing, active carets, and deep filesystem integration governed by security rules. This module covers the core environment architecture, the interface layout, and how to verify your setup before launching code sessions."
+        },
+        {
+          "type": "info",
+          "content": "Design Pattern: Split-pane focus. In antigravity-ide, the primary draft document or code pane stays pinned to the left side, while the agentic chat and command sidecar panel runs on the right. This prevents context switching and allows the developer or writer to monitor the agent's keystrokes in real time."
+        },
+        {
+          "type": "h3",
+          "content": "Decoupled Architecture & UI Surfaces"
+        },
+        {
+          "type": "p",
+          "content": "Google Antigravity decouples where the engine runs (Installation Surfaces) from how the user interacts with the system (User Interfaces). The backend execution surfaces consist of Native Local Install (configured via agy-easy-install), Hardened Workstation Standalone Tarball (user-space extraction in air-gapped environments), and Containerized Sandbox (agy-box image). The decoupled user interfaces include the agy CLI (lightweight terminal actions), antigravity (Agent-First UI standalone desktop board), and antigravity-ide (Classic IDE VS Code fork)."
+        },
+        {
+          "type": "h3",
+          "content": "Workspace Architecture Comparison"
+        },
+        {
+          "type": "p",
+          "content": "Understanding the difference between standard IDE configurations and interactive workspaces is critical for productivity. Below is a comparative matrix outlining the differences:"
+        },
+        {
+          "type": "p",
+          "content": "| Feature | Standard VS Code Extensions | antigravity-ide (Classic IDE) |\n| :--- | :--- | :--- |\n| **Session Model** | Chat window operates in isolation from the editor state. | Shared editor caret and synchronized multi-file workspace state. |\n| **Caret Control** | Agent reads cursor position but cannot drive keyboard events. | Dual carets: Agent caret (green) and Human caret (blue) run in real time. |\n| **Workspace Boundaries** | Open access to host files; easy to overwrite system files. | Directory-locking sandbox boundaries configured via global rules or workspace `.agents/rules/`. |\n| **Diff Resolution** | Manual copy-paste or whole-file overrides. | Contiguous or multi-chunk inline replacements with rollback capability. |"
+        },
+        {
+          "type": "h3",
+          "content": "Editor Productivity Helpers"
+        },
+        {
+          "type": "p",
+          "content": "As you type or modify code within antigravity-ide, the agent-driven editor provides three core assisting behaviors:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Auto-complete: Context-aware suggestions appear inline as gray text; press Tab to accept.",
+            "Tab to Import: The editor detects missing dependencies or libraries and suggests importing them automatically.",
+            "Tab to Jump: Moves the cursor to the next logical location (such as block endings or argument spots) to maintain writing speed."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Keyboard Shortcuts & Panel Toggling"
+        },
+        {
+          "type": "p",
+          "content": "Efficiently navigating the IDE requires mastering keybinding shortcuts. The following table describes how to toggle panel focus and navigate between the editor and manager modes:"
+        },
+        {
+          "type": "p",
+          "content": "| Panel / Action | Keyboard Shortcut (Mac) | Keyboard Shortcut (Linux/Windows) | Functionality |\n| :--- | :--- | :--- | :--- |\n| **Toggle Agent Panel** | Cmd + L | Ctrl + L | Open or close the persistent sidecar chat panel on the right. |\n| **Toggle Terminal Panel** | Ctrl + ` | Ctrl + ` | Open or close the integrated terminal panel. |\n| **Toggle Editor & Manager** | Cmd + E | Ctrl + E | Toggle between full Editor view and full Agent Manager view. |"
+        },
+        {
+          "type": "h3",
+          "content": "Verifying Dependencies & Environment Verification"
+        },
+        {
+          "type": "p",
+          "content": "The IDE relies on Google Chrome browser and the Chrome DevTools Protocol (CDP) for rendering web views and live preview canvases. Run the following terminal commands to check that your system is correctly configured with credentials and configuration files before starting the application."
+        },
+        {
+          "type": "code",
+          "content": "# Check system application default credentials location\nls -l ~/.gcloud_config/application_default_credentials.json\n\n# Inspect the configuration file settings for the Antigravity engine\ncat ~/.config/Antigravity/settings.json 2>/dev/null || echo \"Settings file not found. Let's create one!\"\n\n# Launch antigravity-ide targeting your workspace directory\nantigravity-ide --workspace /var/home/wtg/my-antigravity-work",
+          "language": "bash"
+        },
+        {
+          "type": "h3",
+          "content": "Co-Authoring Guide: Launching a Collaborative Session"
+        },
+        {
+          "type": "p",
+          "content": "To initiate a collaborative writing session with the agent, follow these steps:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Verify your environment credentials are active by running the easy-install verification diagnostics.",
+            "Open your terminal and run the launch command specifying your workspace folder path: antigravity-ide --workspace /var/home/wtg/my-antigravity-work",
+            "Check that the sidecar chat panel on the right side of the screen displays the status 'Connected to Gemini' (toggle with Cmd+L or Ctrl+L).",
+            "Sign in to Google: When prompted, authenticate in the browser using your personal Gmail account to retrieve developer quota.",
+            "Open a markdown file and type a Heading 1 line; the agent will immediately detect the active document context."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding Quiz"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: How does the Dual Caret model function in antigravity-ide?\n\nA) It runs only when the user is disconnected from the internet.\nB) It displays a blue caret for the human developer and a green caret for the agent co-author, showing live keystrokes and typing.\nC) It forces the user to write code in a separate terminal panel.\nD) It prevents the agent from making suggestions inside the code editor.\n\n*Feedback*: The correct answer is B. antigravity-ide features a synchronized dual-caret model showing human (blue) and agent (green) caret positions synchronously to enable real-time collaboration."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: What is the keyboard shortcut to toggle between the full editor canvas and the Agent Manager (Mission Control) view?\n\nA) Cmd + I (Mac) / Ctrl + I (Windows/Linux)\nB) Cmd + L (Mac) / Ctrl + L (Windows/Linux)\nC) Cmd + E (Mac) / Ctrl + E (Windows/Linux)\nD) Cmd + Shift + B (Mac) / Ctrl + Shift + B (Windows/Linux)\n\n*Feedback*: The correct answer is C. Use Cmd + E (Mac) or Ctrl + E (Windows/Linux) to toggle between the co-authoring Editor view and the Agent Manager Mission Control dashboard."
+        }
+      ]
+    },
+    {
+      "title": "2. Navigation & Semantic Indexing",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "The Semantic Indexing Pipeline"
+        },
+        {
+          "type": "p",
+          "content": "When you open a workspace directory, antigravity-ide immediately runs a semantic indexing pipeline. This local process builds a lightweight knowledge graph of all text, markdown, and code files. By extracting structural elements (such as Markdown headings, table structures, and code function definitions), the agent sidecar can answer questions, find code blocks, and locate references using semantic search instead of simple keyword grep."
+        },
+        {
+          "type": "warning",
+          "content": "High CPU Warn: Large build output directories (such as node_modules, dist, or .git folders) can trigger indexing loops. You must configure exclusions in the workspace settings to prevent the semantic parser from scanning compiled build assets."
+        },
+        {
+          "type": "h3",
+          "content": "Exclusion Configuration Settings"
+        },
+        {
+          "type": "p",
+          "content": "To configure directory exclusion and indexing depth, edit your workspace settings file (`.vscode/settings.json`) to include the following configuration parameters:"
+        },
+        {
+          "type": "code",
+          "content": "{\n  \"search.exclude\": {\n    \"**/node_modules\": true,\n    \"**/dist\": true,\n    \"**/.git\": true\n  },\n  \"antigravity.index.depth\": 3,\n  \"antigravity.index.include\": [\"*.md\", \"*.py\", \"*.js\", \"*.json\"]\n}",
+          "language": "json"
+        },
+        {
+          "type": "h3",
+          "content": "Markdown Navigation & URI Patterns"
+        },
+        {
+          "type": "p",
+          "content": "Within an active workspace, you can navigate documents and direct the agent using standardized markdown syntax and specialized URI patterns. These patterns let you cite specific files, folders, lines, and rules inside your prompt. The table below outlines how navigation patterns resolve within the IDE:"
+        },
+        {
+          "type": "p",
+          "content": "| Navigation Feature | Markdown Syntax / Pattern | antigravity-ide Behavior |\n| :--- | :--- | :--- |\n| **Workspace Link** | `[Link Text](file:///absolute/path/to/file.md)` | Direct navigation to the target file; opens tab instantly. |\n| **Line-Range Link** | `[Lines 10-25](file:///path/to/file.py#L10-L25)` | Opens file and highlights specific lines for agent reference. |\n| **Rule Anchor** | `[Rule Key](rule://.gemini.md#security-rules)` | Resolves rule definition in the workspace security dictionary. |\n| **Semantic Mention** | `@file:README.md` | Passes the file contents directly into the agent's context. |"
+        },
+        {
+          "type": "h3",
+          "content": "Spec-Driven Development (SDD) & Spec-kit"
+        },
+        {
+          "type": "p",
+          "content": "To prevent 'vibe coding' (ad-hoc prompt-based code generation) and ensure high-fidelity software engineering, Antigravity introduces Spec-kit—a toolkit that enforces Spec-Driven Development (SDD). The SDD workflow guides the agent and developer through a disciplined cycle: Specify (write a formal `spec.md`), Clarify (resolve design ambiguities), Plan (build task graphs), Tasks (generate step-by-step checklists), Analyze (evaluate existing patterns), and Implement (execute code changes). By anchoring the agent's work in a formal specification, code drift is minimized and verification loops are deterministic."
+        },
+        {
+          "type": "h3",
+          "content": "Co-Authoring Guide: Linking Files and References"
+        },
+        {
+          "type": "p",
+          "content": "When guiding the agent through a multi-file workspace, follow these best practices to maintain reference parity:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Always write out relative paths explicitly: use './docs/architecture.md' rather than just 'architecture.md' to assist the indexing engine.",
+            "When referencing a bug or function, use the line-range hash anchor format (e.g. #L45-L60) to highlight the relevant code segment for the agent.",
+            "Mention workspace rules files using @file:.gemini.md in the chat sidecar to verify current compliance boundaries.",
+            "Toggle the agent side panel using Cmd+L / Ctrl+L to submit reference-rich instructions."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding Quiz"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: Which markdown link syntax is recognized by antigravity-ide to jump to lines 50 to 75 of a script?\n\nA) `[Script](script.py?lines=50-75)`\nB) `[Script](file:///absolute/path/to/script.py#L50-L75)`\nC) `[Script](file://script.py::50::75)`\nD) `[Script](line-range:50-75:script.py)`\n\n*Feedback*: The correct answer is B. The IDE uses standard file:// URI syntax followed by the `#L<start>-L<end>` hash anchor to direct focus and highlight specific line ranges."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: How can you prevent antigravity-ide from indexing massive build directories like `node_modules`?\n\nA) By deleting the folders completely.\nB) By configuring exclusions in the workspace configuration JSON under `search.exclude`.\nC) By running the command `agy stop-index`.\nD) By hiding the files in your OS file manager.\n\n*Feedback*: The correct answer is B. Adding folders to `search.exclude` in the configuration settings ensures the semantic indexing engine skips those directories, avoiding high CPU loads."
+        }
+      ]
+    },
+    {
+      "title": "3. Synchronous Side-by-Side Co-Authoring",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Drafting in Split-Editor View"
+        },
+        {
+          "type": "p",
+          "content": "In antigravity-ide, content creation is a collaborative, real-time process. When you ask the agent to write text or draft code, the system opens a split-editor view. The left pane shows the primary document in its current approved state. The right pane shows the proposed changes with diff styling. You can watch the agent generate, correct, and format text line-by-line in real time, showing the agent's green cursor working side-by-side with your blue cursor."
+        },
+        {
+          "type": "info",
+          "content": "Review Mode: While the agent is typing, the editing canvas enters a temporary read-only state for the target line ranges. This ensures cursor collisions are avoided and the diff engine can compute changes accurately. Once the generation is complete, the accept/reject controls are activated."
+        },
+        {
+          "type": "h3",
+          "content": "Reviewing Plans & Walkthroughs"
+        },
+        {
+          "type": "p",
+          "content": "Before writing code, the planning-mode agent creates an Implementation Plan and a Task List. You can add Google-Doc-style comments directly to these plan cards. For example, if you review the Implementation Plan and see that Flask is proposed as a tech stack, you can highlight it and write a comment suggesting FastAPI instead. After coding, the agent generates a Walkthrough file detailing verification steps, capturing terminal output, browser screenshots, or even video playback records."
+        },
+        {
+          "type": "h3",
+          "content": "Co-Authoring a Statement of Work (SOW)"
+        },
+        {
+          "type": "p",
+          "content": "A prime example of co-authoring is generating a structured project document like a Statement of Work. SOWs contain technical paragraphs, list items, and financial tables that must match corporate rate cards. Let's look at how the draft markdown file is structured during the co-authoring process:"
+        },
+        {
+          "type": "code",
+          "content": "# Statement of Work: Cloud Migration Phase 1\n\n## 1. Project Scope\n[The agent will write a detailed scope explanation here regarding workstation setup]\n\n## 2. Deliverables & Milestones\n- [ ] Milestone 1: Environment Readiness Setup\n- [ ] Milestone 2: OCI-compliant Sandbox Build\n- [ ] Milestone 3: CI/CD Pipeline Migration\n\n## 3. Financials & Rate Card\n| Role | Hourly Rate (USD) | Estimated Hours |\n| :--- | :--- | :--- |\n| Principal Architect | $220.00 | 80 |\n| DevOps Engineer | $160.00 | 120 |\n| Technical Writer | $110.00 | 40 |",
+          "language": "markdown"
+        },
+        {
+          "type": "h3",
+          "content": "Co-Authoring Guide: Directing the Agent Sidecar"
+        },
+        {
+          "type": "p",
+          "content": "Follow this procedure to direct the agent sidecar during SOW generation and review changes:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Create a new file named `sow_draft.md` in the workspace directory.",
+            "Insert the main headers: # Statement of Work, ## Project Scope, ## Deliverables, and ## Financials.",
+            "Select the Project Scope header and open the Chat Sidecar panel (Cmd+L / Ctrl+L). Make sure it is in Planning mode.",
+            "Issue a command: `/draft --insert \"Draft a detailed scope paragraph explaining how the native local install script will automate Node/Python setup.\"`",
+            "Observe the agent green caret drafting the text directly inside the editor tab. Note the temporary canvas locking on the highlighted lines.",
+            "Review the resulting diff highlight. Press Ctrl+Enter to accept the text, or Ctrl+Backspace to reject it.",
+            "If not satisfied, use the Undo Changes up to this point button (↩️) in the chat sidecar to revert."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding Quiz"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: What does the split-editor display during an active co-authoring session?\n\nA) The left pane shows the prompt log, and the right pane shows the file explorer.\nB) The left pane contains the current approved document draft, and the right pane shows the incoming edits with live diff tracking.\nC) The left pane shows code, and the right pane shows terminal output.\nD) Both panes show the exact same file without any visual highlights.\n\n*Feedback*: The correct answer is B. The split-editor displays the base document on the left and the proposed changes with diff colors on the right."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: How do you commit proposed changes typed by the agent co-author?\n\nA) Restart the IDE.\nB) Use the 'Accept' action (Ctrl+Enter) or click 'Accept' in the sidecar to merge the diff into the primary draft.\nC) Run `git push` in the terminal.\nD) The changes are committed automatically and cannot be rejected.\n\n*Feedback*: The correct answer is B. You review the proposed changes and press the 'Accept' key command (Ctrl+Enter) or click 'Accept' in the sidecar to merge them."
+        }
+      ]
+    },
+    {
+      "title": "4. Rewriting, Refactoring & Co-Pilotry",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "Minimal Change Engineering in Refactoring"
+        },
+        {
+          "type": "p",
+          "content": "Code refactoring and text rewriting require surgical precision. In standard AI integrations, the assistant often outputs an entire file, which consumes output tokens, increases latency, and risks introducing errors in unrelated parts of the file. antigravity-ide implements a design pattern called Minimal Change Engineering. When refactoring code or rewriting text, the engine targets specific lines and issues a minimal diff patch using localized tools."
+        },
+        {
+          "type": "warning",
+          "content": "Overwriting Warning: Never use the whole-file write_to_file tool on existing codebase files unless you explicitly intend to replace the entire document. Doing so will wipe out local variables, custom imports, and untracked comments."
+        },
+        {
+          "type": "h3",
+          "content": "Contiguous vs. Non-Contiguous Replacements"
+        },
+        {
+          "type": "p",
+          "content": "The IDE selects the appropriate editing tool depending on whether the changes are localized to one function or scattered across multiple files. The comparative matrix below outlines the replacement strategies used in the IDE:"
+        },
+        {
+          "type": "p",
+          "content": "| Edit Type | Tool Used | Best Suited For | Risk Level |\n| :--- | :--- | :--- | :--- |\n| **Contiguous Edit** | `replace_file_content` | Updating a single function or a continuous paragraph of text. | Low (easy to review) |\n| **Non-Contiguous Edits** | `multi_replace_file_content` | Modifying multiple distinct functions or lines across a large file. | Medium (verify imports/variables) |\n| **Whole File Overwrite** | `write_to_file` | Creating a brand new file or complete template rewrite. | High (overwrites existing work) |"
+        },
+        {
+          "type": "h3",
+          "content": "Refactoring a Python Script"
+        },
+        {
+          "type": "p",
+          "content": "Let's look at a practical example where a developer wants to refactor an inefficient calculation function. The developer highlights the target block inside `src/utils.py` and initiates a refactoring prompt. Here is the original script file:"
+        },
+        {
+          "type": "code",
+          "content": "# src/utils.py\nimport os\nimport sys\n\ndef calculate_totals(hours_list, rate):\n    # Old inefficient loop to refactor\n    total = 0\n    for h in hours_list:\n        total += h * rate\n    return total\n\ndef print_report(total_amount):\n    print(f\"Total Invoice Amount: ${total_amount:.2f}\")",
+          "language": "python"
+        },
+        {
+          "type": "p",
+          "content": "The developer highlights the `calculate_totals` function, presses Cmd+I or Ctrl+I, and enters the command: `/refactor calculate_totals using list comprehension and add type hinting.` The agent will target lines 4-9 and perform a single contiguous edit using the `replace_file_content` tool, showing the proposed changes as green additions and red deletions inline."
+        },
+        {
+          "type": "h3",
+          "content": "Diagnostic Hovers & Terminal Integration"
+        },
+        {
+          "type": "p",
+          "content": "In addition to inline editing, developers can trigger refactoring loops via IDE diagnostics. Hovering over a syntax error, build warning, or linting issue displays the 'Explain and Fix' option. Clicking this allows the agent to automatically suggest corrections. Similarly, in the Problems panel, you can click 'Send all to Agent' to batch-fix lint issues, or highlight a compiler error in the terminal and press Cmd+L / Ctrl+L to send it to the agent panel for troubleshooting."
+        },
+        {
+          "type": "h3",
+          "content": "Co-Authoring Guide: Refactoring Safety Controls"
+        },
+        {
+          "type": "p",
+          "content": "To safely execute a code refactoring task, follow these guidelines:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Select only the lines of code that need refactoring to narrow the agent's target block.",
+            "Trigger inline commands with Cmd+I / Ctrl+I to keep edits targeted.",
+            "Verify that the agent identifies the correct line range in the proposed replacement chunk.",
+            "Before clicking Accept (Ctrl+Enter), run local tests (e.g. pytest or npm run test) in the integrated terminal to verify execution logic.",
+            "If tests pass, accept the changes; if they fail, reject using Ctrl+Backspace and revise your instruction."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding Quiz"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: Which tool should the agent use to modify three separate, non-adjacent functions in a Python file?\n\nA) `replace_file_content`\nB) `multi_replace_file_content`\nC) `write_to_file`\nD) `git-commit`\n\n*Feedback*: The correct answer is B. `multi_replace_file_content` is specifically designed to perform multiple, non-adjacent edits in a single call, preventing file lock conflicts and maintaining revision consistency."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: What is the primary purpose of the 'Minimal Change Engineering' design pattern?\n\nA) To make sure the agent rewrite is as large as possible.\nB) To minimize edits to only what is requested, preventing scope creep and reducing the risk of introducing bugs.\nC) To force developers to write more comments in their code.\nD) To avoid running compiler tests.\n\n*Feedback*: The correct answer is B. Minimal Change Engineering focuses on minimal-viable diffs to preserve existing logic, prevent unrelated changes, and reduce bugs."
+        }
+      ]
+    },
+    {
+      "title": "5. Advanced Editing Operations & Capstone Prep",
+      "blocks": [
+        {
+          "type": "h2",
+          "content": "CLI Coordination and Workspace Boundaries"
+        },
+        {
+          "type": "p",
+          "content": "Advanced operations in antigravity-ide are coordinated with the agy command line interface. This enables you to run git tracking, file system firewalls, and style verification checks directly from the integrated terminal panel. In addition, all edits made inside the IDE must comply with workspace boundaries. These boundaries are specified by workspace directory permissions and security settings configured in local workspace rules."
+        },
+        {
+          "type": "info",
+          "content": "Security Rules: If you attempt to rewrite a file located outside the permitted workspace directory, the directory firewall will block the action and throw a write permission error unless Agent Non-Workspace File Access is explicitly enabled."
+        },
+        {
+          "type": "h3",
+          "content": "Rules vs. Workflows Customization"
+        },
+        {
+          "type": "p",
+          "content": "Developers can customize agent behavior using two distinct concepts: Rules act as persistent system instructions that the agent always follows, while Workflows are saved prompts triggered on demand using the '/' key inside the side panel. Both can be configured globally or per-workspace, stored in the following locations:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Global Rule: ~/.gemini/GEMINI.md (Enforces persistent global constraints)",
+            "Global Workflow: ~/.gemini/antigravity/global_workflows/<NAME>.md (On-demand templates)",
+            "Workspace Rules: your-workspace/.agents/rules/ (Enforces project-specific standards)",
+            "Workspace Workflows: your-workspace/.agents/workflows/ (Project-specific slash commands)"
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Security Policies & Permissions Allow/Deny Lists"
+        },
+        {
+          "type": "p",
+          "content": "Antigravity implements a unified permission system to restrict what actions the agent can perform. The execution policies (Secure Mode, Review-Driven Development, Agent-Driven Development) control the defaults for terminal command, artifact review, and browser JS execution. Individual permissions are formatted as action(target) and mapped to Allow, Deny, or Ask lists:"
+        },
+        {
+          "type": "p",
+          "content": "| Permission Format | Matches | Example |\n| :--- | :--- | :--- |\n| **command(prefix)** | Terminal commands by prefix. | `command(git)` matches `git add`, `git commit`, etc. |\n| **read_file(path)** | Absolute canonical read path. | `read_file(/var/home/wtg/docs)` reads docs folder. |\n| **write_file(path)** | Absolute canonical write path. | `write_file(/var/home/wtg/workspace)` permits edits. |\n| **read_url(domain)** | Browser URL domain access. | `read_url(github.com)` allows web browsing. |\n| **mcp(server/tool)** | Model Context Protocol tool. | `mcp(gws-drive/*)` enables Workspace Drive tool. |"
+        },
+        {
+          "type": "h3",
+          "content": "CLI Diagnostic Commands"
+        },
+        {
+          "type": "p",
+          "content": "Use the following CLI commands inside the integrated terminal to run validations and audits on your workspace rules:"
+        },
+        {
+          "type": "code",
+          "content": "# Verify workspace boundaries and permissions logs\nagy --verify-workspace /var/home/wtg/my-antigravity-work\n\n# Run style validation check on your co-authored markdown files\nagy --check-style sow_draft.md\n\n# Perform a local rules compliance check against .gemini.md / .agents/rules\nagy --validate-rules",
+          "language": "bash"
+        },
+        {
+          "type": "h3",
+          "content": "Design-to-Code & Conversational Database Analytics"
+        },
+        {
+          "type": "p",
+          "content": "Beyond local text manipulations, antigravity-ide extends its capabilities through advanced Model Context Protocol (MCP) integrations. First, **Stitch MCP** enables a Design-to-Code workflow, bridging UI wireframes directly with the agent. By passing design schemas to the sidecar, the agent translates visual elements into structured React or HTML components. Second, **BigQuery Agents** bring conversational data analytics directly inside the IDE. Developers can write natural language prompts (e.g. 'Show monthly signups by region') and the agent generates, executes, and renders SQL query results against BigQuery data warehouses without leaving the editor."
+        },
+        {
+          "type": "h3",
+          "content": "Preparing for the Specialist Capstone Challenge"
+        },
+        {
+          "type": "p",
+          "content": "To earn the **AGY Certified Workspace Specialist** credential, you must complete the capstone challenge 'The SOW Co-Pilot'. This challenge tests your ability to co-author, format, and align a project proposal with strict corporate rules. The workflow is summarized in the table below:"
+        },
+        {
+          "type": "p",
+          "content": "| Capstone Step | Task Description | Verification Command |\n| :--- | :--- | :--- |\n| **1. Create Spec File** | Create a markdown file named `sow_draft.md` in the workspace. | `ls -la sow_draft.md` |\n| **2. Co-Author Sections** | Draft Scope, Milestones, and Financials using the sidecar. | `cat sow_draft.md` |\n| **3. Format Table** | Formulate a rate card markdown table matching style rules. | `agy --check-style sow_draft.md` |\n| **4. Apply Rule Check** | Validate SOW compliance with local `.gemini.md` security rules. | `agy --validate-rules` |"
+        },
+        {
+          "type": "h3",
+          "content": "Co-Authoring Guide: Finalizing the Workspace"
+        },
+        {
+          "type": "p",
+          "content": "Follow this procedure to finalize your workspace and submit your work for verification:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Save all active document and code changes inside the editor panes.",
+            "Run the `agy --validate-rules` command to ensure no compliance policies are violated.",
+            "Execute `git status` in the terminal to verify all edited files are staged.",
+            "Commit and push your changes to your remote repository branch."
+          ]
+        },
+        {
+          "type": "h3",
+          "content": "Check Your Understanding Quiz"
+        },
+        {
+          "type": "p",
+          "content": "**Question 1**: Where is a global rule file stored in Google Antigravity?\n\nA) `your-workspace/.agents/rules/`\nB) `~/.gemini/GEMINI.md`\nC) `~/.config/Antigravity/rules.json`\nD) `/usr/share/antigravity/rules.md`\n\n*Feedback*: The correct answer is B. Global rules are stored in `~/.gemini/GEMINI.md`, while workspace-specific rules are saved in `your-workspace/.agents/rules/`."
+        },
+        {
+          "type": "p",
+          "content": "**Question 2**: What is the format of a command permission entry in the Allow list?\n\nA) `git-command(/var/home)`\nB) `command(prefix) or command(*)`\nC) `command:prefix`\nD) `shell_run(prefix)`\n\n*Feedback*: The correct answer is B. Terminal command permissions follow the format `command(prefix)` or `command(*)` to match terminal executables, ensuring positive security filtering."
+        }
+      ]
+    }
+  ]
+}
