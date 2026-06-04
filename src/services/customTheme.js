@@ -365,6 +365,8 @@ export function injectCustomThemeStyles(vars) {
       background: var(--bg-muted);
     }
     body.theme-custom .accent-btn:hover,
+    body.theme-custom button.bg-accent:not(:disabled):hover,
+    body.theme-custom a.bg-accent:hover,
     body.theme-custom nav div.group:hover,
     body.theme-custom .rounded-xl:hover {
       transform: translateY(-2px);
