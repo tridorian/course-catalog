@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import GlobalControls from '../../components/GlobalControls';
 import * as themeAudio from '../../services/themeAudio';
@@ -243,5 +243,17 @@ describe('GlobalControls Theme Integration', () => {
     fireEvent.click(sandboxTrigger);
     expect(style.getPropertyValue('--test-pattern-opacity')).toBe('');
     expect(style.getPropertyValue('--test-pattern-size')).toBe('');
+  });
+
+  it('updates volume on global scroll wheel events', () => {
+    render(<GlobalControls theme="dark" setTheme={vi.fn()} />);
+
+    // Trigger a wheel scroll event on the body
+    const event = new WheelEvent('wheel', { deltaY: -100, bubbles: true });
+    act(() => {
+      window.dispatchEvent(event);
+    });
+
+    expect(themeAudio.setVolume).toHaveBeenCalledWith(0.35);
   });
 });

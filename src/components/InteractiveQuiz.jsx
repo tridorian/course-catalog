@@ -68,10 +68,10 @@ function renderInlineText(text) {
   const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="text-main font-bold">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-bold text-current">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
-      return <code key={i} className="bg-muted px-1.5 py-0.5 rounded text-main font-mono text-sm">{part.slice(1, -1)}</code>;
+      return <code key={i} className="bg-muted/40 px-1.5 py-0.5 rounded text-current font-mono text-sm border border-border-main/10">{part.slice(1, -1)}</code>;
     }
     return part;
   });
@@ -245,7 +245,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
           <Icons.Check className="text-[var(--quiz-correct-text)] w-8 h-8" />
         </div>
         <h3 className="text-2xl font-bold text-[var(--quiz-correct-text)] mb-2 uppercase tracking-wide">Comprehension Verified</h3>
-        <p className="text-text-muted text-base max-w-md mx-auto mb-6 leading-relaxed">
+        <p className="text-main/80 text-base max-w-md mx-auto mb-6 leading-relaxed">
           Excellent! You have successfully passed the module quiz. Course progression is now unlocked.
         </p>
         <button
@@ -340,7 +340,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
                       : 'border-gray-600 text-gray-600'
                   : isSelected
                     ? 'bg-accent border-accent text-accent-fg'
-                    : 'border-border-main text-text-muted'
+                    : 'border-border-main text-main bg-muted/20'
               }`}>
                 {showAnswerStatus && isCorrectAnswer ? (
                   <Icons.Check size={14} />

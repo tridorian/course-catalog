@@ -83,26 +83,19 @@ const GlobalControls = ({ theme, setTheme }) => {
   useEffect(() => {
     const handleGlobalWheel = (e) => {
       // Don't intercept if scrolling inside a scrollable container (like the sidebar or the main content text area)
-      if (e.target.closest('.overflow-y-auto') || e.target.closest('.custom-scrollbar')) {
+      if (e.target?.closest && (e.target.closest('.overflow-y-auto') || e.target.closest('.custom-scrollbar'))) {
         return;
       }
 
-      // Check if mouse cursor is over header, dashboard top controls row, or GlobalControls component itself
-      const isOverHeader = e.target.closest('header');
-      const isOverDashboardControls = e.target.closest('.border-b.border-border-subtle.pb-6');
-      const isOverGlobalControls = dropdownRef.current && dropdownRef.current.contains(e.target);
-
-      if (isOverHeader || isOverDashboardControls || isOverGlobalControls) {
-        e.preventDefault();
-        const change = e.deltaY < 0 ? 0.05 : -0.05;
-        
-        setAudioState(prev => {
-          const newVol = Math.max(0, Math.min(1, parseFloat(prev.volume) + change));
-          const roundedVol = Math.round(newVol * 100) / 100;
-          themeAudio.setVolume(roundedVol);
-          return { ...prev, volume: roundedVol };
-        });
-      }
+      e.preventDefault();
+      const change = e.deltaY < 0 ? 0.05 : -0.05;
+      
+      setAudioState(prev => {
+        const newVol = Math.max(0, Math.min(1, parseFloat(prev.volume) + change));
+        const roundedVol = Math.round(newVol * 100) / 100;
+        themeAudio.setVolume(roundedVol);
+        return { ...prev, volume: roundedVol };
+      });
     };
 
     window.addEventListener('wheel', handleGlobalWheel, { passive: false });
