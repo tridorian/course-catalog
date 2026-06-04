@@ -71,7 +71,7 @@ function renderInlineText(text) {
       return <strong key={i} className="font-bold text-current">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
-      return <code key={i} className="bg-muted/40 px-1.5 py-0.5 rounded text-current font-mono text-sm border border-border-main/10">{part.slice(1, -1)}</code>;
+      return <code key={i} className="bg-muted px-1.5 py-0.5 rounded text-current font-mono text-sm border border-border-subtle">{part.slice(1, -1)}</code>;
     }
     return part;
   });
@@ -299,7 +299,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
           const isCorrectAnswer = optObj.isCorrect;
           const showAnswerStatus = isAnswered;
 
-          let optionStyle = 'border-border-main bg-panel text-main hover:bg-muted/50 hover:text-accent-text';
+          let optionStyle = 'border-border-main bg-panel text-main hover:bg-elevated hover:text-accent-text';
           let spanStyle = '';
           let stateClass = '';
           if (isSelected) {
@@ -316,8 +316,8 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
               spanStyle = 'text-[var(--quiz-incorrect-text)]';
               stateClass = 'quiz-incorrect';
             } else {
-              optionStyle = 'opacity-40 border-border-main text-main bg-panel';
-              spanStyle = 'text-main opacity-40';
+              optionStyle = 'opacity-75 border-border-main text-muted bg-panel';
+              spanStyle = 'text-muted';
               stateClass = 'quiz-unselected';
             }
           }
@@ -340,7 +340,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
                       : 'border-gray-600 text-gray-600'
                   : isSelected
                     ? 'bg-accent border-accent text-accent-fg'
-                    : 'border-border-main text-main bg-muted/20'
+                    : 'border-border-main text-main bg-base'
               }`}>
                 {showAnswerStatus && isCorrectAnswer ? (
                   <Icons.Check size={14} />

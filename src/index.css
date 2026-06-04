@@ -769,7 +769,7 @@ body.disable-custom-cursor input {
   color: var(--quiz-incorrect-text) !important;
 }
 .quiz-option.quiz-unselected {
-  opacity: 0.4 !important;
+  opacity: 0.75 !important;
 }
 
 /* Custom Scrollbar for sidebar to match theme */

@@ -6,7 +6,12 @@ import {
   deleteCustomTheme, 
   setActiveCustomTheme,
   getPatternSvg,
-  injectCustomThemeStyles
+  injectCustomThemeStyles,
+  hexToRgb,
+  rgbToHex,
+  getLuminance,
+  getContrastRatio,
+  enforceContrast
 } from '../../services/customTheme';
 
 describe('Custom Theme Service', () => {
@@ -137,6 +142,38 @@ describe('Custom Theme Service', () => {
       expect(styleTag.textContent).toContain('--bg-gradient: linear-gradient(135deg, #100a20 0%, #05030a 100%)');
       expect(styleTag.textContent).toContain('background-image: url("data:image/svg+xml;utf8,');
       expect(styleTag.textContent).toContain('background-size: 80px 80px');
+    });
+  });
+
+  describe('Contrast Enforcement Utilities', () => {
+    it('should calculate correct luminance for standard colors', () => {
+      expect(getLuminance(255, 255, 255)).toBe(1); // White
+      expect(getLuminance(0, 0, 0)).toBe(0); // Black
+    });
+
+    it('should calculate correct contrast ratio between white and black', () => {
+      const white = { r: 255, g: 255, b: 255 };
+      const black = { r: 0, g: 0, b: 0 };
+      expect(getContrastRatio(white, black)).toBeCloseTo(21, 1);
+    });
+
+    it('should enforce contrast and return the original color if it meets contrast requirements', () => {
+      // White text on dark base has high contrast, should remain unchanged
+      const text = '#ffffff';
+      const bg = '#000000';
+      const adjusted = enforceContrast(text, bg, 4.5);
+      expect(adjusted.toLowerCase()).toBe('#ffffff');
+    });
+
+    it('should adjust text color if it has low contrast against the background', () => {
+      // Low contrast: dark gray text (#444444) on dark background (#111111)
+      const text = '#444444';
+      const bg = '#111111';
+      const adjusted = enforceContrast(text, bg, 4.5);
+      // Since background is dark, the text should have been lightened
+      const adjustedRgb = hexToRgb(adjusted);
+      const bgRgb = hexToRgb(bg);
+      expect(getContrastRatio(adjustedRgb, bgRgb)).toBeGreaterThanOrEqual(4.5);
     });
   });
 });

@@ -188,6 +188,84 @@ function isDarkColor(hex) {
   return true;
 }
 
+// Helper to parse hex to RGB
+export function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return null;
+  const cleanHex = hex.replace('#', '').trim();
+  if (cleanHex.length === 3) {
+    return {
+      r: parseInt(cleanHex[0] + cleanHex[0], 16),
+      g: parseInt(cleanHex[1] + cleanHex[1], 16),
+      b: parseInt(cleanHex[2] + cleanHex[2], 16)
+    };
+  }
+  if (cleanHex.length === 6) {
+    return {
+      r: parseInt(cleanHex.substring(0, 2), 16),
+      g: parseInt(cleanHex.substring(2, 4), 16),
+      b: parseInt(cleanHex.substring(4, 6), 16)
+    };
+  }
+  return null;
+}
+
+// Helper to convert RGB to Hex
+export function rgbToHex(r, g, b) {
+  const clamp = (val) => Math.max(0, Math.min(255, Math.round(val)));
+  return '#' + ((1 << 24) + (clamp(r) << 16) + (clamp(g) << 8) + clamp(b)).toString(16).slice(1);
+}
+
+// Relative luminance formula (WCAG 2.0)
+export function getLuminance(r, g, b) {
+  const a = [r, g, b].map(function (v) {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
+// Get contrast ratio
+export function getContrastRatio(rgb1, rgb2) {
+  if (!rgb1 || !rgb2) return 1;
+  const l1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+  const l2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+// Adjust text color to ensure minimum contrast against background
+export function enforceContrast(textHex, bgHex, minContrast = 4.5) {
+  const textRgb = hexToRgb(textHex);
+  const bgRgb = hexToRgb(bgHex);
+  if (!textRgb || !bgRgb) return textHex;
+
+  let ratio = getContrastRatio(textRgb, bgRgb);
+  if (ratio >= minContrast) return textHex;
+
+  const bgLuminance = getLuminance(bgRgb.r, bgRgb.g, bgRgb.b);
+  const makeLighter = bgLuminance < 0.5;
+
+  let currentRgb = { ...textRgb };
+  for (let step = 1; step <= 20; step++) {
+    const factor = step / 20;
+    if (makeLighter) {
+      currentRgb.r = Math.round(textRgb.r + (255 - textRgb.r) * factor);
+      currentRgb.g = Math.round(textRgb.g + (255 - textRgb.g) * factor);
+      currentRgb.b = Math.round(textRgb.b + (255 - textRgb.b) * factor);
+    } else {
+      currentRgb.r = Math.round(textRgb.r * (1 - factor));
+      currentRgb.g = Math.round(textRgb.g * (1 - factor));
+      currentRgb.b = Math.round(textRgb.b * (1 - factor));
+    }
+    
+    ratio = getContrastRatio(currentRgb, bgRgb);
+    if (ratio >= minContrast) {
+      return rgbToHex(currentRgb.r, currentRgb.g, currentRgb.b);
+    }
+  }
+
+  return makeLighter ? '#ffffff' : '#000000';
+}
+
 export function getPatternSvg(patternType, accentColor, borderColor) {
   const accent = accentColor || '#22c55e';
   const border = borderColor || 'rgba(34, 197, 94, 0.2)';
@@ -208,7 +286,6 @@ export function getPatternSvg(patternType, accentColor, borderColor) {
   }
 }
 
-// Inject styling variables for .theme-custom class dynamically
 export function injectCustomThemeStyles(vars) {
   if (!vars) return;
   let styleTag = document.getElementById('tridorian-custom-theme');
@@ -218,7 +295,17 @@ export function injectCustomThemeStyles(vars) {
     document.head.appendChild(styleTag);
   }
 
-  const isLight = vars['text-main'] ? isDarkColor(vars['text-main']) : false;
+  const bgPanel = vars['bg-panel'] || '#0d180f';
+  const bgBase = vars['bg-base'] || '#080c08';
+  const accentBg = vars['accent-bg'] || '#22c55e';
+
+  // Enforce WCAG AA 4.5:1 contrast ratio programmatically
+  const textMain = enforceContrast(vars['text-main'] || '#f0fdf4', bgPanel, 4.5);
+  const textMuted = enforceContrast(vars['text-muted'] || '#86efac', bgPanel, 4.5);
+  const accentText = enforceContrast(vars['accent-text'] || '#4ade80', bgPanel, 4.5);
+  const accentFg = enforceContrast(vars['accent-fg'] || '#ffffff', accentBg, 4.5);
+
+  const isLight = textMain ? isDarkColor(textMain) : false;
 
   const quizCorrectBg = isLight ? 'rgba(25, 135, 84, 0.08)' : 'rgba(16, 185, 129, 0.15)';
   const quizCorrectText = isLight ? '#0f5132' : '#34d399';
@@ -228,9 +315,9 @@ export function injectCustomThemeStyles(vars) {
   const quizIncorrectBorder = isLight ? 'rgba(220, 53, 69, 0.25)' : 'rgba(244, 63, 94, 0.4)';
 
   const patternType = vars['bg-pattern'] || 'grid';
-  const patternSvg = getPatternSvg(patternType, vars['accent-bg'], vars['border-main'] || vars['accent-border']);
+  const patternSvg = getPatternSvg(patternType, accentBg, vars['border-main'] || vars['accent-border']);
 
-  const accentColor = vars['accent-bg'] || '#22c55e';
+  const accentColor = accentBg;
   // Futuristic AI/tech crosshair reticle cursor
   const cursorSvgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.5" opacity="0.8"/><circle cx="12" cy="12" r="2" fill="${encodeURIComponent(accentColor)}"/><line x1="12" y1="2" x2="12" y2="5" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="19" x2="12" y2="22" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="2" y1="12" x2="5" y2="12" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="19" y1="12" x2="22" y2="12" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/></svg>`;
   // Click/Pointer state: dash-array circle with pointer element
@@ -242,18 +329,18 @@ export function injectCustomThemeStyles(vars) {
   styleTag.textContent = `
     .theme-custom {
       color-scheme: ${isLight ? 'light' : 'dark'};
-      --bg-base: ${vars['bg-base'] || '#080c08'};
+      --bg-base: ${bgBase};
       --bg-gradient: ${vars['bg-gradient'] || 'none'};
-      --bg-panel: ${vars['bg-panel'] || '#0d180f'};
+      --bg-panel: ${bgPanel};
       --bg-muted: ${vars['bg-muted'] || '#122517'};
       --bg-elevated: ${vars['bg-elevated'] || '#1a3321'};
-      --text-main: ${vars['text-main'] || '#f0fdf4'};
-      --text-muted: ${vars['text-muted'] || '#86efac'};
+      --text-main: ${textMain};
+      --text-muted: ${textMuted};
       --border-main: ${vars['border-main'] || '#1f3d25'};
       --border-subtle: ${vars['border-subtle'] || '#132817'};
-      --accent-bg: ${vars['accent-bg'] || '#22c55e'};
-      --accent-fg: ${vars['accent-fg'] || '#ffffff'};
-      --accent-text: ${vars['accent-text'] || '#4ade80'};
+      --accent-bg: ${accentBg};
+      --accent-fg: ${accentFg};
+      --accent-text: ${accentText};
       --accent-muted: ${vars['accent-muted'] || 'rgba(34, 197, 94, 0.08)'};
       --accent-border: ${vars['accent-border'] || 'rgba(34, 197, 94, 0.25)'};
       --shadow-accent: ${vars['shadow-accent'] || '0 0 15px rgba(34, 197, 94, 0.2)'};
