@@ -1,0 +1,40 @@
+           ID                                    Description                                    Repo                Last active                Status         
+ 8445280379543437008     # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  3s ago                  In Progress    
+ 574058342491824434      # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  18s ago                 In Progress    
+ 2039028697662396412     # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  1s ago                  In Progress    
+ 712325981807696126      # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  5s ago                  In Progress    
+ 13228411159052989326    # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  3s ago                  In Progress    
+ 5169280922565735060     # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  14s ago                 In Progress    
+ 9143514723851534823     # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  53s ago                 In Progress    
+ 12841853528798020895    # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  56m37s ago              In Progress    
+ 285073529030251920      # ⚡ Performance Optimization TaskYou are a performance-foc…  tridorian/course-cata…  1s ago                  In Progress    
+ 745011610578010840      # 🧹 Code Health Improvement TaskYou are a code health agen…  tridorian/course-cata…  17s ago                 In Progress    
+ 5217528644141990614     # ⚡ Performance Optimization TaskYou are a performance-foc…  tridorian/course-cata…  5s ago                  In Progress    
+ 18024705807446867597    # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  2s ago                  Awaiting Plan A
+ 6609397325174361197     # 🧪 Testing Improvement TaskYou are a testing-focused agen…  tridorian/course-cata…  56m12s ago                             
+ 15110508367633861400    # ⚡ Performance Optimization TaskYou are a performance-foc…  tridorian/course-cata…  7s ago                  In Progress    
+ 8901844091968754237     # 🧹 Code Health Improvement TaskYou are a code health agen…  tridorian/course-cata…  3s ago                  In Progress    
+ 3356554314449430092     # 🔒 Security Vulnerability Fix TaskYou are a security-focu…  tridorian/course-cata…  9s ago                  In Progress    
+ 3878696335273257336     # 🔒 Security Vulnerability Fix TaskYou are a security-focu…  tridorian/course-cata…  3s ago                  Awaiting Plan A
+ 15501920697129111039    Please read jules_memories_audit.md and update your reposit…  tridorian/course-cata…  3h11m41s ago            Completed      
+ 13401147798127333074    Switch from HashRouter to BrowserRouter and add Cloud Run d…  tridorian/course-cata…  5h36m58s ago            Completed      
+ 8739235973617295827     Expand the embed system in src/components/Embeds.jsx to sup…  tridorian/course-cata…  12s ago                                
+ 14356195114860350743    Rewrite scripts/sync-docs.js to use a multi-stage content s…  tridorian/course-cata…  5h32m41s ago            Planning       
+ 2376757029672863595     Create a Profile & Achievement Badges modal. Branch from fe…  tridorian/course-cata…  37m56s ago              Planning       
+ 5550392667124306612     Port the glassmorphism header and accent button system from…  tridorian/course-cata…  1h45m18s ago            Completed      
+ 2232921430312548104     Port the following features from the ocm-catalog repo (http…  tridorian/course-cata…  59m40s ago              Planning       
+ 7754813530079899182     1. Initialize the environment using the setup script: ./scr…  tridorian/course-cata…  3h1m45s ago             Completed      
+ 12023743393287897469    Install puppeteer, run 'node scripts/take-screenshots.js' t…  tridorian/course-cata…  6h46m6s ago             Completed      
+ 4513586329216658430     Install puppeteer, run 'node scripts/take-screenshots.js' t…  tridorian/course-cata…  6h49m20s ago            Completed      
+ 5306531265910344563     # Task: Implement RBAC, Role Manager & Admin PanelYou are J…  tridorian/course-cata…  9h1m7s ago              Completed      
+ 17932204721959837729    # Task: Generate Draft Courses & Update CatalogYou are Jule…  tridorian/course-cata…  9h50m51s ago            Completed      
+ 8119349716398803011     # Task: Generate Draft Courses & Update CatalogYou are Jule…  tridorian/course-cata…  10h1m3s ago             Completed      
+ 1802431757510549248     Implement the Sidebar Progress Reset Modal & Direct Complet…  tridorian/course-cata…  10h25m27s ago           Completed      
+ 16048166217594743489    Implement onboarding banner, connection status, and track p…  tridorian/course-cata…  10h33m29s ago           Completed      
+ 11481360085977324965    # Task: Google Docs Content Sync Engine & GHA WorkflowYou a…  tridorian/course-cata…  2 days ago              Completed      
+ 10437862114154850049    # Task: Sync Status UI Indicator & Resume Session ModalYou …  tridorian/course-cata…  2 days ago              Completed      
+ 17317622987421113076    # Task: Google Drive Service Refinement & Offline Sync Veri…  tridorian/course-cata…  2 days ago                             
+ 11592031838637276539    # Wave 2 Prompt: Google Workspace Pipeline Integration & Ge…  tridorian/Tridorian-A…  2 days ago              Completed      
+ 13504734783606684185    ## Task: Create Google Apps Script Bridge + Deploy Workflow…  tridorian/Tridorian-A…  2 days ago              Completed      
+ 5826604240700244419     ## Task: Create Native Google Docs Generator**Branch from:*…  tridorian/Tridorian-A…  2 days ago                             
+                                                                                                                                                      

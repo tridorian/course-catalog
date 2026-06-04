@@ -1,0 +1,23 @@
+{
+  "id": "embed-test",
+  "title": "Embed Test Module",
+  "duration": "5m",
+  "description": "Testing all embed types",
+  "steps": [
+    {
+      "title": "Embed Showcase",
+      "content": [
+        { "type": "h1", "content": "Embed Showcase" },
+        { "type": "p", "content": "This module tests various embed types." },
+        { "type": "h2", "content": "Document Embed" },
+        { "type": "embed", "url": "https://docs.google.com/document/d/123/edit", "title": "Test Doc" },
+        { "type": "h2", "content": "Sheet Embed" },
+        { "type": "embed", "url": "https://docs.google.com/spreadsheets/d/123/edit", "title": "Test Sheet" },
+        { "type": "h2", "content": "YouTube Embed" },
+        { "type": "embed", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "title": "Never Gonna Give You Up" },
+        { "type": "h2", "content": "Auto-detection" },
+        { "type": "p", "content": "https://docs.google.com/presentation/d/123/edit" }
+      ]
+    }
+  ]
+}
