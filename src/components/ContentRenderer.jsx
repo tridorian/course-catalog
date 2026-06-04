@@ -209,11 +209,14 @@ const ContentRenderer = ({ blocks, sourceFile }) => {
 };
 
 // Simple helper to handle basic bolding and code ticks in strings
+const MARKDOWN_SPLIT_REGEX = /(\*\*.*?\*\*|`.*?`|\[.*?\]\(.*?\))/g;
+const MARKDOWN_LINK_REGEX = /\[(.*?)\]\((.*?)\)/;
+
 function renderMarkdown(text) {
   if (typeof text !== 'string') return text;
 
   // Split by bold, code, or links
-  const parts = text.split(/(\*\*.*?\*\*|`.*?`|\[.*?\]\(.*?\))/g);
+  const parts = text.split(MARKDOWN_SPLIT_REGEX);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return <strong key={i} className="text-white">{part.slice(2, -2)}</strong>;
@@ -222,7 +225,7 @@ function renderMarkdown(text) {
       return <code key={i} className="bg-[#132617] px-1 rounded text-[#86efac]">{part.slice(1, -1)}</code>;
     }
     if (part.startsWith('[') && part.endsWith(')')) {
-      const match = part.match(/\[(.*?)\]\((.*?)\)/);
+      const match = part.match(MARKDOWN_LINK_REGEX);
       if (match) {
         return <a key={i} href={match[2]} target="_blank" rel="noreferrer" className="text-[#4ade80] hover:underline underline-offset-2">{match[1]}</a>;
       }
