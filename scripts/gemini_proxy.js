@@ -56,6 +56,8 @@ const server = http.createServer(async (req, res) => {
         await handleGenerateTheme(prompt, res);
       } else if (req.url === '/generate-music') {
         await handleGenerateMusic(prompt, res);
+      } else if (req.url === '/generate-image') {
+        await handleGenerateImage(prompt, res);
       } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Not Found' }));
@@ -174,6 +176,44 @@ async function handleGenerateMusic(prompt, res) {
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ audioDataUrl: `data:audio/mpeg;base64,${part.inlineData.data}` }));
+}
+
+async function handleGenerateImage(prompt, res) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${GEMINI_API_KEY}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      instances: [
+        {
+          prompt: `A subtle, premium, seamless and tileable abstract background pattern/texture overlay for a web app dashboard theme. Style: ${prompt}. Very clean, low contrast, dark or light matching the theme, decorative only.`
+        }
+      ],
+      parameters: {
+        sampleCount: 1,
+        aspectRatio: "1:1",
+        outputMimeType: "image/png"
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    res.writeHead(response.status, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: `Imagen API error: ${errText}` }));
+    return;
+  }
+
+  const data = await response.json();
+  const prediction = data.predictions?.[0];
+  if (!prediction || !prediction.bytesBase64Encoded) {
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'No image prediction returned from Imagen model.' }));
+    return;
+  }
+
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ imageDataUrl: `data:image/png;base64,${prediction.bytesBase64Encoded}` }));
 }
 
 server.listen(PORT, () => {
