@@ -1,0 +1,121 @@
+{
+  "id": "1",
+  "title": "1. agy CLI Binary & Syntax Foundations",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [1. agy CLI Binary & Syntax Foundations]"
+    },
+    {
+      "type": "h2",
+      "content": "Core Command Line Interface Architecture"
+    },
+    {
+      "type": "p",
+      "content": "The agy command line client is a compiled binary optimized for speed, terminal piping, and seamless integration into automated scripting workflows. It decouples the operational interface from the core execution engine and user interfaces (such as antigravity or antigravity-ide). In this module, we will explore the core command structure, global execution flags, interactive REPL mode, slash commands, and diagnostic logging configuration."
+    },
+    {
+      "type": "h3",
+      "content": "Standard Command Syntax and Subcommands"
+    },
+    {
+      "type": "p",
+      "content": "Executing commands in agy follows standard POSIX patterns where global options modify binary behaviors and subcommands trigger specific operational utilities. The syntax structure is: `agy [global flags] <subcommand> [subcommand arguments]`."
+    },
+    {
+      "type": "p",
+      "content": "The primary administrative subcommands of the agy CLI are:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "agy help: Displays usage guidelines and options for all subcommands.",
+        "agy install: Configures environment shell parameters, autocomplete features, and workstation paths.",
+        "agy update: Upgrades the local agy binary to the latest weekly release.",
+        "agy plugin: Manages local tool extensions (commands include list, install, uninstall, enable, disable).",
+        "agy changelog: Prints recent release highlights, bug fixes, and feature additions."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Display the current client version\nagy --version\n\n# Configure shell settings and update paths\nagy install\n\n# List all currently installed plugin extensions\nagy plugin list"
+    },
+    {
+      "type": "h3",
+      "content": "Execution Modes and Option Flags"
+    },
+    {
+      "type": "p",
+      "content": "The CLI supports both interactive and non-interactive execution modes, customized via global flags:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Interactive REPL (Default TTY): Initiated by running agy without execution flags. Starts a live connection loop, checks cloud tokens, and displays the command prompt >.",
+        "Print Non-Interactive Mode (-p, --print, --prompt): Runs a single prompt, outputs the result directly to stdout, and exits. Ideal for automated shell scripts.",
+        "Interactive Prompt Mode (-i, --prompt-interactive): Runs the initial prompt, then leaves the REPL open for further interactive queries.",
+        "Continue Previous Session (-c, --continue): Resumes the most recent local execution thread.",
+        "Resume Specific Session (--conversation <session-id>): Reloads the context, chat history, and variables of a specific session by ID."
+      ]
+    },
+    {
+      "type": "info",
+      "content": "Design Pattern: Always use the -p or --print flag when integrating agy within CI/CD pipelines or bash scripts. This prevents the CLI from opening an interactive prompt and waiting for user input, ensuring the script runs headlessly to completion."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Run a prompt in non-interactive print mode\nagy -p \"Summarize the current working directory\"\n\n# Start a session with a query and continue interactively\nagy -i \"Examine the package.json. What is the entry point?\"\n\n# Resume the last conversation session\nagy -c"
+    },
+    {
+      "type": "h3",
+      "content": "Interactive REPL Slash Commands"
+    },
+    {
+      "type": "p",
+      "content": "When working inside the interactive REPL shell (indicated by the > prompt), standard input is evaluated by the agent. To perform client commands without sending queries to the model, use slash commands:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "/help: Prints descriptions and usage examples for all interactive commands.",
+        "/quit or /exit: Exits the current REPL session safely.",
+        "/mcp list: Lists all configured Model Context Protocol servers and their connection statuses.",
+        "/mcp reload: Restarts and re-queries active MCP servers to refresh tool capabilities.",
+        "/memory reload: Reloads workspace context guidelines (such as .gemini.md files).",
+        "/skills reload: Re-scans and loads discovered local agent skills."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Diagnostic Logging and the --log-file Flag"
+    },
+    {
+      "type": "p",
+      "content": "All agy operations write tracing logs, daemon communications, and error details to disk. By default, these log files are saved to `~/.gemini/antigravity-cli/log/` with names formatted as `cli-YYYYMMDD_HHMMSS.log`."
+    },
+    {
+      "type": "p",
+      "content": "To redirect log outputs for a specific run, use the `--log-file` flag followed by an absolute file path. This is useful for writing test logs or keeping audit trails in automated environments."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Execute a query and write diagnostics to a dedicated log file\nagy -p \"Audit the workspace packages\" --log-file /var/home/wtg/Repos/course-catalog/logs/audit_run.log\n\n# Inspect the log file for warning or error indicators\ngrep -E \"WARN|ERROR\" /var/home/wtg/Repos/course-catalog/logs/audit_run.log"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Which of the following flags runs a single prompt non-interactively and outputs the result directly to the terminal standard output?\n\nA) `agy -i \"prompt\"`\nB) `agy -c`\nC) `agy -p \"prompt\"`\nD) `agy --sandbox`\n\n*Feedback*: The correct answer is C. The `-p` (or `--print` / `--prompt`) flag runs the query non-interactively in print mode."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: What is the default path where agy CLI session diagnostics and error logs are stored on standard Unix systems?\n\nA) `/var/log/agy/`\nB) `~/.gemini/antigravity-cli/log/`\nC) `./logs/`\nD) `/tmp/agy/`\n\n*Feedback*: The correct answer is B. The default path for client session logs is `~/.gemini/antigravity-cli/log/`."
+    }
+  ]
+}

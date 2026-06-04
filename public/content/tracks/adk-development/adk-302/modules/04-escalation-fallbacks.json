@@ -1,0 +1,28 @@
+{
+  "id": "4",
+  "title": "4. Handling escalation pathways and fallback policies",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Escalation & Fallbacks"
+    },
+    {
+      "type": "p",
+      "content": "When an agent fails to match a route, or the sub-agent returns an execution failure, the supervisor must execute a fallback policy. This usually means escalating to a human operator or returning a friendly message."
+    },
+    {
+      "type": "warning",
+      "title": "Loop Detection",
+      "content": "If two agents continually refer queries to each other, they will create an execution loop. Implement a 'max_redirects' header in agent messages to break loops."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How do you prevent infinite redirection loops in multi-agent routing?\n- A) Stop executing code.\n- B) Track a redirection counter (e.g. max_redirects) in the message envelope.\n- C) Enforce database transactions.\n\nFeedback: Option B is correct. Counters prevent loops."
+    }
+  ]
+}

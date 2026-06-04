@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Sandboxing strategies: Linux namespaces and cgroups",
+      "file": "modules/01-namespaces-cgroups.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Configuring gVisor runtime for untrusted tool code",
+      "file": "modules/02-gvisor-runtime.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Restricting network egress and system calls",
+      "file": "modules/03-network-restrictions.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Monitoring, logging, and auditing agent tool executions",
+      "file": "modules/04-audit-logging.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Hardening a Docker run environment",
+      "file": "modules/05-lab-docker-hardening.json"
+    }
+  ]
+}

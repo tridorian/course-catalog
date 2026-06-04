@@ -1,0 +1,59 @@
+{
+  "id": "5",
+  "title": "5. Lab - Implementing Collaborative Planning and Execution",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Collaborative Agent Pipeline"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will configure a cooperative multi-agent workflow: a Coordinator agent receives user instructions, plans actions, routes a scan request to a Security agent, and writes a compliance report file."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Launch the A2AServer Daemon"
+    },
+    {
+      "type": "p",
+      "content": "Create the local router config and launch the central daemon:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk a2a-server start --port 8090"
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Start the Security Sub-Agent"
+    },
+    {
+      "type": "p",
+      "content": "Start the security script which runs a local scan tool and registers itself with the router daemon on port 8090:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "python src/agents/security_agent.py --register-hub http://localhost:8090"
+    },
+    {
+      "type": "h2",
+      "content": "Step 3: Trigger the Orchestration Task"
+    },
+    {
+      "type": "p",
+      "content": "Run the coordinator agent CLI command to execute the plan. The coordinator calls the registered security agent, waits for results, and prints reports:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk run --coordinator --prompt \"Scan the codebase folder src/app and output compliance results.\""
+    },
+    {
+      "type": "info",
+      "title": "Trace Playback Verification",
+      "content": "Open http://localhost:8501 to check step tracing. You should see a routing loop: Coordinator -> Security Agent (runs tool) -> Coordinator (compiles report)."
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "id": "2",
+  "title": "2. CLI Client (agy) — High-Velocity",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "The High-Velocity Terminal Surface"
+    },
+    {
+      "type": "p",
+      "content": "The agy command line interface is a lightweight, terminal-first client that communicates directly with the local execution engine. With a zero-GUI footprint, it is designed for developers, systems administrators, and DevOps pipelines. It enables high-speed workspace validation, codebase querying, and batch task automation without the overhead of rendering graphical windows or web viewports."
+    },
+    {
+      "type": "h2",
+      "content": "Core Command Syntax and Usage"
+    },
+    {
+      "type": "p",
+      "content": "The agy CLI operates within the context of the user's active directory. Security policies, directory lockouts, and credentials configured for the workspace are automatically respected."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Run system and environment diagnostics to verify configuration parity\nagy --verify"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Execute a semantic query across files in the active directory\nagy query \"Locate all files that set environment variables or establish API endpoints\""
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Dispatch a direct modification task to the agent\nagy run --task \"Find all script files in ./bin, change permissions to executable, and document dependencies\""
+    },
+    {
+      "type": "h2",
+      "content": "Shell Integration and Pipeline Piping"
+    },
+    {
+      "type": "p",
+      "content": "Because the CLI outputs structured text, it integrates seamlessly with standard Unix utilities (like find, grep, and xargs) to construct automated development loops."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Find modified code files and pipe them directly into agy for automated review\nfind ./src -name \"*.py\" -mtime -1 | xargs agy run --task \"Audit these files for credentials or syntax violations\""
+    },
+    {
+      "type": "warning",
+      "content": "Safety Warning: Running tasks using the --auto-approve flag executes all file operations, terminal command suggestions, and network tools without pausing for human permission. To prevent accidental host directory corruption or data leaks, always run auto-approve tasks inside a dedicated, containerized sandbox (agy-box)."
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which agy command is used to ensure the local workstation has valid credentials and complies with active workspace rules?"
+    },
+    {
+      "type": "p",
+      "content": "- A) agy run --task"
+    },
+    {
+      "type": "p",
+      "content": "- B) agy --verify"
+    },
+    {
+      "type": "p",
+      "content": "- C) agy query --status"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The --verify command validates system prerequisites, checks active cloud tokens, and ensures the workspace lock state is sound."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What is the recommended safety measure when using the --auto-approve flag on agy commands?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Run the command with root user permissions on the host OS."
+    },
+    {
+      "type": "p",
+      "content": "- B) Execute the command exclusively inside an isolated container sandbox like agy-box."
+    },
+    {
+      "type": "p",
+      "content": "- C) Disable local workspace folder locking rules."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Auto-approval runs commands without pausing for human reviews; running inside a container sandbox protects host directories from unintended modifications."
+    }
+  ]
+}

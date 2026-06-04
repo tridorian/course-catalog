@@ -1,0 +1,141 @@
+{
+  "id": "3",
+  "title": "3. Lab - The Hardened Install (Tarball Method)",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab 1: The Hardened Install"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will deploy the Antigravity v1.23.2 binary on your system. Depending on your corporate security limits, you can choose between Tier 1 (Interactive Scripted) or Tier 2 (Manual Hardened Tarball extraction)."
+    },
+    {
+    {
+      "type": "h2",
+      "content": "🚀 Option A: Tier 1 - Verified script install (Standard Workstations)"
+    },
+    {
+      "type": "p",
+      "content": "For workstations with direct outbound internet access, you must avoid executing remote scripts via `curl | bash` without inspection. Instead, download the install script, verify its checksum and signature against a known hash, and run it:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Download the script and signature/checksum files\ncurl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agy-easy-install/main/antigravity-manager.sh\" -o antigravity-manager.sh\ncurl -fSsL \"https://raw.githubusercontent.com/wtg-codes/agy-easy-install/main/antigravity-manager.sh.sha256\" -o antigravity-manager.sh.sha256\n\n# Verify the SHA-256 checksum\nsha256sum --check --status antigravity-manager.sh.sha256\n\n# Verify the GPG signature\ngpg --verify antigravity-manager.sh.sig antigravity-manager.sh\n\n# Once verified, execute the installer\nbash antigravity-manager.sh"
+    },
+    {
+      "type": "info",
+      "content": "Verifying scripts ensures that code has not been tampered with in transit. The interactive helper script auto-detects dependencies and presents an installation menu."
+    },
+    {
+      "type": "h2",
+      "content": "🔒 Option B: Tier 2 - Hardened manual tarball install (Restricted/Cloudtop VM)"
+    },
+    {
+      "type": "p",
+      "content": "For air-gapped VMs or systems where external curl-to-bash execution is blocked, download and cryptographically verify the official package before manually extracting it. Run this secure sequence:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Create a dedicated application directory\nmkdir -p ~/.local/antigravity\n\n# Download the package, checksum, and GPG signature\nwget https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz -O /tmp/antigravity.tar.gz\nwget https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz.sha256 -O /tmp/antigravity.tar.gz.sha256\nwget https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz.sig -O /tmp/antigravity.tar.gz.sig\n\n# Verify the checksum integrity\necho \"$(cat /tmp/antigravity.tar.gz.sha256)  /tmp/antigravity.tar.gz\" | sha256sum --check\n\n# Verify the cryptographic signature\ngpg --keyserver hkps://keys.openpgp.org --recv-keys 0xKEYID\ngpg --verify /tmp/antigravity.tar.gz.sig /tmp/antigravity.tar.gz\n\n# Extract to the application folder\ntar -xzf /tmp/antigravity.tar.gz -C ~/.local/antigravity\n\n# Create a symlink to user binary folder\nmkdir -p ~/.local/bin\nln -sf ~/.local/antigravity/bin/antigravity ~/.local/bin/antigravity\nln -sf ~/.local/antigravity/bin/agy ~/.local/bin/agy"
+    },
+    {
+      "type": "warning",
+      "content": "Corporate firewall proxy configuration: If your wget command fails with a connection timeout, verify that you have exported your corporate proxy variables (`http_proxy` and `https_proxy`) in your active shell before running the download."
+    },
+    {
+      "type": "h2",
+      "content": "🛠️ Option C: Tier 3 - Containerized Sandbox (agy-box)"
+    },
+    {
+      "type": "p",
+      "content": "To run in a completely isolated sandboxed environment with Docker or Podman, deploy using the official container image. This isolates agent commands entirely from your host workstation files:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Pull the container image\ndocker pull github.com/wtg-codes/agy-box:v1.23.2\n\n# Run the sandboxed workspace, mounting your local project folder\ndocker run -it -v $(pwd):/workspace github.com/wtg-codes/agy-box:v1.23.2 /bin/bash"
+    },
+    {
+      "type": "h2",
+      "content": "❄️ Option D: Tier 4 - Declarative, Auditable, and Reversible Setups (Nix / Ansible)"
+    },
+    {
+      "type": "p",
+      "content": "To eliminate manual setup errors and guarantee auditable rollbacks when dependency updates break local packages, use declarative configuration management systems."
+    },
+    {
+      "type": "h3",
+      "content": "Method 1: Nix Flake Environment"
+    },
+    {
+      "type": "p",
+      "content": "Pin local workstation toolchains (Python, Node.js, Chrome) to exact versions. Nix allows atomic rollbacks to a previous system generation if any change breaks execution."
+    },
+    {
+      "type": "code",
+      "language": "nix",
+      "content": "# flake.nix\n{\n  description = \"Secure Antigravity Dev Environment\";\n  inputs.nixpkgs.url = \"github:NixOS/nixpkgs/nixos-23.11\";\n\n  outputs = { self, nixpkgs }:\n    let\n      system = \"x86_64-linux\";\n      pkgs = nixpkgs.legacyPackages.${system};\n    in {\n      devShells.${system}.default = pkgs.mkShell {\n        buildInputs = [\n          pkgs.python310\n          pkgs.nodejs-18_x\n          pkgs.google-chrome\n        ];\n        shellHook = ''\n          export PATH=$PATH:~/.local/bin\n          echo \"Declarative Antigravity environment loaded via Nix.\"\n        '';\n      };\n    };\n}"
+    },
+    {
+      "type": "h3",
+      "content": "Method 2: Ansible Playbook Setup"
+    },
+    {
+      "type": "p",
+      "content": "Deploy the setup using an Ansible task playbook. Ansible enforces cryptographic verification of downloaded packages and automates local directory permission locks."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "content": "- name: Provision Antigravity Workstation\n  hosts: localhost\n  connection: local\n  tasks:\n    - name: Download verified tarball\n      get_url:\n        url: https://antigravity.google/downloads/antigravity-v1.23.2-linux-x64.tar.gz\n        dest: /tmp/antigravity.tar.gz\n        checksum: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n    - name: Create secure directory structure\n      file:\n        path: \"{{ item }}\"\n        state: directory\n        mode: '0700'\n      loop:\n        - \"{{ ansible_env.HOME }}/.local/antigravity\"\n        - \"{{ ansible_env.HOME }}/.local/bin\"\n\n    - name: Extract package\n      unarchive:\n        src: /tmp/antigravity.tar.gz\n        dest: \"{{ ansible_env.HOME }}/.local/antigravity\"\n        remote_src: yes"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary benefit of the Tier 2 Standalone Tarball installation method?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It runs twice as fast as the Tier 1 native installation."
+    },
+    {
+      "type": "p",
+      "content": "- B) It allows installation on air-gapped, highly restricted corporate workstations without executing external installer shell scripts that might be blocked by IT."
+    },
+    {
+      "type": "p",
+      "content": "- C) It automatically installs the containerized Docker sandbox."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The Standalone Tarball method is a manual extraction process, meaning it bypasses network-dependent installer scripts and respects air-gapped security policies."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Where are the user binaries typically placed after a successful manual extraction or script install to ensure they can be executed without root permissions?"
+    },
+    {
+      "type": "p",
+      "content": "- A) `/usr/bin/`"
+    },
+    {
+      "type": "p",
+      "content": "- B) `/etc/antigravity/`"
+    },
+    {
+      "type": "p",
+      "content": "- C) `~/.local/bin/`"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option C is correct. Local user binaries are best stored in `~/.local/bin` to avoid requiring administrative (`sudo`) privileges for system folders."
+    }
+  ]
+}

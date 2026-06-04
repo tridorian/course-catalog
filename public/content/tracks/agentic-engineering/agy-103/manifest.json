@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Introduction to Agentic Workspaces & Boundary Risks",
+      "file": "modules/01-1-introduction-to-agentic-workspaces-boundary-risks.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Defining Workspace Boundaries & SDK Directory Locking",
+      "file": "modules/02-2-defining-workspace-boundaries-sdk-directory-locking.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Unix File Permissions & System-Level Hardening",
+      "file": "modules/03-3-unix-file-permissions-system-level-hardening.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Folder Firewalls: Protecting Sensitive Personal Directories",
+      "file": "modules/04-4-folder-firewalls-protecting-sensitive-personal-directories.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Verification & Safety Drills",
+      "file": "modules/05-5-verification-safety-drills.json"
+    }
+  ]
+}

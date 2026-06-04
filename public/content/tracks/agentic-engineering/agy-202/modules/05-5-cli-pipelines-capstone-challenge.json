@@ -1,0 +1,132 @@
+{
+  "id": "5",
+  "title": "5. CLI Pipelines & Capstone Challenge",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "# [5. CLI Pipelines & Capstone Challenge]"
+    },
+    {
+      "type": "h2",
+      "content": "Building Terminal Pipelines and the Specialist Challenge"
+    },
+    {
+      "type": "p",
+      "content": "Unix philosophy encourages building small, focused utilities that communicate via standard text streams. The agy CLI client is designed to participate directly in these streams. In this module, we will explore how to chain agy outputs with other shell tools like jq, run headless pipelines in CI/CD without trust blockers, and outline the specialist capstone challenge to earn your AGY Certified Terminal Specialist credential."
+    },
+    {
+      "type": "h3",
+      "content": "Chaining agy with UNIX Filters"
+    },
+    {
+      "type": "p",
+      "content": "By instructing the agent to generate raw, unadorned structured text (like JSON or CSV) without conversational preambles or markdown code blocks, you can pipe its output directly into tools like jq, grep, or awk. This enables you to automate downstream operations based on the agent's evaluations."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Extract error entries from a log, format as JSON list, and filter using jq\ncat logs/system.log | \\\n  agy -p \"Extract all critical database failures from this log stream. Return only a raw JSON array containing objects with keys 'timestamp' and 'error_message'. Do not include markdown code fences or conversational text.\" | \\\n  jq '.[] | select(.error_message | contains(\"Timeout\"))'"
+    },
+    {
+      "type": "h3",
+      "content": "Headless Automation and Trust Bypass in CI/CD"
+    },
+    {
+      "type": "p",
+      "content": "When running agy commands inside automated pipelines (like GitHub Actions workflows), you must configure the pipeline to bypass interactive prompts. To do this:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Enable non-interactive execution by always using the -p or --print option.",
+        "Bypass folder trust validations by running with the --skip-trust flag or setting the environment variable GEMINI_CLI_TRUST_WORKSPACE=true."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "content": "# Example GitHub Actions Job Step utilizing agy\n- name: Run automated codebase security scan\n  env:\n    GEMINI_CLI_TRUST_WORKSPACE: \"true\"\n    GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}\n  run: |\n    agy -p \"Scan all JS files in ./src for raw API keys. Report any findings.\" --log-file ./scan.log"
+    },
+    {
+      "type": "h3",
+      "content": "The Specialist Capstone Challenge"
+    },
+    {
+      "type": "p",
+      "content": "To complete the AGY Certified Terminal Specialist capstone and earn your Specialist badge, you must build an automated diagnostic reporting pipeline that processes unorganized workstation log files and outputs a clean markdown status summary."
+    },
+    {
+      "type": "p",
+      "content": "Your pipeline must run within a secure workspace boundary and be executed entirely via a defensive shell script."
+    },
+    {
+      "type": "h3",
+      "content": "Step-by-Step Capstone Blueprint"
+    },
+    {
+      "type": "p",
+      "content": "**Step 1: Setup Workspace and Permissions**"
+    },
+    {
+      "type": "p",
+      "content": "Create a secure directory at `/workspace/capstone` and initialize a `.gemini.md` boundary file restricting agent actions to that folder:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "mkdir -p /workspace/capstone\ncd /workspace/capstone\n\n# Configure boundary constraints\necho \"permissions:\n  read-write: [./]\n  blocked: [/etc/, ~/.ssh/]\" > .gemini.md"
+    },
+    {
+      "type": "p",
+      "content": "**Step 2: Seed Mock Log Data**"
+    },
+    {
+      "type": "p",
+      "content": "Create two mock server log files representing separate system nodes:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "cat << 'EOF' > node-1.log\n2026-06-03T10:00:00Z [INFO] System initialized.\n2026-06-03T10:05:00Z [WARN] Memory consumption at 85% limit.\n2026-06-03T10:08:00Z [ERROR] DB connection timed out after 5000ms.\nEOF\n\ncat << 'EOF' > node-2.log\n2026-06-03T10:01:00Z [INFO] Node 2 online.\n2026-06-03T10:06:00Z [WARN] Disk space low on volume /data.\n2026-06-03T10:12:00Z [ERROR] Authentication token expired for service api-client.\nEOF"
+    },
+    {
+      "type": "p",
+      "content": "**Step 3: Write the generate_report.sh Shell Script**"
+    },
+    {
+      "type": "p",
+      "content": "Write a bash script using defensive shell programming patterns (`set -euo pipefail`) that loops through each log file, pipes its contents to agy run to summarize critical warnings, and appends the output to `summary_report.md`:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "cat << 'EOF' > generate_report.sh\n#!/usr/bin/env bash\n\n# Enable strict error checking and pipeline failure detection\nset -euo pipefail\n\nOUTPUT=\"summary_report.md\"\n\necho \"# Systems Status Summary Report\" > \"$OUTPUT\"\necho \"Generated on: $(date)\" >> \"$OUTPUT\"\necho \"--------------------------------\" >> \"$OUTPUT\"\necho \"\" >> \"$OUTPUT\"\n\n# Iterate over each server log file in the capstone directory\nfor file in *.log; do\n  echo \"Processing $file...\"\n  echo \"### Node File: $(basename \"$file\")\" >> \"$OUTPUT\"\n  \n  # Stream the log contents to the agy client for analysis\n  cat \"$file\" | agy -p \"Summarize the critical warn or error logs in this stream. Keep the response to 3 short bullet points.\" >> \"$OUTPUT\"\n  echo \"\" >> \"$OUTPUT\"\ndone\n\necho \"Reporting pipeline complete. Output written to $OUTPUT.\"\nEOF\n\n# Make the script executable\nchmod +x generate_report.sh"
+    },
+    {
+      "type": "p",
+      "content": "**Step 4: Execute and Verify**"
+    },
+    {
+      "type": "p",
+      "content": "Run your reporting script and execute the automated capstone validator script to verify your project outcomes:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Run the pipeline\n./generate_report.sh\n\n# Execute the automated certification verification tool\nagy verify --course agy-202 --target ./summary_report.md"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1**: Why is the shell options directive `set -euo pipefail` standard in production pipeline scripts?\n\nA) It accelerates execution speed by skipping diagnostic checks.\nB) It ensures that if any single command in a pipeline fails, or a variable is undefined, the shell script terminates immediately.\nC) It authorizes the command line client with Google Workspace APIs.\nD) It compresses the generated output reports.\n\n*Feedback*: The correct answer is B. Defensive shell programming patterns ensure execution aborts instantly on errors rather than proceeding with incomplete data."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2**: Which command allows you to verify your local workspace capstone results against certification requirements?\n\nA) `agy status`\nB) `agy verify --course agy-202 --target ./summary_report.md`\nC) `node populate-course-doc.js`\nD) `npm run lint`\n\n*Feedback*: The correct answer is B. `agy verify` evaluates your local outputs to verify they meet badge completion criteria."
+    }
+  ]
+}

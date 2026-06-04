@@ -1,0 +1,114 @@
+{
+  "id": "3",
+  "title": "3. Google Drive & Docs Integration",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Google Drive and Google Docs serve as primary workspaces in corporate environments. Connecting your AGY SDK agents to these platforms lets them read input files, monitor shared folders, compile project specifications, and update live records. In this module, we build integrations to query Drive and dynamically rewrite Docs using Python and Node.js."
+    },
+    {
+      "type": "h2",
+      "content": "Drive API: Querying and Searching Files"
+    },
+    {
+      "type": "p",
+      "content": "To find a Google Doc or folder programmatically, use the Drive API's files.list method. This method accepts a 'q' query parameter to restrict searches by name, mimeType, and modification dates."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "# Drive search query pattern to find Google Documents named 'Project Specs'\nquery = \"name = 'Project Specs' and mimeType = 'application/vnd.google-apps.document' and trashed = false\""
+    },
+    {
+      "type": "h2",
+      "content": "Docs API: Reading and Editing Content Body"
+    },
+    {
+      "type": "p",
+      "content": "The Google Docs API exposes document structures as a hierarchical JSON tree. The document body consists of a content list containing structural elements (Paragraphs, Tables, SectionBreaks). To edit a document, you must send a list of update request objects in a batchUpdate call."
+    },
+    {
+      "type": "warning",
+      "content": "Index Shifting: The Docs API uses character-offset indexes (0-based) to target text edits. When you insert or delete text, the indices of all downstream elements shift. To avoid corrupting your layout, perform multiple text insertions in descending index order (from the end of the document to the beginning)."
+    },
+    {
+      "type": "h2",
+      "content": "Google Workspace Integration Script (Python)"
+    },
+    {
+      "type": "p",
+      "content": "This script uses the Drive API to find a Google Doc, reads the document contents, sends the text to the Google Antigravity Agent for summarization, and appends the summarized text back into the document."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "import asyncio\nimport os\nfrom google.oauth2.credentials import Credentials\nfrom googleapiclient.discovery import build\nfrom google.antigravity import Agent, LocalAgentConfig\n\nasync def run_drive_docs_pipeline():\n    # 1. Load authenticated OAuth credentials\n    if not os.path.exists('token.json'):\n        print(\"token.json not found! Run Module 1 setup script first.\")\n        return\n    creds = Credentials.from_authorized_user_file('token.json')\n    \n    # 2. Build Workspace Clients\n    drive = build('drive', 'v3', credentials=creds)\n    docs = build('docs', 'v1', credentials=creds)\n    \n    # 3. Find the Target Google Doc\n    print(\"Searching for document...\")\n    query = \"name = 'AGY-311 Work Doc' and mimeType = 'application/vnd.google-apps.document'\"\n    results = drive.files().list(q=query, fields=\"files(id, name)\").execute()\n    files = results.get('files', [])\n    \n    if not files:\n        print(\"No matching document found. Creating a new document...\")\n        # Create a mock file\n        file_metadata = {\n            'name': 'AGY-311 Work Doc',\n            'mimeType': 'application/vnd.google-apps.document'\n        }\n        doc_file = drive.files().create(body=file_metadata, fields='id').execute()\n        doc_id = doc_file.get('id')\n        # Initialize it with some content\n        init_requests = [{\n            'insertText': {\n                'text': \"Project Kickoff Notes\\n\\nRaw Transcript:\\nThe client wants a system that is secure, runs inside distrobox, and logs all tool execution approvals. We need to deploy this by Q3.\",\n                'location': {'index': 1}\n            }\n        }]\n        docs.documents().batchUpdate(documentId=doc_id, body={'requests': init_requests}).execute()\n    else:\n        doc_id = files[0]['id']\n        \n    # 4. Extract document content\n    print(f\"Fetching document ID: {doc_id}...\")\n    doc_content = docs.documents().get(documentId=doc_id).execute()\n    \n    # Construct raw text from document content array\n    text_runs = []\n    body_elements = doc_content.get('body', {}).get('content', [])\n    for element in body_elements:\n        if 'paragraph' in element:\n            for run in element['paragraph'].get('elements', []):\n                if 'textRun' in run:\n                    text_runs.append(run['textRun']['content'])\n    raw_text = \"\".join(text_runs)\n    \n    # 5. Process text with Antigravity Agent\n    print(\"Processing content with Antigravity...\")\n    system_instruction = \"You are a business writer. Summarize transcripts into clean, bulleted Action Items.\"\n    config = LocalAgentConfig(system_instruction=system_instruction)\n    \n    async with Agent(config) as agent:\n        prompt = f\"Summarize this project content:\\n\\n<doc>\\n{raw_text}\\n</doc>\"\n        response = await agent.chat(prompt)\n        summary = await response.text()\n        \n    # 6. Append Summary back to Google Doc\n    print(\"Appending summary to Google Doc...\")\n    # Read current document state to get the ending index\n    updated_doc = docs.documents().get(documentId=doc_id).execute()\n    body = updated_doc.get('body', {})\n    # Document end index is located at the end index of the last element\n    end_index = body.get('content', [])[-1].get('endIndex')\n    \n    insert_text = f\"\\n\\n--- Asynchronous Agent Summary ---\\n{summary}\"\n    requests = [{\n        'insertText': {\n            'text': insert_text,\n            'location': {'index': end_index - 1}\n        }\n    }]\n    docs.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()\n    print(f\"Pipeline completed! Check document at https://docs.google.com/document/d/{doc_id}/edit\")\n\nif __name__ == '__main__':\n    asyncio.run(run_drive_docs_pipeline())"
+    },
+    {
+      "type": "h2",
+      "content": "Google Workspace Integration Script (Node.js)"
+    },
+    {
+      "type": "p",
+      "content": "Below is the equivalent implementation in Node.js, doing file queries and batch updating the Google Doc."
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "content": "import fs from 'fs';\nimport { google } from 'googleapis';\nimport { Agent, LocalAgentConfig } from '@google/antigravity';\n\nasync function runDriveDocsPipeline() {\n  if (!fs.existsSync('token.json')) {\n    console.error(\"token.json not found! Run Module 1 first.\");\n    return;\n  }\n  const tokenData = JSON.parse(fs.readFileSync('token.json', 'utf8'));\n  const auth = google.auth.fromJSON(tokenData);\n  \n  const drive = google.drive({ version: 'v3', auth });\n  const docs = google.docs({ version: 'v1', auth });\n  \n  // Search for the document\n  console.log(\"Searching for document...\");\n  const query = \"name = 'AGY-311 Work Doc' and mimeType = 'application/vnd.google-apps.document'\";\n  const searchResults = await drive.files.list({ q: query, fields: 'files(id, name)' });\n  const files = searchResults.data.files || [];\n  \n  let docId;\n  if (files.length === 0) {\n    console.log(\"Creating document...\");\n    const newFile = await drive.files.create({\n      requestBody: {\n        name: 'AGY-311 Work Doc',\n        mimeType: 'application/vnd.google-apps.document'\n      },\n      fields: 'id'\n    });\n    docId = newFile.data.id;\n    await docs.documents.batchUpdate({\n      documentId: docId,\n      requestBody: {\n        requests: [{\n          insertText: {\n            text: \"Project Kickoff Notes\\n\\nRaw Transcript:\\nThe client wants a system that is secure, runs inside distrobox, and logs all tool execution approvals. We need to deploy this by Q3.\",\n            location: { index: 1 }\n          }\n        }]\n      }\n    });\n  } else {\n    docId = files[0].id;\n  }\n  \n  // Get document body\n  console.log(`Reading document body for ID: ${docId}`);\n  const doc = await docs.documents.get({ documentId: docId });\n  const content = doc.data.body?.content || [];\n  let rawText = '';\n  for (const element of content) {\n    if (element.paragraph) {\n      for (const run of element.paragraph.elements || []) {\n        if (run.textRun) {\n          rawText += run.textRun.content;\n        }\n      }\n    }\n  }\n  \n  // Run Agent turn\n  console.log(\"Summarizing doc content...\");\n  const config = new LocalAgentConfig({\n    systemInstruction: \"You are a business writer. Summarize transcripts into clean, bulleted Action Items.\"\n  });\n  const agent = new Agent(config);\n  await agent.start();\n  \n  let summary;\n  try {\n    const response = await agent.chat(`Summarize this project content:\\n\\n<doc>\\n${rawText}\\n</doc>`);\n    summary = await response.text();\n  } finally {\n    await agent.stop();\n  }\n  \n  // Append back to document\n  const docDetails = await docs.documents.get({ documentId: docId });\n  const docContent = docDetails.data.body?.content || [];\n  const lastElement = docContent[docContent.length - 1];\n  const endIndex = lastElement.endIndex || 1;\n  \n  console.log(\"Appending summary...\");\n  await docs.documents.batchUpdate({\n    documentId: docId,\n    requestBody: {\n      requests: [{\n        insertText: {\n          text: `\\n\\n--- Asynchronous Agent Summary ---\\n${summary}`,\n          location: { index: endIndex - 1 }\n        }\n      }]\n    }\n  });\n  console.log(`Success! Doc updated. https://docs.google.com/document/d/${docId}/edit`);\n}\n\nrunDriveDocsPipeline().catch(console.error);"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary index shifting gotcha when executing batch updates on a Google Doc?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The document size increases and results in a billing surcharge."
+    },
+    {
+      "type": "p",
+      "content": "- B) Inserting text shifts downstream character indices, which can cause subsequent update requests targeting static indexes to insert text in incorrect positions."
+    },
+    {
+      "type": "p",
+      "content": "- C) The document is automatically locked for 1 hour."
+    },
+    {
+      "type": "p",
+      "content": "- D) The font family resets to Courier New automatically."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. Modifying document body elements alters characters counts, displacing indices. Performing actions in reverse index order mitigates this shift."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: How can an agent find a specific file inside Drive without searching the entire storage hierarchy?"
+    },
+    {
+      "type": "p",
+      "content": "- A) By specifying the parent folder ID in the search query parameter 'q' as in \"'folder_id' in parents\"."
+    },
+    {
+      "type": "p",
+      "content": "- B) By guessing the index value of the file."
+    },
+    {
+      "type": "p",
+      "content": "- C) By deleting all other files in Drive."
+    },
+    {
+      "type": "p",
+      "content": "- D) By requesting access token updates."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: A. Appending \"'folder_id' in parents\" to the file query restricts searches to a single directory."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "2",
+  "title": "2. Implementing Node.js ADK SDK bindings",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Node.js SDK Bindings"
+    },
+    {
+      "type": "p",
+      "content": "For JavaScript developers, ADK offers a fully typed TypeScript/Node.js SDK library to manage asynchronous executions."
+    },
+    {
+      "type": "h2",
+      "content": "Basic NodeJS Setup"
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "code": "import { AgentRuntime } from '@google/adk';\n\nasync function run() {\n  const runtime = new AgentRuntime({ configPath: 'agent.yaml' });\n  const result = await runtime.execute({ prompt: 'Hello agent!' });\n  console.log('Response:', result.content);\n}\nrun();"
+    },
+    {
+      "type": "info",
+      "title": "ES Modules",
+      "content": "The Node.js SDK utilizes modern ES modules. Ensure your package.json has 'type': 'module' or use .mjs file extensions."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How are executions managed in the Node.js SDK?\n- A) Synchronous blocking threads\n- B) Asynchronous promises using async/await\n- C) Callback event emitters only\n\nFeedback: Option B is correct. The SDK uses standard Promise APIs for async executions."
+    }
+  ]
+}

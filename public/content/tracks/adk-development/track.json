@@ -1,0 +1,167 @@
+{
+  "track_id": "adk-development",
+  "title": "ADK Development",
+  "description": "Build and deploy production-grade multi-agent systems using Google's Agent Development Kit (ADK), adk-web debugging tools, A2A protocols, and interactive A2UI layouts.",
+  "courses": [
+    {
+      "id": "adk-101",
+      "title": "ADK-101: ADK Foundations",
+      "description": "Master the basics of Google's Agent Development Kit (ADK). Setup your local environment, install the CLI, configure agent.yaml, and run your first agent.",
+      "modules": 5,
+      "icon": "Download",
+      "level": "L100",
+      "duration": 60,
+      "tags": ["Foundations", "Setup", "CLI"]
+    },
+    {
+      "id": "adk-102",
+      "title": "ADK-102: Advanced Configs & Multi-model Setup",
+      "description": "Dive deep into agent.yaml properties. Configure model backends, safety filters, context parameters, temperature, and tokens.",
+      "modules": 5,
+      "icon": "Sliders",
+      "level": "L100",
+      "duration": 60,
+      "tags": ["YAML", "Configuration", "Models"]
+    },
+    {
+      "id": "adk-103",
+      "title": "ADK-103: Python & Node.js SDK Bindings",
+      "description": "Build and initiate ADK agents programmatically using Python and Node.js SDK libraries, intercepting key runner event hooks.",
+      "modules": 5,
+      "icon": "Code",
+      "level": "L100",
+      "duration": 60,
+      "tags": ["SDK", "Python", "NodeJS"]
+    },
+    {
+      "id": "adk-104",
+      "title": "ADK-104: Tool Schema Design & Basic APIs",
+      "description": "Design robust agent tool definitions using strict parameter schemas and type reflections to wrap weather and currency APIs.",
+      "modules": 5,
+      "icon": "Hammer",
+      "level": "L100",
+      "duration": 65,
+      "tags": ["Tools", "Schema", "APIs"]
+    },
+    {
+      "id": "adk-201",
+      "title": "ADK-201: Developer Tooling & adk-web",
+      "description": "Inspect and debug active agent runs using the adk-web developer console. Review execution traces, memory states, transaction logs, and step playbacks.",
+      "modules": 5,
+      "icon": "Layout",
+      "level": "L200",
+      "duration": 75,
+      "tags": ["Debugging", "adk-web", "Observability"]
+    },
+    {
+      "id": "adk-202",
+      "title": "ADK-202: Prompt Engineering & Custom System Instructions",
+      "description": "Write structured instructions, few-shot examples, dynamic templates, and safety rules to guide agent reasoning behavior.",
+      "modules": 5,
+      "icon": "MessageSquare",
+      "level": "L200",
+      "duration": 75,
+      "tags": ["Prompts", "System Instructions", "Reasoning"]
+    },
+    {
+      "id": "adk-203",
+      "title": "ADK-203: Stateful Conversation Memory",
+      "description": "Implement conversation storage adapters for sliding windows, summarization, Redis caches, and persistent Postgres backends.",
+      "modules": 5,
+      "icon": "Database",
+      "level": "L200",
+      "duration": 80,
+      "tags": ["Memory", "Redis", "Database"]
+    },
+    {
+      "id": "adk-204",
+      "title": "ADK-204: Local Mocking & Agent Testing",
+      "description": "Design regression suites, unit test tool integrations, and mock model endpoints to establish robust agent CI/CD pipelines.",
+      "modules": 5,
+      "icon": "ClipboardCheck",
+      "level": "L200",
+      "duration": 85,
+      "tags": ["Testing", "Mocking", "CICD"]
+    },
+    {
+      "id": "adk-301",
+      "title": "ADK-301: Agent-to-Agent (A2A) Orchestration",
+      "description": "Design and orchestrate multi-agent collaboration environments. Configure A2AServer routing, launch remote agents, and write discovery card manifests.",
+      "modules": 5,
+      "icon": "GitMerge",
+      "level": "L300",
+      "duration": 90,
+      "tags": ["A2A", "Orchestration", "Networking"]
+    },
+    {
+      "id": "adk-302",
+      "title": "ADK-302: Intent Classification & Routing Agents",
+      "description": "Configure router agents to classify semantic intents and dispatch task execution parameters to worker sub-agents.",
+      "modules": 5,
+      "icon": "Navigation",
+      "level": "L300",
+      "duration": 90,
+      "tags": ["Routing", "Intent", "Supervisors"]
+    },
+    {
+      "id": "adk-303",
+      "title": "ADK-303: Collaborative Multi-Agent Patterns",
+      "description": "Master consensus protocols, voting nodes, shared blackboards, and sequential editing chains across agent workgroups.",
+      "modules": 5,
+      "icon": "Users",
+      "level": "L300",
+      "duration": 95,
+      "tags": ["Collaboration", "Consensus", "Blackboards"]
+    },
+    {
+      "id": "adk-304",
+      "title": "ADK-304: High-Throughput Message Queues for Agents",
+      "description": "Scale A2A traffic with asynchronous message brokers like RabbitMQ or Kafka, implementing retry policies and DLQs.",
+      "modules": 5,
+      "icon": "ListOrdered",
+      "level": "L300",
+      "duration": 100,
+      "tags": ["Queues", "RabbitMQ", "Kafka"]
+    },
+    {
+      "id": "adk-401",
+      "title": "ADK-401: Dynamic Interfaces with A2UI",
+      "description": "Create interactive user interfaces generated dynamically by agents. Learn the A2UI schema format to build cards, forms, tables, and secure callbacks.",
+      "modules": 5,
+      "icon": "Code",
+      "level": "L400",
+      "duration": 105,
+      "tags": ["A2UI", "Frontend", "Interactive"]
+    },
+    {
+      "id": "adk-402",
+      "title": "ADK-402: Enterprise Integration & MCP",
+      "description": "Deploy production agents connected to Model Context Protocol (MCP) servers, configure OAuth2 integrations, and execute securely inside virtualized sandboxes.",
+      "modules": 5,
+      "icon": "Server",
+      "level": "L400",
+      "duration": 120,
+      "tags": ["Enterprise", "MCP", "Security"]
+    },
+    {
+      "id": "adk-403",
+      "title": "ADK-403: Custom A2UI Component Development",
+      "description": "Build and register bespoke client-side React widgets and charts that compile into sandboxed A2UI rendering frames.",
+      "modules": 5,
+      "icon": "Layers",
+      "level": "L400",
+      "duration": 120,
+      "tags": ["React", "Components", "Widgets"]
+    },
+    {
+      "id": "adk-404",
+      "title": "ADK-404: Enterprise Sandbox Security & Isolation",
+      "description": "Isolate agent execution nodes with gVisor, enforce strict syscall filter policies, limit egress connections, and monitor trails.",
+      "modules": 5,
+      "icon": "ShieldAlert",
+      "level": "L400",
+      "duration": 120,
+      "tags": ["Security", "gVisor", "Isolation"]
+    }
+  ]
+}

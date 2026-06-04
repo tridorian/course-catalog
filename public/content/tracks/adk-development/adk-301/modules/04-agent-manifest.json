@@ -1,0 +1,49 @@
+{
+  "id": "4",
+  "title": "4. Dynamic Discovery with Agent Cards and Manifests",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Agent Discovery & Manifest Files"
+    },
+    {
+      "type": "p",
+      "content": "To enable dynamic task routing, the orchestrator needs to know what tools and operations an agent provides without hardcoding logic. This metadata is declared in the `agent-card.json` manifest file."
+    },
+    {
+      "type": "h2",
+      "content": "Agent Card Manifest Schema (`agent-card.json`)"
+    },
+    {
+      "type": "p",
+      "content": "Create an agent card manifest file that defines inputs, scopes, models, and contact endpoints for your agent:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"agent_id\": \"security-scanner-agent\",\n  \"version\": \"1.4.0\",\n  \"capabilities\": {\n    \"domains\": [\"source-code\", \"vulnerability-scan\", \"dependency-check\"],\n    \"languages\": [\"python\", \"go\", \"javascript\"]\n  },\n  \"inputs\": {\n    \"repository_path\": \"string\",\n    \"scan_level\": \"string\"\n  },\n  \"routing_endpoint\": \"http://localhost:8094/a2a/v1/execute\",\n  \"security_claims\": {\n    \"requires_network\": false,\n    \"write_permission_required\": true\n  }\n}"
+    },
+    {
+      "type": "info",
+      "title": "Dynamic Routing Rules",
+      "content": "The central hub parses all available card manifests in the directory. If a user asks to scan a repo for issues, the hub matches 'vulnerability-scan' to the scanner's card and routes the message."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary function of the agent-card.json file in a multi-agent system?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It compiles Javascript dependencies.\n- B) It acts as a declarative manifest describing an agent's capabilities, inputs, and endpoints to enable dynamic routing and discovery.\n- C) It stores model weights for execution."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The agent-card.json provides the metadata required by routing engines to discover capabilities dynamically."
+    }
+  ]
+}

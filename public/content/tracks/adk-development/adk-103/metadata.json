@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-103",
+  "title": "ADK-103: Python & Node.js SDK Bindings",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Build and initiate ADK agents programmatically using Python and Node.js SDK libraries, intercepting key runner event hooks.",
+  "features": [
+    {
+      "icon": "🐍",
+      "title": "Python Bindings",
+      "description": "Initialize runtime parameters, bind custom tools, and run agent loops from Python scripts."
+    },
+    {
+      "icon": "🟢",
+      "title": "NodeJS Bindings",
+      "description": "Use TypeScript/JavaScript to instantiate the ADK Agent, managing asynchronous callbacks."
+    },
+    {
+      "icon": "🪝",
+      "title": "Lifecycle Hooks",
+      "description": "Intercept model requests, tool calls, and completion events to log transactions."
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "id": "5",
+  "title": "5. Capstone Project & Assessment",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "The capstone project is the final validation challenge for the L200 Standalone Operations track. Successful completion of this project is required to earn the **AGY Certified Operations Specialist** credential."
+    },
+    {
+      "type": "h2",
+      "content": "Project Scenario & Scope"
+    },
+    {
+      "type": "p",
+      "content": "You are a Competitive Intelligence Analyst at Tridorian. You are tasked with analyzing the pricing models of three competitor services. You must orchestrate three parallel agent cards on the `antigravity` dashboard to monitor three target sites, scrape their pricing details using visual browser automation, troubleshoot any loading delays, and compile a consolidated pricing matrix following the Zero-Placeholder Rule."
+    },
+    {
+      "type": "h2",
+      "content": "Step-by-Step Implementation Blueprint"
+    },
+    {
+      "type": "p",
+      "content": "**Step 1: Workspace and Target Configuration**"
+    },
+    {
+      "type": "p",
+      "content": "Prepare your local directory and create a configuration mapping the simulated competitor URLs:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Create folders\nmkdir -p ~/agy-workspaces/competitive-tracker/data\ncd ~/agy-workspaces/competitive-tracker\n\n# Create the competitors list mapping file\ncat << 'EOF' > competitors.json\n[\n  {\"id\": \"competitor_a\", \"url\": \"http://localhost:3000/comp-a\"},\n  {\"id\": \"competitor_b\", \"url\": \"http://localhost:3000/comp-b\"},\n  {\"id\": \"competitor_c\", \"url\": \"http://localhost:3000/comp-c\"}\n]\nEOF"
+    },
+    {
+      "type": "p",
+      "content": "**Step 2: Dispatch the Aggregation Prompt**"
+    },
+    {
+      "type": "p",
+      "content": "In the `antigravity` dashboard prompt input field, enter the following orchestrator instructions:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "content": "Task: Parallel Competitive Pricing Aggregator\n\nInstructions:\n1. Read the list of target websites from './competitors.json'.\n2. For each competitor, spawn a web scraping subagent.\n3. Navigate to each URL using the browser automation tools.\n4. Extract the pricing plans. On Competitor C's site, note that the pricing table loads dynamically after a 2-second delay. Ensure you wait for the selector 'div.pricing-card' to be visible.\n5. Save the scraped data for each source in JSON format under './data/'.\n6. Consolidate the findings into a single report in the root directory named 'pricing_matrix.md'.\n7. The report must contain a 3-paragraph summary and a GFM table comparing plans and pricing. Follow the Zero-Placeholder Rule."
+    },
+    {
+      "type": "p",
+      "content": "**Step 3: Monitor Execution & Debug Competitor C**"
+    },
+    {
+      "type": "p",
+      "content": "During execution, the agent card for Competitor C will pause and report a selector timeout because of a dynamic loader spinner. You must resolve this using active steering:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Open the Playback Viewport for the Competitor C scraper card.",
+        "Examine the visual recording tape under `.gemini/state/tapes/` to confirm that the spinner was active and verify the element class name.",
+        "Click Redirect on the card, and input the following corrective instructions: 'Modify the script to wait for networkidle state and add a 3000ms delay before attempting to select the pricing cards.'",
+        "Click Resume to let the agent compile the data successfully."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "**Step 4: Automated Verification**"
+    },
+    {
+      "type": "p",
+      "content": "Once the consolidated `pricing_matrix.md` has been compiled in your workspace, execute the local validation checks in your terminal to assert project integrity:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Run the validation command against the generated output\nagy verify --course agy-201 --target ./pricing_matrix.md"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Which CLI command is used to locally check your workspace deliverables against the certification criteria for course `agy-201`?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) `antigravity run`",
+        "B) `agy verify --course agy-201 --target ./pricing_matrix.md`",
+        "C) `node scripts/sync-docs.js`",
+        "D) `playwright test`"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Running `agy verify` with the specific course code and target file runs local assertions against your capstone output files to verify completion."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** What steering feedback corrects the agent when it times out trying to scrape a dynamic client-rendered page?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Reject the step and run a basic curl command instead",
+        "B) Redirect the agent to wait for the network idle state and add a specific wait timeout in milliseconds",
+        "C) Restart the visual board daemon on a different port",
+        "D) Add the target site domain to the blocked list in the permissions file"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Instructing the agent to wait for network idle states and introducing a wait timeout tells Playwright to let client-side JS finish rendering before querying elements."
+    }
+  ]
+}

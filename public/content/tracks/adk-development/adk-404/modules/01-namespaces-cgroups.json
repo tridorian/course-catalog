@@ -1,0 +1,32 @@
+{
+  "id": "1",
+  "title": "1. Sandboxing strategies: Linux namespaces and cgroups",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Linux Namespaces and Cgroups"
+    },
+    {
+      "type": "p",
+      "content": "Running untrusted agent code requires isolation. Namespaces partition system resources (network interfaces, mounts, process lists), and cgroups limit compute resource quotas (CPU, memory), preventing malicious loops from exhausting host power."
+    },
+    {
+      "type": "h2",
+      "content": "Namespaces & Limits"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "# Run agent container with strict memory limits\ndocker run --memory=\"512m\" --cpus=\"1.0\" --network=none adk-agent-image"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What linux mechanism restricts an agent's memory usage limits?\n- A) Namespaces\n- B) Control Groups (cgroups)\n- C) Seccomp filters\n\nFeedback: Option B is correct. cgroups throttle and limit hardware resources."
+    }
+  ]
+}

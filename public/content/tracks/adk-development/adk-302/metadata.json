@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-302",
+  "title": "ADK-302: Intent Classification & Routing Agents",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Configure router agents to classify semantic intents and dispatch task execution parameters to worker sub-agents.",
+  "features": [
+    {
+      "icon": "🔀",
+      "title": "Supervisor Design",
+      "description": "Design a centralized supervisor agent that processes input queries and selects downstream executors."
+    },
+    {
+      "icon": "🎯",
+      "title": "Intent Parsing",
+      "description": "Apply classification prompts or vector similarities to tag messages with specialized labels."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Fallback Paths",
+      "description": "Handle complex and unresolvable intents with grace, escalating queries to manual intervention channels."
+    }
+  ]
+}

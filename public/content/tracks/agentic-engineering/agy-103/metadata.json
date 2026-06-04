@@ -1,0 +1,29 @@
+{
+  "course_id": "agy-103",
+  "title": "AGY-103: Workspace Design & File Security (L100)",
+  "version": "0.1.0",
+  "author": "Tridorian Labs & Google Cloud",
+  "description": "Learn to design secure workspace boundaries and configure file-system level access controls for autonomous AI agents. This course provides comprehensive training on directory locking, POSIX folder permissions, and designing custom SDK policies to shield sensitive user folders (such as SSH keys, desktop, documents) from agent interactions.",
+  "features": [
+    {
+      "icon": "🔒",
+      "title": "Boundary Containment",
+      "description": "Lock agent execution strictly to designated workspace paths using canonical paths validation."
+    },
+    {
+      "icon": "📂",
+      "title": "POSIX Directory Security",
+      "description": "Enforce standard permissions (chmod/chown) and create low-privilege runtime configurations to block shell escapes."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Custom Firewalls",
+      "description": "Implement SDK argument predicates to intercept and deny tool requests that target sensitive files."
+    },
+    {
+      "icon": "🧪",
+      "title": "Verification Audits",
+      "description": "Use the agy CLI verification tool and mock simulations to audit configuration security before execution."
+    }
+  ]
+}

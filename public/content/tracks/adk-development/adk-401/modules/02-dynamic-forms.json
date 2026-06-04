@@ -1,0 +1,57 @@
+{
+  "id": "2",
+  "title": "2. Building Forms and Processing Input Paybacks",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Form Components & Input Capture"
+    },
+    {
+      "type": "p",
+      "content": "To capture parameters from the user securely, agents construct forms using the A2UI input widgets. When the user submits, a callback request payload is routed back to the agent session."
+    },
+    {
+      "type": "h2",
+      "content": "A2UI Form Schema Example"
+    },
+    {
+      "type": "p",
+      "content": "This schema defines a user settings form with a text input, selection dropdown, and a submit button:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"type\": \"form\",\n  \"form_id\": \"user-auth-settings\",\n  \"controls\": [\n    {\n      \"type\": \"text-input\",\n      \"id\": \"username_field\",\n      \"label\": \"Service Username\",\n      \"placeholder\": \"Enter corporate ID\"\n    },\n    {\n      \"type\": \"dropdown\",\n      \"id\": \"auth_level\",\n      \"label\": \"Access Tier\",\n      \"options\": [\n        {\"label\": \"Read-Only\", \"value\": \"ro\"},\n        {\"label\": \"Read-Write\", \"value\": \"rw\"}\n      ]\n    },\n    {\n      \"type\": \"button\",\n      \"action_id\": \"submit-auth-credentials\",\n      \"label\": \"Apply and Connect\"\n    }\n  ]\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Understanding Callback Paybacks"
+    },
+    {
+      "type": "p",
+      "content": "When the button is clicked, the UI generates a callback payload containing values from the input fields:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"event_type\": \"a2ui_submit\",\n  \"form_id\": \"user-auth-settings\",\n  \"action_id\": \"submit-auth-credentials\",\n  \"values\": {\n    \"username_field\": \"dev-user-009\",\n    \"auth_level\": \"rw\"\n  }\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What format does A2UI use to return user-entered form data to the agent?"
+    },
+    {
+      "type": "p",
+      "content": "- A) As a raw text message containing prompt inputs.\n- B) As a structured JSON callback envelope mapping input IDs to values.\n- C) As a CSV spreadsheet export."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Data collected from A2UI forms is returned in a structured JSON callback payload with the input values mapped to control IDs."
+    }
+  ]
+}

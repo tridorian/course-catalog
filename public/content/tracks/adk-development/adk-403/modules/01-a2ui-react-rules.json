@@ -1,0 +1,28 @@
+{
+  "id": "1",
+  "title": "1. Understanding React rendering rules in A2UI",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "A2UI React Rendering Rules"
+    },
+    {
+      "type": "p",
+      "content": "A2UI is a declarative UI frame. It prevents custom Javascript execution inside templates to block XSS vector attacks. If you build custom components, they must compile down to a static component list and accept variables strictly through properties."
+    },
+    {
+      "type": "info",
+      "title": "Security Boundary",
+      "content": "Components cannot access global `window` or `document` variables. They communicate with the parent frame using serialized state updates."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why does A2UI restrict raw JavaScript execution inside custom component definitions?\n- A) To speed up React compiling.\n- B) To mitigate XSS vulnerabilities and maintain a secure sandboxed UI frame.\n- C) To support older browser versions.\n\nFeedback: Option B is correct. Sandboxing prevents malicious code execution."
+    }
+  ]
+}

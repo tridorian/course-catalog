@@ -1,0 +1,113 @@
+{
+  "id": "3",
+  "title": "3. Unix File Permissions & System-Level Hardening",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Operating System Boundaries"
+    },
+    {
+      "type": "p",
+      "content": "While SDK-level policies provide a clean, declarative interface for restricting file operations, they are not a complete security boundary. If an agent is granted shell execution privileges via the `run_command` tool, it can execute commands directly on the host operating system. In this scenario, the agent's actions are governed by POSIX-level permissions. To ensure comprehensive safety, you must configure operating system-level restrictions."
+    },
+    {
+      "type": "warning",
+      "content": "The Shell Bypass Vulnerability. If your agent is configured to run shell commands (`run_command`), the commands execute under your host user context. If the agent executes a shell command like `cat ~/.ssh/id_rsa`, it completely bypasses the Python interpreter and the SDK's file policies. OS-level security permissions are necessary to protect your files."
+    },
+    {
+      "type": "p",
+      "content": "To lock down files at the system level, you must configure ownership and permission settings using UNIX tools like `chown` and `chmod`. This prevents unauthorized processes from reading or writing to sensitive workspace directories."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Create a workspace directory specifically for the agent\nmkdir -p /var/home/wtg/workspace_agy_project\n\n# Assign ownership to the invoking user and set group ownership to a restricted group\nsudo chown -R $USER:nogroup /var/home/wtg/workspace_agy_project\n\n# Apply restrictive permissions (Owner: read/write/execute, Group/Others: none)\nchmod 700 /var/home/wtg/workspace_agy_project\n\n# Verify that permissions are set correctly\nls -ld /var/home/wtg/workspace_agy_project\n# Expected output shows: drwx------"
+    },
+    {
+      "type": "p",
+      "content": "For production environments, running the agent within a dedicated, low-privilege system user account (e.g., `agy-sandbox`) is a baseline. However, modifying host home directory permissions (such as `chmod 700` on your entire home directory) is highly problematic as it can break user applications, SSH agents, and desktop environment functionalities."
+    },
+    {
+      "type": "h3",
+      "content": "Container Isolation & Restricted Mounts"
+    },
+    {
+      "type": "p",
+      "content": "To avoid altering host permissions, use containers (Docker or Podman) to sandbox the agent. Implement three key security constraints:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Restricted Volume Mounts:** Only mount the specific project directory (`-v $(pwd)/project:/workspace:Z`). Never mount the entire home directory (`-v ~/:/workspace`) as this exposes SSH keyrings, configuration dotfiles, and sensitive browser session profiles.",
+        "**Disable DBus & X11 Socket Forwarding:** Do not share host IPC sockets (like `/tmp/.X11-unix` or `/var/run/dbus/system_bus_socket`) unless a graphical interface is strictly required for testing. Sharing these sockets allows container escape or keystroke sniffing on the host system.",
+        "**Credential Isolation with Dedicated Agent Keyrings:** Do not pass the host login keyring to the agent. Setup a dedicated agent keyring process (such as a local GPG-agent or mock keyring) inside the sandboxed environment to isolate API tokens and credentials."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# 1. Run container with strict directory mounts and no IPC socket sharing\npodman run -it --rm \\\n  --name agy-secure-workspace \\\n  -v $(pwd)/project_dir:/workspace:Z \\\n  --network none \\\n  github.com/wtg-codes/agy-box:v1.23.2 /bin/bash\n\n# 2. Inside the container, start an isolated credentials keyring session\neval $(gpg-agent --daemon --options /workspace/.gnupg/gpg-agent.conf)"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: If an agent is granted access to the `run_command` tool, why are Unix permissions and container boundaries required in addition to SDK policies?"
+    },
+    {
+      "type": "p",
+      "content": "A) The SDK policy checks only execute when a file is modified."
+    },
+    {
+      "type": "p",
+      "content": "B) Commands run via the shell bypass the Python SDK file-policy middleware and execute with the permissions of the invoking UNIX user, requiring container sandbox isolation to prevent system-wide breaches."
+    },
+    {
+      "type": "p",
+      "content": "C) Running commands in the shell requires writing to a temp file in /tmp."
+    },
+    {
+      "type": "p",
+      "content": "D) Unix permissions speed up token processing."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "info",
+      "content": "Feedback: When an agent runs a command in the shell, it uses the host operating system's execution pipeline. This pipeline does not check Python-level middleware, meaning the agent can run any command your UNIX user can, unless system-level permissions or container namespaces block it."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What is the primary risk of mounting an entire user home directory into an agent's container sandbox?"
+    },
+    {
+      "type": "p",
+      "content": "A) It causes container image signature verification to fail."
+    },
+    {
+      "type": "p",
+      "content": "B) It exposes the entire user workspace, including sensitive SSH keys, cloud CLI configurations, and primary host login keyrings, to potential exfiltration or tampering by the agent."
+    },
+    {
+      "type": "p",
+      "content": "C) It prevents the agent from resolving absolute symlinks."
+    },
+    {
+      "type": "p",
+      "content": "D) It violates the OCI runtime spec and crashes the container engine."
+    },
+    {
+      "type": "p",
+      "content": "Correct Answer: B"
+    },
+    {
+      "type": "info",
+      "content": "Feedback: Mounting the entire home directory defeats the purpose of container isolation by providing the agent direct read/write access to sensitive files (SSH keys, cloud config, active credentials) belonging to the host developer."
+    }
+  ]
+}

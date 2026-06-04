@@ -1,0 +1,110 @@
+{
+  "id": "4",
+  "title": "4. Headless Pipeline Runs & CI/CD",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Executing Agent Workloads in CI/CD"
+    },
+    {
+      "type": "p",
+      "content": "To scale agentic engineering, agent loops must run unattended in continuous integration pipelines. A headless run executes without user interaction, reading task instructions, running files, performing checks, and reporting results. This requires configuring non-interactive authorization, defining timeout thresholds, and capturing build artifacts."
+    },
+    {
+      "type": "warning",
+      "content": "Because headless pipelines cannot request human-in-the-loop approvals, any CLI invocation must include the --auto-approve flag or a custom workspace rule file (.gemini.md) specifying permitted actions. Ensure strict repository branch protections are active so agents cannot run unreviewed code changes."
+    },
+    {
+      "type": "h3",
+      "content": "Pre-Authenticating and Injecting OAuth Tokens"
+    },
+    {
+      "type": "p",
+      "content": "Since headless execution environments cannot prompt for interactive browser sign-ins, you must pre-authenticate the Workspace MCP servers on a secure workstation. Extract the generated token cache files, encode them, and inject them into the target container environment at runtime."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# On your secure workstation, run /mcp to authenticate all servers.\n# Locate the generated credentials directory (usually ~/.config/antigravity/tokens)\n# Package the credentials into a base64 string\ntar -czf - -C ~/.config/antigravity/tokens . | base64 -w 0 > gws-tokens-base64.txt\n\n# Save the contents of gws-tokens-base64.txt as a protected CI/CD secret variable: GWS_AUTH_TOKENS_BASE64"
+    },
+    {
+      "type": "h3",
+      "content": "Production-Grade GitLab CI/CD Configuration"
+    },
+    {
+      "type": "p",
+      "content": "The following GitLab CI/CD snippet runs a headless agent sequence inside an ephemeral agy-box workspace, processing a pull request, querying Google Workspace, and generating a report."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "content": "stages:\n  - analyze\n\nrun_headless_agent:\n  stage: analyze\n  image: private-registry.corp.internal/agy/agy-box:latest\n  variables:\n    AGY_WORKSPACE_DIR: \"$CI_PROJECT_DIR\"\n    AGY_HEADLESS: \"true\"\n    AGY_API_KEY: \"$AGY_PROD_API_KEY\"\n  before_script:\n    # Setup isolated temporary directory within workspace\n    mkdir -p $CI_PROJECT_DIR/.tmp\n    export TMPDIR=$CI_PROJECT_DIR/.tmp\n    \n    # Restore pre-authenticated Google Workspace tokens\n    mkdir -p /home/agy_runner/.config/antigravity/tokens\n    echo \"$GWS_AUTH_TOKENS_BASE64\" | base64 -d | tar -xzf - -C /home/agy_runner/.config/antigravity/tokens\n    \n    # Verify API authorization credentials\n    agy --version\n    agy auth verify --token $AGY_API_KEY\n  script:\n    # Execute the agent loop on the workspace.\n    # --auto-approve allows executing commands without human prompts.\n    # --timeout 600 limits execution time to 10 minutes.\n    agy run \\\n      --task \"Search Drive for 'release-notes-v2', read and summarize their contents, find the email for release-manager in Directory, and create a Gmail draft to them with the summary.\" \\\n      --auto-approve \\\n      --timeout 600 \\\n      --rules-file .gemini.md\n  artifacts:\n    name: agent-changes\n    paths:\n      - agy-report.json\n    expire_in: 7 days"
+    },
+    {
+      "type": "h3",
+      "content": "Advanced CI/CD Pipeline Automation (GitHub Actions)"
+    },
+    {
+      "type": "p",
+      "content": "GitHub Actions can also run headless agent operations. We use actions secrets to pass API keys securely and checkout only the specific pull request branch."
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "content": "name: Headless Agent Automation\non:\n  pull_request:\n    paths:\n      - 'src/**'\n\njobs:\n  run-agent:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout Repository\n        uses: actions/checkout@v3\n        with:\n          ref: ${{ github.event.pull_request.head.ref }}\n          fetch-depth: 0\n      - name: Restore Pre-Authenticated Workspace Tokens\n        run: |\n          mkdir -p $HOME/.config/antigravity/tokens\n          echo \"${{ secrets.GWS_AUTH_TOKENS_BASE64 }}\" | base64 -d | tar -xzf - -C $HOME/.config/antigravity/tokens\n      - name: Run Ephemeral AGY-Box Sandbox\n        run: |\n          docker run --rm \\\n            -v ${{ github.workspace }}:/workspace \\\n            -v $HOME/.config/antigravity/tokens:/home/agy_runner/.config/antigravity/tokens \\\n            -e AGY_API_KEY=${{ secrets.AGY_API_KEY }} \\\n            -e GOOGLE_APPLICATION_CREDENTIALS=/workspace/gcp-creds.json \\\n            private-registry.corp.internal/agy/agy-box:latest \\\n            agy run \\\n              --task \"Check the Google Calendar for any event overlaps tomorrow, look for messages containing 'blocker' in Chat Space 'incident-response', and email the summaries to the team via Gmail.\" \\\n              --auto-approve \\\n              --workspace /workspace \\\n              --output-report /workspace/agy-report.json\n      - name: Commit Agent Suggestions\n        run: |\n          git config --global user.name \"AGY Headless Runner\"\n          git config --global user.email \"agy-runner@corp.internal\"\n          git add src/\n          git diff-index --quiet HEAD || git commit -m \"style: automated agent security refactoring\"\n          git push origin HEAD:${{ github.event.pull_request.head.ref }}"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the purpose of passing the GWS_AUTH_TOKENS_BASE64 secret into the headless container's config directory?"
+    },
+    {
+      "type": "p",
+      "content": "A) To bypass the corporate proxy checks."
+    },
+    {
+      "type": "p",
+      "content": "B) To inject pre-authenticated Google Workspace OAuth tokens so the agent can execute tasks without interactive browser dialogs."
+    },
+    {
+      "type": "p",
+      "content": "C) To authorize systemd to start Podman without root privileges."
+    },
+    {
+      "type": "p",
+      "content": "D) To register the redirect URI callback endpoint."
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: B. Restoring pre-authenticated token cache files bypasses the interactive login requirement, enabling headless pipelines to authenticate to Google Workspace MCP servers."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which flag must be provided to the agy CLI during a headless run to prevent the pipeline from hanging indefinitely?"
+    },
+    {
+      "type": "p",
+      "content": "A) --verbose"
+    },
+    {
+      "type": "p",
+      "content": "B) --auto-approve"
+    },
+    {
+      "type": "p",
+      "content": "C) --no-sandbox"
+    },
+    {
+      "type": "p",
+      "content": "D) --headless"
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: B. The --auto-approve flag tells the agent to proceed with command executions without waiting for user confirmation in the terminal."
+    }
+  ]
+}

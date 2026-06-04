@@ -1,0 +1,94 @@
+{
+  "id": "4",
+  "title": "4. Scraper Visual Playback Tapes",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "When scraping data from modern websites, agents often face obstacles like single-page applications (React, Angular) that load contents dynamically, or firewalls that block programmatic access. To troubleshoot these issues, `antigravity` uses a visual browser execution model."
+    },
+    {
+      "type": "p",
+      "content": "When an agent starts a web scraping task, it runs a virtual browser in **Headful Mode** (using Playwright). This mirrors the agent's actions directly inside the **Playback Viewport**. Furthermore, the dashboard records these actions as **Visual Playback Tapes** (saved as `.webm` video recordings and step-by-step screenshots) under the `.gemini/state/tapes/` workspace directory."
+    },
+    {
+      "type": "h2",
+      "content": "Isolating Failures using the Playback Viewport"
+    },
+    {
+      "type": "p",
+      "content": "If a scraping run fails due to a locator timeout or dynamic content shift, you can open the playback tape in the dashboard. Using the control panel (Play, Pause, Step Forward, Step Backward), you can inspect the agent's actions second-by-second. This lets you see precisely why it failed (e.g. a loading spinner was still active, or a modal pop-up blocked the button click)."
+    },
+    {
+      "type": "info",
+      "content": "Troubleshooting screenshots are automatically captured and saved under `.gemini/state/tapes/` whenever a scraper command exits with a non-zero code or times out on a DOM selector."
+    },
+    {
+      "type": "h2",
+      "content": "Standard Playwright Scraper Script"
+    },
+    {
+      "type": "p",
+      "content": "Below is the robust Python scraper configuration executed by the agent. It sets custom viewports, overrides the user agent, and waits for network idle states to ensure dynamic elements load:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "import asyncio\nfrom playwright.async_api import async_playwright\n\nasync def run_scraper(target_url, output_path):\n    async with async_playwright() as p:\n        # Launch headful browser to integrate with the Playback Viewport\n        browser = await p.chromium.launch(headless=False)\n        context = await browser.new_context(\n            viewport={'width': 1280, 'height': 800},\n            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'\n        )\n        page = await context.new_page()\n        \n        print(f\"Navigating to {target_url}...\")\n        await page.goto(target_url, wait_until='networkidle')\n        \n        # Wait for the target table to render dynamically\n        try:\n            await page.wait_for_selector('table.pricing-matrix', timeout=5000)\n            table_html = await page.locator('table.pricing-matrix').inner_html()\n            with open(output_path, 'w') as f:\n                f.write(table_html)\n            print(f\"Successfully saved data to {output_path}\")\n        except Exception as e:\n            print(f\"Selector timeout occurred: {e}\")\n            # Capture screenshot for visual tape troubleshooting\n            await page.screenshot(path='./data/error_screenshot.png')\n            raise e\n        finally:\n            await browser.close()\n\n# Execute scraper\nasyncio.run(run_scraper('https://mock-competitor.com/pricing', './data/scraped_table.html'))"
+    },
+    {
+      "type": "h2",
+      "content": "Fallback Strategies for Scraper Prompts"
+    },
+    {
+      "type": "p",
+      "content": "When writing scraping commands, include these standard fallbacks in your agent instructions:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Text-Based Matching:** If the class selector (e.g. `table.pricing-matrix`) is not found, attempt to locate containers using text headers (e.g. searching for 'Pricing' or 'Subscription Plans').",
+        "**State Hydration Wait:** If the scraped container returns empty, instruct the agent to pause for 3 seconds to let dynamic content hydrate before retrying.",
+        "**Error Capture:** Direct the agent to save a diagnostic screenshot to the `.gemini/state/tapes/` folder whenever a selector fails."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Why does the AGY browser execute in headful mode (headless=False) during visual scraping operations?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) To decrease CPU and memory consumption during executions",
+        "B) To allow the browser window to render inside the Playback Viewport so the user can inspect the live interaction",
+        "C) To bypass basic local network proxy setups",
+        "D) Because Chromium cannot run headlessly on Linux servers"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Running in headful mode is required to project the browser GUI into the Playback Viewport, enabling visual tracking and recording of the agent's actions."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Where does the agent save troubleshooting screenshots when a Playwright selector timeout occurs?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Inside the host's `Downloads` folder",
+        "B) In the remote cloud database",
+        "C) Under the `.gemini/state/tapes/` folder in the active workspace",
+        "D) In the project's node_modules directory"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Diagnostics, screenshots, and visual recordings are centralized inside the `.gemini/state/tapes/` folder for easy inspection."
+    }
+  ]
+}

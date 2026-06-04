@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Foundations of Agentic Governance",
+      "file": "modules/01-1-foundations-of-agentic-workspace-governance.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Codifying Compliance Guardrails",
+      "file": "modules/02-2-codifying-compliance-code-quality-guardrails.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Security Boundaries & Firewalls",
+      "file": "modules/03-3-establishing-workspace-security-boundaries-file-firewalls.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Workflows & Multi-Agent Flow",
+      "file": "modules/04-4-architectural-patterns-multi-agent-execution-flow.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Rule Auditing & CI/CD Deployment",
+      "file": "modules/05-5-rule-auditing-drift-prevention-and-enterprise-deployment.json"
+    }
+  ]
+}

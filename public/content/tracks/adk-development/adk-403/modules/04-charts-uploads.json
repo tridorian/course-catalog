@@ -1,0 +1,32 @@
+{
+  "id": "4",
+  "title": "4. Designing rich file uploads and interactive charts",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Data Visualization Components"
+    },
+    {
+      "type": "p",
+      "content": "A2UI includes charting widgets out of the box, allowing agents to present telemetry, token consumption logs, or spreadsheet data to users."
+    },
+    {
+      "type": "h2",
+      "content": "A2UI Chart Schema Payload"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"type\": \"chart\",\n  \"chart_type\": \"line\",\n  \"data\": [\n    {\"label\": \"Jan\", \"value\": 120},\n    {\"label\": \"Feb\", \"value\": 210}\n  ]\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How does an agent render a line chart inside A2UI?\n- A) By generating a PNG image file.\n- B) By returning a structured 'chart' schema with labels and values.\n- C) By writing CSS templates.\n\nFeedback: Option B is correct. The framework parses schemas to render interactive widgets."
+    }
+  ]
+}

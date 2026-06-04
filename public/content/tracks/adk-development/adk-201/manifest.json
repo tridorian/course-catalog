@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Visual Debugging with adk-web Dashboard",
+      "file": "modules/01-adk-web-intro.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Transaction Auditing & Step Playback",
+      "file": "modules/02-transaction-audit.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Inspecting Memory & Conversation States",
+      "file": "modules/03-memory-inspection.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Performance Tracking: Token Usage & Latency Benchmarks",
+      "file": "modules/04-performance-traces.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab - Debugging a Failing Tool using Trace Analysis",
+      "file": "modules/05-lab-tool-debug.json"
+    }
+  ]
+}

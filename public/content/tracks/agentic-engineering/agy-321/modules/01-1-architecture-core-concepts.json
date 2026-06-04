@@ -1,0 +1,87 @@
+{
+  "id": "1",
+  "title": "1. Architecture & Core Concepts",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "Welcome to AGY-321: Jules VM Orchestration. This course is specifically designed for Solutions Architects who are responsible for designing, deploying, and managing secure, high-performance execution environments for autonomous AI agents. In this course, you will master the architecture of remote, isolated virtual machine pools (Jules VMs) to execute untrusted build and test commands."
+    },
+    {
+      "type": "p",
+      "content": "At its core, Jules VM Orchestration addresses a fundamental security challenge in agentic workflows: how to execute arbitrary, untrusted agent actions (such as installing dependencies, executing custom scripts, running test suites, or performing web scraping) without compromising the security of the host system. By spawning isolated, ephemeral virtual machine instances (Jules VMs), architects can provide agents with full execution privileges within a strictly controlled sandbox."
+    },
+    {
+      "type": "h2",
+      "content": "Core Components of Jules VM Orchestration"
+    },
+    {
+      "type": "p",
+      "content": "The orchestration architecture is composed of three primary layers:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "AGY Local Orchestrator: The main coordinator running on the user's local workstation or CI/CD runner. It parses tasks, manages instruction loops, and sends orchestrations to the pool manager.",
+        "Jules VM Pool Manager: A centralized control plane service (running on Google Cloud Compute Engine or GKE) that maintains pools of warm VM instances, manages resource allocation, and handles provisioning requests.",
+        "Jules VM Instances: The actual virtual machines where tasks are executed. Each instance runs a minimal hardened OS, the Jules agent daemon, and a secure container runtime where user code executes."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Security Isolation & Threat Modeling"
+    },
+    {
+      "type": "p",
+      "content": "Running untrusted build and test commands on local workstations is a high-risk security hazard. An agent tasked with compiling a codebase or installing dependencies could inadvertently download malicious packages that perform credential exfiltration or execute lateral network scanning. Jules VMs mitigate this risk by providing complete guest OS isolation, ensuring that any exploit is contained entirely within the guest sandboxed virtual machine."
+    },
+    {
+      "type": "info",
+      "content": "Design Pattern: Immutability & Ephemerality. A fundamental security rule of Jules VMs is that every instance is completely destroyed after a task runs. Storing state between jobs should be handled by external storage mounts or artifact repositories, never on the VM itself."
+    },
+    {
+      "type": "p",
+      "content": "Each Jules VM instance operates within a zero-trust network environment. Solution Architects must design network topologies that restrict VM access to internal resources while allowing controlled access to external APIs or package repositories via secure egress proxies."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Test your knowledge of the core architecture concepts:"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** Which architectural component is responsible for maintaining warm standby VM instances and scaling them based on task load?"
+    },
+    {
+      "type": "p",
+      "content": "- A) AGY Local Orchestrator\n- B) Jules VM Pool Manager\n- C) Jules Agent Daemon\n- D) Google Cloud Load Balancer"
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** The Jules VM Pool Manager is the centralized control plane service that manages instance lifecycles, maintaining warm pools to reduce boot latency and allocating instances to incoming agent tasks."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Why are Jules VM instances designed to be ephemeral and immutable?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To reduce cloud hosting costs by shutting down idle instances.\n- B) To prevent configuration drift, ensure clean state transitions, and eliminate persistent security threats from compromised tasks.\n- C) To allow developers to modify system configurations during execution.\n- D) To match the execution model of physical local workstations."
+    },
+    {
+      "type": "p",
+      "content": "**Correct Answer:** B"
+    },
+    {
+      "type": "p",
+      "content": "**Explanation:** Ephemerality ensures that every agent run starts from a known, clean state, preventing residual files or malicious modifications from affecting subsequent builds or tasks."
+    }
+  ]
+}

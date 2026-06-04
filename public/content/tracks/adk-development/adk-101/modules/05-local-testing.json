@@ -1,0 +1,54 @@
+{
+  "id": "5",
+  "title": "5. Execution and Local Verification",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Running and Testing Agents Locally"
+    },
+    {
+      "type": "p",
+      "content": "Once your configurations and tool files are registered, run the local execution engine using the ADK CLI to verify agent outputs and validate tool interfaces."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Execute with a Direct Prompt"
+    },
+    {
+      "type": "p",
+      "content": "Run the agent in single-prompt execution mode. This initializes the connection, registers your tools, passes the prompt, executes the loop, and prints output:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk run --prompt \"Validate if customer_records.csv contains headers: id, name, email. Use relative path: src/test/customer_records.csv\""
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Run in Interactive Repl Mode"
+    },
+    {
+      "type": "p",
+      "content": "To test multi-step dialogues and evaluate memory window slide parameters, launch the interactive shell (REPL) interface:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk run --interactive"
+    },
+    {
+      "type": "info",
+      "title": "Trace Output Folder",
+      "content": "By default, every execution of 'adk run' dumps a step-by-step tracking log file into the workspace directory under `.adk/logs/runs/`. You can reference these files to diagnose tool execution arguments."
+    },
+    {
+      "type": "h2",
+      "content": "Congratulations!"
+    },
+    {
+      "type": "p",
+      "content": "You have completed ADK-101: ADK Foundations. You are now ready to advance to developer tooling and visualization dashboards in ADK-201."
+    }
+  ]
+}

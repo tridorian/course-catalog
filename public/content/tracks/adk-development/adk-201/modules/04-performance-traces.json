@@ -1,0 +1,60 @@
+{
+  "id": "4",
+  "title": "4. Performance Tracking: Token Usage & Latency Benchmarks",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Performance Metrics & Latencies"
+    },
+    {
+      "type": "p",
+      "content": "Optimizing agent loops for production requires tracing system latency bottlenecks and token metrics. The Performance dashboard aggregates data per run, showing costs and response times."
+    },
+    {
+      "type": "h2",
+      "content": "Analyzing Performance Charts"
+    },
+    {
+      "type": "p",
+      "content": "Open the 'Traces' view to evaluate trace timings:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Time-to-first-token latency: Measures model prompt response speed.",
+        "Tool execution latency: Isolates network delays or database query bottlenecks in your custom python/node scripts.",
+        "Total Turn execution time: Combines model planning loops and tool execution times."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Token Auditing Configuration"
+    },
+    {
+      "type": "p",
+      "content": "Review token counters to track Gemini execution costs: input tokens, generated output tokens, cached tokens, and total token usage per prompt step."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "# Configure local logger to output verbose traces to standard out\nadk run --verbose-perf-traces"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which trace latency measurement isolates database queries or API execution bottlenecks from model inference delays?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Time-to-first-token latency\n- B) Tool execution latency\n- C) Compiler compile time"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Tool execution latency tracks the absolute runtime duration of your custom tools."
+    }
+  ]
+}

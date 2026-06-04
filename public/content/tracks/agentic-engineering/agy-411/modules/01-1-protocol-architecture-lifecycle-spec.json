@@ -1,0 +1,122 @@
+{
+  "id": "1",
+  "title": "1. Protocol Architecture & Lifecycle Spec",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Understanding the Model Context Protocol (MCP)"
+    },
+    {
+      "type": "p",
+      "content": "The Model Context Protocol (MCP) is an open-standard, JSON-RPC 2.0 based transport protocol designed to establish a standardized interface between AI client applications (such as the AGY CLI or the antigravity dashboard) and target data sources, servers, or external development tooling. Rather than bundling custom API connections and database drivers into the core model wrappers, MCP provides a decoupled runtime interface. This allows AI agents to interact with third-party software securely and deterministically."
+    },
+    {
+      "type": "h3",
+      "content": "JSON-RPC 2.0 Transport Layers"
+    },
+    {
+      "type": "p",
+      "content": "MCP defines two main communication methods to run data transfers: Standard Input/Output (stdio) and Server-Sent Events (SSE) over HTTP/HTTPS. In local-first workstation architectures (like Tier 1 and Tier 2 setups), stdio transport is preferred. The client spawns the server process directly, communicating through pipes (stdin/stdout). This ensures no local network port is opened, drastically reducing the system's attack surface."
+    },
+    {
+      "type": "info",
+      "content": "When writing custom stdio servers, remember that stdout is reserved for JSON-RPC 2.0 messages. Any extra logs, print statements, or console messages must go through stderr, or else the client's parser will fail and the session will crash."
+    },
+    {
+      "type": "h3",
+      "content": "The Session Lifecycle Flow"
+    },
+    {
+      "type": "p",
+      "content": "Every MCP session transitions through a set of defined protocol states. Standard clients and servers must adhere to this sequence to guarantee session integrity:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Handshake Initialize: The client sends an 'initialize' request detailing the protocolVersion, clientInfo, and clientCapabilities.",
+        "Handshake Result: The server responds with its serverCapabilities (resources, tools, prompts) and serverInfo (name, version).",
+        "Readiness Notification: The client sends an 'initialized' notification to finalize capabilities negotiations.",
+        "Resource/Tool Discovery: The client queries available assets using requests like 'tools/list' or 'resources/list'.",
+        "Runtime Loop: The agent triggers operations using 'tools/call' or 'resources/read' schemas.",
+        "Session Termination: The client triggers a 'shutdown' request, followed by an 'exit' notification to gracefully terminate the server process."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Protocol JSON Schema Structures"
+    },
+    {
+      "type": "p",
+      "content": "Here is the exact schema representation of a client's initialize request sent at the start of a session:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {\n      \"roots\": {\n        \"listChanged\": true\n      },\n      \"sampling\": {}\n    },\n    \"clientInfo\": {\n      \"name\": \"antigravity-client\",\n      \"version\": \"1.0.0\"\n    }\n  }\n}"
+    },
+    {
+      "type": "p",
+      "content": "The server returns its handshake response, declaring which operations it supports. In this case, the server registers resource read and list tools capabilities:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"result\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {\n      \"resources\": {\n        \"subscribe\": true,\n        \"listChanged\": true\n      },\n      \"tools\": {\n        \"listChanged\": true\n      }\n    },\n    \"serverInfo\": {\n      \"name\": \"custom-postgres-connector\",\n      \"version\": \"0.1.0\"\n    }\n  }\n}"
+    },
+    {
+      "type": "h3",
+      "content": "The Three MCP Primitives"
+    },
+    {
+      "type": "p",
+      "content": "MCP structures all features into three base primitives to standardize how models digest contextual information:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Resources: Read-only data schemas that are referenced via custom URIs (e.g., db://active_users). Think of them as file attachments for the LLM.",
+        "Tools: Executable logic definitions that the model can request to execute with specific arguments. Tools represent active write/modify capabilities.",
+        "Prompts: Parameterized templates that help format prompt interactions or package complex workflows."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary transport mechanism used by default in a secure, local-only workstation deployment of an MCP server?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. WebSockets (ws://)",
+        "B. Standard Input/Output (stdio) pipes",
+        "C. Server-Sent Events (SSE) over public HTTP",
+        "D. gRPC over Unix Domain Sockets"
+      ]
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: B is correct. Standard Input/Output (stdio) pipes are the default local transport for MCP, as they allow the client to spawn the server process directly and communicate securely without opening local network ports."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Which JSON-RPC method initiates the capabilities negotiation between an MCP client and server?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A. tools/list",
+        "B. connection/negotiate",
+        "C. initialize",
+        "D. session/start"
+      ]
+    },
+    {
+      "type": "p",
+      "content": "Answer Feedback: C is correct. The 'initialize' method is the standard handshake starter, where client and server exchange capabilities, protocol versions, and metadata before any tools or resources can be accessed."
+    }
+  ]
+}

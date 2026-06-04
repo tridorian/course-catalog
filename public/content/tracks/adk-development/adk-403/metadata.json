@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-403",
+  "title": "ADK-403: Custom A2UI Component Development",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Build and register bespoke client-side React widgets and charts that compile into sandboxed A2UI rendering frames.",
+  "features": [
+    {
+      "icon": "⚛️",
+      "title": "React Extensions",
+      "description": "Author custom React UI templates using strict JSON Schema properties to accept variables from agents."
+    },
+    {
+      "icon": "📊",
+      "title": "Data Charting",
+      "description": "Integrate visualization charting libraries to represent compound table columns graphically."
+    },
+    {
+      "icon": "🪝",
+      "title": "Event Callbacks",
+      "description": "Define custom callback parameters to send user interaction variables back to the active agent run."
+    }
+  ]
+}

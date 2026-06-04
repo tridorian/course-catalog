@@ -1,0 +1,126 @@
+{
+  "id": "4",
+  "title": "4. Workspace Editor (antigravity-ide)",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Synchronous Co-Authoring & Editor Surface"
+    },
+    {
+      "type": "p",
+      "content": "The workspace editor, antigravity-ide, is a customized fork of VS Code. While the visual board focuses on high-level asynchronous orchestration, the Editor is designed for synchronous, side-by-side co-authoring. It integrates agent capabilities directly into your editing workflows, ensuring that developer muscle memory for syntax styling, extensions, and file trees is fully preserved."
+    },
+    {
+      "type": "h2",
+      "content": "Active Editor Assistant Capabilities"
+    },
+    {
+      "type": "p",
+      "content": "As you type or modify code, the agent-driven editor provides three core assisting behaviors:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Auto-complete: Context-aware suggestions appear inline as gray text; press Tab to accept.",
+        "Tab to Import: The editor detects missing dependencies or libraries and suggests importing them automatically.",
+        "Tab to Jump: Moves the cursor to the next logical location (such as block endings or argument spots) to maintain writing speed."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Interactive Agent Panels and Context Commands"
+    },
+    {
+      "type": "p",
+      "content": "The Editor interface offers several natural ways to collaborate with the agent:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Inline Commands (Cmd+I / Ctrl+I): Highlight a block of code or text in the editor or terminal and prompt the agent to modify, refactor, or explain it. Changes are shown as an inline green-and-red diff overlay.",
+        "Agent Side Panel (Cmd+L / Ctrl+L): Open the persistent agent chat panel to ask questions. Reference specific files, directories, or tools using '@'.",
+        "Explain and Fix: Hover over code diagnostics or build warnings, click 'Explain and Fix', and the agent automatically attempts to rewrite the line.",
+        "Send to Agent: Select compiler outputs, terminal errors, or test failures, and send them directly to the active agent context for diagnosis."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Workspace Customizations: Rules and Workflows"
+    },
+    {
+      "type": "p",
+      "content": "Developers can customize agent behavior locally using two distinct concepts:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Rules: Workspace-wide guidelines (saved under .agents/rules/) that act as permanent system instructions. The agent reads these to ensure all output complies with styling (e.g. PEP 8) or architectural principles.",
+        "Workflows: User-defined prompts (saved under .agents/workflows/) that can be triggered on demand using '/' inside the chat side panel."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Step-by-Step Lab: Implementing Rules and Workflows"
+    },
+    {
+      "type": "p",
+      "content": "This lab shows how to implement custom rules and workflows to build unit tests:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "1. Open antigravity-ide and select your active project directory.",
+        "2. Under Customizations, click 'Rules' and create a workspace rule named 'pep8-strict' to enforce PEP 8 guidelines and commenting on all files.",
+        "3. Create a workspace workflow named 'generate-unit-tests' with the instruction to generate unit tests prefixed with test_ for each file and method.",
+        "4. Create a main.py file and ask the agent (Cmd+I): 'Implement bubble sort and binary search.'",
+        "5. Review the inline diff overlay. Observe that the agent split the logic into separate modular files (bubble_sort.py, binary_search.py) matching the active rules. Click Accept.",
+        "6. In the Agent Side Panel, type '/generate-unit-tests' and submit. Verify that test_bubble_sort.py and test_binary_search.py are generated."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the purpose of the inline diff overlay in the Editor when using Cmd+I?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To compile the active file in the background."
+    },
+    {
+      "type": "p",
+      "content": "- B) To show proposed agent changes as red deletions and green additions directly in the editor tab before they are accepted."
+    },
+    {
+      "type": "p",
+      "content": "- C) To trace memory leaks in the active application."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Inline diff overlays allow developers to audit exactly what code the agent plans to modify or add before committing to the file."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What is the main distinction between Rules and Workflows in workspace customization?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Rules are saved globally, while Workflows can only be saved in the workspace."
+    },
+    {
+      "type": "p",
+      "content": "- B) Rules act as persistent system instructions that the agent always follows, while Workflows are custom prompts triggered on demand using the '/' key."
+    },
+    {
+      "type": "p",
+      "content": "- C) Rules control security bounds, while Workflows handle third-party library imports."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Rules permanently guide style and architecture during all agent actions, whereas Workflows are on-demand shortcuts for specific tasks."
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "id": "1",
+  "title": "1. SDK Architecture & OAuth Setup",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "To integrate autonomous AI agents into enterprise workflows, developers must move beyond basic prompt-response sandboxes. The Google Antigravity SDK provides programmatic bindings that allow you to orchestrate conversation lifecycles, manage execution sessions, and connect to cloud APIs. In this module, we explore the SDK architecture, install the required packages, and establish an OAuth 2.0 connection to the Google Workspace ecosystem."
+    },
+    {
+      "type": "h2",
+      "content": "Core SDK Architectural Pillars"
+    },
+    {
+      "type": "p",
+      "content": "The Antigravity SDK is designed around a clean separation of concerns, divided into three fundamental objects:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Agent: The configuration and capability registry. It manages access tokens, loads system instructions, defines active tools, handles safety settings, and registers lifecycle hooks.",
+        "Conversation: The stateful session container. It persists interaction histories, records execution trajectories, tracks tokens, and executes context compaction policies when input limits are reached.",
+        "Connection: The abstract network transport layer. It encapsulates HTTP/REST and WebSocket protocols, managing requests, responses, and token streaming with the Gemini model backends."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Developer Setup & Dependencies"
+    },
+    {
+      "type": "p",
+      "content": "The Antigravity SDK is available for both Python and Node.js. Choose your preferred language runtime and verify your local environment setup (Python 3.10+ or Node.js 18+ is required)."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Install the Python SDK library\npip install google-antigravity google-auth-oauthlib google-api-python-client"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Install the Node.js SDK library\nnpm install @google/antigravity googleapis @google-cloud/local-auth"
+    },
+    {
+      "type": "h2",
+      "content": "Google Workspace OAuth 2.0 Authentication"
+    },
+    {
+      "type": "p",
+      "content": "To programmatically manage resources in Google Drive, Docs, and Sheets, your application must obtain authorized user credentials. The standard method is OAuth 2.0, which allows developers to request specific scopes of access."
+    },
+    {
+      "type": "info",
+      "content": "Authentication Decoupling: Use OAuth Client IDs (Desktop Application) for interactive user scripts that need personal Drive access. For headless backend pipelines running on servers, configure Google Cloud Service Accounts with domain-wide delegation or explicitly shared folder access to avoid manual verification gates."
+    },
+    {
+      "type": "p",
+      "content": "Follow these steps to establish authorization in the Google Cloud Console:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "1. Navigate to the GCP Console (https://console.cloud.google.com) and create or select a project.",
+        "2. Navigate to 'API & Services' > 'Library' and enable the Google Drive API, Google Docs API, and Google Sheets API.",
+        "3. Configure the OAuth Consent Screen: Set the User Type to 'Internal' (if using a Google Workspace domain) or 'External'. Add the required scopes: https://www.googleapis.com/auth/drive, https://www.googleapis.com/auth/documents, and https://www.googleapis.com/auth/spreadsheets.",
+        "4. Go to 'Credentials' > 'Create Credentials' > 'OAuth Client ID'. Select 'Desktop Application' as the application type, name the client, and click create.",
+        "5. Download the credentials JSON file, rename it to 'credentials.json', and place it in the root of your local project workspace."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Programmatic OAuth Implementation (Python)"
+    },
+    {
+      "type": "p",
+      "content": "The following Python script implements the OAuth 2.0 flow. It launches a local loopback server to handle the user consent redirect, retrieves access/refresh tokens, writes them to a local 'token.json' file for persistence, and initializes the Google API service clients."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "content": "import os.path\nfrom google.auth.transport.requests import Request\nfrom google.oauth2.credentials import Credentials\nfrom google_auth_oauthlib.flow import InstalledAppFlow\nfrom googleapiclient.discovery import build\n\n# Define the required scopes for Drive, Docs, and Sheets\nSCOPES = [\n    'https://www.googleapis.com/auth/drive',\n    'https://www.googleapis.com/auth/documents',\n    'https://www.googleapis.com/auth/spreadsheets'\n]\n\ndef get_workspace_credentials():\n    creds = None\n    # The token.json file stores the user's access and refresh tokens\n    if os.path.exists('token.json'):\n        creds = Credentials.from_authorized_user_file('token.json', SCOPES)\n        \n    # If credentials do not exist or are invalid, run the login flow\n    if not creds or not creds.valid:\n        if creds and creds.expired and creds.refresh_token:\n            print(\"Refreshing expired OAuth token...\")\n            creds.refresh(Request())\n        else:\n            print(\"Initializing fresh local OAuth consent flow...\")\n            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)\n            creds = flow.run_local_server(port=0)\n            \n        # Save the credentials for subsequent script executions\n        with open('token.json', 'w') as token_file:\n            token_file.write(creds.to_json())\n            \n    return creds\n\nif __name__ == '__main__':\n    credentials = get_workspace_credentials()\n    # Initialize the standard Google Workspace API clients\n    drive_client = build('drive', 'v3', credentials=credentials)\n    docs_client = build('docs', 'v1', credentials=credentials)\n    sheets_client = build('sheets', 'v4', credentials=credentials)\n    print(\"API clients successfully authenticated with OAuth!\")"
+    },
+    {
+      "type": "h2",
+      "content": "Programmatic OAuth Implementation (Node.js)"
+    },
+    {
+      "type": "p",
+      "content": "Below is the equivalent implementation in Node.js using ES module syntax. It loads the Client ID credentials, handles token exchange, and exports standard API client wrappers."
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "content": "import fs from 'fs';\nimport path from 'path';\nimport { authenticate } from '@google-cloud/local-auth';\nimport { google } from 'googleapis';\n\nconst SCOPES = [\n  'https://www.googleapis.com/auth/drive',\n  'https://www.googleapis.com/auth/documents',\n  'https://www.googleapis.com/auth/spreadsheets'\n];\nconst TOKEN_PATH = path.join(process.cwd(), 'token.json');\nconst CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');\n\nasync function loadSavedCredentialsIfExist() {\n  try {\n    if (fs.existsSync(TOKEN_PATH)) {\n      const content = fs.readFileSync(TOKEN_PATH, 'utf8');\n      const credentials = JSON.parse(content);\n      return google.auth.fromJSON(credentials);\n    }\n  } catch (err) {\n    return null;\n  }\n  return null;\n}\n\nasync function saveCredentials(client) {\n  const content = fs.readFileSync(CREDENTIALS_PATH, 'utf8');\n  const keys = JSON.parse(content);\n  const key = keys.installed || keys.web;\n  const payload = JSON.stringify({\n    type: 'authorized_user',\n    client_id: key.client_id,\n    client_secret: key.client_secret,\n    refresh_token: client.credentials.refresh_token,\n    access_token: client.credentials.access_token,\n    token_type: client.credentials.token_type,\n    expiry_date: client.credentials.expiry_date,\n  });\n  fs.writeFileSync(TOKEN_PATH, payload);\n}\n\nasync function getWorkspaceClient() {\n  let client = await loadSavedCredentialsIfExist();\n  if (client) {\n    return client;\n  }\n  \n  console.log(\"Initializing local redirect server for OAuth verification...\");\n  client = await authenticate({\n    scopes: SCOPES,\n    keyfilePath: CREDENTIALS_PATH,\n  });\n  \n  if (client.credentials) {\n    await saveCredentials(client);\n  }\n  return client;\n}\n\nasync function run() {\n  const auth = await getWorkspaceClient();\n  const drive = google.drive({ version: 'v3', auth });\n  const docs = google.docs({ version: 'v1', auth });\n  const sheets = google.sheets({ version: 'v4', auth });\n  console.log(\"Node.js Workspace API clients successfully constructed!\");\n}\n\nrun().catch(console.error);"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which Google Cloud credentials type is most appropriate for a backend automated script running on a cloud server that reads shared folder contents without requiring human interaction?"
+    },
+    {
+      "type": "p",
+      "content": "- A) API Key"
+    },
+    {
+      "type": "p",
+      "content": "- B) Service Account JSON File"
+    },
+    {
+      "type": "p",
+      "content": "- C) OAuth Client ID (Desktop Application)"
+    },
+    {
+      "type": "p",
+      "content": "- D) OAuth Client ID (Web Application) with short-lived access tokens"
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. Service Accounts allow backend-to-backend operations without interactive human-in-the-loop authorization gates."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Why are scopes required during the OAuth consent screen configuration?"
+    },
+    {
+      "type": "p",
+      "content": "- A) To increase the token encryption level."
+    },
+    {
+      "type": "p",
+      "content": "- B) To define the specific boundaries of access (e.g. read-only vs edit permissions for Sheets/Drive) that the application is authorized to request."
+    },
+    {
+      "type": "p",
+      "content": "- C) To compile the GCP project code."
+    },
+    {
+      "type": "p",
+      "content": "- D) To limit the number of parallel requests the script can make."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Correct Answer: B. OAuth scopes limit access authority, protecting the user's data from unauthorized modifications by restricting the client's capabilities."
+    }
+  ]
+}

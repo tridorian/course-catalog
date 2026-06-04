@@ -1,0 +1,63 @@
+{
+  "id": "5",
+  "title": "5. Rule Auditing & CI/CD Deployment",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Enterprise Rules Deployment & CI/CD Verification"
+    },
+    {
+      "type": "p",
+      "content": "Having .gemini.md rules in a repository is only effective if they are consistently maintained. Developers or agents might modify the governance files to remove security blocklists, or bypass style checks to speed up task completion. Architects must implement mechanisms to audit these rules and prevent policy drift."
+    },
+    {
+      "type": "p",
+      "content": "The primary line of defense is integrating rule audits into the CI/CD pipeline. Every pull request must be checked to ensure that:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "1. The .gemini.md rules file exists in the correct workspace locations.",
+        "2. The rules file has not been modified without authorization from a Lead Architect (enforced via checksum verification).",
+        "3. All newly created or altered files strictly comply with the active ruleset."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "If unauthorized rule modifications are detected, the pipeline must fail immediately, preventing changes from merging."
+    },
+    {
+      "type": "info",
+      "content": "To streamline the master hash verification, you can store the approved checksum in a GitHub Repository Variable or Secret. If the .gemini.md file needs to be updated, the change must be submitted in a separate PR approved by the Architecture Board, which also updates the master hash secret."
+    },
+    {
+      "type": "h3",
+      "content": "Lab: Configuring a CI/CD Rules Audit Pipeline"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, we will write a GitHub Actions workflow that runs on every pull request. The workflow runs a checksum verification against the .gemini.md file using a stored master hash to ensure it has not been modified without approval, and runs the AGY verification linting tool. Create a GitHub Actions workflow file at .github/workflows/agy-governance.yml with the following configuration:"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "content": "name: AGY Enterprise Governance Lint & Verify\non:\n  pull_request:\n    branches: [ main ]\njobs:\n  audit-rules:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout Codebase\n        uses: actions/checkout@v3\n        with:\n          fetch-depth: 0\n      - name: Setup Node.js Environment\n        uses: actions/setup-node@v3\n        with:\n          node-version: 18\n      - name: Install AGY CLI\n        run: npm install -g @google-antigravity/cli\n      - name: Verify Rule Integrity (Anti-Drift Check)\n        run: |\n          MASTER_HASH=\"7e8a9f0e1c2d3b4a5f6e7d8c9b0a1f2e\"\n          CURRENT_HASH=$(md5sum .gemini.md | awk '{print $1}')\n          if [ \"$CURRENT_HASH\" != \"$MASTER_HASH\" ]; then\n            echo \"[ERROR] Unauthorized modification of .gemini.md detected!\"\n            echo \"Expected Hash: $MASTER_HASH\"\n            echo \"Actual Hash: $CURRENT_HASH\"\n            exit 1\n          fi\n          echo \"[SUCCESS] Rules integrity verified.\"\n      - name: Run AGY Code Compliance Audits\n        run: agy audit --dir ./src --rules-file .gemini.md"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Answer the following questions to verify your comprehension of rule auditing:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Question 1: What is 'Rule Drift' in the context of agentic engineering governance, and how is it mitigated?\n  - A) Rule Drift is when rules files are automatically deleted by the OS; mitigated by running disk checks.\n  - B) Rule Drift is when local rules files are modified to relax compliance or security policies; mitigated by running integrity hash checks inside CI/CD pipelines.\n  - C) Rule Drift is when agents run too fast; mitigated by throttle limits.\n  - D) Rule Drift is when models update their internal training datasets; mitigated by model freezing.\n\nFeedback: Option B is correct. Rule Drift occurs when developers or agents modify local workspace rules to bypass governance constraints. Mitigation involves verifying the file's hash against an authorized value in CI/CD pipelines.",
+        "Question 2: How can an organization safely manage updates to their .gemini.md rules?\n  - A) Allow any developer to rewrite the file in their workspace without review.\n  - B) Establish an Architecture Board approval process where rule changes are reviewed, and updates are committed along with their new verified checksum in the CI pipeline configurations.\n  - C) Put rules in gitignore so they are never tracked.\n  - D) Delete the rules file when running tests.\n\nFeedback: Option B is correct. Treating governance configurations as infrastructure-as-code ensures that changes are reviewed, verified, and cataloged systematically, preventing security escapes."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-201",
+  "title": "ADK-201: Developer Tooling & adk-web",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Inspect and debug active agent runs using the adk-web developer console. Review execution traces, memory states, transaction logs, and step playbacks.",
+  "features": [
+    {
+      "icon": "🖥️",
+      "title": "Visual Dashboard",
+      "description": "Spin up local graphical developer web-portals to track real-time agent execution processes."
+    },
+    {
+      "icon": "🔄",
+      "title": "Step Auditing",
+      "description": "Audit individual model reasoning cycles, prompt expansions, and tool call outputs."
+    },
+    {
+      "icon": "📊",
+      "title": "Metrics Analysis",
+      "description": "Inspect model token metrics, model execution times, and network network transport latency graphs."
+    }
+  ]
+}

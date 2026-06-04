@@ -19,7 +19,7 @@ describe('contentLoader', () => {
 
     const manifest = await fetchCourseManifest('track1', 'course1');
     expect(manifest).toEqual(mockManifest);
-    expect(fetch).toHaveBeenCalledWith('./content/tracks/track1/course1/manifest.json');
+    expect(fetch).toHaveBeenCalledWith('/content/tracks/track1/course1/manifest.json');
   });
 
   it('fetchCourseManifest throws error on invalid manifest', async () => {

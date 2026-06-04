@@ -5,6 +5,13 @@
       "title": "Agentic Engineering",
       "description": "Master AI-powered development with Google Antigravity. Build, orchestrate, and secure autonomous AI agents for real-world software delivery.",
       "icon": "Cpu"
+    },
+    {
+      "id": "adk-development",
+      "title": "ADK Development",
+      "description": "Build and deploy production-grade multi-agent systems using Google's Agent Development Kit (ADK), adk-web debugging tools, A2A protocols, and interactive A2UI layouts.",
+      "icon": "Layers"
     }
   ]
 }
+

@@ -1,0 +1,37 @@
+{
+  "id": "2",
+  "title": "2. Defining strict Pydantic structures for tool inputs",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Pydantic Validation for Tool Inputs"
+    },
+    {
+      "type": "p",
+      "content": "Pydantic offers strict, runtime class validation. By using Pydantic models in tool signatures, you ensure parameters adhere to specific constraints (like string length, email format, or enum constants)."
+    },
+    {
+      "type": "h2",
+      "content": "Pydantic Tool Integration"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from pydantic import BaseModel, Field, EmailStr\nfrom google_adk.tools import tool\n\nclass TicketInput(BaseModel):\n    user_email: EmailStr = Field(description=\"Customer support email address\")\n    urgency: str = Field(description=\"Ticket urgency: LOW, MEDIUM, or HIGH\")\n\n@tool\ndef create_support_ticket(ticket: TicketInput) -> str:\n    # Executed code\n    return f\"Created ticket for {ticket.user_email} with urgency {ticket.urgency}\""
+    },
+    {
+      "type": "warning",
+      "title": "Validation Failures",
+      "content": "If the LLM passes an invalid payload (e.g. invalid email structure), Pydantic triggers a ValidationError, which ADK returns to the LLM to auto-correct."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What happens when a tool argument fails Pydantic validation?\n- A) The host program crashes.\n- B) The agent exits immediately.\n- C) A validation exception returns to the LLM so it can attempt a corrected tool call.\n\nFeedback: Option C is correct. ADK catches validation errors and allows the agent loop to self-heal."
+    }
+  ]
+}

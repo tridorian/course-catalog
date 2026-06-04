@@ -1,0 +1,28 @@
+{
+  "id": "3",
+  "title": "3. Restricting network egress and system calls",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Egress & Syscall Restricting"
+    },
+    {
+      "type": "p",
+      "content": "To prevent agents from leaking database records, egress firewalls must restrict outbound traffic. Only allow queries to approved API endpoints."
+    },
+    {
+      "type": "warning",
+      "title": "Network Lockdowns",
+      "content": "Enforce policies that block DNS requests to unrecognized hosts, blocking data exfiltration attempts through DNS tunnel packets."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Why enforce strict egress boundaries on agent execution containers?\n- A) To reduce memory allocation size.\n- B) To block compromised tools from exfiltrating data to external hosts.\n- C) To make compilation faster.\n\nFeedback: Option B is correct. Firewalls prevent exfiltration."
+    }
+  ]
+}

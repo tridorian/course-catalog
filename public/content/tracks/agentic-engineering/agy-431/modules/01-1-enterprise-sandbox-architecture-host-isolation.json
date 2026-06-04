@@ -1,0 +1,127 @@
+{
+  "id": "1",
+  "title": "1. Enterprise Sandbox & Host Isolation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "The Paradigm of Immutable Agent Isolation"
+    },
+    {
+      "type": "p",
+      "content": "Traditional agent deployments execute scripts directly on the host virtual machine, presenting an unacceptable risk profile in enterprise environments. An autonomous agent with shell access can perform destructive commands, compromise host credentials, or escalate privileges. In the Antigravity architecture, we enforce Tier 3 Sandboxing using the `agy-box` OCI image. This ensures that the engine runs in an ephemeral, containerized environment, separating the agent's execution context from the host VM's kernel and metadata server."
+    },
+    {
+      "type": "info",
+      "content": "The agy-box image is built on a minimal, hardened base distro (typically Alpine or Wolfi) and runs as a rootless container. It strips unnecessary kernel capabilities, enforces strict read-only root filesystems, and locks the agent workspace to a single mapped volume."
+    },
+    {
+      "type": "h3",
+      "content": "Rootless Podman vs. Docker Sandboxing"
+    },
+    {
+      "type": "p",
+      "content": "In high-security enterprise environments, rootless Podman is the preferred container runtime. Since Podman does not rely on a root-owned daemon, it leverages Linux user namespaces (userns) to map the container's root user to an unprivileged UID on the host VM. This prevents container escape vulnerabilities from compromising the host."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Verify host support for user namespaces\nsysctl user.max_user_namespaces\n\n# Create an unprivileged system user for agy-box execution\nsudo useradd -r -s /usr/sbin/nologin agy_runner\n\n# Configure subuid and subgid mappings for rootless container execution\necho \"agy_runner:100000:65536\" | sudo tee -a /etc/subuid\necho \"agy_runner:100000:65536\" | sudo tee -a /etc/subgid\n\n# Run a diagnostic container to verify rootless execution mapping\nsudo -u agy_runner podman run --rm alpine whoami"
+    },
+    {
+      "type": "h3",
+      "content": "Firewalling & Network Egress Restrictions"
+    },
+    {
+      "type": "p",
+      "content": "AI agents must be restricted to prevent data exfiltration. The agy-box container should only have egress access to approved API endpoints (such as Google Vertex AI, GCP APIs, and private registries) while blocking access to internal databases, metadata servers, and other VMs."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Deny container access to the GCP Instance Metadata Server (169.254.169.254)\n# This prevents the agent from harvesting host service account tokens.\nsudo iptables -A OUTPUT -d 169.254.169.254 -j REJECT\n\n# Launch the agy-box container with specific network controls\npodman run -d \\\n  --name agy-sandbox \\\n  --network slirp4netns:port_forward=8080 \\\n  --cap-drop=ALL \\\n  --security-opt label=disable \\\n  --read-only \\\n  --tmpfs /tmp \\\n  -v /opt/agy/workspace:/workspace:z \\\n  gcr.io/tridorian-corp/agy-box:v1.2.0"
+    },
+    {
+      "type": "h3",
+      "content": "Google Workspace Developer Preview Program Enrollment"
+    },
+    {
+      "type": "p",
+      "content": "To use the official Google Workspace MCP servers, you must enroll your developer account and GCP projects in the Google Workspace Developer Preview Program. This public program grants access to the dedicated Workspace Model Context Protocol (MCP) servers, which expose safe, high-level endpoints for agent interaction without requiring custom API integration code. You can sign up and ensure your account is accepted into the program at: https://developers.google.com/workspace/preview."
+    },
+    {
+      "type": "h3",
+      "content": "Enabling Standard Workspace APIs & MCP Services"
+    },
+    {
+      "type": "p",
+      "content": "To use Google Workspace MCP servers, you must enable the standard Google Workspace APIs and the corresponding Google Workspace MCP Services in your GCP project. Note that some MCP servers operate independently, while others require the standard API to be enabled:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Gmail and Chat: Require both their standard APIs and their MCP services to be enabled (gmail.googleapis.com, chat.googleapis.com, gmailmcp.googleapis.com, chatmcp.googleapis.com).",
+        "Drive: Requires the standard API for certain tools and the Drive MCP Service (drive.googleapis.com, drivemcp.googleapis.com).",
+        "Calendar: Does not require the standard API; only requires the Calendar MCP Service to be enabled (calendarmcp.googleapis.com).",
+        "People API: Handles both standard access and MCP functionality, so it does not have a separate MCP service to enable (people.googleapis.com)."
+      ]
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Enable standard Google Workspace APIs\ngcloud services enable \\\n  chat.googleapis.com \\\n  drive.googleapis.com \\\n  gmail.googleapis.com \\\n  people.googleapis.com\n\n# Enable Google Workspace MCP Services\ngcloud services enable \\\n  calendarmcp.googleapis.com \\\n  chatmcp.googleapis.com \\\n  drivemcp.googleapis.com \\\n  gmailmcp.googleapis.com"
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Which Google Workspace MCP service is independent and does NOT require its standard counterpart API to be enabled in the Google Cloud Console?"
+    },
+    {
+      "type": "p",
+      "content": "A) Gmail MCP (gmailmcp.googleapis.com)"
+    },
+    {
+      "type": "p",
+      "content": "B) Calendar MCP (calendarmcp.googleapis.com)"
+    },
+    {
+      "type": "p",
+      "content": "C) Chat MCP (chatmcp.googleapis.com)"
+    },
+    {
+      "type": "p",
+      "content": "D) People API (people.googleapis.com)"
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: B. Google Calendar MCP operates independently and does not require the standard Google Calendar API to be enabled in the GCP project."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Why must the IP address 169.254.169.254 be explicitly blocked in the output iptables rules of the sandbox container?"
+    },
+    {
+      "type": "p",
+      "content": "A) It is the default Gateway for private registries."
+    },
+    {
+      "type": "p",
+      "content": "B) It is the cloud provider metadata service IP, and blocking it prevents the agent from harvesting host service account tokens."
+    },
+    {
+      "type": "p",
+      "content": "C) It is the URL redirect callback endpoint for OAuth consent."
+    },
+    {
+      "type": "p",
+      "content": "D) It represents the external proxy server IP."
+    },
+    {
+      "type": "info",
+      "content": "Correct Answer: B. The GCP metadata server (169.254.169.254) distributes host credentials, which must be blocked to enforce complete sandbox isolation."
+    }
+  ]
+}

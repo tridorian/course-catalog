@@ -1,0 +1,55 @@
+{
+  "id": "3",
+  "title": "3. Temperature, Top-k, Top-p, and Max Tokens",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Model Tuning Parameters"
+    },
+    {
+      "type": "p",
+      "content": "Hyperparameters dictate the diversity and randomness of the model's text generation loops. Small adjustments drastically shift response formats."
+    },
+    {
+      "type": "grid",
+      "items": [
+        {
+          "icon": "Cpu",
+          "title": "Temperature",
+          "content": "Controls response randomness. 0.0 is deterministic; 1.0 is creative.",
+          "border": "#4ade80"
+        },
+        {
+          "icon": "Activity",
+          "title": "Top-P",
+          "content": "Nucleus sampling threshold, selecting tokens from a cumulative probability pool.",
+          "border": "#3b82f6"
+        },
+        {
+          "icon": "Sliders",
+          "title": "Top-K",
+          "content": "Selects next token from top K most probable options.",
+          "border": "#ef4444"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Tuning YAML Setup"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "settings:\n  model: \"gemini-1.5-flash\"\n  temperature: 0.1\n  top_p: 0.95\n  top_k: 40\n  max_output_tokens: 1024"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: For code generation, what is the recommended temperature range?\n- A) High (0.8 - 1.0)\n- B) Low (0.0 - 0.2)\n- C) Variable (0.5 - 0.7)\n\nFeedback: Option B is correct. Code requires precise syntax, making low temperature settings optimal."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "embed-test",
+      "title": "Embed Test",
+      "file": "modules/embed-test.json",
+      "duration": "5m"
+    }
+  ]
+}

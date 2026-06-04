@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Exploring agent.yaml Directives and Schema Options",
+      "file": "modules/01-directives.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Configuring Safety Filters and Block Thresholds",
+      "file": "modules/02-safety-filters.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Temperature, Top-k, Top-p, and Max Tokens",
+      "file": "modules/03-tuning-parameters.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Configuring Multi-model Backends",
+      "file": "modules/04-multimodel-backends.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab - Multi-Model Configuration Switcher",
+      "file": "modules/05-lab-model-switcher.json"
+    }
+  ]
+}

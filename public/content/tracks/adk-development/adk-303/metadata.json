@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-303",
+  "title": "ADK-303: Collaborative Multi-Agent Patterns",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Master consensus protocols, voting nodes, shared blackboards, and sequential editing chains across agent workgroups.",
+  "features": [
+    {
+      "icon": "📋",
+      "title": "Blackboards",
+      "description": "Design shared state stores where multiple independent agents read and write variables during calculations."
+    },
+    {
+      "icon": "🗳️",
+      "title": "Voting Consensus",
+      "description": "Implement consensus checks where worker agents validate each other's outputs before writing to files."
+    },
+    {
+      "icon": "⛓️",
+      "title": "Sequential Pipelines",
+      "description": "Structure multi-agent pipelines (writer -> reviewer -> publisher) to automate corporate document writing."
+    }
+  ]
+}

@@ -4,18 +4,134 @@
   "description": "Build, orchestrate, and secure autonomous AI agents for real-world software delivery using Google Antigravity and the Tridorian standard.",
   "courses": [
     {
-      "id": "agv-101",
-      "title": "AGV-101: Secure Agentic Development: Installation & Setup (L100)",
-      "description": "Welcome to the foundational session of Google Antigravity (AGV). Before we can orchestrate AI agents to write code or execute terminal commands, we must establish a secure, working environment.",
+      "id": "agy-101",
+      "title": "AGY-101: Setup & Initialization",
+      "description": "Welcome to the foundational session of Google Antigravity. Establish a secure working environment, configure cloud credentials, run diagnostic checks, and select the correct installation tier.",
       "modules": 5,
-      "icon": "Rocket"
+      "icon": "Download",
+      "level": "L100",
+      "duration": 60,
+      "tags": ["Foundations", "Setup", "Security"]
     },
     {
-      "id": "gemini-cli",
-      "title": "Gemini CLI Deep Dive",
-      "description": "Advanced command-line AI orchestration with Gemini. Learn to leverage CLI tools for automated workflows and pipeline integration.",
-      "modules": 9,
-      "icon": "Terminal"
+      "id": "agy-102",
+      "title": "AGY-102: The UI Landscape & Selection",
+      "description": "A comparative tour of Google Antigravity's three main interfaces: the standalone visual board (antigravity), the lightweight command line (agy), and the agent-powered VS Code workspace editor (antigravity-ide).",
+      "modules": 5,
+      "icon": "Layout",
+      "level": "L100",
+      "duration": 45,
+      "tags": ["Foundations", "Interfaces", "Productivity"]
+    },
+    {
+      "id": "agy-103",
+      "title": "AGY-103: Workspace Design & File Security",
+      "description": "Learn to design secure workspace boundaries and configure file-system level access controls for autonomous AI agents, including directory locking, permissions, and custom system-level firewalls.",
+      "modules": 5,
+      "icon": "FolderLock",
+      "level": "L100",
+      "duration": 60,
+      "tags": ["Foundations", "Security", "Firewall"]
+    },
+    {
+      "id": "agy-104",
+      "title": "AGY-104: Agent-Human Collaboration Loops",
+      "description": "Constructing clear instructions, managing terminal execution approvals, and learning how to safely pause, redirect, and resume an agent task under human-in-the-loop validation.",
+      "modules": 5,
+      "icon": "GitMerge",
+      "level": "L100",
+      "duration": 75,
+      "tags": ["Foundations", "Human-in-the-Loop", "Collaboration"]
+    },
+    {
+      "id": "agy-201",
+      "title": "AGY-201: Standalone Operations",
+      "description": "Managing asynchronous agent boards, prompt engineering for document generation, and tracking web-scraper visual playback tapes inside the standalone antigravity app.",
+      "modules": 5,
+      "icon": "Play",
+      "level": "L200",
+      "duration": 90,
+      "tags": ["UI Elective", "Scraping", "Visual"]
+    },
+    {
+      "id": "agy-202",
+      "title": "AGY-202: AGY CLI Operations",
+      "description": "Mastering global command line syntax, piping local folder inputs, executing bulk file modifications, and running rapid query batch jobs inside the agy terminal command line.",
+      "modules": 5,
+      "icon": "Terminal",
+      "level": "L200",
+      "duration": 90,
+      "tags": ["UI Elective", "CLI", "Automation"]
+    },
+    {
+      "id": "agy-203",
+      "title": "AGY-203: Interactive Workspaces",
+      "description": "Synchronous side-by-side co-authoring, workspace markdown navigation, and live text rewriting or code refactoring inside the antigravity-ide VS Code extension environment.",
+      "modules": 5,
+      "icon": "Code",
+      "level": "L200",
+      "duration": 90,
+      "tags": ["UI Elective", "IDE", "Co-Authoring"]
+    },
+    {
+      "id": "agy-311",
+      "title": "AGY-311: Scripting with the SDK",
+      "description": "Programmatic automation. Triggering agent cycles, passing context arrays, and handling structured outputs using Python and Node.js SDK libraries.",
+      "modules": 5,
+      "icon": "Cpu",
+      "level": "L300",
+      "duration": 105,
+      "tags": ["Track A: Integrators", "SDK", "Python", "NodeJS"]
+    },
+    {
+      "id": "agy-411",
+      "title": "AGY-411: Custom MCP Servers",
+      "description": "Designing, hosting, and deploying custom Model Context Protocol (MCP) servers to let agents safely read and write to custom databases and enterprise API endpoints.",
+      "modules": 5,
+      "icon": "Server",
+      "level": "L400",
+      "duration": 120,
+      "tags": ["Track A: Integrators", "MCP", "APIs", "Database"]
+    },
+    {
+      "id": "agy-321",
+      "title": "AGY-321: Jules VM Orchestration",
+      "description": "Spawning Jules virtual machine instances to run complex, isolated build pipelines and testing jobs across remote pools under architectural guidelines.",
+      "modules": 5,
+      "icon": "Layers",
+      "level": "L300",
+      "duration": 105,
+      "tags": ["Track B: Architects", "Jules VM", "Orchestration"]
+    },
+    {
+      "id": "agy-421",
+      "title": "AGY-421: Enterprise Governance & Rules",
+      "description": "Codifying compliance guidelines, security boundaries, and architectural patterns inside local workspace .gemini.md rules for high-autonomy agents.",
+      "modules": 5,
+      "icon": "ShieldCheck",
+      "level": "L400",
+      "duration": 120,
+      "tags": ["Track B: Architects", "Governance", "Compliance"]
+    },
+    {
+      "id": "agy-331",
+      "title": "AGY-331: Advanced Container Sandboxing",
+      "description": "Configuring local distrobox or devcontainers environments using the portable agy-box OCI image to run high-autonomy agent loops under container protection.",
+      "modules": 5,
+      "icon": "Box",
+      "level": "L300",
+      "duration": 105,
+      "tags": ["Track C: Platform", "Containers", "Sandboxing"]
+    },
+    {
+      "id": "agy-431",
+      "title": "AGY-431: Scale & Immutable DevOps",
+      "description": "Deploying agy-box images to remote cloud VMs, setting up private container registries under corporate proxies, and running headless pipeline runs.",
+      "modules": 5,
+      "icon": "Cloud",
+      "level": "L400",
+      "duration": 120,
+      "tags": ["Track C: Platform", "DevOps", "CI/CD", "Scale"]
     }
   ]
 }

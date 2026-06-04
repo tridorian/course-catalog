@@ -1,0 +1,105 @@
+{
+  "id": "2",
+  "title": "2. Asynchronous Agent Boards",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "In traditional development setups, you run a command in your shell and wait for it to complete. In standalone operations, tasks are often complex and long-running. The `antigravity` application handles this using **Agent Cards** managed asynchronously on a Kanban board."
+    },
+    {
+      "type": "p",
+      "content": "When a new task is created, a dedicated agent card is spawned. This card runs as a separate thread, letting you dispatch multiple agents in parallel to perform independent missions (e.g. scraping different websites or compiling different reports)."
+    },
+    {
+      "type": "h2",
+      "content": "Agent Card Lifecycle States"
+    },
+    {
+      "type": "p",
+      "content": "Every task card on the board moves through a defined set of execution states:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Proposed:** The task description is analyzed, and the agent is preparing to outline its strategy.",
+        "**Planning:** The agent drafts a step-by-step implementation plan and displays it for review.",
+        "**Executing:** The agent is active, performing file system operations, executing whitelisted console commands, or scraping pages.",
+        "**Awaiting Approval:** The agent reaches a security gate or user-defined checkpoint and pauses for manual authorization.",
+        "**Completed:** The task succeeded, and the final output (typically formatted markdown) is loaded into the Output Panel.",
+        "**Failed:** The agent encountered a fatal error (e.g. security block or execution timeout) and aborted."
+      ]
+    },
+    {
+      "type": "warning",
+      "content": "Never launch `antigravity` with the `--auto-approve` flag on a native host (Tier 1 or Tier 2). This bypasses the approval loop entirely, giving the agent full control to execute commands and alter files on your primary workstation without confirmation. Auto-approval should only be active inside containerized sandboxes like `agy-box`."
+    },
+    {
+      "type": "h2",
+      "content": "Steering the Collaboration Loop"
+    },
+    {
+      "type": "p",
+      "content": "The Human-in-the-Loop pattern is established via three core interactive decisions on the card when it enters the **Awaiting Approval** state:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Approve:** Authorizes the proposed step or command to proceed.",
+        "**Redirect:** Pauses the execution and lets the user type manual directions (e.g. instructing the agent to fix a selector or search a different folder).",
+        "**Reject:** Denies the action and immediately kills the agent card thread."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Configuring Permissions and Rules"
+    },
+    {
+      "type": "p",
+      "content": "You can declare execution limits by editing `.gemini/permissions.json` directly. This maps command patterns to automated approvals, blocks, or manual confirmations:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"allowed_commands\": [\n    \"cat\",\n    \"grep\",\n    \"python3 -m json.tool\"\n  ],\n  \"blocked_commands\": [\n    \"rm -rf /\",\n    \"curl *\"\n  ],\n  \"require_approval\": [\n    \"node scripts/*\",\n    \"python3 scraper.py\"\n  ]\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** What action should you take when an agent card enters the 'Awaiting Approval' state but you notice its proposed shell command is incorrect?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Click Approve and let it fail naturally",
+        "B) Press the workspace Panic Button",
+        "C) Click Redirect, provide specific instructions to modify the command, and resume",
+        "D) Manually run the command in a separate terminal window"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** Selecting Redirect pauses the agent, opens an input box for custom steering instructions, and prevents the agent from running incorrect or destructive commands."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Which file in the `.gemini/` control folder defines which command prefixes require human-in-the-loop approvals?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) config.json",
+        "B) state.json",
+        "C) permissions.json",
+        "D) rules.md"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: C**\n\n**Immediate Feedback:** The `permissions.json` file contains parameters for `allowed_commands`, `blocked_commands`, and `require_approval`, defining the exact authorization boundaries."
+    }
+  ]
+}

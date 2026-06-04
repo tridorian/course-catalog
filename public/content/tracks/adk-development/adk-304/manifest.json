@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. The necessity of asynchronous execution in multi-agent routing",
+      "file": "modules/01-async-necessity.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Connecting A2AServer to RabbitMQ brokers",
+      "file": "modules/02-rabbitmq-connection.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Designing worker agents that consume queues",
+      "file": "modules/03-worker-consumers.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Implementing retry policies, transaction rollbacks, and DLQs",
+      "file": "modules/04-retries-dlq.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Building an asynchronous order-processing agent queue",
+      "file": "modules/05-lab-async-queue.json"
+    }
+  ]
+}

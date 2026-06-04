@@ -1,0 +1,41 @@
+{
+  "id": "5",
+  "title": "5. Lab: Authoring a structured system instruction suite",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Authoring a Structured System Instruction Suite"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will author a robust system instructions file for a financial tax calculator agent, configure the agent, and test its behavior against invalid queries."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Create the agent.yaml"
+    },
+    {
+      "type": "code",
+      "language": "yaml",
+      "code": "metadata:\n  name: \"tax-calculator\"\n  version: \"1.0.0\"\nsettings:\n  model: \"gemini-1.5-flash\"\n  temperature: 0.0\n  system_instructions: |\n    You are a tax auditing assistant.\n    You are only allowed to compute taxes using the 'compute_tax' tool.\n    If asked to compute tax without using the tool, reject the request.\n    If asked about general news or sports, reply with 'Error: Out of Scope'.\ntools:\n  - name: \"compute_tax\"\n    source: \"tax_tool.py\""
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Write tax_tool.py"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from google_adk.tools import tool\n\n@tool\ndef compute_tax(income: float, rate: float) -> float:\n    \"\"\"\n    Computes the tax value by multiplying income by the rate.\n    \"\"\"\n    return income * rate"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: If you prompt the agent with 'Who won the basketball game yesterday?', what should it return?\n- A) A mock score\n- B) 'Error: Out of Scope'\n- C) A runtime python exception\n\nFeedback: Option B is correct. The system instructions explicitly force refusal on out-of-scope queries."
+    }
+  ]
+}

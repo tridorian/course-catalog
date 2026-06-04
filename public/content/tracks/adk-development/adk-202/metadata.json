@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-202",
+  "title": "ADK-202: Prompt Engineering & Custom System Instructions",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Write structured instructions, few-shot examples, dynamic templates, and safety rules to guide agent reasoning behavior.",
+  "features": [
+    {
+      "icon": "✍️",
+      "title": "System Instructions",
+      "description": "Inject operational guidelines that enforce tone, rules, and task execution constraints."
+    },
+    {
+      "icon": "📚",
+      "title": "Few-shot Prompts",
+      "description": "Embed historical samples directly in prompts to teach the agent complex multi-step reasoning."
+    },
+    {
+      "icon": "🛡️",
+      "title": "Prompt Protection",
+      "description": "Detect and deflect user injection threats that try to leak files or override agent constraints."
+    }
+  ]
+}

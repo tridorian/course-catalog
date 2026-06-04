@@ -1,0 +1,87 @@
+{
+  "id": "3",
+  "title": "3. Prompting for Doc Generation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "p",
+      "content": "AI agents are excellent at compiling summaries, writing SOWs, and organizing structured analyses. However, left unguided, they frequently resort to placeholders (e.g. `[Insert Date Here]`, `TODO: Add feature list`, or `Lorem Ipsum`). For business analysts and architects, these placeholders represent compilation failures."
+    },
+    {
+      "type": "p",
+      "content": "To prevent this, operations specialists must master the **Zero-Placeholder Rule**. This design rule states that all generated output documents must be complete, production-grade text. If a piece of data is missing from the source files, the agent must estimate it, mark it explicitly as 'Data Unavailable' based on the sources, or calculate a logical approximation rather than writing bracketed placeholders."
+    },
+    {
+      "type": "h2",
+      "content": "The Four Pillars of a Production Prompt"
+    },
+    {
+      "type": "p",
+      "content": "When writing instructions to generate documents inside the `antigravity` dashboard, structure your prompt into four key areas:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "**Persona & Role:** Establishes the professional background and standards of the agent.",
+        "**Context & Inputs:** Feeds the agent the exact files or data sources to parse.",
+        "**Strict Constraints:** Sets the rules, including the Zero-Placeholder Rule and the target format.",
+        "**Structure & Outline:** Declares the exact markdown headings and sections expected in the final document."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Standard Competitor Pricing Summary Prompt"
+    },
+    {
+      "type": "p",
+      "content": "The following is a production prompt template designed for compiling competitor pricing matrices. It can be copied directly into the prompt bar of the visual board:"
+    },
+    {
+      "type": "code",
+      "language": "text",
+      "content": "Role: Senior Competitive Intelligence Analyst\nTask: Generate a Competitive Pricing Summary from the scraped data files in './data/'.\n\nInput Sources:\n- File: './data/competitor_a.json'\n- File: './data/competitor_b.json'\n- File: './data/competitor_c.json'\n\nConstraints:\n1. ZERO-PLACEHOLDER RULE: Under no circumstances will you write placeholders, empty brackets, or TODO items. Every sentence must contain fully written text. If a pricing feature is missing, write 'Data Not Provided in Sources'.\n2. Output format must be GitHub Flavored Markdown (GFM).\n3. You must include a structured comparison table with columns: Competitor, Plan Name, Monthly Cost, Key Features, and Data Source.\n4. Write a 3-paragraph executive summary detailing pricing gaps.\n\nStructure:\n# Competitive Pricing Analysis\n## Executive Summary\n[Your 3 paragraphs detailing pricing differentials]\n## Comparison Matrix\n[Your GFM comparison table]"
+    },
+    {
+      "type": "info",
+      "content": "Standard GFM tables are rendered natively by the `antigravity` Output Panel, displaying clean, visually styled interactive spreadsheets directly on the board."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "**Question 1:** According to the Zero-Placeholder Rule, what should the agent write if a competitor's monthly subscription cost is missing from the scraped files?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) Leaving the cost field empty or using brackets like `[Cost]`",
+        "B) Writing a clear fallback statement like 'Data Not Provided in Sources' or providing a logical approximation based on other tiers",
+        "C) Halting the execution plan and throwing a terminal exception",
+        "D) Leaving a TODO comment in the output file"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** The Zero-Placeholder Rule prohibits the use of bracketed values or TODOs. The agent must write explicit fallback notes or compute estimated values based on context."
+    },
+    {
+      "type": "p",
+      "content": "**Question 2:** Why is it recommended to specify the exact outline structure in a document generation prompt?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "A) It decreases the agent's API token consumption",
+        "B) It allows the Output Panel to parse and display the sections with the correct visual layout and headers",
+        "C) It forces the agent to bypass execution approval checks",
+        "D) It converts the document automatically to a PDF"
+      ]
+    },
+    {
+      "type": "info",
+      "content": "**Correct Answer: B**\n\n**Immediate Feedback:** Declaring a concrete markdown outline ensures that the agent's output is structured correctly for visual rendering on the dashboard."
+    }
+  ]
+}

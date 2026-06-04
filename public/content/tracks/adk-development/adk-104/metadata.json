@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-104",
+  "title": "ADK-104: Tool Schema Design & Basic APIs",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Design robust agent tool definitions using strict parameter schemas and type reflections to wrap weather and currency APIs.",
+  "features": [
+    {
+      "icon": "🗺️",
+      "title": "JSON Schema Design",
+      "description": "Construct declarative type schemas for custom parameters that the LLM consumes for tool selection."
+    },
+    {
+      "icon": "📝",
+      "title": "Pydantic Typing",
+      "description": "Use Pydantic models to assert validation bounds on inputs, catching parameter typos immediately."
+    },
+    {
+      "icon": "🌐",
+      "title": "API Integrations",
+      "description": "Configure external request boundaries, managing HTTP status codes and payloads safely."
+    }
+  ]
+}

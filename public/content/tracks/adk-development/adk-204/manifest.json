@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Designing unit tests for custom tools",
+      "file": "modules/01-testing-philosophy.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Mocking model responses and external API calls",
+      "file": "modules/02-mocking-endpoints.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Automated integration testing",
+      "file": "modules/03-integration-testing.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Evaluating agent accuracy and regression metrics",
+      "file": "modules/04-regression-evaluation.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab: Creating a continuous integration workflow",
+      "file": "modules/05-lab-testing-ci.json"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. Intro to Human-in-the-Loop",
+      "file": "modules/01-1-introduction-to-human-in-the-loop-collaboration.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Composing Standardized Instructions",
+      "file": "modules/02-2-composing-clear-and-standardized-instructions.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Terminal Execution Approvals",
+      "file": "modules/03-3-managing-terminal-execution-approvals.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Active Steering & Pausing",
+      "file": "modules/04-4-active-steering-pausing-redirecting-and-resuming.json"
+    },
+    {
+      "id": "5",
+      "title": "5. End-to-End Collaboration Lab",
+      "file": "modules/05-5-end-to-end-collaboration-lab-loop-verification.json"
+    }
+  ]
+}

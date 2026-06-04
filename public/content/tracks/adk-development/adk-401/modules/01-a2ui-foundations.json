@@ -1,0 +1,52 @@
+{
+  "id": "1",
+  "title": "1. The A2UI Declarative Layout Protocol",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Introduction to A2UI Protocol"
+    },
+    {
+      "type": "p",
+      "content": "Text inputs and markdown outputs are insufficient for complex actions like scheduling meetings or reviewing code changes. The Agent-to-User Interface (A2UI) protocol allows agents to emit structured JSON UI components that are rendered as clean, native visual elements in client browsers."
+    },
+    {
+      "type": "h2",
+      "content": "Core Design Philosophy"
+    },
+    {
+      "type": "p",
+      "content": "A2UI separates interface definitions from the rendering engine. The agent outputs UI blocks defined by a strict JSON Schema, and the client frontend platform converts these definitions into styling-consistent React or HTML widgets."
+    },
+    {
+      "type": "h2",
+      "content": "A2UI Container Example Schema"
+    },
+    {
+      "type": "p",
+      "content": "Below is the layout JSON for a basic A2UI block describing a system alert card:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "code": "{\n  \"a2ui_version\": \"2.0.0\",\n  \"layout\": \"vertical\",\n  \"components\": [\n    {\n      \"type\": \"card\",\n      \"title\": \"Security Patch Required\",\n      \"status\": \"critical\",\n      \"body\": \"A critical vulnerability has been identified in packages.json.\"\n    }\n  ]\n}"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary benefit of the A2UI protocol over standard raw markdown text outputs?"
+    },
+    {
+      "type": "p",
+      "content": "- A) It speeds up the LLM text generation latency.\n- B) It allows agents to generate structured, interactive UI blocks like forms, calendars, and tables rendered natively on the client.\n- C) It translates agent codes into Go."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. A2UI gives the agent the ability to define functional, structured interface layouts that render as native browser widgets."
+    }
+  ]
+}

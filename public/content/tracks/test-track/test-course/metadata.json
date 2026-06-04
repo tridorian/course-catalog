@@ -1,0 +1,9 @@
+{
+  "course_id": "test-course",
+  "title": "Test Course",
+  "version": "1.0.0",
+  "author": "Jules",
+  "target_audience": "Testing",
+  "description": "A course for testing embeds",
+  "status": "Published"
+}

@@ -1,0 +1,109 @@
+{
+  "id": "1",
+  "title": "1. Multi-Interface Selection Philosophy",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Understanding the Decoupled Paradigm"
+    },
+    {
+      "type": "p",
+      "content": "Google Antigravity introduces an agentic engineering model that cleanly decouples backend task execution from frontend interaction surfaces. Traditional IDEs and coding assistants force developers into a single, synchronous chat or autocomplete interface, limiting productivity and flexibility. Antigravity resolves this technical friction by running its execution engine on three distinct surfaces: a local script-based environment, a standalone secure tarball, or a containerized sandbox (agy-box). Above this layer, developers can choose between three distinct frontend command surfaces depending on their operational context, role, and current goal."
+    },
+    {
+      "type": "info",
+      "content": "Design Principle: Decoupling ensures that UI preferences do not affect the engine's core capabilities. Whether you direct your agent visually or script it in a shell, the engine enforces the same workspace boundary locks, directory permissions, credential storage, and security rules."
+    },
+    {
+      "type": "h2",
+      "content": "Separation of Concerns: Agent Manager vs. Editor"
+    },
+    {
+      "type": "p",
+      "content": "In Antigravity, the user experience is divided into two primary workspaces to mirror the natural division of labor in software engineering: high-level task management and low-level code implementation."
+    },
+    {
+      "type": "list",
+      "items": [
+        "Agent Manager (Mission Control): Designed for high-level asynchronous orchestration. Users can define high-level objectives, spawn parallel agent instances to work on multiple tasks or bugs simultaneously, manage credentials, and review generated artifacts.",
+        "Editor Interface: Designed for low-level synchronous co-authoring and editing. It retains the familiar, low-latency editing features of Visual Studio Code (file explorers, syntax highlighting, language extensions) while introducing inline code generation tools."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Agent Execution Modes: Fast vs. Planning"
+    },
+    {
+      "type": "p",
+      "content": "To control the agent's level of reasoning and resource consumption, users can toggle between two primary execution modes in the command interfaces:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Fast Mode (Standard Execution): The agent executes tasks directly with minimal thinking latency and resource consumption. Best suited for simple, localized modifications such as variable renaming, execution of straightforward bash commands, or minor edits where review is unnecessary.",
+        "Planning Mode (Deep Reasoning): The agent constructs an explicit implementation plan and a sequential task list before modifying files. It works in structured task groups, produces detailed artifacts, and stops for human verification at critical gates. Best suited for complex refactorings, multi-step web research, or new feature additions."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Interface Selection Guidelines"
+    },
+    {
+      "type": "p",
+      "content": "Each surface is tailored to specific workloads and environments:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Use the CLI Client (agy) for rapid terminal checks, scripting batch updates, piping outputs, and running headless container environments.",
+        "Use the Standalone Visual Board (antigravity) for parallel asynchronous workflows, monitoring multi-agent pipelines, tracking visual web browsing, and inspecting playback tapes.",
+        "Use the Workspace Editor (antigravity-ide) for active coding sessions, inline natural language updates (Cmd+I), line-by-line diff reviews, and co-authoring document structures."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary difference between the Agent Manager and the Editor workspaces?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The Agent Manager executes compiled languages, while the Editor runs interpreted scripting languages."
+    },
+    {
+      "type": "p",
+      "content": "- B) The Agent Manager is designed for asynchronous, multi-agent orchestration, while the Editor is designed for synchronous, side-by-side file editing and code review."
+    },
+    {
+      "type": "p",
+      "content": "- C) The Agent Manager only runs inside containers, whereas the Editor must be installed natively on the host workstation."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Antigravity splits the interface to allow high-level asynchronous delegation in the Agent Manager, and synchronous, hands-on code adjustments in the Editor."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: Under what conditions should you select Planning Mode over Fast Mode?"
+    },
+    {
+      "type": "p",
+      "content": "- A) When you need the agent to perform quick terminal executions without pausing for reviews."
+    },
+    {
+      "type": "p",
+      "content": "- B) When you are working on simple code fixes that need to be committed in under 10 seconds."
+    },
+    {
+      "type": "p",
+      "content": "- C) When you are executing complex, multi-step tasks that require a structured design plan, artifact outputs, and human-in-the-loop review."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option C is correct. Planning Mode allows the agent to reason, group tasks, and create structured plans for complex or high-risk modifications."
+    }
+  ]
+}

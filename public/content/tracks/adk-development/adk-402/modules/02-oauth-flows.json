@@ -1,0 +1,62 @@
+{
+  "id": "2",
+  "title": "2. Configuring OAuth2 for Enterprise APIs",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Enterprise OAuth2 Authentication"
+    },
+    {
+      "type": "p",
+      "content": "To execute actions on behalf of employees (such as modifying Google Drive sheets or emailing status updates), agents must authenticate using OAuth 2.0 flows, storing token sets securely to preserve authorization boundaries."
+    },
+    {
+      "type": "h2",
+      "content": "OAuth Token Exchange Handshake"
+    },
+    {
+      "type": "p",
+      "content": "The ADK runtime manages the redirect handshake loop:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Agent identifies a request requiring authentication.",
+        "Agent redirects user web client to authorization server (authorization flow redirect).",
+        "User signs in, granting application permissions.",
+        "Authorization server returns code parameter to agent's local callback endpoint.",
+        "Agent exchanges code for token pair (access token + refresh token), saving them securely."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Implementing Token Management"
+    },
+    {
+      "type": "p",
+      "content": "Store refresh tokens inside hardware keychains or encrypted database vaults. Never log or output token keys to diagnostic tracing panels."
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "# Retrieve authenticated client sessions securely in python tools\nfrom google_adk.auth import get_oauth_session\n\ndef fetch_user_drive_docs(user_id: str):\n    session = get_oauth_session(user_id=user_id, service=\"google-drive\")\n    # session object handles auto-refresh transparently\n    files = session.get(\"https://www.googleapis.com/drive/v3/files\").json()\n    return files"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: Where should OAuth refresh tokens be stored securely in a production ADK agent deployment?"
+    },
+    {
+      "type": "p",
+      "content": "- A) Written directly as hardcoded string variables in tools.py.\n- B) Within encrypted vault systems or secure credential keychains.\n- C) Exported to the public transaction logs folder."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Credential keys and refresh tokens must be kept in encrypted databases or vaults to prevent token theft."
+    }
+  ]
+}

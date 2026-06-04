@@ -1,0 +1,115 @@
+{
+  "id": "3",
+  "title": "3. Standalone Visual Board (antigravity)",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "Agent Manager: Asynchronous Mission Control"
+    },
+    {
+      "type": "p",
+      "content": "The antigravity standalone application serves as a visual Agent Manager. Traditional chatbot interfaces operate linearly and synchronously—requiring the developer to wait for one answer before posing the next. The Agent Manager bypasses this bottleneck by serving as an asynchronous Mission Control. Developers define high-level tasks, launch parallel agent instances across different project directories, and monitor multiple work streams simultaneously."
+    },
+    {
+      "type": "h2",
+      "content": "Mission Cards, Lanes, and Artifact Lists"
+    },
+    {
+      "type": "p",
+      "content": "Tasks are managed visually using 'Mission Cards' organized in status lanes (Queued, Running, Completed, and Failed):"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Queued: The task is initialized and waits for execution tokens or backend workspace authorization.",
+        "Running: The agent is active. Clicking the card opens a live side drawer displaying execution logs, model details, and terminal command streams.",
+        "Completed: The task finished. The card displays direct links to the generated documents, code files, and verification walkthroughs.",
+        "Failed: The task encountered a compilation error, boundary block, or budget exhaustion. Detailed error logs and stacks are displayed directly on the card."
+      ]
+    },
+    {
+      "type": "p",
+      "content": "As the agent proceeds, it lists its produced Artifacts directly on the card. This includes Task Lists, Implementation Plans, and Walkthroughs, which the developer can inspect, review, and comment on."
+    },
+    {
+      "type": "h2",
+      "content": "Model Configurations and Mode Selections"
+    },
+    {
+      "type": "p",
+      "content": "When creating a new Mission Card, the user configures two parameters:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Model Selection: Choose which model (e.g. Gemini 3 Pro) the agent will use for execution.",
+        "Mode Selection: Toggle between Fast (for simple terminal actions and quick changes) or Planning (for complex tasks requiring task group design and plans)."
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Step-by-Step Lab: Orchestrating a Parallel App Build"
+    },
+    {
+      "type": "p",
+      "content": "This lab guides you through dispatching an asynchronous task to build a simple FastAPI application:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "1. Launch the antigravity standalone application and click 'Open Folder' to select your workspace folder.",
+        "2. Ensure the Mode Selection is set to 'Planning' in the side panel.",
+        "3. Submit the prompt: 'Create a todo list web application using Python FastAPI.'",
+        "4. Observe the agent analyzing the request and producing an Implementation Plan. Under 'Review policy', review the plan details.",
+        "5. Add a Google Docs-style comment on the plan: 'Please use SQLite for data storage and ensure the models are documented.' Submit the comment.",
+        "6. Observe the agent re-planning, updating its Task List, and generating requirements.txt, main.py, and templates.",
+        "7. Click 'Proceed' or 'Accept' to allow the agent to finalize the build and watch it verify the server."
+      ]
+    },
+    {
+      "type": "h3",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How does the Antigravity Agent Manager resolve the linear limitation of traditional AI chat tools?"
+    },
+    {
+      "type": "p",
+      "content": "- A) By translating code into natural language documentation."
+    },
+    {
+      "type": "p",
+      "content": "- B) By allowing developers to dispatch multiple agent instances simultaneously to work asynchronously on parallel task cards."
+    },
+    {
+      "type": "p",
+      "content": "- C) By compiling code instantly without requiring local runtime setups."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. The Agent Manager is an asynchronous mission control center that can manage multiple parallel agents operating in different lanes."
+    },
+    {
+      "type": "p",
+      "content": "Question 2: What happens when you add a comment to a generated Implementation Plan in the visual card?"
+    },
+    {
+      "type": "p",
+      "content": "- A) The agent ignores the comment and continues executing the original plan."
+    },
+    {
+      "type": "p",
+      "content": "- B) The comment is submitted to the engine, prompting the agent to update its design and re-plan its task list before executing code."
+    },
+    {
+      "type": "p",
+      "content": "- C) The task card fails immediately and moves to the Failed lane."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. Google Docs-style feedback on artifacts like plans and tasks prompts the agent to iterate on its approach before writing code."
+    }
+  ]
+}

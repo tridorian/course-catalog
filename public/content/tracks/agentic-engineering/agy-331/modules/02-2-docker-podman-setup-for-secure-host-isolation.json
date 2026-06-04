@@ -1,0 +1,107 @@
+{
+  "id": "2",
+  "title": "2. Docker & Podman Setup for Host Isolation",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h2",
+      "content": "2.1 Rootless Runtimes & The Isolation Model"
+    },
+    {
+      "type": "p",
+      "content": "Running containers as root is a significant vulnerability for agent deployments. If the container engine runs with root privileges (as is common with default Docker configurations), any container breakout vulnerability instantly yields root control over the host. L300 platform engineering mandates rootless container execution. Under Podman, the container engine runs entirely within the unprivileged user's namespace, mapping the container's virtual root user to a standard unprivileged user ID on the host. This prevents host filesystem takeover and root privilege escalation."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# 1. Install Podman on the host workstation\nsudo apt-get update && sudo apt-get install -y podman\n\n# 2. Verify Podman is running in rootless mode for the current user\npodman info | grep -i rootless\n# Expected output: rootless: true\n\n# 3. Configure the rootless network backend (pasta or slirp4netns) to prevent host interface access\ncat << 'EOF' > ~/.config/containers/containers.conf\n[network]\ndefault_network = \"podman\"\nnetwork_backend = \"netavark\"\nEOF"
+    },
+    {
+      "type": "info",
+      "content": "Rootless Mappings: When running rootless, a process executing as UID 0 (root) inside the container is mapped directly to UID 1000 (your host user) on the host machine. If an agent manages to escape the container, it only gains the rights of your unprivileged host user."
+    },
+    {
+      "type": "h2",
+      "content": "2.2 Configuring subuid and subgid Files"
+    },
+    {
+      "type": "p",
+      "content": "Rootless container runtimes map virtual UIDs inside the container to ranges of subordinate UIDs on the host system. These allocations are controlled by `/etc/subuid` and `/etc/subgid`. If allocations are missing, you must generate them to allow namespace mapping:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Allocate a range of 65536 subordinate UIDs/GIDs starting at 100000 for your user\n# Execute this on the host system:\nsudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USER\n\n# Update namespaces config to activate the mappings\npodman system migrate\n\n# Verify subordinate maps\ncat /etc/subuid\ncat /etc/subgid"
+    },
+    {
+      "type": "h2",
+      "content": "2.3 Dropping Administrative Capabilities"
+    },
+    {
+      "type": "p",
+      "content": "Linux kernels partition traditional root privileges into distinct units called 'capabilities' (e.g., CAP_SYS_ADMIN, CAP_NET_ADMIN, CAP_SYS_CHROOT). By default, standard container runtimes grant a subset of these capabilities. For AI agent sandboxes, we must drop ALL administrative capabilities to prevent system clock modifications, network routing overrides, or driver configurations."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Drop all capabilities and enforce no-new-privileges\npodman run -d --name agy-sandbox-01 \\\n  --cap-drop=ALL \\\n  --security-opt no-new-privileges \\\n  local/agy-box:latest"
+    },
+    {
+      "type": "h2",
+      "content": "2.4 Implementing custom Seccomp Profiles"
+    },
+    {
+      "type": "p",
+      "content": "Seccomp (Secure Computing Mode) acts as an internal system call firewall. It defines which system commands (like read, write, unshare, mount) a process can send to the kernel. We write a custom seccomp profile to restrict calls that are unnecessary for developer work but present risk (such as running ptrace or unshare)."
+    },
+    {
+      "type": "h3",
+      "content": "Custom Seccomp Blueprint: seccomp-agent.json"
+    },
+    {
+      "type": "p",
+      "content": "Save this JSON file in your configuration directory and apply it during container startup:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "content": "{\n  \"defaultAction\": \"SCMP_ACT_ALLOW\",\n  \"architectures\": [\n    \"SCMP_ARCH_X86_64\",\n    \"SCMP_ARCH_X86\",\n    \"SCMP_ARCH_X32\"\n  ],\n  \"syscalls\": [\n    {\n      \"names\": [\n        \"ptrace\",\n        \"syslog\",\n        \"sys_boot\",\n        \"sys_chroot\",\n        \"mount\",\n        \"umount2\",\n        \"unshare\",\n        \"kexec_load\"\n      ],\n      \"action\": \"SCMP_ACT_ERRNO\"\n    }\n  ]\n}"
+    },
+    {
+      "type": "warning",
+      "content": "The Socket Exposure Vulnerability: Never mount '/var/run/docker.sock' or '/run/user/1000/podman/podman.sock' into your sandbox container. An agent that gains access to this socket can send API requests to the host daemon to spawn new, fully privileged containers, bypassing all container sandboxing bounds."
+    },
+    {
+      "type": "h2",
+      "content": "2.5 Keyring Fallback Decryption on Headless Hosts"
+    },
+    {
+      "type": "p",
+      "content": "Google Chrome and Antigravity store credentials in keyrings using D-Bus. In headless systems or remote VMs where D-Bus session keyrings are unreachable, authentication fails. The agy-box provides a file-based encrypted keyring fallback utilizing 'keyrings.alt.file.EncryptedKeyring'."
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "content": "# Export the fallback master password to your environment variables\nexport KEYRING_CRYPT_PASSWORD=\"your-hardened-master-password\"\n\n# Configure python keyring to use the file-based backend alternative\nexport PYTHON_KEYRING_BACKEND=\"keyrings.alt.file.EncryptedKeyring\""
+    },
+    {
+      "type": "info",
+      "content": "Credentials configuration and passwords must be stored inside '~/.config/environment.d/agy-box.conf' with tight permissions (chmod 600) so the shell hook automatically sources them in subsequent sessions."
+    },
+    {
+      "type": "h2",
+      "content": "2.6 Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Review your understanding of rootless execution and system call filtering:"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Question 1: What occurs when a container runs with the '--cap-drop=ALL' flag?\n  - A) It prevents the container from writing files to its own virtual drive.\n  - B) It strips the container's processes of all administrative capabilities, blocking actions like network routing changes or device configuration modifications.\n  - C) It disables internet access inside the container.\n\nFeedback: Option B is correct. Dropping all capabilities ensures that even if a process inside the container becomes root, it lacks the administrative rights to execute commands like configuring hardware or overriding network interfaces.",
+        "Question 2: What is the risk of mounting the host's container daemon socket (docker.sock) inside the sandbox?\n  - A) The agent will consume all host memory.\n  - B) The agent can bypass all sandbox boundaries by commanding the host daemon to start new containers with host root privileges.\n  - C) The container filesystem becomes read-only.\n\nFeedback: Option B is correct. Access to the container socket is equivalent to having root privileges on the host system, enabling immediate sandbox escape."
+      ]
+    }
+  ]
+}

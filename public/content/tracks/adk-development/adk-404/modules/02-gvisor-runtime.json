@@ -1,0 +1,37 @@
+{
+  "id": "2",
+  "title": "2. Configuring gVisor runtime for untrusted tool code",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "gVisor Runtime Security"
+    },
+    {
+      "type": "p",
+      "content": "Containers share the host kernel. If an agent compromises a tool, it can exploit kernel vulnerabilities to escape. gVisor runs a user-space kernel (Sentry), intercepting syscalls to isolate host systems."
+    },
+    {
+      "type": "h2",
+      "content": "Docker Run with gVisor"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "# Execute agent inside runsc (gVisor) runtime\ndocker run --runtime=runsc -it adk-agent-sandbox"
+    },
+    {
+      "type": "info",
+      "title": "Sentry Core",
+      "content": "gVisor's Sentry implements a large portion of the Linux kernel API in user-space, preventing direct communication with the hardware layer."
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: How does gVisor block container escape exploits?\n- A) It encrypts network traffic.\n- B) It runs a user-space kernel proxy intercepting system calls before they reach the host.\n- C) It requires OAuth tokens for execution.\n\nFeedback: Option B is correct. User-space kernel proxying blocks escape exploits."
+    }
+  ]
+}

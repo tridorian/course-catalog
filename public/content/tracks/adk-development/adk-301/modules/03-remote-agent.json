@@ -1,0 +1,44 @@
+{
+  "id": "3",
+  "title": "3. Remote Agent Integration with RemoteA2aAgent",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Remote Agents with RemoteA2aAgent"
+    },
+    {
+      "type": "p",
+      "content": "Not all agents can run on a single local server. The `RemoteA2aAgent` library allows you to bind an agent running on a remote cloud server to your local system as if it were a local module."
+    },
+    {
+      "type": "h2",
+      "content": "Writing a Python Remote Registration Script"
+    },
+    {
+      "type": "p",
+      "content": "Below is a python script utilizing the ADK library to spin up an agent and register it securely with a running `A2AServer` hub:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "from google_adk.a2a import RemoteA2aAgent, AgentServer\n\n# Define the agent logic locally\ndef run_database_query(query: str) -> dict:\n    # Database logic...\n    return {\"result\": \"records query success\"}\n\n# Initialize the remote agent configuration\nremote_agent = RemoteA2aAgent(\n    agent_id=\"sql-agent\",\n    server_url=\"http://localhost:8090\",\n    auth_token=\"sec-key-9923\"\n)\n\n# Register capabilities and register tool functions\nremote_agent.register_tool(\"query_db\", run_database_query)\n\n# Connect and listen for tasks from the orchestrator hub\nif __name__ == \"__main__\":\n    print(\"Starting RemoteA2aAgent loop for sql-agent...\")\n    remote_agent.start_event_loop()"
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: When using RemoteA2aAgent, how does the remote agent receive tasks from the central hub?"
+    },
+    {
+      "type": "p",
+      "content": "- A) By writing logs to a shared network hard drive.\n- B) It opens an event loop or long-poll WebSocket connection to the A2AServer router URL, awaiting task assignments.\n- C) By scheduling cron jobs on the server."
+    },
+    {
+      "type": "p",
+      "content": "Feedback: Option B is correct. RemoteA2aAgent establishes a persistent link to the routing hub server, listening for incoming events to execute."
+    }
+  ]
+}

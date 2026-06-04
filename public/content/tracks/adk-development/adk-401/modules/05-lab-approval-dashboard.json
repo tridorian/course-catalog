@@ -1,0 +1,54 @@
+{
+  "id": "5",
+  "title": "5. Lab - Creating an Agent-Driven Approval Dashboard",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Lab: Deploying an Approval Interface"
+    },
+    {
+      "type": "p",
+      "content": "In this lab, you will write an agent that reviews expense report submissions and generates an interactive A2UI card with 'Approve' and 'Reject' buttons for manager validation."
+    },
+    {
+      "type": "h2",
+      "content": "Step 1: Write the Dashboard Script"
+    },
+    {
+      "type": "p",
+      "content": "Create `src/agents/approval_manager.py` to generate the A2UI approval card layout payload:"
+    },
+    {
+      "type": "code",
+      "language": "python",
+      "code": "import json\nfrom google_adk import Agent\n\ndef create_approval_card(report_details: dict) -> str:\n    # Define the structured A2UI card with action buttons\n    card_layout = {\n        \"a2ui_version\": \"2.0.0\",\n        \"components\": [\n            {\n                \"type\": \"card\",\n                \"title\": \"Expense Approval Required\",\n                \"body\": f\"Review submission from {report_details['submitter']}: ${report_details['amount']}\",\n                \"status\": \"warning\"\n            },\n            {\n                \"type\": \"button_group\",\n                \"buttons\": [\n                    {\"label\": \"Approve Request\", \"action_id\": \"approve_expense\", \"variant\": \"success\"},\n                    {\"label\": \"Reject Request\", \"action_id\": \"reject_expense\", \"variant\": \"danger\"}\n                ]\n            }\n        ]\n    }\n    return json.dumps(card_layout)"
+    },
+    {
+      "type": "h2",
+      "content": "Step 2: Start the agent server"
+    },
+    {
+      "type": "p",
+      "content": "Launch your local agent host server to listen for events:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "adk serve --agent approval_manager.py --port 8096"
+    },
+    {
+      "type": "h2",
+      "content": "Step 3: Test action callbacks"
+    },
+    {
+      "type": "p",
+      "content": "Interact with the generated visual interface card. Click **Approve**. Review system console log to verify that the callback event routing triggers the correct backend handler function:"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "code": "[adk-server] Received event: a2ui_submit -> action_id: approve_expense. Processing payment ledger update..."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "course_id": "adk-304",
+  "title": "ADK-304: High-Throughput Message Queues for Agents",
+  "version": "1.0.0",
+  "author": "Google Cloud",
+  "description": "Scale A2A traffic with asynchronous message brokers like RabbitMQ or Kafka, implementing retry policies and DLQs.",
+  "features": [
+    {
+      "icon": "📬",
+      "title": "Asynchronous Brokers",
+      "description": "Offload agent messages to RabbitMQ, decoupling synchronous execution threads."
+    },
+    {
+      "icon": "🔁",
+      "title": "Retry Policies",
+      "description": "Design delivery retry protocols and exponential backoff loops for failed agent calls."
+    },
+    {
+      "icon": "💀",
+      "title": "Dead Letter Queues",
+      "description": "Redirect unresolvable agent transaction payloads to DLQs for developer audit analysis."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "metadata": "metadata.json",
+  "modules": [
+    {
+      "id": "1",
+      "title": "1. The A2UI Declarative Layout Protocol",
+      "file": "modules/01-a2ui-foundations.json"
+    },
+    {
+      "id": "2",
+      "title": "2. Building Forms and Processing Input Paybacks",
+      "file": "modules/02-dynamic-forms.json"
+    },
+    {
+      "id": "3",
+      "title": "3. Structuring Cards, Lists, and Data Tables",
+      "file": "modules/03-cards-tables.json"
+    },
+    {
+      "id": "4",
+      "title": "4. Secure Action Handlers & Event Routing",
+      "file": "modules/04-event-routing.json"
+    },
+    {
+      "id": "5",
+      "title": "5. Lab - Creating an Agent-Driven Approval Dashboard",
+      "file": "modules/05-lab-approval-dashboard.json"
+    }
+  ]
+}

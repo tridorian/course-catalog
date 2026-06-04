@@ -1,0 +1,46 @@
+{
+  "id": "1",
+  "title": "1. Introduction to agent conversation memory paradigms",
+  "type": "lab",
+  "blocks": [
+    {
+      "type": "h1",
+      "content": "Conversation Memory Paradigms"
+    },
+    {
+      "type": "p",
+      "content": "LLMs are inherently stateless. Each request must pass the historical message context. Managing this context limits token overhead."
+    },
+    {
+      "type": "grid",
+      "items": [
+        {
+          "icon": "ArrowRight",
+          "title": "Full History",
+          "content": "Sends every message. Accurate but runs out of context tokens quickly.",
+          "border": "#ef4444"
+        },
+        {
+          "icon": "Sliders",
+          "title": "Sliding Window",
+          "content": "Only keeps the last N messages, discarding older context.",
+          "border": "#3b82f6"
+        },
+        {
+          "icon": "FileText",
+          "title": "Summarization",
+          "content": "Summarizes older history into a single paragraph to save tokens.",
+          "border": "#4ade80"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "content": "Check Your Understanding"
+    },
+    {
+      "type": "p",
+      "content": "Question 1: What is the primary drawback of sending full conversation history with every message?\n- A) It is slow to parse on the client.\n- B) It exhausts token limits, increasing costs and response latencies.\n- C) It requires database write locks.\n\nFeedback: Option B is correct. Full history consumes tokens rapidly."
+    }
+  ]
+}
