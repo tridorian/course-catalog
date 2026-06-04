@@ -14,10 +14,10 @@ vi.mock('../../services/themeAudio', () => ({
   playThemeMusic: vi.fn(),
 }));
 
-// Mock theme generator service to prevent external Gemini API calls
 vi.mock('../../services/themeGenerator', () => ({
   generateThemeWithGemini: vi.fn(),
   generateMusicWithLyria: vi.fn(),
+  generateImageWithImagen: vi.fn(),
 }));
 
 describe('GlobalControls Theme Integration', () => {

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Palette, Check, Volume2, VolumeX, Sparkles, Cpu, Trash2, Sliders, Grid } from 'lucide-react';
 import * as themeAudio from '../services/themeAudio';
 import { saveCustomTheme, getCustomTheme, getCustomThemes, deleteCustomTheme, setActiveCustomTheme } from '../services/customTheme';
-import { generateThemeWithGemini, generateMusicWithLyria } from '../services/themeGenerator';
+import { generateThemeWithGemini, generateMusicWithLyria, generateImageWithImagen } from '../services/themeGenerator';
 
 const THEME_OPTIONS = [
   { id: 'dark', label: '🌿 tridorian Dark', swatches: ['#050805', '#4ade80', '#f0fdf4'] },
@@ -178,6 +178,15 @@ const GlobalControls = ({ theme, setTheme }) => {
       themeVars.prompt = prompt;
       saveCustomTheme(themeVars);
       localStorage.setItem('tridorian_last_theme_gen_time', Date.now().toString());
+
+      setGenStatus("Synthesizing theme background image (Imagen AI)...");
+      try {
+        const bgImageUrl = await generateImageWithImagen(prompt, apiKey);
+        themeVars['bg-pattern-image-url'] = bgImageUrl;
+        saveCustomTheme(themeVars);
+      } catch (err) {
+        console.warn("Failed to generate background image with Imagen, falling back to pre-built textures:", err);
+      }
 
       setGenStatus("Synthesizing ambient music track (Lyria AI)...");
       try {

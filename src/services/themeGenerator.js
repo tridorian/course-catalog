@@ -225,3 +225,78 @@ export async function generateMusicWithLyria(promptText, userApiKey = '') {
 
   return `data:audio/mpeg;base64,${part.inlineData.data}`;
 }
+
+export async function generateImageWithImagen(promptText, userApiKey = '') {
+  const proxyUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_PROXY_URL : '';
+
+  if (proxyUrl) {
+    const url = `${proxyUrl.replace(/\/$/, '')}/generate-image`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: promptText })
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Proxy error: ${response.status} - ${errText}`);
+    }
+    const data = await response.json();
+    return data.imageDataUrl;
+  }
+
+  const apiKey = getValidApiKey(userApiKey);
+  const gAuthToken = getAccessToken();
+
+  if (!apiKey && !gAuthToken) {
+    const rawKey = (userApiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('tridorian_gemini_api_key') : '') || '').trim();
+    if (rawKey === 'AIzaSyCrQVmC1PFEFb-oLAuOQdT7Jr-gb9W-JzY') {
+      throw new Error('API key was reported as leaked. Please use a different Gemini API key or sign in with Google.');
+    }
+    if (rawKey === 'your-gemini-api-key-here' || rawKey.startsWith('your-')) {
+      throw new Error('Please replace the placeholder API key with a valid Gemini API key or sign in with Google.');
+    }
+    throw new Error('API_KEY_REQUIRED');
+  }
+
+  let url;
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (apiKey) {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+  } else {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict`;
+    headers['Authorization'] = `Bearer ${gAuthToken}`;
+  }
+
+  const payload = {
+    instances: [
+      {
+        prompt: `A subtle, premium, seamless and tileable abstract background pattern/texture overlay for a web app dashboard theme. Style: ${promptText}. Very clean, low contrast, dark or light matching the theme, decorative only.`
+      }
+    ],
+    parameters: {
+      sampleCount: 1,
+      aspectRatio: "1:1",
+      outputMimeType: "image/png"
+    }
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Imagen API error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  const prediction = data.predictions?.[0];
+  if (!prediction || !prediction.bytesBase64Encoded) {
+    throw new Error('No image prediction returned from Imagen model.');
+  }
+
+  return `data:image/png;base64,${prediction.bytesBase64Encoded}`;
+}
