@@ -364,11 +364,11 @@ export function injectCustomThemeStyles(vars) {
     .theme-custom ::-webkit-scrollbar-track {
       background: var(--bg-muted);
     }
-    body.theme-custom .accent-btn:hover,
-    body.theme-custom button.bg-accent:not(:disabled):hover,
-    body.theme-custom a.bg-accent:hover,
+    body.theme-custom button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+    body.theme-custom a:not(.rounded-xl):not(.rounded-2xl):hover,
     body.theme-custom nav div.group:hover,
-    body.theme-custom .rounded-xl:hover {
+    body.theme-custom .rounded-xl:hover,
+    body.theme-custom .rounded-2xl:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-accent);
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);

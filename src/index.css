@@ -479,10 +479,10 @@ body:not([class*="theme-"]) .group:hover svg.text-accent-text {
 }
 
 /* Clean Light Leaf-Spring Hover */
-body.theme-light .accent-btn:hover,
-body.theme-light button.bg-accent:not(:disabled):hover,
-body.theme-light a.bg-accent:hover,
-body.theme-light .rounded-xl:hover {
+body.theme-light button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-light a:not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-light .rounded-xl:hover,
+body.theme-light .rounded-2xl:hover {
   transform: scale(1.03) translateY(-2px);
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -518,11 +518,11 @@ body.theme-light .progress-bar-fill::after {
 }
 
 /* Rainbow Kitten Wobble/Jiggle */
-body.theme-kitten .accent-btn:hover,
-body.theme-kitten button.bg-accent:not(:disabled):hover,
-body.theme-kitten a.bg-accent:hover,
+body.theme-kitten button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-kitten a:not(.rounded-xl):not(.rounded-2xl):hover,
 body.theme-kitten nav div.group:hover,
-body.theme-kitten .rounded-xl:hover {
+body.theme-kitten .rounded-xl:hover,
+body.theme-kitten .rounded-2xl:hover {
   animation: jiggle 0.4s ease-in-out;
 }
 
@@ -573,7 +573,8 @@ body.theme-kitten .progress-bar-fill::after {
 
 /* Caribbean Mood sea sway */
 body.theme-caribbean nav div.group:hover,
-body.theme-caribbean .rounded-xl:hover {
+body.theme-caribbean .rounded-xl:hover,
+body.theme-caribbean .rounded-2xl:hover {
   transform: translateY(-2px);
   animation: sea-sway 3s ease-in-out infinite alternate;
 }
@@ -584,8 +585,8 @@ body.theme-caribbean .rounded-xl:hover {
 }
 
 body.theme-caribbean .accent-btn,
-body.theme-caribbean button.bg-accent:not(:disabled),
-body.theme-caribbean a.bg-accent {
+body.theme-caribbean button.bg-accent:not(:disabled):not(.rounded-xl):not(.rounded-2xl),
+body.theme-caribbean a.bg-accent:not(.rounded-xl):not(.rounded-2xl) {
   position: relative;
   overflow: hidden;
   background-size: 100% 200%;
@@ -593,8 +594,8 @@ body.theme-caribbean a.bg-accent {
   transition: background-position 0.5s ease;
 }
 body.theme-caribbean .accent-btn:hover,
-body.theme-caribbean button.bg-accent:not(:disabled):hover,
-body.theme-caribbean a.bg-accent:hover {
+body.theme-caribbean button.bg-accent:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-caribbean a.bg-accent:not(.rounded-xl):not(.rounded-2xl):hover {
   background-position: 0 100%;
 }
 
@@ -616,6 +617,7 @@ body.theme-caribbean .progress-bar-fill {
 
 /* Lunar Vibe stark hover */
 body.theme-lunar .rounded-xl:hover,
+body.theme-lunar .rounded-2xl:hover,
 body.theme-lunar nav div.group:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(255, 255, 255, 0.04);
@@ -623,8 +625,8 @@ body.theme-lunar nav div.group:hover {
 }
 
 body.theme-lunar .accent-btn:hover,
-body.theme-lunar button.bg-accent:not(:disabled):hover,
-body.theme-lunar a.bg-accent:hover {
+body.theme-lunar button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-lunar a:not(.rounded-xl):not(.rounded-2xl):hover {
   box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.3);
 }
 
@@ -696,11 +698,11 @@ body.theme-lunar .progress-bar-fill::after {
   animation: shimmer 1.2s ease-in-out;
 }
 /* Jungle Safari Hover animations */
-body.theme-jungle .accent-btn:hover,
-body.theme-jungle button.bg-accent:not(:disabled):hover,
-body.theme-jungle a.bg-accent:hover,
+body.theme-jungle button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-jungle a:not(.rounded-xl):not(.rounded-2xl):hover,
 body.theme-jungle nav div.group:hover,
-body.theme-jungle .rounded-xl:hover {
+body.theme-jungle .rounded-xl:hover,
+body.theme-jungle .rounded-2xl:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3), 0 0 0 1px #eab308;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -726,14 +728,14 @@ body.theme-jungle .progress-bar-fill {
 }
 
 /* EVA-01 HUD animations */
-body.theme-genesis .accent-btn:hover,
-body.theme-genesis button.bg-accent:not(:disabled):hover,
-body.theme-genesis a.bg-accent:hover,
+body.theme-genesis button:not(:disabled):not(.rounded-xl):not(.rounded-2xl):hover,
+body.theme-genesis a:not(.rounded-xl):not(.rounded-2xl):hover,
 body.theme-genesis nav div.group:hover {
   animation: cyber-glitch 0.25s linear infinite alternate;
   box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
 }
-body.theme-genesis .rounded-xl:hover {
+body.theme-genesis .rounded-xl:hover,
+body.theme-genesis .rounded-2xl:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 15px rgba(57, 255, 20, 0.25);
   transition: all 0.3s ease;
