@@ -53,7 +53,6 @@ export const signOut = () => {
   if (accessToken) {
     window.google.accounts.oauth2.revoke(accessToken, () => {
       accessToken = null;
-      console.log('Access token revoked');
     });
   }
 };
