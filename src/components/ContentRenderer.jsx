@@ -237,7 +237,30 @@ function renderMarkdown(text) {
     if (part.startsWith('[') && part.endsWith(')')) {
       const match = part.match(/\[(.*?)\]\((.*?)\)/);
       if (match) {
-        return <a key={i} href={match[2]} target="_blank" rel="noreferrer" className="text-accent-text hover:underline underline-offset-2">{match[1]}</a>;
+        const text = match[1];
+        let href = match[2];
+
+        // URL Sanitization to prevent XSS
+        let isSafe = false;
+        try {
+          // Parse the URL. We use a dummy base for relative URLs.
+          const parsedUrl = new URL(href, 'http://dummy.com');
+          // Allow specific safe protocols
+          const safeProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
+          if (safeProtocols.includes(parsedUrl.protocol)) {
+            isSafe = true;
+          }
+        } catch (e) {
+          // If URL parsing fails, it might be an invalid URL. We err on the side of caution.
+          isSafe = false;
+        }
+
+        if (isSafe) {
+          return <a key={i} href={href} target="_blank" rel="noreferrer" className="text-accent-text hover:underline underline-offset-2">{text}</a>;
+        } else {
+          // If the link is not safe, render it as plain text (or bold text as it's meant to stand out)
+          return <span key={i} className="text-accent-text" title="Blocked insecure link">{text}</span>;
+        }
       }
     }
     return part;
