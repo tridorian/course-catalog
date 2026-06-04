@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchCourseManifest, fetchModuleContent } from '../services/contentLoader';
+import { fetchCourseManifest, fetchModuleContent, clearCache } from '../services/contentLoader';
 
 describe('contentLoader', () => {
   beforeEach(() => {
+    clearCache();
     vi.stubGlobal('fetch', vi.fn());
   });
 
