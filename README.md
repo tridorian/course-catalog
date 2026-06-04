@@ -1,10 +1,10 @@
 # Course Catalog Demo
 
-[![Build and Deploy](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml/badge.svg)](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml)
+[![Build and Deploy](https://github.com/tridorian/course-catalog/actions/workflows/deploy-cloudrun.yml/badge.svg)](https://github.com/tridorian/course-catalog/actions/workflows/deploy-cloudrun.yml)
 
-The course catalog demo. This project showcases the capabilities of  the tridorian standard for  an interactive web-based course.
+The course catalog demo. This project showcases the capabilities of the tridorian standard for an interactive web-based course.
 
-**[🚀 Launch Live Course Catalog](https://wtg-codes.github.io/course-catalog/)**
+**[🚀 Launch Live Course Catalog](https://tridorian-labs-zqfmig3vcq-uc.a.run.app)**
 
 ## Overview
 
@@ -50,10 +50,10 @@ The production-ready files will be in the `dist` directory.
 
 ## Deployment
 
-This project is configured for automated deployment to GitHub Pages via GitHub Actions.
+This project is configured for automated deployment to Google Cloud Run via GitHub Actions.
 
 - **Vite Config:** Uses `base: './'` for relative asset paths.
-- **Workflow:** `.github/workflows/deploy.yml` handles building and deploying on pushes to the `main` branch.
+- **Workflow:** `.github/workflows/deploy-cloudrun.yml` handles building, pushing Docker images, and deploying to Cloud Run on pushes to the `main` branch.
 
 ## Architecture
 
