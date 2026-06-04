@@ -597,9 +597,9 @@ function AppContent({ theme, setTheme }) {
 
           {/* Breadcrumbs */}
           <div className="mb-4 text-xs font-mono text-gray-500 tracking-wider">
-             <button onClick={() => navigate(`/${currentTrackId}`)} className="hover:text-accent-text transition-colors">{currentTrackId}</button>
+             <button onClick={() => navigate(`/${currentTrackId}`)} className="hover:text-accent-text transition-colors">{trackManifest?.title || currentTrackId}</button>
              <span className="opacity-50 mx-1">/</span>
-             <button onClick={() => navigate(`/${currentTrackId}/${currentCourseId}`)} className="hover:text-accent-text transition-colors">{currentCourseId}</button>
+             <button onClick={() => navigate(`/${currentTrackId}/${currentCourseId}`)} className="hover:text-accent-text transition-colors">{courseMetadata?.title || currentCourseId}</button>
              {moduleId ? <><span className="opacity-50 mx-1">/</span> <span className="text-text-muted">{activeStep?.title}</span></> : null}
           </div>
 
