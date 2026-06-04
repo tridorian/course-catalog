@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import * as Icons from 'lucide-react';
 
 // Procedural audio synthesizer for quiz sounds
@@ -71,7 +71,7 @@ function renderInlineText(text) {
       return <strong key={i} className="text-main font-bold">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith('`') && part.endsWith('`')) {
-      return <code key={i} className="bg-muted px-1.5 py-0.5 rounded text-accent-text font-mono text-sm">{part.slice(1, -1)}</code>;
+      return <code key={i} className="bg-muted px-1.5 py-0.5 rounded text-main font-mono text-sm">{part.slice(1, -1)}</code>;
     }
     return part;
   });
@@ -97,6 +97,25 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
   );
   const [retrying, setRetrying] = useState(false);
   const [quizFinished, setQuizFinished] = useState(false);
+
+  const containerRef = useRef(null);
+  const prevBottomRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (prevBottomRef.current !== null && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const diff = rect.bottom - prevBottomRef.current;
+      if (diff !== 0) {
+        const scrollParent = containerRef.current.closest('.overflow-y-auto');
+        if (scrollParent) {
+          scrollParent.scrollBy({ top: diff, behavior: 'auto' });
+        } else {
+          window.scrollBy({ top: diff, behavior: 'auto' });
+        }
+      }
+      prevBottomRef.current = null;
+    }
+  });
 
   const currentQuestion = questions[currentIdx];
   const isQuestionCorrect = answeredStates[currentIdx] === true;
@@ -135,6 +154,11 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
   const handleSubmit = () => {
     if (selectedOpt === null || shuffledOptions.length === 0) return;
 
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      prevBottomRef.current = rect.bottom;
+    }
+
     const isCorrect = shuffledOptions[selectedOpt].isCorrect;
     const newStates = [...answeredStates];
     newStates[currentIdx] = isCorrect;
@@ -150,6 +174,10 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
 
   // Handle retry after incorrect answer
   const handleRetry = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      prevBottomRef.current = rect.bottom;
+    }
     setSelectedOpt(null);
     setIsAnswered(false);
     setRetrying(true);
@@ -174,6 +202,13 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
       setSelectedOpt(null);
       setIsAnswered(false);
       setRetrying(false);
+      
+      // Smoothly scroll the top of the quiz box back into view
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 50);
     } else {
       // Check if all questions are completed successfully
       const allPassed = answeredStates.every(s => s === true);
@@ -224,7 +259,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
   }
 
   return (
-    <div className="bg-panel border border-border-main p-6 md:p-8 rounded-2xl shadow-sm-themed my-8 animate-in fade-in duration-300 relative overflow-hidden">
+    <div ref={containerRef} className="bg-panel border border-border-main p-6 md:p-8 rounded-2xl shadow-sm-themed my-8 animate-in fade-in duration-300 relative overflow-hidden">
       
       {/* Quiz Header */}
       <div className="flex justify-between items-center mb-6">
@@ -264,7 +299,9 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
           const isCorrectAnswer = optObj.isCorrect;
           const showAnswerStatus = isAnswered;
 
-          let optionStyle = 'border-border-main bg-panel text-text-muted hover:bg-muted/50 hover:text-main';
+          let optionStyle = 'border-border-main bg-panel text-main hover:bg-muted/50 hover:text-accent-text';
+          let spanStyle = '';
+          let stateClass = '';
           if (isSelected) {
             optionStyle = 'border-accent bg-muted text-accent-text shadow-accent';
           }
@@ -272,10 +309,16 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
           if (showAnswerStatus) {
             if (isCorrectAnswer) {
               optionStyle = 'bg-[var(--quiz-correct-bg)] border-[var(--quiz-correct-border)] text-[var(--quiz-correct-text)]';
+              spanStyle = 'text-[var(--quiz-correct-text)]';
+              stateClass = 'quiz-correct';
             } else if (isSelected) {
               optionStyle = 'bg-[var(--quiz-incorrect-bg)] border-[var(--quiz-incorrect-border)] text-[var(--quiz-incorrect-text)]';
+              spanStyle = 'text-[var(--quiz-incorrect-text)]';
+              stateClass = 'quiz-incorrect';
             } else {
-              optionStyle = 'opacity-40 border-border-main text-text-muted bg-panel';
+              optionStyle = 'opacity-40 border-border-main text-main bg-panel';
+              spanStyle = 'text-main opacity-40';
+              stateClass = 'quiz-unselected';
             }
           }
 
@@ -286,7 +329,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
               key={idx}
               disabled={isAnswered}
               onClick={() => handleSelectOption(idx)}
-              className={`w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-start gap-4 ${optionStyle}`}
+              className={`w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-start gap-4 quiz-option ${stateClass} ${optionStyle}`}
             >
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border flex-shrink-0 ${
                 showAnswerStatus
@@ -307,7 +350,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
                   optionLetter
                 )}
               </div>
-              <span className="leading-relaxed text-sm md:text-base pt-0.5">{renderInlineText(optObj.text)}</span>
+              <span className={`leading-relaxed text-sm md:text-base pt-0.5 ${spanStyle}`}>{renderInlineText(optObj.text)}</span>
             </button>
           );
         })}
@@ -330,7 +373,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
               <div className="font-bold text-xs uppercase tracking-wider mb-1 font-mono">
                 {answeredStates[currentIdx] === true ? 'Correct Explanatory Log' : 'Validation Error'}
               </div>
-              <p className="text-sm leading-relaxed text-main/90">{renderInlineText(currentQuestion.feedback)}</p>
+              <p className="text-sm leading-relaxed text-current">{renderInlineText(currentQuestion.feedback)}</p>
             </div>
           </div>
         </div>

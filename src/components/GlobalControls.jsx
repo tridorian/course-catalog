@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Palette, Check, Volume2, VolumeX, Sparkles, Cpu, Trash2 } from 'lucide-react';
+import { Palette, Check, Volume2, VolumeX, Sparkles, Cpu, Trash2, Sliders, Grid } from 'lucide-react';
 import * as themeAudio from '../services/themeAudio';
 import { saveCustomTheme, getCustomTheme, getCustomThemes, deleteCustomTheme, setActiveCustomTheme } from '../services/customTheme';
 import { generateThemeWithGemini, generateMusicWithLyria } from '../services/themeGenerator';
@@ -10,6 +10,8 @@ const THEME_OPTIONS = [
   { id: 'kitten', label: '🐱 Rainbow Kitten', swatches: ['#fef4f8', '#e91e8c', '#2d0b1a'] },
   { id: 'caribbean', label: '🏝️ Caribbean Mood', swatches: ['#e6f9f5', '#0d9e8a', '#0a2922'] },
   { id: 'lunar', label: '🌙 Lunar Vibe', swatches: ['#000000', '#e8e8e8', '#b0b0b0'] },
+  { id: 'jungle', label: '🐆 Jungle Safari', swatches: ['#0c1a12', '#eab308', '#b91c1c'] },
+  { id: 'genesis', label: '😈 EVA-01', swatches: ['#0a0512', '#39ff14', '#f3e8ff'] },
 ];
 
 const GlobalControls = ({ theme, setTheme }) => {
@@ -41,6 +43,24 @@ const GlobalControls = ({ theme, setTheme }) => {
   const [customThemes, setCustomThemes] = useState(() => getCustomThemes());
   const activeCustomTheme = getCustomTheme();
 
+  // Sandbox Background Tester state
+  // Sandbox Background Tester state
+  const [sandboxOpacity, setSandboxOpacity] = useState(0.25);
+  const [sandboxScale, setSandboxScale] = useState(2.0);
+  const [showTester, setShowTester] = useState(false);
+
+  // Sync sandbox state to CSS properties on mount or change
+  useEffect(() => {
+    const root = document.documentElement;
+    if (showTester) {
+      root.style.setProperty('--test-pattern-opacity', sandboxOpacity.toString());
+      root.style.setProperty('--test-pattern-size', `${512 * sandboxScale}px ${512 * sandboxScale}px`);
+    } else {
+      root.style.removeProperty('--test-pattern-opacity');
+      root.style.removeProperty('--test-pattern-size');
+    }
+  }, [showTester, sandboxOpacity, sandboxScale, theme]);
+
   // Refresh themes list when dropdown is opened to ensure sync
   useEffect(() => {
     if (isOpen) {
@@ -58,6 +78,39 @@ const GlobalControls = ({ theme, setTheme }) => {
       localStorage.setItem('tridorian_disable_cursor', (!isCursorEnabled).toString());
     } catch {}
   }, [isCursorEnabled]);
+
+  // Global scroll wheel volume controls
+  useEffect(() => {
+    const handleGlobalWheel = (e) => {
+      // Don't intercept if scrolling inside a scrollable container (like the sidebar or the main content text area)
+      if (e.target.closest('.overflow-y-auto') || e.target.closest('.custom-scrollbar')) {
+        return;
+      }
+
+      // Check if mouse cursor is over header, dashboard top controls row, or GlobalControls component itself
+      const isOverHeader = e.target.closest('header');
+      const isOverDashboardControls = e.target.closest('.border-b.border-border-subtle.pb-6');
+      const isOverGlobalControls = dropdownRef.current && dropdownRef.current.contains(e.target);
+
+      if (isOverHeader || isOverDashboardControls || isOverGlobalControls) {
+        e.preventDefault();
+        const change = e.deltaY < 0 ? 0.05 : -0.05;
+        
+        setAudioState(prev => {
+          const newVol = Math.max(0, Math.min(1, parseFloat(prev.volume) + change));
+          const roundedVol = Math.round(newVol * 100) / 100;
+          themeAudio.setVolume(roundedVol);
+          return { ...prev, volume: roundedVol };
+        });
+      }
+    };
+
+    window.addEventListener('wheel', handleGlobalWheel, { passive: false });
+    return () => {
+      window.removeEventListener('wheel', handleGlobalWheel);
+    };
+  }, []);
+
 
   const toggleCursor = (e) => {
     e.stopPropagation();
@@ -276,8 +329,13 @@ const GlobalControls = ({ theme, setTheme }) => {
               })}
 
               {/* Injected AI Custom Theme Options */}
-              {customThemes.map((opt) => {
-                const isActive = theme === 'custom' && activeCustomTheme && activeCustomTheme.id === opt.id;
+              {customThemes
+                .filter((opt) => {
+                  const name = (opt['theme-name'] || opt.themeName || '').toLowerCase();
+                  return !name.includes('jungle safari') && !name.includes('jungle park') && !name.includes('jeep jamboree');
+                })
+                .map((opt) => {
+                  const isActive = theme === 'custom' && activeCustomTheme && activeCustomTheme.id === opt.id;
                 const swatches = opt.swatches || [
                   opt['bg-base'] || '#080c08',
                   opt['accent-bg'] || '#22c55e',
@@ -332,6 +390,66 @@ const GlobalControls = ({ theme, setTheme }) => {
               })}
             </div>
 
+            {/* Background Texture Tester / Pattern Sandbox */}
+            <div className="p-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowTester(!showTester);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono font-bold hover:bg-muted/20 text-text-muted transition-all duration-150"
+                data-testid="pattern-sandbox-trigger"
+              >
+                <div className="flex items-center gap-2">
+                  <Grid size={12} />
+                  <span>Background Sandbox</span>
+                </div>
+                <Sliders size={12} className={`transition-transform duration-200 ${showTester ? 'rotate-90' : ''}`} />
+              </button>
+
+              {showTester && (
+                <div className="mt-2 p-2 rounded-lg space-y-3 bg-black/20 border border-border-subtle font-mono text-[10px]">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-text-muted uppercase tracking-wider">
+                      <span>Opacity</span>
+                      <span>{Math.round(sandboxOpacity * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.0"
+                      max="1.0"
+                      step="0.05"
+                      value={sandboxOpacity}
+                      onChange={(e) => setSandboxOpacity(parseFloat(e.target.value))}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full h-1 bg-muted rounded appearance-none cursor-pointer"
+                      style={{ accentColor: 'var(--accent-bg)' }}
+                      data-testid="sandbox-opacity-slider"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-text-muted uppercase tracking-wider">
+                      <span>Scale / Density</span>
+                      <span>{sandboxScale.toFixed(1)}x</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.5"
+                      step="0.1"
+                      value={sandboxScale}
+                      onChange={(e) => setSandboxScale(parseFloat(e.target.value))}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full h-1 bg-muted rounded appearance-none cursor-pointer"
+                      style={{ accentColor: 'var(--accent-bg)' }}
+                      data-testid="sandbox-scale-slider"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* AI Theme Generator Button */}
             <div className="p-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
               <button
@@ -384,6 +502,15 @@ const GlobalControls = ({ theme, setTheme }) => {
           borderColor: 'var(--border-main)',
           backgroundColor: 'var(--bg-panel)',
           color: 'var(--text-muted)',
+        }}
+        onWheel={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          const change = e.deltaY < 0 ? 0.05 : -0.05;
+          const newVol = Math.max(0, Math.min(1, parseFloat(audioState.volume) + change));
+          const roundedVol = Math.round(newVol * 100) / 100;
+          themeAudio.setVolume(roundedVol);
+          setAudioState(prev => ({ ...prev, volume: roundedVol }));
         }}
       >
         <button

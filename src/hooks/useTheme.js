@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { injectCustomThemeStyles, getCustomTheme } from '../services/customTheme';
 
 const THEME_STORAGE_KEY = 'tridorian_theme';
-const VALID_THEMES = ['dark', 'light', 'kitten', 'caribbean', 'lunar', 'custom'];
+const VALID_THEMES = ['dark', 'light', 'kitten', 'caribbean', 'lunar', 'jungle', 'genesis', 'custom'];
 
 export function useTheme() {
   const [theme, setThemeState] = useState(() => {

@@ -125,7 +125,7 @@ export async function generateMusicWithLyria(promptText, userApiKey = '') {
 
   const payload = {
     contents: {
-      parts: [{ text: `Generate a 30-second seamless ambient background instrumental music track. No spoken vocals. Mood: ${promptText}` }]
+      parts: [{ text: `Generate exactly a 30-second seamless, perfectly looping ambient background instrumental music track. No spoken vocals. It must have clean, smooth matching transitions at both start and end so it repeats flawlessly without any clicks or gaps. Mood: ${promptText}` }]
     },
     generationConfig: {
       responseModalities: ['AUDIO', 'TEXT']

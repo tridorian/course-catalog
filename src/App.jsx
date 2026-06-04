@@ -55,6 +55,9 @@ function AppContent({ theme, setTheme }) {
   const [activeStepQuizPassed, setActiveStepQuizPassed] = useState(true);
   const [trackManifest, setTrackManifest] = useState(null);
   const [userRole, setUserRole] = useState('student');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isProgressLoaded, setIsProgressLoaded] = useState(false);
+
 
 
   const { trackId, courseId, moduleId } = useParams();
@@ -81,6 +84,7 @@ function AppContent({ theme, setTheme }) {
   useEffect(() => {
     async function loadCourse() {
       setIsLoading(true);
+      setIsProgressLoaded(false);
       setError(null);
       try {
         const manifest = await fetchCourseManifest(currentTrackId, currentCourseId);
@@ -120,14 +124,24 @@ function AppContent({ theme, setTheme }) {
 
         // Load progress from Drive / Cache
         const token = getAccessToken();
+        let progress = null;
         if (token) {
-          const { progress, fileId } = await loadProgress();
-          setDriveFileId(fileId);
+          const res = await loadProgress();
+          progress = res.progress;
+          setDriveFileId(res.fileId);
+        } else {
+          try {
+            progress = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
+          } catch (e) {
+            console.error("Failed to load local progress:", e);
+          }
+        }
 
-          if (progress && progress._custom_themes) {
+        if (progress) {
+          if (progress._custom_themes) {
             localStorage.setItem('tridorian_custom_themes_list', JSON.stringify(progress._custom_themes));
           }
-          if (progress && progress._custom_theme) {
+          if (progress._custom_theme) {
             saveCustomTheme(progress._custom_theme);
           }
 
@@ -141,6 +155,7 @@ function AppContent({ theme, setTheme }) {
           // Resume session check
           let newest = null;
           for (const [key, val] of Object.entries(progress)) {
+            if (key.startsWith('_')) continue;
             if (val && val.lastUpdated) {
               if (!newest || new Date(val.lastUpdated) > new Date(newest.lastUpdated)) {
                 const [tId, cId] = key.split('_');
@@ -168,10 +183,12 @@ function AppContent({ theme, setTheme }) {
         }
 
         setIsLoading(false);
+        setIsProgressLoaded(true);
       } catch (err) {
         console.error("Failed to load course content:", err);
         setError(err.message);
         setIsLoading(false);
+        setIsProgressLoaded(true);
       }
     }
 
@@ -214,22 +231,28 @@ function AppContent({ theme, setTheme }) {
     };
   }, [moduleId, activeStepIndex, courseSteps]);
 
-  // Update progress in Drive whenever module or completed steps change
+  // Update progress in local storage (and Drive if connected) whenever module or completed steps change
   useEffect(() => {
-    if (driveFileId && moduleId && activeStepIndex !== -1) {
+    if (isProgressLoaded && moduleId && activeStepIndex !== -1) {
       const syncProgress = async () => {
-        setSyncStatus('syncing');
+        if (driveFileId) {
+          setSyncStatus('syncing');
+        }
         try {
           await saveCourseProgress(trackId, courseId, moduleId, completedSteps);
-          setSyncStatus('synced');
+          if (driveFileId) {
+            setSyncStatus('synced');
+          }
         } catch (err) {
           console.error("Failed to save progress:", err);
-          setSyncStatus('error');
+          if (driveFileId) {
+            setSyncStatus('error');
+          }
         }
       };
       syncProgress();
     }
-  }, [driveFileId, trackId, courseId, moduleId, completedSteps, activeStepIndex]);
+  }, [isProgressLoaded, driveFileId, trackId, courseId, moduleId, completedSteps, activeStepIndex]);
 
   const handleRetrySync = async () => {
     if (!driveFileId || !moduleId) return;
@@ -294,6 +317,8 @@ function AppContent({ theme, setTheme }) {
     // Mark all steps as completed
     const allIndices = courseSteps.map((_, i) => i);
     setCompletedSteps(allIndices);
+    saveCourseProgress(currentTrackId, currentCourseId, moduleId || '', allIndices)
+      .catch(err => console.error("Failed to save final course progress:", err));
     setShowCelebration(true);
   };
 
@@ -394,339 +419,362 @@ function AppContent({ theme, setTheme }) {
   const trackCompleted = currentCourseIndex !== -1 && currentCourseIndex === activeCourses.length - 1;
 
   return (
-    <div className="min-h-screen bg-base text-main font-sans flex flex-col md:flex-row selection:bg-accent selection:text-accent-fg relative overflow-hidden">
+    <div className="min-h-screen bg-base text-main font-sans flex flex-col selection:bg-accent selection:text-accent-fg relative overflow-hidden h-screen">
       <div className="theme-pattern-grid" />
 
-      {/* Mobile Header */}
-      <div className="md:hidden bg-panel border-b border-border-main p-4 flex justify-between items-center sticky top-0 z-50">
-        <button 
-          onClick={() => navigate('/')} 
-          className="font-bold text-accent-text tracking-widest hover:opacity-85 transition-opacity"
-        >
-          TRIDORIAN
-        </button>
-        <div className="flex items-center gap-4">
-          <GlobalControls theme={theme} setTheme={setTheme} />
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-main">
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      {/* Top Header Bar (Unified for Mobile & Desktop) */}
+      <header className="h-16 flex-shrink-0 bg-panel border-b border-border-main px-4 md:px-6 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
+          {/* Mobile hamburger button */}
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            className="md:hidden p-1.5 rounded-lg text-text-muted hover:text-main hover:bg-muted transition-colors flex-shrink-0"
+            title="Toggle Menu"
+            aria-label="Toggle navigation menu"
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-        </div>
-      </div>
 
-      {/* Sidebar Navigation */}
-      <div className={`
-        ${isMobileMenuOpen ? 'block' : 'hidden'}
-        md:block fixed md:sticky top-[61px] md:top-0 h-[calc(100vh-61px)] md:h-screen
-        w-full md:w-80 bg-panel border-r border-border-main flex flex-col z-40
-        transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar
-      `}>
-        <div className="p-6 hidden md:block border-b border-border-main">
-          <div className="flex justify-between items-start mb-2">
-            <button 
-              onClick={() => navigate('/')} 
-              className="font-extrabold text-xl text-accent-text tracking-[0.2em] hover:opacity-85 transition-opacity"
-            >
-              TRIDORIAN
-            </button>
+          {/* Desktop sidebar toggle button */}
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            className="hidden md:block p-1.5 rounded-lg text-text-muted hover:text-main hover:bg-muted transition-colors flex-shrink-0"
+            title="Toggle Sidebar"
+            aria-label="Toggle sidebar"
+          >
+            <Menu size={20} />
+          </button>
+
+          {/* Logo */}
+          <button 
+            onClick={() => navigate('/')} 
+            className="font-extrabold text-lg md:text-xl text-accent-text tracking-[0.2em] hover:opacity-85 transition-opacity whitespace-nowrap focus:outline-none"
+          >
+            TRIDORIAN
+          </button>
+
+          {/* Vertical Divider */}
+          <div className="hidden md:block w-px h-6 bg-border-main" />
+
+          {/* Course Title */}
+          <div className="hidden md:block text-xs font-mono uppercase text-text-muted truncate max-w-[240px] lg:max-w-[400px]" title={courseMetadata?.title}>
+            {courseMetadata?.title || 'LABS // UNKNOWN'}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
+          <div className="hidden sm:block">
             <SyncStatus status={syncStatus} onRetry={handleRetrySync} />
           </div>
-          <div className="flex justify-between items-center gap-2 mt-3">
-            <div className="text-xs text-text-muted font-mono uppercase truncate max-w-[160px]" title={courseMetadata?.title}>
-              {courseMetadata?.title || 'LABS // UNKNOWN'}
-            </div>
-            <GlobalControls theme={theme} setTheme={setTheme} />
-          </div>
+          <GlobalControls theme={theme} setTheme={setTheme} />
         </div>
+      </header>
 
-        <div className="p-4 flex-1">
-          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Course Modules</h2>
-          <nav className="space-y-2">
-            {courseSteps.map((step, index) => {
-              const isCompleted = completedSteps.includes(index);
-              const isActive = index === activeStepIndex;
-              const isLocked = index > 0 && !completedSteps.includes(index - 1);
+      {/* Main Workspace Area (split into sidebar and content area) */}
+      <div className="flex-1 flex flex-row relative overflow-hidden h-[calc(100vh-64px)]">
+        {/* Sidebar Navigation */}
+        <aside className={`
+          ${isMobileMenuOpen ? 'flex' : 'hidden'}
+          md:flex flex-col flex-shrink-0 bg-panel border-border-main z-40
+          transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar
+          fixed md:relative top-16 md:top-0 left-0 bottom-0 md:bottom-auto
+          ${isSidebarOpen ? 'w-full md:w-80 border-r' : 'w-0 overflow-hidden border-r-0'}
+          h-full
+        `}>
+          <div className="w-full md:w-80 flex-shrink-0 flex flex-col h-full justify-between">
+            <div className="p-4 flex-1">
+              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Course Modules</h2>
+              <nav className="space-y-2">
+                {courseSteps.map((step, index) => {
+                  const isCompleted = completedSteps.includes(index);
+                  const isActive = index === activeStepIndex;
+                  const isLocked = index > 0 && !completedSteps.includes(index - 1);
 
-              return (
-                <div
-                  key={`${step.id || ""}-${index}`}
-                  className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex justify-between items-center group relative ${
-                    isActive
-                      ? 'bg-muted text-accent-text border border-border-main shadow-accent'
-                      : isLocked
-                        ? 'text-gray-600 opacity-50'
-                        : 'text-gray-400 hover:bg-muted/50 hover:text-main'
-                  }`}
-                >
-                  <button
-                    disabled={isLocked}
-                    onClick={() => {
-                      navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="absolute inset-0 w-full h-full z-0 rounded-lg text-transparent select-none"
-                  >
-                    {step.title}
-                  </button>
-                  <div className="flex items-center gap-3 min-w-0 relative z-10 pointer-events-none">
-                    <button
-                      onClick={(e) => handleToggleComplete(index, e)}
-                      data-testid={`toggle-complete-${index}`}
-                      className="flex-shrink-0 focus:outline-none pointer-events-auto"
+                  return (
+                    <div
+                      key={`${step.id || ""}-${index}`}
+                      className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex justify-between items-center group relative ${
+                        isActive
+                          ? 'bg-muted text-accent-text border border-border-main shadow-accent'
+                          : isLocked
+                            ? 'text-gray-600 opacity-50'
+                            : 'text-gray-400 hover:bg-muted/50 hover:text-main'
+                      }`}
                     >
-                      {isLocked ? (
-                        <Lock size={14} className="text-gray-600" />
-                      ) : isCompleted ? (
-                        <CheckCircle2 size={14} className="text-accent-text" data-testid={`check-icon-${index}`} />
-                      ) : (
-                        <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-accent animate-pulse' : 'border-gray-500'}`}></div>
+                      <button
+                        disabled={isLocked}
+                        onClick={() => {
+                          navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="absolute inset-0 w-full h-full z-0 rounded-lg text-transparent select-none"
+                      >
+                        {step.title}
+                      </button>
+                      <div className="flex items-center gap-3 min-w-0 relative z-10 pointer-events-none">
+                        <button
+                          onClick={(e) => handleToggleComplete(index, e)}
+                          data-testid={`toggle-complete-${index}`}
+                          className="flex-shrink-0 focus:outline-none pointer-events-auto"
+                        >
+                          {isLocked ? (
+                            <Lock size={14} className="text-gray-600" />
+                          ) : isCompleted ? (
+                            <CheckCircle2 size={14} className="text-accent-text" data-testid={`check-icon-${index}`} />
+                          ) : (
+                            <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-accent animate-pulse' : 'border-gray-500'}`}></div>
+                          )}
+                        </button>
+                        <span className="truncate">{step.title}</span>
+                      </div>
+                      <span className="text-[10px] opacity-40 whitespace-nowrap font-mono relative z-10 pointer-events-none">{step.duration}</span>
+
+                      {isActive && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-accent rounded-r-full shadow-accent z-20"></div>
                       )}
-                    </button>
-                    <span className="truncate">{step.title}</span>
-                  </div>
-                  <span className="text-[10px] opacity-40 whitespace-nowrap font-mono relative z-10 pointer-events-none">{step.duration}</span>
+                    </div>
+                  );
+                })}
+              </nav>
+            </div>
 
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-accent rounded-r-full shadow-accent z-20"></div>
-                  )}
-                </div>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Global Progress */}
-        <div className="p-6 border-t border-border-main bg-base">
-          <div className="flex justify-between text-xs text-text-muted mb-2">
-            <span>Progress</span>
-            <span>{Math.round(progressPercentage)}%</span>
-          </div>
-          <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-4">
-            <div
-              className="h-full bg-accent progress-bar-fill transition-all duration-500 ease-out shadow-accent"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-          <button
-            onClick={() => setShowResetModal(true)}
-            className="w-full py-2 text-[10px] font-mono text-gray-500 hover:text-red-400 border border-border-main hover:border-red-900/30 rounded transition-all uppercase tracking-tighter"
-          >
-            Reset Progress
-          </button>
-          <button
-            onClick={() => navigate('/help')}
-            className="w-full mt-2 py-2 text-[10px] font-mono text-gray-500 hover:text-accent-text border border-border-main hover:border-accent-border rounded transition-all uppercase tracking-tighter flex items-center justify-center gap-1.5"
-          >
-            <HelpCircle size={10} />
-            Help & Troubleshooting
-          </button>
-        </div>
-      </div>
-
-      {/* Reset Confirmation Modal */}
-      {showResetModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-panel border border-border-main rounded-xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-            <h3 className="text-xl font-bold text-main mb-4">Reset Progress?</h3>
-            <p className="text-text-muted text-sm mb-8 leading-relaxed">
-              Are you sure you want to reset your progress for this course? This cannot be undone.
-            </p>
-            <div className="flex flex-col gap-3">
+            {/* Global Progress */}
+            <div className="p-6 border-t border-border-main bg-base">
+              <div className="flex justify-between text-xs text-text-muted mb-2">
+                <span>Progress</span>
+                <span>{Math.round(progressPercentage)}%</span>
+              </div>
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-4">
+                <div
+                  className="h-full bg-accent progress-bar-fill transition-all duration-500 ease-out shadow-accent"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
               <button
-                onClick={handleResetProgress}
-                className="w-full py-3 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded-lg font-bold transition-all"
+                onClick={() => setShowResetModal(true)}
+                className="w-full py-2 text-[10px] font-mono text-gray-500 hover:text-red-400 border border-border-main hover:border-red-900/30 rounded transition-all uppercase tracking-tighter"
               >
-                Confirm Reset
+                Reset Progress
               </button>
               <button
-                onClick={() => setShowResetModal(false)}
-                className="w-full py-3 bg-muted hover:bg-elevated text-gray-400 rounded-lg font-medium transition-all"
+                onClick={() => navigate('/help')}
+                className="w-full mt-2 py-2 text-[10px] font-mono text-gray-500 hover:text-accent-text border border-border-main hover:border-accent-border rounded transition-all uppercase tracking-tighter flex items-center justify-center gap-1.5"
               >
-                Cancel
+                <HelpCircle size={10} />
+                Help & Troubleshooting
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden pb-24 md:pb-0">
-
-        {/* Resume Session Banner */}
-        {isResumeBannerVisible && resumeSession && !isBannerDismissed && (
-          <div className="bg-muted border-b border-accent-border p-4 animate-in slide-in-from-top duration-500 z-50">
-            <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center border border-accent-border">
-                  <History size={20} className="text-accent-text" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-main">Resume Session?</div>
-                  <div className="text-xs text-text-muted font-mono">
-                    You were last working on <span className="text-accent-text">{resumeSession.courseId} / {resumeSession.moduleId}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => {
-                    setIsResumeBannerVisible(false);
-                    setIsBannerDismissed(true);
-                  }}
-                  className="px-4 py-1.5 text-xs font-mono text-gray-400 hover:text-main transition-colors"
+        {/* Reset Confirmation Modal */}
+        {showResetModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="bg-panel border border-border-main rounded-xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+              <h3 className="text-xl font-bold text-main mb-4">Reset Progress?</h3>
+              <p className="text-text-muted text-sm mb-8 leading-relaxed">
+                Are you sure you want to reset your progress for this course? This cannot be undone.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleResetProgress}
+                  className="w-full py-3 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded-lg font-bold transition-all"
                 >
-                  DISMISS
+                  Confirm Reset
                 </button>
-                <button 
-                  onClick={() => {
-                    navigate(`/${resumeSession.trackId}/${resumeSession.courseId}/${resumeSession.moduleId}`);
-                    setIsResumeBannerVisible(false);
-                  }}
-                  className="px-4 py-1.5 bg-accent text-accent-fg text-xs font-bold rounded flex items-center gap-2 hover:brightness-110 transition-all"
+                <button
+                  onClick={() => setShowResetModal(false)}
+                  className="w-full py-3 bg-muted hover:bg-elevated text-gray-400 rounded-lg font-medium transition-all"
                 >
-                  RESUME MISSION
+                  Cancel
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Subtle Background Glow */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
-
-        <main className="flex-1 p-6 md:p-12 lg:p-16 max-w-4xl mx-auto w-full z-10">
-
-          {/* Breadcrumbs */}
-          <div className="mb-4 text-xs font-mono text-gray-500 tracking-wider">
-             <button onClick={() => navigate(`/${currentTrackId}`)} className="hover:text-accent-text transition-colors">{trackManifest?.title || currentTrackId}</button>
-             <span className="opacity-50 mx-1">/</span>
-             <button onClick={() => navigate(`/${currentTrackId}/${currentCourseId}`)} className="hover:text-accent-text transition-colors">{courseMetadata?.title || currentCourseId}</button>
-             {moduleId ? <><span className="opacity-50 mx-1">/</span> <span className="text-text-muted">{activeStep?.title}</span></> : null}
-          </div>
-
-          {!moduleId ? (
-            <div className="space-y-6">
-              <h1 className="text-3xl font-bold text-main mb-6">Course Map</h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {courseSteps.map((step, index) => {
-                   const isCompleted = completedSteps.includes(index);
-                   const isLocked = index > 0 && !completedSteps.includes(index - 1);
-                   return (
-                     <div key={step.id} className={`p-4 rounded-xl border ${isLocked ? 'border-border-main bg-panel opacity-50' : 'border-border-main bg-muted'}`}>
-                        <h3 className="font-bold text-accent-text mb-2">{step.title}</h3>
-                        <p className="text-sm text-text-muted mb-4">{step.description || 'Module details'}</p>
-                        <button
-                          disabled={isLocked}
-                          onClick={() => navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`)}
-                          className="text-xs px-4 py-2 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110"
-                        >
-                          {isCompleted ? 'Review Module' : 'Start Module'}
-                        </button>
-                     </div>
-                   );
-                })}
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col h-full relative overflow-y-auto overflow-x-hidden custom-scrollbar pb-24 md:pb-12">
+          {/* Resume Session Banner */}
+          {isResumeBannerVisible && resumeSession && !isBannerDismissed && (
+            <div className="bg-muted border-b border-accent-border p-4 animate-in slide-in-from-top duration-500 z-50 flex-shrink-0">
+              <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center border border-accent-border">
+                    <History size={20} className="text-accent-text" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-main">Resume Session?</div>
+                    <div className="text-xs text-text-muted font-mono">
+                      You were last working on <span className="text-accent-text">{resumeSession.courseId} / {resumeSession.moduleId}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => {
+                      setIsResumeBannerVisible(false);
+                      setIsBannerDismissed(true);
+                    }}
+                    className="px-4 py-1.5 text-xs font-mono text-gray-400 hover:text-main transition-colors"
+                  >
+                    DISMISS
+                  </button>
+                  <button 
+                    onClick={() => {
+                      navigate(`/${resumeSession.trackId}/${resumeSession.courseId}/${resumeSession.moduleId}`);
+                      setIsResumeBannerVisible(false);
+                    }}
+                    className="px-4 py-1.5 bg-accent text-accent-fg text-xs font-bold rounded flex items-center gap-2 hover:brightness-110 transition-all"
+                  >
+                    RESUME MISSION
+                  </button>
+                </div>
               </div>
             </div>
-          ) : (
-            <>
-              {/* Step Indicator */}
-          <div className="mb-8 flex items-center justify-between">
-            <div className="text-xs font-mono text-text-muted tracking-widest uppercase">
-              Module {activeStepIndex + 1} <span className="opacity-30 mx-2">//</span> {activeStep.title.replace(/^\d+\.\s*/, '')}
-            </div>
-            <div className="text-[10px] font-mono text-gray-500">
-              {activeStepIndex + 1} / {totalSteps}
-            </div>
-          </div>
-
-          <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-12">
-            <div
-              className="h-full bg-gradient-to-r from-border-main to-accent transition-all duration-700 ease-in-out"
-              style={{ width: `${((activeStepIndex + 1) / totalSteps) * 100}%` }}
-            ></div>
-          </div>
-
-          {/* Inject Content */}
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} onQuizPassed={() => setActiveStepQuizPassed(true)} />
-          </div>
-            </>
           )}
-        </main>
 
-        {/* Bottom Navigation Bar */}
-        {moduleId && (
-        <footer className="fixed md:sticky bottom-0 w-full md:w-auto bg-panel border-t border-border-main p-4 px-6 md:px-12 flex justify-between items-center z-30">
-          <button
-            onClick={goToPrev}
-            disabled={activeStepIndex === 0}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeStepIndex === 0
-                ? 'text-gray-600 cursor-not-allowed'
-                : 'text-main hover:bg-muted'
-            }`}
-          >
-            <ChevronLeft size={20} />
-            Back
-          </button>
+          {/* Subtle Background Glow */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
 
-          {activeStepIndex === totalSteps - 1 ? (
-            completedSteps.includes(activeStepIndex) ? (
-              <div className="flex gap-3">
-                <button
-                  onClick={completeCourse}
-                  className="flex items-center gap-2 px-4 py-2 border border-border-main text-text-muted hover:text-main rounded-lg font-medium transition-colors"
-                >
-                  <Trophy size={16} />
-                  Review Badge
-                </button>
-                {nextCourse ? (
-                  <button
-                    onClick={() => navigate(`/${currentTrackId}/${nextCourse.id}`)}
-                    className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
-                  >
-                    Next Course
-                    <ChevronRight size={20} />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => navigate('/')}
-                    className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
-                  >
-                    Complete Track
-                  </button>
-                )}
+          <main className="flex-grow p-6 md:p-12 lg:p-16 max-w-4xl mx-auto w-full z-10">
+            {/* Breadcrumbs */}
+            <div className="mb-4 text-xs font-mono text-gray-500 tracking-wider">
+               <button onClick={() => navigate(`/${currentTrackId}`)} className="hover:text-accent-text transition-colors">{trackManifest?.title || currentTrackId}</button>
+               <span className="opacity-50 mx-1">/</span>
+               <button onClick={() => navigate(`/${currentTrackId}/${currentCourseId}`)} className="hover:text-accent-text transition-colors">{courseMetadata?.title || currentCourseId}</button>
+               {moduleId ? <><span className="opacity-50 mx-1">/</span> <span className="text-text-muted">{activeStep?.title}</span></> : null}
+            </div>
+
+            {!moduleId ? (
+              <div className="space-y-6">
+                <h1 className="text-3xl font-bold text-main mb-6">Course Map</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {courseSteps.map((step, index) => {
+                     const isCompleted = completedSteps.includes(index);
+                     const isLocked = index > 0 && !completedSteps.includes(index - 1);
+                     return (
+                       <div key={step.id} className={`p-4 rounded-xl border transition-all ${isLocked ? 'border-border-main bg-panel' : 'border-border-main bg-muted hover:border-accent/40'}`}>
+                          <h3 className={`font-bold mb-2 ${isLocked ? 'text-text-muted' : 'text-accent-text'}`}>{step.title}</h3>
+                          <p className={`text-sm mb-4 ${isLocked ? 'text-text-muted opacity-60' : 'text-text-muted'}`}>{step.description || 'Module details'}</p>
+                          <button
+                            disabled={isLocked}
+                            onClick={() => navigate(`/${currentTrackId}/${currentCourseId}/${step.id}`)}
+                            className={`text-xs px-4 py-2 font-bold rounded-lg transition-all ${
+                              isLocked
+                                ? 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
+                                : 'bg-accent text-accent-fg hover:brightness-110 shadow-accent'
+                            }`}
+                          >
+                            {isCompleted ? 'Review Module' : 'Start Module'}
+                          </button>
+                       </div>
+                     );
+                  })}
+                </div>
               </div>
             ) : (
+              <>
+                {/* Step Indicator */}
+                <div className="mb-8 flex items-center justify-between">
+                  <div className="text-xs font-mono text-text-muted tracking-widest uppercase">
+                    Module {activeStepIndex + 1} <span className="opacity-30 mx-2">//</span> {activeStep.title.replace(/^\d+\.\s*/, '')}
+                  </div>
+                  <div className="text-[10px] font-mono text-gray-500">
+                    {activeStepIndex + 1} / {totalSteps}
+                  </div>
+                </div>
+
+                <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-12">
+                  <div
+                    className="h-full bg-gradient-to-r from-border-main to-accent transition-all duration-700 ease-in-out"
+                    style={{ width: `${((activeStepIndex + 1) / totalSteps) * 100}%` }}
+                  ></div>
+                </div>
+
+                {/* Inject Content */}
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} onQuizPassed={() => setActiveStepQuizPassed(true)} />
+                </div>
+              </>
+            )}
+          </main>
+
+          {/* Bottom Navigation Bar */}
+          {moduleId && (
+            <footer className="sticky bottom-0 w-full bg-panel border-t border-border-main p-4 px-6 md:px-12 flex justify-between items-center z-30 flex-shrink-0">
               <button
-                disabled={!activeStepQuizPassed}
-                onClick={completeCourse}
-                className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
-                  activeStepQuizPassed
-                    ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse'
-                    : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
+                onClick={goToPrev}
+                disabled={activeStepIndex === 0}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeStepIndex === 0
+                    ? 'text-gray-600 cursor-not-allowed'
+                    : 'text-main hover:bg-muted'
                 }`}
               >
-                {activeStepQuizPassed ? <Trophy size={20} /> : <Lock size={20} />}
-                Complete Course
+                <ChevronLeft size={20} />
+                Back
               </button>
-            )
-          ) : (
-            <button
-              disabled={!activeStepQuizPassed}
-              onClick={goToNext}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
-                activeStepQuizPassed
-                  ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent'
-                  : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
-              }`}
-            >
-              {!activeStepQuizPassed && <Lock size={16} />}
-              Next
-              <ChevronRight size={20} />
-            </button>
+
+              {activeStepIndex === totalSteps - 1 ? (
+                completedSteps.includes(activeStepIndex) ? (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={completeCourse}
+                      className="flex items-center gap-2 px-4 py-2 border border-border-main text-text-muted hover:text-main rounded-lg font-medium transition-colors"
+                    >
+                      <Trophy size={16} />
+                      Review Badge
+                    </button>
+                    {nextCourse ? (
+                      <button
+                        onClick={() => navigate(`/${currentTrackId}/${nextCourse.id}`)}
+                        className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
+                      >
+                        Next Course
+                        <ChevronRight size={20} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => navigate('/')}
+                        className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
+                      >
+                        Complete Track
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    disabled={!activeStepQuizPassed}
+                    onClick={completeCourse}
+                    className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
+                      activeStepQuizPassed
+                        ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse'
+                        : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
+                    }`}
+                  >
+                    {activeStepQuizPassed ? <Trophy size={20} /> : <Lock size={20} />}
+                    Complete Course
+                  </button>
+                )
+              ) : (
+                <button
+                  disabled={!activeStepQuizPassed}
+                  onClick={goToNext}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all ${
+                    activeStepQuizPassed
+                      ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent'
+                      : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
+                  }`}
+                >
+                  {!activeStepQuizPassed && <Lock size={16} />}
+                  Next
+                  <ChevronRight size={20} />
+                </button>
+              )}
+            </footer>
           )}
-        </footer>
-        )}
+        </div>
       </div>
 
       {showScrollIndicator && (
@@ -766,6 +814,44 @@ function AppContent({ theme, setTheme }) {
 
 export default function App() {
   const { theme, setTheme } = useTheme();
+
+  // Developer utility to clear themes & reset counter via query parameter "?reset_themes=true"
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('reset_themes') === 'true') {
+        console.log("[Dev Tool] Clearing custom themes and resetting rate limit counters...");
+        localStorage.removeItem('tridorian_custom_themes_list');
+        localStorage.removeItem('tridorian_last_theme_gen_time');
+        localStorage.removeItem('tridorian_custom_theme_vars');
+        localStorage.removeItem('tridorian_custom_theme_audio');
+        
+        // Clean up from agy_local_progress
+        const localProg = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
+        delete localProg['_custom_themes'];
+        delete localProg['_custom_theme'];
+        localStorage.setItem('agy_local_progress', JSON.stringify(localProg));
+
+        // Reset cookie active theme references
+        document.cookie = 'tridorian_custom_theme_vars=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+        // Clear dynamic style tag if present
+        const styleTag = document.getElementById('tridorian-custom-theme');
+        if (styleTag) styleTag.remove();
+
+        // Reset theme setting state
+        setTheme('dark');
+
+        // Clear query param and reload
+        const url = new URL(window.location.href);
+        url.searchParams.delete('reset_themes');
+        window.history.replaceState({}, '', url.pathname + url.search);
+        window.location.reload();
+      }
+    } catch (e) {
+      console.warn("Dev Tool reset error:", e);
+    }
+  }, [setTheme]);
 
   // Unlock browser audio context on user interaction and start theme music
   useEffect(() => {

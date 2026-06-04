@@ -207,4 +207,41 @@ describe('GlobalControls Theme Integration', () => {
     expect(themes.length).toBe(1);
     expect(themes[0]['theme-name']).toBe('Nebula Sunset');
   });
+
+  it('verifies the Background Sandbox interactive controls and CSS updates', () => {
+    const mockSetTheme = vi.fn();
+    render(<GlobalControls theme="dark" setTheme={mockSetTheme} />);
+
+    // Open picker dropdown
+    fireEvent.click(screen.getByTestId('global-theme-picker'));
+
+    // Verify trigger button exists and click it to open
+    const sandboxTrigger = screen.getByTestId('pattern-sandbox-trigger');
+    expect(sandboxTrigger).toBeInTheDocument();
+    fireEvent.click(sandboxTrigger);
+
+    // Verify sliders are immediately visible
+    const opacitySlider = screen.getByTestId('sandbox-opacity-slider');
+    const scaleSlider = screen.getByTestId('sandbox-scale-slider');
+    expect(opacitySlider).toBeInTheDocument();
+    expect(scaleSlider).toBeInTheDocument();
+
+    // Verify CSS variables are updated on document root
+    const style = document.documentElement.style;
+    expect(style.getPropertyValue('--test-pattern-opacity')).toBe('0.25');
+    expect(style.getPropertyValue('--test-pattern-size')).toBe('1024px 1024px');
+
+    // Change opacity and scale
+    fireEvent.change(opacitySlider, { target: { value: '0.45' } });
+    fireEvent.change(scaleSlider, { target: { value: '1.8' } });
+
+    // Verify CSS updates correctly
+    expect(style.getPropertyValue('--test-pattern-opacity')).toBe('0.45');
+    expect(style.getPropertyValue('--test-pattern-size')).toBe('921.6px 921.6px');
+    
+    // Close sandbox to clear values
+    fireEvent.click(sandboxTrigger);
+    expect(style.getPropertyValue('--test-pattern-opacity')).toBe('');
+    expect(style.getPropertyValue('--test-pattern-size')).toBe('');
+  });
 });

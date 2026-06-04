@@ -935,6 +935,225 @@ function playCustomTheme() {
   }, tempo);
 }
 
+// Jungle Safari: Organic nature drone, rustling leaves noise, and sparse forest flutes
+function playJungleSafari() {
+  const now = audioCtx.currentTime;
+
+  // 1. Organic deep drone (low triangle chords)
+  const freqs = [82.41, 123.47, 164.81, 196.00]; // E minor
+  const padGain = audioCtx.createGain();
+  padGain.gain.setValueAtTime(0, now);
+  padGain.gain.linearRampToValueAtTime(0.08, now + 3);
+  padGain.connect(masterGain);
+
+  freqs.forEach(f => {
+    const osc = audioCtx.createOscillator();
+    const filter = audioCtx.createBiquadFilter();
+    osc.type = 'triangle';
+    osc.frequency.value = f;
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 350;
+
+    osc.connect(filter);
+    filter.connect(padGain);
+    osc.start(now);
+    osc.gainNode = padGain;
+    activeNodes.push(osc);
+  });
+
+  // 2. Rustling forest leaves wind (White Noise)
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+  }
+  const noiseNode = audioCtx.createBufferSource();
+  noiseNode.buffer = noiseBuffer;
+  noiseNode.loop = true;
+
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.setValueAtTime(1200, now);
+  noiseFilter.Q.setValueAtTime(1.5, now);
+
+  const noiseLfo = audioCtx.createOscillator();
+  const noiseLfoGain = audioCtx.createGain();
+  noiseLfo.frequency.value = 0.04; // Very slow leaf rustling wave
+  noiseLfoGain.gain.value = 500;
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0, now);
+  noiseGain.gain.linearRampToValueAtTime(0.012, now + 5);
+
+  noiseLfo.connect(noiseLfoGain);
+  noiseLfoGain.connect(noiseFilter.frequency);
+  noiseNode.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(masterGain);
+
+  noiseNode.start(now);
+  noiseLfo.start(now);
+  noiseNode.gainNode = noiseGain;
+  activeNodes.push(noiseNode, noiseLfo);
+
+  // 3. Ambient Forest Flute (E minor pentatonic)
+  const fluteNotes = [329.63, 392.00, 440.00, 493.88, 587.33, 659.25];
+  schedulerTimer = setInterval(() => {
+    if (audioCtx.state === 'suspended') return;
+    const schedNow = audioCtx.currentTime;
+
+    if (Math.random() > 0.6) {
+      const noteFreq = fluteNotes[Math.floor(Math.random() * fluteNotes.length)];
+      
+      const fluteOsc = audioCtx.createOscillator();
+      const fluteGain = audioCtx.createGain();
+      const vibrato = audioCtx.createOscillator();
+      const vibratoGain = audioCtx.createGain();
+      const delayObj = createDelayNode(0.45, 0.5);
+
+      fluteOsc.type = 'sine';
+      fluteOsc.frequency.setValueAtTime(noteFreq, schedNow);
+
+      // Add gentle vibrato for organic flute feel
+      vibrato.frequency.value = 5.5; // 5.5Hz vibrato
+      vibratoGain.gain.value = 4.0; // Vibrato depth (frequency offset)
+
+      vibrato.connect(vibratoGain);
+      vibratoGain.connect(fluteOsc.frequency);
+
+      // Flute envelope (slow attack and release)
+      fluteGain.gain.setValueAtTime(0, schedNow);
+      fluteGain.gain.linearRampToValueAtTime(0.03, schedNow + 0.35); // Slow puff attack
+      fluteGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 2.5); // Long natural decay
+
+      fluteOsc.connect(fluteGain);
+      fluteGain.connect(masterGain);
+      fluteGain.connect(delayObj.delay);
+      delayObj.delay.connect(masterGain);
+
+      vibrato.start(schedNow);
+      fluteOsc.start(schedNow);
+      fluteOsc.stop(schedNow + 3.0);
+      vibrato.stop(schedNow + 3.0);
+    }
+  }, 1800);
+}
+
+// EVA-01: Deep industrial cyberpunk drone and mecha glitch arpeggios
+function playNeonGenesis() {
+  const now = audioCtx.currentTime;
+
+  // 1. Deep industrial drone (saw + detuned square)
+  const osc1 = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const filter = audioCtx.createBiquadFilter();
+  const droneGain = audioCtx.createGain();
+
+  osc1.type = 'sawtooth';
+  osc1.frequency.value = 51.91; // G#1
+  
+  osc2.type = 'square';
+  osc2.frequency.value = 52.2; // Detuned
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(140, now);
+  filter.Q.setValueAtTime(7, now);
+
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.frequency.value = 0.06; // Slow modulation of filter cutoff
+  lfoGain.gain.value = 60;
+
+  lfo.connect(lfoGain);
+  lfoGain.connect(filter.frequency);
+
+  droneGain.gain.setValueAtTime(0, now);
+  droneGain.gain.linearRampToValueAtTime(0.28, now + 3);
+
+  osc1.connect(filter);
+  osc2.connect(filter);
+  filter.connect(droneGain);
+  droneGain.connect(masterGain);
+
+  osc1.start(now);
+  osc2.start(now);
+  lfo.start(now);
+
+  osc1.gainNode = droneGain;
+  osc2.gainNode = droneGain;
+  lfo.gainNode = droneGain;
+  activeNodes.push(osc1, osc2, lfo);
+
+  // 2. High glitch telemetry arpeggiator (G# minor pentatonic)
+  const arpNotes = [103.83, 123.47, 138.59, 155.56, 185.00, 207.65];
+  let step = 0;
+
+  schedulerTimer = setInterval(() => {
+    if (audioCtx.state === 'suspended') return;
+    const schedNow = audioCtx.currentTime;
+
+    // Glitchy syncopation
+    if (step % 8 !== 2 && step % 8 !== 6) {
+      const baseFreq = arpNotes[step % arpNotes.length];
+      const noteFreq = baseFreq * (Math.random() > 0.88 ? 4 : 2); // Double octave glitch spikes
+
+      const pluckOsc = audioCtx.createOscillator();
+      const pluckGain = audioCtx.createGain();
+      const pluckFilter = audioCtx.createBiquadFilter();
+      const delayObj = createDelayNode(0.42, 0.28); // Glitchy quick delay
+
+      pluckOsc.type = 'triangle';
+      pluckOsc.frequency.setValueAtTime(noteFreq, schedNow);
+
+      pluckFilter.type = 'bandpass';
+      pluckFilter.frequency.setValueAtTime(noteFreq * 2.5, schedNow);
+      pluckFilter.Q.setValueAtTime(2.0, schedNow);
+
+      pluckGain.gain.setValueAtTime(0, schedNow);
+      pluckGain.gain.linearRampToValueAtTime(0.09, schedNow + 0.005);
+      pluckGain.gain.exponentialRampToValueAtTime(0.0001, schedNow + 0.18);
+
+      pluckOsc.connect(pluckFilter);
+      pluckFilter.connect(pluckGain);
+      pluckGain.connect(masterGain);
+      pluckGain.connect(delayObj.delay);
+      delayObj.delay.connect(masterGain);
+
+      pluckOsc.start(schedNow);
+      pluckOsc.stop(schedNow + 0.25);
+    }
+    step = (step + 1) % 16;
+  }, 140); // Fast, cyber arpeggio
+}
+
+function playLoopOrProcedural(themeId, filePath, proceduralPlayFunc) {
+  if (typeof fetch !== 'function') {
+    proceduralPlayFunc();
+    return;
+  }
+
+  fetch(filePath, { method: 'HEAD' })
+    .then(response => {
+      // Only proceed if the user hasn't switched to a different theme in the meantime
+      if (currentLoopId !== themeId) return;
+
+      if (response.ok) {
+        console.log(`[Theme Audio] Playing generated Lyria loop for ${themeId}: ${filePath}`);
+        playCustomAudioURL(filePath);
+      } else {
+        console.warn(`[Theme Audio] Generated loop not found at ${filePath}. Falling back to procedural synthesizer.`);
+        proceduralPlayFunc();
+      }
+    })
+    .catch(err => {
+      if (currentLoopId !== themeId) return;
+      console.warn(`[Theme Audio] Failed to check loop file at ${filePath}. Falling back to procedural synthesizer:`, err);
+      proceduralPlayFunc();
+    });
+}
+
 // --- Controller Actions ---
 
 export function playThemeMusic(themeId) {
@@ -953,7 +1172,7 @@ export function playThemeMusic(themeId) {
 
     console.log(`[Theme Audio] Loading upgraded music loop: ${themeId}...`);
     if (themeId === 'dark') {
-      playTridorianDark();
+      playLoopOrProcedural('dark', '/audio/tridorian_dark_loop.mp3', playTridorianDark);
     } else if (themeId === 'light') {
       playCleanLight();
     } else if (themeId === 'kitten') {
@@ -961,7 +1180,11 @@ export function playThemeMusic(themeId) {
     } else if (themeId === 'caribbean') {
       playCaribbeanMood();
     } else if (themeId === 'lunar') {
-      playLunarVibe();
+      playLoopOrProcedural('lunar', '/audio/lunar_vibe_loop.mp3', playLunarVibe);
+    } else if (themeId === 'jungle') {
+      playJungleSafari();
+    } else if (themeId === 'genesis') {
+      playLoopOrProcedural('genesis', '/audio/eva01_loop.mp3', playNeonGenesis);
     } else if (themeId === 'custom') {
       playCustomTheme();
     }

@@ -142,6 +142,67 @@
   --quiz-incorrect-border: rgba(244, 63, 94, 0.4);
 }
 
+/* Jungle Safari — Jurassic Park Jeep Jamboree: deep forest green, hazard yellow, and crimson red */
+.theme-jungle {
+  color-scheme: dark;
+  --bg-base: #060e0a;
+  --bg-panel: #0c1a12;
+  --bg-muted: #132a1e;
+  --bg-elevated: #1b3a2a;
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
+  --border-main: #204d37;
+  --border-subtle: #132a1e;
+  --accent-bg: #eab308;
+  --accent-fg: #000000;
+  --accent-text: #eab308;
+  --accent-muted: rgba(234, 179, 8, 0.08);
+  --accent-border: rgba(234, 179, 8, 0.25);
+  --accent-red: #b91c1c;
+  --shadow-accent: 0 0 15px rgba(234, 179, 8, 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --quiz-correct-bg: rgba(16, 185, 129, 0.15);
+  --quiz-correct-text: #34d399;
+  --quiz-correct-border: rgba(16, 185, 129, 0.4);
+  --quiz-incorrect-bg: rgba(185, 28, 28, 0.15);
+  --quiz-incorrect-text: #fca5a5;
+  --quiz-incorrect-border: rgba(185, 28, 28, 0.4);
+  --theme-pattern-bg: url("/jungle_safari_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
+}
+
+/* EVA-01 — mecha theme with cybernetic purple & neon green */
+.theme-genesis {
+  color-scheme: dark;
+  --bg-base: #0a0512;
+  --bg-panel: #110920;
+  --bg-muted: #190f2d;
+  --bg-elevated: #24163f;
+  --text-main: #f3e8ff;
+  --text-muted: #c084fc;
+  --border-main: #341e57;
+  --border-subtle: #190f2d;
+  --accent-bg: #39ff14; /* Neon Green */
+  --accent-fg: #000000;
+  --accent-text: #39ff14;
+  --accent-muted: rgba(57, 255, 20, 0.08);
+  --accent-border: rgba(57, 255, 20, 0.25);
+  --shadow-accent: 0 0 15px rgba(57, 255, 20, 0.25);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --quiz-correct-bg: rgba(16, 185, 129, 0.15);
+  --quiz-correct-text: #34d399;
+  --quiz-correct-border: rgba(16, 185, 129, 0.4);
+  --quiz-incorrect-bg: rgba(244, 63, 94, 0.15);
+  --quiz-incorrect-text: #fda4af;
+  --quiz-incorrect-border: rgba(244, 63, 94, 0.4);
+  --theme-pattern-bg: url("/neon_genesis_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.15;
+}
+
 /* Themed Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
@@ -184,6 +245,9 @@
     color: var(--text-main);
     transition: background-color 0.3s ease, color 0.3s ease, background-image 0.3s ease;
   }
+  button:disabled {
+    -webkit-text-fill-color: currentColor;
+  }
 }
 
 /* ========================================
@@ -213,6 +277,24 @@
   background: var(--bg-base);
 }
 
+.theme-jungle ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b91c1c 0%, #eab308 100%);
+  border: 2px solid var(--bg-panel);
+  border-radius: 6px;
+}
+.theme-jungle ::-webkit-scrollbar-track {
+  background: var(--bg-muted);
+}
+
+.theme-genesis ::-webkit-scrollbar-thumb {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-text);
+  border-radius: 0px;
+}
+.theme-genesis ::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
 /* ========================================
    THEME PATTERN & GRID OVERLAYS
    ======================================== */
@@ -221,38 +303,40 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
+  opacity: var(--test-pattern-opacity, var(--theme-pattern-opacity, 0.4));
+  background-image: var(--test-pattern-bg, var(--theme-pattern-bg, none));
+  background-size: var(--test-pattern-size, var(--theme-pattern-size, auto));
+  transition: opacity 0.3s ease, background-size 0.2s ease;
 }
 
-:root:not(.theme-light):not(.theme-kitten):not(.theme-caribbean):not(.theme-lunar) .theme-pattern-grid {
-  background-image: 
-    linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
+body:not(.theme-light):not(.theme-kitten):not(.theme-caribbean):not(.theme-lunar):not(.theme-custom):not(.theme-jungle):not(.theme-genesis) {
+  --theme-pattern-bg: url("/tridorian_dark_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.15;
 }
 
-.theme-light .theme-pattern-grid {
-  background-image: radial-gradient(var(--border-main) 1.5px, transparent 1.5px);
-  background-size: 20px 20px;
+.theme-light {
+  --theme-pattern-bg: url("/clean_light_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
 }
 
-.theme-kitten .theme-pattern-grid {
-  background-image: radial-gradient(var(--border-main) 1px, transparent 0);
-  background-size: 24px 24px;
-  opacity: 0.6;
+.theme-kitten {
+  --theme-pattern-bg: url("/rainbow_kitten_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
 }
 
-.theme-caribbean .theme-pattern-grid {
-  background: radial-gradient(circle at 100% 150%, transparent 24%, var(--border-subtle) 24%, var(--border-subtle) 28%, transparent 28%, transparent);
-  background-size: 40px 40px;
+.theme-caribbean {
+  --theme-pattern-bg: url("/caribbean_mood_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.25;
 }
 
-.theme-lunar .theme-pattern-grid {
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 64px 64px;
+.theme-lunar {
+  --theme-pattern-bg: url("/lunar_vibe_bg.png");
+  --theme-pattern-size: 1024px 1024px;
+  --theme-pattern-opacity: 0.15;
 }
 
 /* ========================================
@@ -301,6 +385,26 @@ body.theme-lunar a,
 body.theme-lunar button,
 body.theme-lunar [role="button"] {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='6' fill='%23e8e8e8'/%3E%3Ccircle cx='10' cy='10' r='5' fill='%230c0c0c'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+body.theme-jungle {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23eab308' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%23b91c1c'/%3E%3Cline x1='12' y1='2' x2='12' y2='6' stroke='%23eab308' stroke-width='1.5'/%3E%3Cline x1='12' y1='18' x2='12' y2='22' stroke='%23eab308' stroke-width='1.5'/%3E%3Cline x1='2' y1='12' x2='6' y2='12' stroke='%23eab308' stroke-width='1.5'/%3E%3Cline x1='18' y1='12' x2='22' y2='12' stroke='%23eab308' stroke-width='1.5'/%3E%3C/svg%3E") 12 12, auto;
+}
+body.theme-jungle a,
+body.theme-jungle button,
+body.theme-jungle [role="button"],
+body.theme-jungle select,
+body.theme-jungle input {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='rgba(234,179,8,0.2)' stroke='%23eab308' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='21' stroke='%23eab308' stroke-width='2'/%3E%3Cline x1='3' y1='12' x2='21' y2='12' stroke='%23eab308' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%23b91c1c' stroke='%23eab308' stroke-width='1'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+body.theme-genesis {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 22,22 12,18 2,22' fill='%2339ff14' stroke='%23ff5500' stroke-width='1.5'/%3E%3C/svg%3E") 12 2, auto;
+}
+body.theme-genesis a,
+body.theme-genesis button,
+body.theme-genesis [role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 22,22 12,18 2,22' fill='%23ff5500' stroke='%2339ff14' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='2' fill='white'/%3E%3C/svg%3E") 12 2, pointer;
 }
 
 /* ========================================
@@ -551,6 +655,46 @@ body.theme-lunar .progress-bar-fill::after {
 .group:hover .group-hover\:animate-shimmer {
   animation: shimmer 1.2s ease-in-out;
 }
+/* Jungle Safari Hover animations */
+body.theme-jungle .accent-btn:hover,
+body.theme-jungle nav div.group:hover,
+body.theme-jungle .rounded-xl:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3), 0 0 0 1px #eab308;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+body.theme-jungle .progress-bar-fill {
+  background: repeating-linear-gradient(
+    -45deg,
+    #b91c1c,
+    #b91c1c 8px,
+    #eab308 8px,
+    #eab308 16px
+  );
+  background-size: 40px 40px;
+  animation: hazard-move 4s linear infinite;
+}
+@keyframes hazard-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+/* EVA-01 HUD animations */
+body.theme-genesis .accent-btn:hover,
+body.theme-genesis nav div.group:hover,
+body.theme-genesis .rounded-xl:hover {
+  animation: cyber-glitch 0.25s linear infinite alternate;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+}
+body.theme-genesis .progress-bar-fill {
+  background: linear-gradient(90deg, #c084fc 0%, #39ff14 100%);
+  background-size: 200% 100%;
+  animation: matrix-scan 2.5s linear infinite;
+}
 
 /* Custom Cursor Override Switch */
 body.disable-custom-cursor,
@@ -563,4 +707,29 @@ body.disable-custom-cursor [role="button"],
 body.disable-custom-cursor select,
 body.disable-custom-cursor input {
   cursor: pointer !important;
+}
+
+/* Quiz Option Contrast & Readability Overrides */
+.quiz-option:disabled {
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+}
+.quiz-option.quiz-correct {
+  background-color: var(--quiz-correct-bg) !important;
+  border-color: var(--quiz-correct-border) !important;
+  color: var(--quiz-correct-text) !important;
+}
+.quiz-option.quiz-correct span {
+  color: var(--quiz-correct-text) !important;
+}
+.quiz-option.quiz-incorrect {
+  background-color: var(--quiz-incorrect-bg) !important;
+  border-color: var(--quiz-incorrect-border) !important;
+  color: var(--quiz-incorrect-text) !important;
+}
+.quiz-option.quiz-incorrect span {
+  color: var(--quiz-incorrect-text) !important;
+}
+.quiz-option.quiz-unselected {
+  opacity: 0.4 !important;
 }

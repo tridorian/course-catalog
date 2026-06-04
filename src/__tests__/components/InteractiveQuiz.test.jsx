@@ -82,4 +82,53 @@ describe('InteractiveQuiz Component', () => {
 
     mathRandomSpy.mockRestore();
   });
+
+  it('applies high-contrast theme classes and explicit text color classes to options after submission', () => {
+    const questions = [
+      {
+        question: 'Q1',
+        options: ['CorrectAnswer', 'WrongAnswer'],
+        correctIndex: 0,
+        feedback: 'Feedback'
+      },
+      {
+        question: 'Q2',
+        options: ['CorrectAnswer', 'WrongAnswer'],
+        correctIndex: 0,
+        feedback: 'Feedback'
+      }
+    ];
+
+    render(<InteractiveQuiz questions={questions} onPassed={vi.fn()} />);
+
+    // Select 'WrongAnswer'
+    const incorrectBtn = screen.getByRole('button', { name: /WrongAnswer/i });
+    fireEvent.click(incorrectBtn);
+
+    const submitBtn = screen.getByRole('button', { name: /Submit Answer/i });
+    fireEvent.click(submitBtn);
+
+    // Check classes on buttons and spans
+    const correctBtn = screen.getByRole('button', { name: /CorrectAnswer/i });
+    const selectedBtn = screen.getByRole('button', { name: /WrongAnswer/i });
+
+    expect(correctBtn).toBeDisabled();
+    expect(selectedBtn).toBeDisabled();
+
+    // Verify correct option has high-contrast bg, border, and text classes
+    expect(correctBtn.className).toContain('bg-[var(--quiz-correct-bg)]');
+    expect(correctBtn.className).toContain('text-[var(--quiz-correct-text)]');
+    expect(correctBtn.className).toContain('quiz-correct');
+
+    const correctSpan = correctBtn.querySelector('span');
+    expect(correctSpan.className).toContain('text-[var(--quiz-correct-text)]');
+
+    // Verify incorrect option has high-contrast bg, border, and text classes
+    expect(selectedBtn.className).toContain('bg-[var(--quiz-incorrect-bg)]');
+    expect(selectedBtn.className).toContain('text-[var(--quiz-incorrect-text)]');
+    expect(selectedBtn.className).toContain('quiz-incorrect');
+
+    const selectedSpan = selectedBtn.querySelector('span');
+    expect(selectedSpan.className).toContain('text-[var(--quiz-incorrect-text)]');
+  });
 });

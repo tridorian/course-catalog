@@ -121,6 +121,10 @@ export async function loadProgress() {
   let fileId = null;
 
   const token = getAccessToken();
+  if (!token) {
+    const localProgress = getLocalProgress();
+    return { progress: localProgress, fileId: null };
+  }
   if (token === 'valid-token') {
     const localProgress = getLocalProgress();
     return { progress: localProgress, fileId: 'mock-file-id' };
@@ -157,7 +161,7 @@ export async function saveCourseProgress(trackId, courseId, activeModuleId, comp
   saveLocalProgress(fullProgress);
 
   const token = getAccessToken();
-  if (token === 'valid-token') {
+  if (!token || token === 'valid-token') {
     return;
   }
 

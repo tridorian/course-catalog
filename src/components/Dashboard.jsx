@@ -94,7 +94,7 @@ const Dashboard = ({ theme, setTheme }) => {
       }
     }
     loadCatalog();
-  }, []);
+  }, [isConnected]);
 
   const handleConnect = async () => {
     try {

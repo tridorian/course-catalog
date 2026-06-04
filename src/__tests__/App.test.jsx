@@ -10,6 +10,7 @@ vi.mock('../services/contentLoader');
 describe('App Integration', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    localStorage.clear();
 
     // Mock catalog and track manifest (used by Dashboard/TrackPage)
     contentLoader.fetchCatalog.mockResolvedValue({
@@ -295,5 +296,30 @@ describe('App Integration', () => {
       expect(screen.getByRole('button', { name: /Review Badge/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Complete Track/i })).toBeInTheDocument();
     });
+  });
+
+  it('loads progress from localStorage if not signed in / no token', async () => {
+    const mockProgress = {
+      'agentic-engineering_agy-101': {
+        activeModuleId: 'module-2',
+        completedIndices: ['0'],
+        lastUpdated: new Date().toISOString()
+      }
+    };
+    localStorage.setItem('agy_local_progress', JSON.stringify(mockProgress));
+
+    renderApp();
+
+    await waitFor(() => {
+      expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
+    });
+
+    // Check that module-1 (index 0) has a checkmark indicating completion
+    await waitFor(() => {
+      expect(screen.getAllByTestId(/check-icon-/).length).toBe(1);
+    });
+
+    // Clean up
+    localStorage.removeItem('agy_local_progress');
   });
 });

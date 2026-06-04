@@ -230,6 +230,15 @@ export function injectCustomThemeStyles(vars) {
   const patternType = vars['bg-pattern'] || 'grid';
   const patternSvg = getPatternSvg(patternType, vars['accent-bg'], vars['border-main'] || vars['accent-border']);
 
+  const accentColor = vars['accent-bg'] || '#22c55e';
+  // Futuristic AI/tech crosshair reticle cursor
+  const cursorSvgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.5" opacity="0.8"/><circle cx="12" cy="12" r="2" fill="${encodeURIComponent(accentColor)}"/><line x1="12" y1="2" x2="12" y2="5" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="19" x2="12" y2="22" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="2" y1="12" x2="5" y2="12" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="19" y1="12" x2="22" y2="12" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/></svg>`;
+  // Click/Pointer state: dash-array circle with pointer element
+  const pointerSvgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="${encodeURIComponent(accentColor)}" stroke-width="2" stroke-dasharray="3 2"/><circle cx="12" cy="12" r="3" fill="${encodeURIComponent(accentColor)}"/><path d="M12,4 L15,8 L9,8 Z" fill="${encodeURIComponent(accentColor)}" opacity="0.95"/></svg>`;
+
+  const cursorSvg = `data:image/svg+xml;utf8,${cursorSvgXml}`;
+  const pointerSvg = `data:image/svg+xml;utf8,${pointerSvgXml}`;
+
   styleTag.textContent = `
     .theme-custom {
       color-scheme: ${isLight ? 'light' : 'dark'};
@@ -258,7 +267,33 @@ export function injectCustomThemeStyles(vars) {
     .theme-custom .theme-pattern-grid {
       background-image: ${patternSvg ? `url("${patternSvg}")` : 'none'};
       background-size: ${patternType === 'circuit' ? '80px 80px' : patternType === 'waves' ? '60px 30px' : '40px 40px'};
-      opacity: ${patternType === 'none' ? '0' : '0.45'};
+      opacity: ${patternType === 'none' ? '0' : '0.55'};
+    }
+    .theme-custom ::-webkit-scrollbar-thumb {
+      background: var(--accent-bg);
+      border: 2px solid var(--bg-panel);
+      border-radius: 6px;
+    }
+    .theme-custom ::-webkit-scrollbar-track {
+      background: var(--bg-muted);
+    }
+    body.theme-custom .accent-btn:hover,
+    body.theme-custom nav div.group:hover,
+    body.theme-custom .rounded-xl:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-accent);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    body.theme-custom .progress-bar-fill {
+      background: linear-gradient(90deg, var(--bg-muted) 0%, var(--accent-bg) 100%);
+    }
+    body.theme-custom {
+      cursor: url("${cursorSvg}") 12 12, auto;
+    }
+    body.theme-custom a,
+    body.theme-custom button,
+    body.theme-custom [role="button"] {
+      cursor: url("${pointerSvg}") 12 12, pointer;
     }
   `;
 }
