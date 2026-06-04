@@ -175,6 +175,7 @@ describe('GlobalControls Theme Integration', () => {
       swatches: ['#120c1f', '#ff00aa', '#ffffff']
     });
 
+    themeGenerator.generateImageWithImagen.mockResolvedValue('data:image/png;base64,mockImageGeneratedByImagen');
     themeGenerator.generateMusicWithLyria.mockResolvedValue('data:audio/mp3;base64,mock');
 
     render(<GlobalControls theme="dark" setTheme={mockSetTheme} />);
@@ -202,10 +203,13 @@ describe('GlobalControls Theme Integration', () => {
       expect(themeAudio.playThemeMusic).toHaveBeenCalledWith('custom');
     });
 
-    // Verify it saved the custom theme to storage
+    // Verify it saved the custom theme to storage with the background image
     const themes = getCustomThemes();
     expect(themes.length).toBe(1);
     expect(themes[0]['theme-name']).toBe('Nebula Sunset');
+    expect(themes[0]['bg-pattern-image-url']).toBe(`local:image_${themes[0].id}`);
+    expect(localStorage.getItem(`tridorian_custom_theme_image_${themes[0].id}`)).toBe('data:image/png;base64,mockImageGeneratedByImagen');
+    expect(themeGenerator.generateImageWithImagen).toHaveBeenCalledWith('Nebula theme', 'test-api-key');
   });
 
   it('verifies the Background Sandbox interactive controls and CSS updates', () => {

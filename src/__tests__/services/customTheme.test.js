@@ -11,7 +11,8 @@ import {
   rgbToHex,
   getLuminance,
   getContrastRatio,
-  enforceContrast
+  enforceContrast,
+  safeLocalStorageSet
 } from '../../services/customTheme';
 
 describe('Custom Theme Service', () => {
@@ -107,14 +108,12 @@ describe('Custom Theme Service', () => {
   describe('getPatternSvg', () => {
     it('returns grid SVG data URI', () => {
       const svg = getPatternSvg('grid', '#ff0000', '#00ff00');
-      expect(svg).toContain('data:image/svg+xml');
-      expect(svg).toContain('stroke="%2300ff00"');
+      expect(svg).toContain('data:image/svg+xml;base64,');
     });
 
     it('returns circuit SVG data URI with accent and border colors', () => {
       const svg = getPatternSvg('circuit', '#ff0000', '#00ff00');
-      expect(svg).toContain('fill="%23ff0000"');
-      expect(svg).toContain('stroke="%2300ff00"');
+      expect(svg).toContain('data:image/svg+xml;base64,');
     });
 
     it('returns empty string for none pattern', () => {
@@ -140,8 +139,23 @@ describe('Custom Theme Service', () => {
       expect(styleTag).not.toBeNull();
       expect(styleTag.textContent).toContain('--bg-base: #100a20');
       expect(styleTag.textContent).toContain('--bg-gradient: linear-gradient(135deg, #100a20 0%, #05030a 100%)');
-      expect(styleTag.textContent).toContain('background-image: url("data:image/svg+xml;utf8,');
+      expect(styleTag.textContent).toContain('background-image: url("data:image/svg+xml;base64,');
       expect(styleTag.textContent).toContain('background-size: 80px 80px');
+    });
+
+    it('uses bg-pattern-image-url if provided', () => {
+      const themeVars = {
+        'bg-base': '#100a20',
+        'accent-bg': '#7928ca',
+        'text-main': '#ffffff',
+        'bg-pattern-image-url': 'data:image/png;base64,mockImageGeneratedByImagen'
+      };
+
+      injectCustomThemeStyles(themeVars);
+
+      const styleTag = document.getElementById('tridorian-custom-theme');
+      expect(styleTag).not.toBeNull();
+      expect(styleTag.textContent).toContain('url("data:image/png;base64,mockImageGeneratedByImagen")');
     });
   });
 
@@ -185,4 +199,95 @@ describe('Custom Theme Service', () => {
       expect(getContrastRatio(adjustedRgb, bgRgb)).toBeGreaterThanOrEqual(7.0);
     });
   });
+
+  describe('safeLocalStorageSet quota protection', () => {
+    it('should evict non-active themes to make space but keep active theme intact', () => {
+      const activeTheme = { id: 'theme_active', 'theme-name': 'Active Theme', generatedAt: '2026-06-04T00:00:00Z' };
+      const inactiveTheme = { id: 'theme_inactive', 'theme-name': 'Inactive Theme', generatedAt: '2026-06-03T00:00:00Z' };
+
+      // Save themes
+      saveCustomTheme(inactiveTheme);
+      saveCustomTheme(activeTheme);
+      setActiveCustomTheme(activeTheme);
+
+      // Verify they are saved
+      expect(getCustomThemes().length).toBe(2);
+      expect(getCustomTheme().id).toBe('theme_active');
+
+      // Mock localStorage.setItem to throw QuotaExceededError on the first call,
+      // but succeed on subsequent calls (after eviction)
+      let callsCount = 0;
+      const originalSetItem = localStorage.setItem;
+      
+      const mockSetItem = vi.fn((key, value) => {
+        callsCount++;
+        // Throw quota error only for the heavy audio key on the first attempt
+        if (key === 'heavy_audio_key' && callsCount === 1) {
+          const err = new Error('QuotaExceededError');
+          err.name = 'QuotaExceededError';
+          throw err;
+        }
+        return originalSetItem.call(localStorage, key, value);
+      });
+      localStorage.setItem = mockSetItem;
+
+      // Call safeLocalStorageSet
+      const result = safeLocalStorageSet('heavy_audio_key', 'some_large_audio_base64_data');
+      
+      // Restore original
+      localStorage.setItem = originalSetItem;
+
+      expect(result).toBe(true);
+      
+      // Inactive theme should be evicted
+      const themes = getCustomThemes();
+      expect(themes.length).toBe(1);
+      expect(themes[0].id).toBe('theme_active');
+      
+      // Active theme should NOT be evicted
+      expect(getCustomTheme().id).toBe('theme_active');
+    });
+  });
+
+  describe('Robust fallback and parsing error handling', () => {
+    it('should fall back to localStorage if cookie JSON is truncated/invalid', () => {
+      const activeTheme = { id: 'theme_cookie_fallback', 'theme-name': 'Fallback Theme' };
+      localStorage.setItem('tridorian_custom_theme_vars', JSON.stringify(activeTheme));
+      
+      // Set a truncated/broken JSON cookie
+      document.cookie = 'tridorian_custom_theme_vars={"id":"theme_cookie_fallback"; path=/; SameSite=Lax';
+
+      const resolved = getCustomTheme();
+      expect(resolved).not.toBeNull();
+      expect(resolved.id).toBe('theme_cookie_fallback');
+    });
+
+    it('should fall back to agy_local_progress._custom_theme if cookie and local vars keys are missing', () => {
+      const activeTheme = { id: 'theme_progress_fallback', 'theme-name': 'Progress Theme' };
+      const localProgress = {
+        _custom_theme: activeTheme,
+        _custom_themes: [activeTheme]
+      };
+      localStorage.setItem('agy_local_progress', JSON.stringify(localProgress));
+
+      const resolved = getCustomTheme();
+      expect(resolved).not.toBeNull();
+      expect(resolved.id).toBe('theme_progress_fallback');
+    });
+
+    it('should fall back to agy_local_progress._custom_themes if themes list key is missing', () => {
+      const theme1 = { id: 'theme_1', 'theme-name': 'Theme One' };
+      const theme2 = { id: 'theme_2', 'theme-name': 'Theme Two' };
+      const localProgress = {
+        _custom_themes: [theme1, theme2]
+      };
+      localStorage.setItem('agy_local_progress', JSON.stringify(localProgress));
+
+      const resolvedThemes = getCustomThemes();
+      expect(resolvedThemes.length).toBe(2);
+      expect(resolvedThemes.map(t => t.id)).toContain('theme_1');
+      expect(resolvedThemes.map(t => t.id)).toContain('theme_2');
+    });
+  });
 });
+

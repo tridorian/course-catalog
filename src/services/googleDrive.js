@@ -139,7 +139,70 @@ export async function loadProgress() {
   }
 
   const localProgress = getLocalProgress();
+  console.log("[loadProgress] Loaded remoteProgress custom_theme:", JSON.stringify(remoteProgress?._custom_theme || null));
+  console.log("[loadProgress] Loaded localProgress custom_theme:", JSON.stringify(localProgress?._custom_theme || null));
+  
   const merged = { ...remoteProgress, ...localProgress };
+
+  // Deep-merge active custom theme intelligently to prevent image disappearing issues
+  if (remoteProgress?._custom_theme || localProgress?._custom_theme) {
+    const remoteTheme = remoteProgress?._custom_theme;
+    const localTheme = localProgress?._custom_theme;
+
+    if (remoteTheme && localTheme) {
+      if (remoteTheme.id === localTheme.id) {
+        const remoteHasImg = !!remoteTheme['bg-pattern-image-url'];
+        const localHasImg = !!localTheme['bg-pattern-image-url'];
+
+        if (localHasImg && !remoteHasImg) {
+          merged._custom_theme = localTheme;
+        } else if (remoteHasImg && !localHasImg) {
+          merged._custom_theme = remoteTheme;
+        } else {
+          // Fallback to latest generatedAt or local version
+          const remoteTime = new Date(remoteTheme.generatedAt || 0).getTime();
+          const localTime = new Date(localTheme.generatedAt || 0).getTime();
+          merged._custom_theme = localTime >= remoteTime ? localTheme : remoteTheme;
+        }
+      } else {
+        // Different theme IDs: prefer the most recently generated theme
+        const remoteTime = new Date(remoteTheme.generatedAt || 0).getTime();
+        const localTime = new Date(localTheme.generatedAt || 0).getTime();
+        merged._custom_theme = localTime >= remoteTime ? localTheme : remoteTheme;
+      }
+    } else {
+      merged._custom_theme = localTheme || remoteTheme;
+    }
+  }
+
+  // Deep-merge custom themes list to preserve all generated themes and their background image URLs
+  if (remoteProgress?._custom_themes || localProgress?._custom_themes) {
+    const remoteThemes = remoteProgress?._custom_themes || [];
+    const localThemes = localProgress?._custom_themes || [];
+    const themesMap = new Map();
+
+    remoteThemes.forEach(t => {
+      if (t && t.id) themesMap.set(t.id, t);
+    });
+
+    localThemes.forEach(t => {
+      if (t && t.id) {
+        const existing = themesMap.get(t.id);
+        if (existing) {
+          const existingHasImg = !!existing['bg-pattern-image-url'];
+          const tHasImg = !!t['bg-pattern-image-url'];
+          if (tHasImg || !existingHasImg) {
+            themesMap.set(t.id, t);
+          }
+        } else {
+          themesMap.set(t.id, t);
+        }
+      }
+    });
+    merged._custom_themes = Array.from(themesMap.values());
+  }
+
+  console.log("[loadProgress] Merged custom_theme:", JSON.stringify(merged?._custom_theme || null));
   saveLocalProgress(merged);
 
   return { progress: merged, fileId };

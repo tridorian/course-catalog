@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Palette, Check, Volume2, VolumeX, Sparkles, Cpu, Trash2, Sliders, Grid } from 'lucide-react';
 import * as themeAudio from '../services/themeAudio';
-import { saveCustomTheme, getCustomTheme, getCustomThemes, deleteCustomTheme, setActiveCustomTheme } from '../services/customTheme';
+import { saveCustomTheme, getCustomTheme, getCustomThemes, deleteCustomTheme, setActiveCustomTheme, safeLocalStorageSet } from '../services/customTheme';
 import { generateThemeWithGemini, generateMusicWithLyria, generateImageWithImagen } from '../services/themeGenerator';
 
 const THEME_OPTIONS = [
@@ -64,6 +64,7 @@ const GlobalControls = ({ theme, setTheme }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
   const [genStatus, setGenStatus] = useState('');
+  const [genLogs, setGenLogs] = useState([]);
 
   const [customThemes, setCustomThemes] = useState(() => getCustomThemes());
   const activeCustomTheme = getCustomTheme();
@@ -127,6 +128,11 @@ const GlobalControls = ({ theme, setTheme }) => {
   };
 
 
+  const addLog = (msg) => {
+    console.log(`[ThemeGen] ${msg}`);
+    setGenLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  };
+
   const handleGenerateTheme = async () => {
     if (!prompt.trim()) {
       setGenError("Prompt cannot be empty.");
@@ -166,45 +172,99 @@ const GlobalControls = ({ theme, setTheme }) => {
     setIsGenerating(true);
     setGenError(null);
     setGenStatus("Generating theme colors...");
+    setGenLogs([]);
+
+    addLog("🚀 Initiating Custom Theme Pipeline...");
+    addLog(`[Config] User Prompt: "${prompt}"`);
+    addLog(`[Config] Proxy Mode Enabled: Routing calls to secure backend proxy at ${import.meta.env.VITE_PROXY_URL || 'http://localhost:5001'}`);
 
     try {
+      addLog("Step 1/3: Calling Gemini API (gemini-2.5-flash) to generate custom color palette & styling tokens...");
       const themeVars = await generateThemeWithGemini(prompt, apiKey);
+      addLog(`[Gemini] ✅ Colors generated successfully! Created theme: "${themeVars['theme-name']}"`);
+      addLog(`[Gemini] Theme Variables:`);
+      addLog(`  • Name: ${themeVars['theme-name']}`);
+      addLog(`  • Base Background: ${themeVars['bg-base']}`);
+      addLog(`  • Panel Background: ${themeVars['bg-panel']}`);
+      addLog(`  • Accent color: ${themeVars['accent-bg']}`);
+      addLog(`  • Pattern style: ${themeVars['bg-pattern'] || 'none'}`);
+      addLog(`  • Music Scale: ${themeVars.music?.scale || 'dorian'}, Waveform: ${themeVars.music?.waveform || 'sine'}`);
       
       // Save Gemini API key if entered/changed
       if (apiKey) {
         localStorage.setItem('tridorian_gemini_api_key', apiKey);
+        addLog(`[Storage] Saved user-provided Gemini API key to local settings.`);
       }
 
       themeVars.prompt = prompt;
-      saveCustomTheme(themeVars);
+      addLog("[Storage] Caching initial theme variables...");
+      saveCustomTheme(themeVars, true);
       localStorage.setItem('tridorian_last_theme_gen_time', Date.now().toString());
 
+      addLog("Step 2/3: Dispatching background image request to Imagen AI (imagen-4.0-generate-001)...");
+      addLog(`[Imagen] Requesting 1:1 aspect ratio JPEG texture. Timeout threshold: 30 seconds.`);
       setGenStatus("Synthesizing theme background image (Imagen AI)...");
       try {
         const bgImageUrl = await generateImageWithImagen(prompt, apiKey);
+        addLog(`[Imagen] ✅ Background image generated successfully! Received compressed base64 payload size: ${bgImageUrl.length} characters.`);
         themeVars['bg-pattern-image-url'] = bgImageUrl;
-        saveCustomTheme(themeVars);
+        saveCustomTheme(themeVars, true);
+        addLog(`[Storage] Updated theme variables with background image URL.`);
       } catch (err) {
+        addLog(`[Imagen] ⚠️ Image generation failed: ${err.message}`);
+        addLog("  ↳ Common reasons: API timeouts or content policy filters. Falling back to CSS SVG pattern overlay.");
         console.warn("Failed to generate background image with Imagen, falling back to pre-built textures:", err);
       }
 
+      addLog("Step 3/3: Dispatching audio loop request to Lyria AI (lyria-3-clip-preview)...");
+      addLog(`[Lyria] Prompting for a 30-second seamless looping instrumental track. Timeout threshold: 30 seconds.`);
       setGenStatus("Synthesizing ambient music track (Lyria AI)...");
       try {
         const audioDataUrl = await generateMusicWithLyria(prompt, apiKey);
-        localStorage.setItem(`tridorian_custom_theme_audio_${themeVars.id}`, audioDataUrl);
-        localStorage.setItem('tridorian_custom_theme_audio', audioDataUrl);
+        addLog(`[Lyria] ✅ Audio loop generated successfully! Received base64 payload size: ${audioDataUrl.length} characters.`);
+        
+        addLog("[Storage] Saving audio loop to localStorage cache...");
+        const saveAudio = safeLocalStorageSet(`tridorian_custom_theme_audio_${themeVars.id}`, audioDataUrl);
+        try {
+          localStorage.removeItem('tridorian_custom_theme_audio');
+        } catch (e) {}
+        
+        if (saveAudio) {
+          addLog("[Storage] ✅ Audio loop saved successfully to local cache.");
+        } else {
+          addLog("⚠️ Failed to cache audio loop in localStorage (Quota exceeded).");
+        }
       } catch (err) {
-        console.warn("Failed to generate music with Lyria, falling back to synthesizer loop:", err);
+        addLog(`[Lyria] ⚠️ Audio generation failed: ${err.message}`);
+        if (prompt.toLowerCase().includes("'s") || prompt.toLowerCase().includes("rip") || prompt.toLowerCase().includes("dutton") || prompt.toLowerCase().includes("yellowstone")) {
+          addLog("  ↳ Warning: Prompts containing fictional characters (e.g. 'Rip', 'Dutton') or trademarked entities can trigger model safety blocks (Finish Reason: OTHER). Try using descriptive terms instead.");
+        }
+        console.warn("Failed to generate music with Lyria:", err);
         localStorage.removeItem(`tridorian_custom_theme_audio_${themeVars.id}`);
-        localStorage.removeItem('tridorian_custom_theme_audio');
+        try {
+          localStorage.removeItem('tridorian_custom_theme_audio');
+        } catch (e) {}
       }
 
+      addLog("Finalizing theme activation...");
       setCustomThemes(getCustomThemes());
       setTheme('custom');
+      
+      // Final sync of the custom theme variables (with completed properties) to Drive
+      saveCustomTheme(themeVars, false);
+      
+      addLog("[Audio] Initializing playback for the new theme...");
       themeAudio.playThemeMusic('custom');
-      setPrompt('');
-      setShowGenerator(false);
+      addLog("🎉 Custom theme pipeline completed successfully! Enjoy your theme.");
+      
+      // Keep modal open slightly longer so user can read complete logs
+      setTimeout(() => {
+        setPrompt('');
+        setShowGenerator(false);
+        setGenLogs([]);
+      }, 7000);
     } catch (e) {
+      addLog(`❌ Pipeline aborted with error: ${e.message}`);
       if (e.message === 'API_KEY_REQUIRED') {
         setGenError("A Gemini API Key is required to run the theme generator.");
       } else {
@@ -558,7 +618,7 @@ const GlobalControls = ({ theme, setTheme }) => {
       {/* 4. AI Theme Generator Prompt Modal */}
       {showGenerator && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-panel border border-border-main rounded-xl p-6 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] font-sans max-h-[95vh] overflow-y-auto">
+          <div className="bg-panel border border-border-main rounded-xl p-6 max-w-3xl w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] font-sans max-h-[95vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-main mb-2">AI Theme Generator</h3>
             <p className="text-text-muted text-xs mb-4">
               Enter a design style to generate custom colors & synthesizer loops using Gemini.
@@ -608,8 +668,21 @@ const GlobalControls = ({ theme, setTheme }) => {
                 {isGenerating ? (genStatus || "Generating...") : "Generate Theme Colors & Music"}
               </button>
               
+              {/* Real-time Terminal Log Console */}
+              {(isGenerating || genLogs.length > 0) && (
+                <div className="mt-4 p-3 bg-black border border-border-main rounded-lg font-mono text-[10px] leading-relaxed text-[#4ade80] max-h-96 overflow-y-auto space-y-1">
+                  <div className="text-[10px] text-gray-500 uppercase tracking-wider pb-1 border-b border-border-subtle mb-1 flex justify-between items-center">
+                    <span>Theme Generation Logs</span>
+                    {isGenerating && <span className="animate-pulse text-amber-500">● RUNNING</span>}
+                  </div>
+                  {genLogs.map((log, i) => (
+                    <div key={i} className="break-words select-all">{log}</div>
+                  ))}
+                </div>
+              )}
+
               {genError && (
-                <div className="text-red-400 text-xs font-mono max-w-xs break-words">
+                <div className="text-red-400 text-xs font-mono max-w-xl break-words">
                   {genError}
                 </div>
               )}
@@ -617,11 +690,13 @@ const GlobalControls = ({ theme, setTheme }) => {
               {/* Actions */}
               <div className="flex gap-3 border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
                 <button
+                  disabled={isGenerating}
                   onClick={() => {
                     setShowGenerator(false);
                     setGenError(null);
+                    setGenLogs([]);
                   }}
-                  className="w-full py-2 bg-muted text-text-muted rounded-lg hover:bg-elevated transition-all text-sm font-bold"
+                  className="w-full py-2 bg-muted text-text-muted rounded-lg hover:bg-elevated transition-all text-sm font-bold disabled:opacity-50"
                 >
                   Close
                 </button>

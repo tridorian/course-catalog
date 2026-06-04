@@ -12,6 +12,68 @@ export function setCookie(name, value, days = 30) {
   document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/; SameSite=Lax";
 }
 
+export function safeLocalStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    const isQuotaError = e.name === 'QuotaExceededError' || e.code === 22 || e.message?.toLowerCase().includes('quota');
+    if (isQuotaError) {
+      console.warn(`[Storage] LocalStorage quota exceeded. Evicting oldest custom theme to clear space...`);
+      try {
+        const rawList = localStorage.getItem('tridorian_custom_themes_list');
+        if (rawList) {
+          const themes = JSON.parse(rawList);
+          if (Array.isArray(themes) && themes.length > 0) {
+            // Find active theme ID to protect it
+            const activeRaw = localStorage.getItem('tridorian_custom_theme_vars');
+            let activeId = '';
+            if (activeRaw) {
+              try {
+                const active = JSON.parse(activeRaw);
+                activeId = active?.id || '';
+              } catch (err) {}
+            }
+
+            // Filter out themes that are active
+            let candidates = themes.filter(t => t.id !== activeId);
+            
+            while (candidates.length > 0) {
+              // Sort candidates by generatedAt (oldest first)
+              candidates.sort((a, b) => new Date(a.generatedAt || 0) - new Date(b.generatedAt || 0));
+              const oldest = candidates[0];
+              console.warn(`[Storage] Evicting older custom theme to clear space: ${oldest['theme-name']} (${oldest.id})`);
+              
+              // Remove this candidate from list
+              const newThemes = themes.filter(t => t.id !== oldest.id);
+              localStorage.setItem('tridorian_custom_themes_list', JSON.stringify(newThemes));
+              localStorage.removeItem(`tridorian_custom_theme_audio_${oldest.id}`);
+              
+              // Update candidates list
+              candidates = candidates.filter(t => t.id !== oldest.id);
+              
+              // Retry write
+              try {
+                localStorage.setItem(key, value);
+                console.log(`[Storage] Quota recovered! Saved key ${key} successfully after eviction.`);
+                return true;
+              } catch (writeErr) {
+                console.warn(`[Storage] Write still failing after evicting ${oldest.id}. Trying next candidate...`);
+              }
+            }
+            console.warn(`[Storage] No more inactive themes to evict. Quota cleanup finished.`);
+          }
+        }
+      } catch (err) {
+        console.error(`[Storage] Eviction failed during quota recovery:`, err);
+      }
+    }
+    console.error(`[Storage] safeLocalStorageSet failed for key ${key}:`, e);
+    return false;
+  }
+}
+
+
 export function getCookie(name) {
   const nameEQ = name + "=";
   const ca = document.cookie.split(';');
@@ -26,7 +88,19 @@ export function getCookie(name) {
 // Get the array of all custom themes
 export function getCustomThemes() {
   try {
-    const raw = localStorage.getItem(CUSTOM_THEMES_LIST_KEY);
+    let raw = localStorage.getItem(CUSTOM_THEMES_LIST_KEY);
+    if (!raw) {
+      // Try to load from agy_local_progress if themes list is missing/cleared
+      try {
+        const localProg = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
+        if (localProg._custom_themes) {
+          raw = JSON.stringify(localProg._custom_themes);
+          localStorage.setItem(CUSTOM_THEMES_LIST_KEY, raw);
+        }
+      } catch (err) {
+        console.warn("[getCustomThemes] Failed to parse agy_local_progress:", err);
+      }
+    }
     if (!raw) {
       // Migrate legacy single theme if present
       const legacy = getCookie(CUSTOM_THEME_COOKIE) || localStorage.getItem(CUSTOM_THEME_COOKIE);
@@ -37,7 +111,7 @@ export function getCustomThemes() {
           theme['theme-name'] = theme['theme-name'] || 'Legacy Custom Theme';
         }
         const list = [theme];
-        localStorage.setItem(CUSTOM_THEMES_LIST_KEY, JSON.stringify(list));
+        safeLocalStorageSet(CUSTOM_THEMES_LIST_KEY, JSON.stringify(list));
         return list;
       }
       return [];
@@ -50,16 +124,28 @@ export function getCustomThemes() {
 }
 
 // Save a theme into the themes list and set it as active
-export function saveCustomTheme(vars) {
+export function saveCustomTheme(vars, skipSync = false) {
   try {
     if (!vars) return;
+    console.log("[saveCustomTheme] Called with vars:", JSON.stringify(vars), "skipSync:", skipSync);
     
     // Assign ID and timestamp if missing
     if (!vars.id) {
       vars.id = `custom_${Date.now()}`;
+      console.log(`[saveCustomTheme] Assigned new ID: ${vars.id}`);
     }
     if (!vars.generatedAt) {
       vars.generatedAt = new Date().toISOString();
+    }
+
+    // Extract background image base64 if present in vars
+    if (vars['bg-pattern-image-url'] && vars['bg-pattern-image-url'].startsWith('data:image')) {
+      const imgData = vars['bg-pattern-image-url'];
+      console.log(`[saveCustomTheme] Extracting base64 image (size: ${imgData.length}) to local storage key: tridorian_custom_theme_image_${vars.id}`);
+      safeLocalStorageSet(`tridorian_custom_theme_image_${vars.id}`, imgData);
+      // Replace with lightweight reference to save storage and prevent QuotaExceededError
+      vars['bg-pattern-image-url'] = `local:image_${vars.id}`;
+      console.log(`[saveCustomTheme] Set bg-pattern-image-url to: ${vars['bg-pattern-image-url']}`);
     }
 
     const themes = getCustomThemes();
@@ -67,23 +153,28 @@ export function saveCustomTheme(vars) {
     updatedThemes.push(vars);
 
     // Save themes list
-    localStorage.setItem(CUSTOM_THEMES_LIST_KEY, JSON.stringify(updatedThemes));
-
+    safeLocalStorageSet(CUSTOM_THEMES_LIST_KEY, JSON.stringify(updatedThemes));
+ 
     // Save active theme reference (for backwards compatibility/cookie load)
     const activeStr = JSON.stringify(vars);
     setCookie(CUSTOM_THEME_COOKIE, activeStr, 30);
-    localStorage.setItem(CUSTOM_THEME_COOKIE, activeStr);
-
+    safeLocalStorageSet(CUSTOM_THEME_COOKIE, activeStr);
+ 
     injectCustomThemeStyles(vars);
-
+ 
     // Sync state to standard progress profile object for Drive sync
     try {
       const LOCAL_PROGRESS_KEY = 'agy_local_progress';
       const localProg = JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY) || '{}');
       localProg['_custom_themes'] = updatedThemes;
       localProg['_custom_theme'] = vars;
-      localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
-      syncProgressToDrive();
+      safeLocalStorageSet(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+      if (!skipSync) {
+        console.log("[saveCustomTheme] Syncing progress to Drive...");
+        syncProgressToDrive();
+      } else {
+        console.log("[saveCustomTheme] Skipping sync to Drive (intermediate state).");
+      }
     } catch (err) {
       console.warn("Failed to store custom themes in user progress profile:", err);
     }
@@ -98,16 +189,16 @@ export function setActiveCustomTheme(vars) {
     if (!vars) return;
     const activeStr = JSON.stringify(vars);
     setCookie(CUSTOM_THEME_COOKIE, activeStr, 30);
-    localStorage.setItem(CUSTOM_THEME_COOKIE, activeStr);
-
+    safeLocalStorageSet(CUSTOM_THEME_COOKIE, activeStr);
+ 
     injectCustomThemeStyles(vars);
-
+ 
     // Sync state to standard progress profile object for Drive sync
     try {
       const LOCAL_PROGRESS_KEY = 'agy_local_progress';
       const localProg = JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY) || '{}');
       localProg['_custom_theme'] = vars;
-      localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+      safeLocalStorageSet(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
       syncProgressToDrive();
     } catch (err) {
       console.warn("Failed to store custom theme in user progress profile:", err);
@@ -124,8 +215,49 @@ export function getCustomTheme(id = '') {
     if (id) {
       return themes.find(t => t.id === id) || null;
     }
-    const raw = getCookie(CUSTOM_THEME_COOKIE) || localStorage.getItem(CUSTOM_THEME_COOKIE);
-    return raw ? JSON.parse(raw) : (themes.length > 0 ? themes[themes.length - 1] : null);
+    
+    // 1. Try reading and parsing cookie
+    const cookieRaw = getCookie(CUSTOM_THEME_COOKIE);
+    if (cookieRaw) {
+      try {
+        const parsed = JSON.parse(cookieRaw);
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
+        }
+      } catch (e) {
+        console.warn("[getCustomTheme] Failed to parse cookie theme JSON, trying fallback...", e);
+      }
+    }
+
+    // 2. Try reading and parsing localStorage
+    const localRaw = localStorage.getItem(CUSTOM_THEME_COOKIE);
+    if (localRaw) {
+      try {
+        const parsed = JSON.parse(localRaw);
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
+        }
+      } catch (e) {
+        console.warn("[getCustomTheme] Failed to parse localStorage theme JSON, trying fallback...", e);
+      }
+    }
+
+    // 3. Try reading from agy_local_progress
+    try {
+      const localProg = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
+      if (localProg._custom_theme) {
+        return localProg._custom_theme;
+      }
+    } catch (e) {
+      console.warn("[getCustomTheme] Failed to parse agy_local_progress...", e);
+    }
+
+    // 4. Fallback to the last custom theme in the list
+    if (themes.length > 0) {
+      return themes[themes.length - 1];
+    }
+
+    return null;
   } catch (e) {
     return null;
   }
@@ -138,8 +270,9 @@ export function deleteCustomTheme(id) {
     const updatedThemes = themes.filter(t => t.id !== id);
     localStorage.setItem(CUSTOM_THEMES_LIST_KEY, JSON.stringify(updatedThemes));
 
-    // Cleanup audio cache
+    // Cleanup audio and image cache
     localStorage.removeItem(`tridorian_custom_theme_audio_${id}`);
+    localStorage.removeItem(`tridorian_custom_theme_image_${id}`);
 
     // If active theme was deleted, clear active cookie/localStorage
     const active = getCustomTheme();
@@ -159,7 +292,7 @@ export function deleteCustomTheme(id) {
       if (active && active.id === id) {
         delete localProg['_custom_theme'];
       }
-      localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+      safeLocalStorageSet(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
       syncProgressToDrive();
     } catch (err) {}
   } catch (e) {
@@ -266,32 +399,37 @@ export function enforceContrast(textHex, bgHex, minContrast = 4.5) {
   return makeLighter ? '#ffffff' : '#000000';
 }
 
+function getBase64Svg(xml) {
+  const base64 = typeof btoa !== 'undefined' ? btoa(xml) : Buffer.from(xml).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
+}
+
 export function getPatternSvg(patternType, accentColor, borderColor) {
   const accent = accentColor || '#22c55e';
   const border = borderColor || 'rgba(34, 197, 94, 0.2)';
   
-  let rawSvg = '';
+  let svgXml = '';
   switch (patternType) {
     case 'grid':
-      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/></svg>`;
+      svgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="${border}" stroke-width="1"/></svg>`;
       break;
     case 'dots':
-      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5" fill="${encodeURIComponent(border)}"/></svg>`;
+      svgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5" fill="${border}"/></svg>`;
       break;
     case 'stripes':
-      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M0,40 L40,0 M-10,10 L10,-10 M30,50 L50,30" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+      svgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M0,40 L40,0 M-10,10 L10,-10 M30,50 L50,30" fill="none" stroke="${border}" stroke-width="1.5"/></svg>`;
       break;
     case 'waves':
-      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 60 30"><path d="M 0 15 Q 15 0, 30 15 T 60 15" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+      svgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 60 30"><path d="M 0 15 Q 15 0, 30 15 T 60 15" fill="none" stroke="${border}" stroke-width="1.5"/></svg>`;
       break;
     case 'circuit':
-      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><path d="M0,20 L40,20 L50,30 L80,30 M30,0 L30,40 L40,50 L40,80 M60,80 L60,60 L70,50" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/><circle cx="50" cy="30" r="3" fill="${encodeURIComponent(accent)}"/><circle cx="40" cy="50" r="3" fill="${encodeURIComponent(accent)}"/></svg>`;
+      svgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><path d="M0,20 L40,20 L50,30 L80,30 M30,0 L30,40 L40,50 L40,80 M60,80 L60,60 L70,50" fill="none" stroke="${border}" stroke-width="1"/><circle cx="50" cy="30" r="3" fill="${accent}"/><circle cx="40" cy="50" r="3" fill="${accent}"/></svg>`;
       break;
     default:
       return '';
   }
   
-  return rawSvg.replace(/</g, '%3C').replace(/>/g, '%3E');
+  return getBase64Svg(svgXml);
 }
 
 function getMatchingBgImage(themeName = '', prompt = '', isLight = false) {
@@ -318,6 +456,7 @@ function getMatchingBgImage(themeName = '', prompt = '', isLight = false) {
 
 export function injectCustomThemeStyles(vars) {
   if (!vars) return;
+  console.log("[injectCustomThemeStyles] Called with vars:", JSON.stringify(vars));
   let styleTag = document.getElementById('tridorian-custom-theme');
   if (!styleTag) {
     styleTag = document.createElement('style');
@@ -346,16 +485,55 @@ export function injectCustomThemeStyles(vars) {
 
   const patternType = vars['bg-pattern'] || 'grid';
   const patternSvg = getPatternSvg(patternType, accentBg, vars['border-main'] || vars['accent-border']);
-  const bgImage = getMatchingBgImage(vars['theme-name'], vars.prompt, isLight);
+
+  let bgImageRule = '';
+  let bgSizeRule = '';
+  let opacityRule = '';
+  let repeatRule = '';
+
+  let bgImageUrl = vars['bg-pattern-image-url'] || '';
+  if (bgImageUrl && bgImageUrl.startsWith('local:image_')) {
+    try {
+      const stored = localStorage.getItem(`tridorian_custom_theme_image_${vars.id}`);
+      console.log(`[injectCustomThemeStyles] Looking up tridorian_custom_theme_image_${vars.id}, found length: ${stored ? stored.length : 'null'}`);
+      bgImageUrl = stored || '';
+    } catch (e) {
+      console.warn(`[injectCustomThemeStyles] Failed to load local image for ${vars.id}:`, e);
+      bgImageUrl = '';
+    }
+  }
+
+  console.log(`[injectCustomThemeStyles] Resolved background image URL size/type: ${bgImageUrl ? (bgImageUrl.startsWith('data:') ? 'base64 data URL length ' + bgImageUrl.length : bgImageUrl) : 'none'}`);
+
+  if (bgImageUrl) {
+    // We have a custom generated background image from Imagen!
+    // Display ONLY this custom image, with no patterns layered on top of it.
+    bgImageRule = `background-image: url("${bgImageUrl}");`;
+    bgSizeRule = `background-size: cover;`;
+    opacityRule = `opacity: 0.25;`;
+    repeatRule = `background-repeat: no-repeat; background-position: center; background-attachment: fixed;`;
+  } else if (patternSvg) {
+    // If no custom image is ready/provided, render only the custom-colored SVG pattern lines/dots
+    bgImageRule = `background-image: url("${patternSvg}");`;
+    bgSizeRule = `background-size: ${patternType === 'circuit' ? '80px 80px' : patternType === 'waves' ? '60px 30px' : '40px 40px'};`;
+    opacityRule = `opacity: ${patternType === 'none' ? '0.15' : '0.45'};`;
+    repeatRule = `background-repeat: repeat;`;
+  } else {
+    // No pattern, no image
+    bgImageRule = `background-image: none;`;
+    bgSizeRule = `background-size: auto;`;
+    opacityRule = `opacity: 0;`;
+    repeatRule = `background-repeat: no-repeat;`;
+  }
 
   const accentColor = accentBg;
   // Futuristic AI/tech crosshair reticle cursor
-  const cursorSvgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.5" opacity="0.8"/><circle cx="12" cy="12" r="2" fill="${encodeURIComponent(accentColor)}"/><line x1="12" y1="2" x2="12" y2="5" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="19" x2="12" y2="22" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="2" y1="12" x2="5" y2="12" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/><line x1="19" y1="12" x2="22" y2="12" stroke="${encodeURIComponent(accentColor)}" stroke-width="1.2" opacity="0.6"/></svg>`;
+  const cursorSvgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="${accentColor}" stroke-width="1.5" opacity="0.8"/><circle cx="12" cy="12" r="2" fill="${accentColor}"/><line x1="12" y1="2" x2="12" y2="5" stroke="${accentColor}" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="19" x2="12" y2="22" stroke="${accentColor}" stroke-width="1.2" opacity="0.6"/><line x1="2" y1="12" x2="5" y2="12" stroke="${accentColor}" stroke-width="1.2" opacity="0.6"/><line x1="19" y1="12" x2="22" y2="12" stroke="${accentColor}" stroke-width="1.2" opacity="0.6"/></svg>`;
   // Click/Pointer state: dash-array circle with pointer element
-  const pointerSvgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="${encodeURIComponent(accentColor)}" stroke-width="2" stroke-dasharray="3 2"/><circle cx="12" cy="12" r="3" fill="${encodeURIComponent(accentColor)}"/><path d="M12,4 L15,8 L9,8 Z" fill="${encodeURIComponent(accentColor)}" opacity="0.95"/></svg>`;
+  const pointerSvgXml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="${accentColor}" stroke-width="2" stroke-dasharray="3 2"/><circle cx="12" cy="12" r="3" fill="${accentColor}"/><path d="M12,4 L15,8 L9,8 Z" fill="${accentColor}" opacity="0.95"/></svg>`;
 
-  const cursorSvg = `data:image/svg+xml;utf8,${cursorSvgXml}`;
-  const pointerSvg = `data:image/svg+xml;utf8,${pointerSvgXml}`;
+  const cursorSvg = getBase64Svg(cursorSvgXml);
+  const pointerSvg = getBase64Svg(pointerSvgXml);
 
   styleTag.textContent = `
     .theme-custom {
@@ -383,10 +561,10 @@ export function injectCustomThemeStyles(vars) {
       --quiz-incorrect-border: ${quizIncorrectBorder};
     }
     .theme-custom .theme-pattern-grid {
-      background-image: ${patternSvg ? `url("${patternSvg}"), ` : ''}url("${bgImage}");
-      background-size: ${patternType === 'circuit' ? '80px 80px' : patternType === 'waves' ? '60px 30px' : '40px 40px'}, 1024px 1024px;
-      opacity: ${patternType === 'none' ? '0.15' : '0.45'};
-      background-repeat: repeat, repeat;
+      ${bgImageRule}
+      ${bgSizeRule}
+      ${opacityRule}
+      ${repeatRule}
     }
     .theme-custom ::-webkit-scrollbar-thumb {
       background: var(--accent-bg);

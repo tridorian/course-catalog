@@ -6,6 +6,7 @@ import { getCustomTheme } from './customTheme';
 let currentLoopId = null;
 let isUnlocked = false;
 let audioElement = null;
+let hasAudioSource = false;
 
 // Persistent preference keys
 const VOL_KEY = 'tridorian_audio_volume';
@@ -33,7 +34,7 @@ export function playThemeMusic(themeId) {
     isUnlocked = true;
 
     if (currentLoopId === themeId) {
-      if (audioElement && audioElement.paused) {
+      if (audioElement && audioElement.paused && hasAudioSource) {
         const playPromise = audioElement.play();
         if (playPromise !== undefined && typeof playPromise.catch === 'function') {
           playPromise.catch(err => {
@@ -72,6 +73,7 @@ export function playThemeMusic(themeId) {
     if (src) {
       console.log(`[Theme Audio] Loading high-fidelity music loop for ${themeId}: ${src.slice(0, 100)}`);
       audioElement.src = src;
+      hasAudioSource = true;
       const playPromise = audioElement.play();
       if (playPromise !== undefined && typeof playPromise.catch === 'function') {
         playPromise.catch(err => {
@@ -80,6 +82,8 @@ export function playThemeMusic(themeId) {
       }
     } else {
       console.log(`[Theme Audio] No loop file found for theme: ${themeId}. Playback stopped.`);
+      audioElement.src = '';
+      hasAudioSource = false;
     }
   } catch (e) {
     console.warn("[Theme Audio] Audio play failed:", e);
@@ -88,8 +92,10 @@ export function playThemeMusic(themeId) {
 
 export function stopThemeMusic() {
   currentLoopId = null;
+  hasAudioSource = false;
   if (audioElement) {
     audioElement.pause();
+    audioElement.src = '';
   }
 }
 

@@ -25,6 +25,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  console.log(`[Proxy] Received ${req.method} request for: ${req.url}`);
+
   // Handle only POST requests
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
@@ -41,28 +43,40 @@ const server = http.createServer(async (req, res) => {
       const prompt = payload.prompt;
 
       if (!prompt) {
+        console.warn(`[Proxy] Rejected request: Missing prompt in body`);
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Missing prompt in request body' }));
         return;
       }
 
       if (!GEMINI_API_KEY) {
+        console.error(`[Proxy] Error: GEMINI_API_KEY is not defined in proxy environment`);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Proxy misconfigured: GEMINI_API_KEY is missing on server' }));
         return;
       }
 
+      console.log(`[Proxy] Processing prompt: "${prompt}"`);
+
       if (req.url === '/generate-theme') {
+        console.log(`[Proxy] Calling Gemini to generate theme colors...`);
         await handleGenerateTheme(prompt, res);
+        console.log(`[Proxy] Theme colors generated successfully!`);
       } else if (req.url === '/generate-music') {
+        console.log(`[Proxy] Calling Lyria to generate music loop...`);
         await handleGenerateMusic(prompt, res);
+        console.log(`[Proxy] Music generated successfully!`);
       } else if (req.url === '/generate-image') {
+        console.log(`[Proxy] Calling Imagen to generate background image...`);
         await handleGenerateImage(prompt, res);
+        console.log(`[Proxy] Background image generated successfully!`);
       } else {
+        console.warn(`[Proxy] Path not found: ${req.url}`);
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Not Found' }));
       }
     } catch (err) {
+      console.error(`[Proxy] Server Error:`, err.message);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: err.message }));
     }
@@ -151,22 +165,44 @@ async function handleGenerateMusic(prompt, res) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: {
-        parts: [{ text: `Generate exactly a 30-second seamless, perfectly looping ambient background instrumental music track. No spoken vocals. It must have clean, smooth matching transitions at both start and end so it repeats flawlessly without any clicks or gaps. Mood: ${prompt}` }]
+        parts: [{ text: `Generate exactly a 30-second seamless, perfectly looping instrumental background music track. No spoken vocals. It must have clean, smooth matching transitions at both start and end so it repeats flawlessly without any clicks or gaps. The genre, style, instrumentation, and mood of the track must match this description: ${prompt}` }]
       },
       generationConfig: {
         responseModalities: ['AUDIO', 'TEXT']
-      }
+      },
+      safetySettings: [
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+      ]
     })
   });
 
   if (!response.ok) {
     const errText = await response.text();
+    console.error(`[Proxy] Lyria API call failed with status ${response.status}: ${errText}`);
     res.writeHead(response.status, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: `Lyria API error: ${errText}` }));
     return;
   }
 
   const data = await response.json();
+  console.log(`[Proxy] Lyria API raw response keys:`, Object.keys(data));
+  if (data.candidates) {
+    data.candidates.forEach((cand, i) => {
+      console.log(`[Proxy] Candidate ${i}: finishReason=${cand.finishReason}, partsCount=${cand.content?.parts?.length || 0}`);
+      if (cand.content?.parts) {
+        cand.content.parts.forEach((p, pi) => {
+          if (p.text) console.log(`  Part ${pi} (text): ${p.text}`);
+          if (p.inlineData) console.log(`  Part ${pi} (inlineData): mimeType=${p.inlineData.mimeType}, dataLength=${p.inlineData.data?.length || 0}`);
+        });
+      }
+    });
+  } else {
+    console.warn(`[Proxy] Lyria API returned no candidates. Raw body:`, JSON.stringify(data));
+  }
+
   const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
   if (!part || !part.inlineData || !part.inlineData.data) {
     res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -179,41 +215,53 @@ async function handleGenerateMusic(prompt, res) {
 }
 
 async function handleGenerateImage(prompt, res) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${GEMINI_API_KEY}`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      instances: [
-        {
-          prompt: `A subtle, premium, seamless and tileable abstract background pattern/texture overlay for a web app dashboard theme. Style: ${prompt}. Very clean, low contrast, dark or light matching the theme, decorative only.`
-        }
-      ],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio: "1:1",
-        outputMimeType: "image/png"
+  const models = ['imagen-4.0-generate-001', 'imagen-4.0-fast-generate-001', 'imagen-4.0-ultra-generate-001'];
+  let lastError = null;
+
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${GEMINI_API_KEY}`;
+      console.log(`[Proxy] Attempting model ${model}...`);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instances: [
+            {
+              prompt: `A subtle, premium, seamless and tileable abstract repeating background pattern/texture overlay for a web app dashboard. Theme/Style: ${prompt}. Purely visual pattern of abstract shapes, geometry, lines or textures. ABSOLUTELY NO text, NO words, NO letters, NO numbers, NO typography, NO labels. Extremely clean, low contrast, elegant, decorative only.`
+            }
+          ],
+          parameters: {
+            sampleCount: 1,
+            aspectRatio: "1:1",
+            outputMimeType: "image/jpeg"
+          }
+        }),
+        signal: AbortSignal.timeout(30000)
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Model ${model} returned status ${response.status}: ${errText}`);
       }
-    })
-  });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    res.writeHead(response.status, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: `Imagen API error: ${errText}` }));
-    return;
+      const data = await response.json();
+      const prediction = data.predictions?.[0];
+      if (!prediction || !prediction.bytesBase64Encoded) {
+        throw new Error(`Model ${model} returned empty predictions`);
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ imageDataUrl: `data:image/jpeg;base64,${prediction.bytesBase64Encoded}` }));
+      return;
+    } catch (err) {
+      console.warn(`[Proxy] Model ${model} failed:`, err.message);
+      lastError = err;
+    }
   }
 
-  const data = await response.json();
-  const prediction = data.predictions?.[0];
-  if (!prediction || !prediction.bytesBase64Encoded) {
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'No image prediction returned from Imagen model.' }));
-    return;
-  }
-
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ imageDataUrl: `data:image/png;base64,${prediction.bytesBase64Encoded}` }));
+  res.writeHead(500, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: `All Imagen models failed. Last error: ${lastError ? lastError.message : 'Unknown'}` }));
 }
 
 server.listen(PORT, () => {

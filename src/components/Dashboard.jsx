@@ -62,7 +62,20 @@ const Dashboard = ({ theme, setTheme }) => {
           } catch (e) {
             console.warn("Failed to load Drive progress on Dashboard:", e);
           }
+        } else {
+          try {
+            const localProg = JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
+            if (localProg._custom_themes) {
+              localStorage.setItem('tridorian_custom_themes_list', JSON.stringify(localProg._custom_themes));
+            }
+            if (localProg._custom_theme) {
+              saveCustomTheme(localProg._custom_theme);
+            }
+          } catch (e) {
+            console.warn("Failed to load local themes on Dashboard:", e);
+          }
         }
+
 
         const localProgress = progress || JSON.parse(localStorage.getItem('agy_local_progress') || '{}');
         const progressStats = {};

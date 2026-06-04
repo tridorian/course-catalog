@@ -42,6 +42,7 @@ export async function generateThemeWithGemini(promptText, userApiKey = '') {
 
   if (proxyUrl) {
     const url = `${proxyUrl.replace(/\/$/, '')}/generate-theme`;
+    console.log(`[Client] [Theme] Routing theme generation request to proxy: ${url}`);
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -49,9 +50,12 @@ export async function generateThemeWithGemini(promptText, userApiKey = '') {
     });
     if (!response.ok) {
       const errText = await response.text();
+      console.error(`[Client] [Theme] Proxy request failed: ${response.status} - ${errText}`);
       throw new Error(`Proxy error: ${response.status} - ${errText}`);
     }
-    return await response.json();
+    const themeVars = await response.json();
+    console.log(`[Client] [Theme] Proxy returned custom theme successfully!`, themeVars);
+    return themeVars;
   }
 
   const apiKey = getValidApiKey(userApiKey);
@@ -132,17 +136,19 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
     }
   };
 
+  console.log(`[Client] [Theme] Dispatching Gemini API request to: ${url}`);
   const response = await fetch(url, {
     method: 'POST',
     headers: headers,
     body: JSON.stringify(payload)
   });
-
+ 
   if (!response.ok) {
     const errText = await response.text();
+    console.error(`[Client] [Theme] Gemini API error: ${response.status} - ${errText}`);
     throw new Error(`Gemini API error: ${response.status} - ${errText}`);
   }
-
+ 
   const data = await response.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   
@@ -151,6 +157,7 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
     cleanedText = cleanedText.replace(/^```(?:json)?\n?/i, '').replace(/```$/i, '').trim();
   }
   
+  console.log(`[Client] [Theme] Gemini responded successfully with raw output:`, cleanedText);
   const variables = JSON.parse(cleanedText);
   return variables;
 }
@@ -160,6 +167,7 @@ export async function generateMusicWithLyria(promptText, userApiKey = '') {
 
   if (proxyUrl) {
     const url = `${proxyUrl.replace(/\/$/, '')}/generate-music`;
+    console.log(`[Client] [Music] Routing music generation request to proxy: ${url}`);
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -167,9 +175,11 @@ export async function generateMusicWithLyria(promptText, userApiKey = '') {
     });
     if (!response.ok) {
       const errText = await response.text();
+      console.error(`[Client] [Music] Proxy request failed: ${response.status} - ${errText}`);
       throw new Error(`Proxy error: ${response.status} - ${errText}`);
     }
     const data = await response.json();
+    console.log(`[Client] [Music] Proxy returned audio successfully! base64 length: ${data.audioDataUrl?.length || 0}`);
     return data.audioDataUrl;
   }
 
@@ -199,31 +209,42 @@ export async function generateMusicWithLyria(promptText, userApiKey = '') {
 
   const payload = {
     contents: {
-      parts: [{ text: `Generate exactly a 30-second seamless, perfectly looping ambient background instrumental music track. No spoken vocals. It must have clean, smooth matching transitions at both start and end so it repeats flawlessly without any clicks or gaps. Mood: ${promptText}` }]
+      parts: [{ text: `Generate exactly a 30-second seamless, perfectly looping instrumental background music track. No spoken vocals. It must have clean, smooth matching transitions at both start and end so it repeats flawlessly without any clicks or gaps. The genre, style, instrumentation, and mood of the track must match this description: ${promptText}` }]
     },
     generationConfig: {
       responseModalities: ['AUDIO', 'TEXT']
-    }
+    },
+    safetySettings: [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+    ]
   };
 
+  console.log(`[Client] [Music] Dispatching Lyria API request to: ${url}`);
   const response = await fetch(url, {
     method: 'POST',
     headers: headers,
     body: JSON.stringify(payload)
   });
-
+ 
   if (!response.ok) {
     const errText = await response.text();
+    console.error(`[Client] [Music] Lyria API error: ${response.status} - ${errText}`);
     throw new Error(`Lyria API error: ${response.status} - ${errText}`);
   }
-
+ 
   const data = await response.json();
   const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
   if (!part || !part.inlineData || !part.inlineData.data) {
+    console.error(`[Client] [Music] Empty inline audio data returned from Lyria candidate:`, data);
     throw new Error('No audio data returned from Lyria model.');
   }
-
-  return `data:audio/mpeg;base64,${part.inlineData.data}`;
+ 
+  const audioUri = `data:audio/mpeg;base64,${part.inlineData.data}`;
+  console.log(`[Client] [Music] Lyria generated music successfully! Base64 length: ${audioUri.length}`);
+  return audioUri;
 }
 
 export async function generateImageWithImagen(promptText, userApiKey = '') {
@@ -231,6 +252,7 @@ export async function generateImageWithImagen(promptText, userApiKey = '') {
 
   if (proxyUrl) {
     const url = `${proxyUrl.replace(/\/$/, '')}/generate-image`;
+    console.log(`[Client] [Image] Routing image generation request to proxy: ${url}`);
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -238,9 +260,11 @@ export async function generateImageWithImagen(promptText, userApiKey = '') {
     });
     if (!response.ok) {
       const errText = await response.text();
+      console.error(`[Client] [Image] Proxy request failed: ${response.status} - ${errText}`);
       throw new Error(`Proxy error: ${response.status} - ${errText}`);
     }
     const data = await response.json();
+    console.log(`[Client] [Image] Proxy returned image successfully! base64 length: ${data.imageDataUrl?.length || 0}`);
     return data.imageDataUrl;
   }
 
@@ -258,45 +282,63 @@ export async function generateImageWithImagen(promptText, userApiKey = '') {
     throw new Error('API_KEY_REQUIRED');
   }
 
-  let url;
-  const headers = { 'Content-Type': 'application/json' };
+  const models = ['imagen-4.0-generate-001', 'imagen-4.0-fast-generate-001', 'imagen-4.0-ultra-generate-001'];
+  let lastError = null;
 
-  if (apiKey) {
-    url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
-  } else {
-    url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict`;
-    headers['Authorization'] = `Bearer ${gAuthToken}`;
-  }
+  for (const model of models) {
+    try {
+      let url;
+      const headers = { 'Content-Type': 'application/json' };
 
-  const payload = {
-    instances: [
-      {
-        prompt: `A subtle, premium, seamless and tileable abstract background pattern/texture overlay for a web app dashboard theme. Style: ${promptText}. Very clean, low contrast, dark or light matching the theme, decorative only.`
+      if (apiKey) {
+        url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
+      } else {
+        url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict`;
+        headers['Authorization'] = `Bearer ${gAuthToken}`;
       }
-    ],
-    parameters: {
-      sampleCount: 1,
-      aspectRatio: "1:1",
-      outputMimeType: "image/png"
+
+      const payload = {
+        instances: [
+          {
+            prompt: `A subtle, premium, seamless and tileable abstract repeating background pattern/texture overlay for a web app dashboard. Theme/Style: ${promptText}. Purely visual pattern of abstract shapes, geometry, lines or textures. ABSOLUTELY NO text, NO words, NO letters, NO numbers, NO typography, NO labels. Extremely clean, low contrast, elegant, decorative only.`
+          }
+        ],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: "1:1",
+          outputMimeType: "image/jpeg"
+        }
+      };
+
+      console.log(`[Client] [Image] Dispatching Imagen request to model ${model} at: ${url}`);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(30000)
+      });
+ 
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`[Client] [Image] Model ${model} returned error status ${response.status}: ${errText}`);
+        throw new Error(`Model ${model} failed with status ${response.status}: ${errText}`);
+      }
+ 
+      const data = await response.json();
+      const prediction = data.predictions?.[0];
+      if (!prediction || !prediction.bytesBase64Encoded) {
+        console.error(`[Client] [Image] Empty prediction or bytes returned from model ${model}:`, data);
+        throw new Error(`Model ${model} returned empty predictions`);
+      }
+ 
+      const imageUri = `data:image/jpeg;base64,${prediction.bytesBase64Encoded}`;
+      console.log(`[Client] [Image] Model ${model} generated image successfully! Base64 length: ${imageUri.length}`);
+      return imageUri;
+    } catch (err) {
+      console.warn(`[Client] [Image] Model ${model} failed:`, err.message);
+      lastError = err;
     }
-  };
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Imagen API error: ${response.status} - ${errText}`);
   }
 
-  const data = await response.json();
-  const prediction = data.predictions?.[0];
-  if (!prediction || !prediction.bytesBase64Encoded) {
-    throw new Error('No image prediction returned from Imagen model.');
-  }
-
-  return `data:image/png;base64,${prediction.bytesBase64Encoded}`;
+  throw new Error(`All Imagen models failed to generate background image. Last error: ${lastError ? lastError.message : 'Unknown'}`);
 }
