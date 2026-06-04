@@ -448,6 +448,36 @@ body:not([class*="theme-"]) .group:hover svg.text-accent-text {
   100% { transform: translate(0) skew(0deg); }
 }
 
+@keyframes cyber-glitch-sporadic {
+  0%, 60%, 70%, 90%, 100% {
+    transform: translate(0) skew(0deg);
+    filter: none;
+  }
+  62% {
+    transform: translate(-3px, 1px) skew(-3deg);
+    filter: hue-rotate(60deg) brightness(1.25);
+  }
+  64% {
+    transform: translate(2px, -2px) skew(4deg);
+    filter: hue-rotate(120deg) contrast(1.3);
+  }
+  66% {
+    transform: translate(0) skew(0deg);
+    filter: none;
+  }
+  92% {
+    transform: translate(3px, 2px) skew(5deg);
+    filter: hue-rotate(180deg) brightness(0.95);
+  }
+  94% {
+    transform: translate(-2px, -1px) skew(-4deg);
+  }
+  96% {
+    transform: translate(0) skew(0deg);
+    filter: none;
+  }
+}
+
 /* Clean Light Leaf-Spring Hover */
 body.theme-light .accent-btn:hover,
 body.theme-light .rounded-xl:hover {
@@ -684,9 +714,13 @@ body.theme-jungle .progress-bar-fill {
 }
 
 /* EVA-01 HUD animations */
-body.theme-genesis .accent-btn:hover,
+body.theme-genesis .accent-btn:hover {
+  animation: cyber-glitch-sporadic 2.3s linear infinite;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+}
 body.theme-genesis nav div.group:hover {
-  animation: cyber-glitch 0.3s ease 1;
+  animation: cyber-glitch-sporadic 1.9s linear infinite;
+  animation-delay: 0.4s;
   box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
 }
 body.theme-genesis .rounded-xl:hover {
