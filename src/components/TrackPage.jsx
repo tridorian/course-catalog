@@ -251,7 +251,7 @@ const TrackPage = ({ theme, setTheme }) => {
                     {course.tags && course.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-5">
                         {course.tags.map((tag, i) => (
-                          <span key={i} className="text-[10px] font-mono text-gray-400 bg-black/40 px-2 py-0.5 rounded border border-border-subtle">
+                          <span key={i} className="text-[10px] font-mono text-accent-text bg-accent-muted px-2 py-0.5 rounded border border-accent-border">
                             #{tag.toLowerCase()}
                           </span>
                         ))}

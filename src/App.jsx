@@ -802,7 +802,7 @@ function AppContent({ theme, setTheme }) {
           }}
           onDismiss={() => {
             setShowCelebration(false);
-            navigate(`/${currentTrackId}/${currentCourseId}`);
+            navigate(`/${currentTrackId}`);
           }}
         />
       )}

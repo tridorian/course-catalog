@@ -244,7 +244,16 @@ describe('App Integration', () => {
     const dismissBtn = screen.getByRole('button', { name: /Return to Course Map/i });
     fireEvent.click(dismissBtn);
 
-    // Verify we are back on Course Map
+    // Verify we are back on Track Overview (TrackPage)
+    await waitFor(() => {
+      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+    });
+
+    // Navigate back to the course page from TrackPage
+    const courseBtn = screen.getByRole('button', { name: /AGY-101/i });
+    fireEvent.click(courseBtn);
+
+    // Verify we are on Course page
     await waitFor(() => {
       expect(screen.getByText('Course Map')).toBeInTheDocument();
     });
@@ -282,7 +291,16 @@ describe('App Integration', () => {
     const dismissBtn2 = screen.getByRole('button', { name: /Return to Course Map/i });
     fireEvent.click(dismissBtn2);
 
-    // Verify we are back on Course Map
+    // Verify we are back on Track Overview (TrackPage)
+    await waitFor(() => {
+      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+    });
+
+    // Navigate back to the course page from TrackPage
+    const courseBtn2 = screen.getByRole('button', { name: /AGY-102/i });
+    fireEvent.click(courseBtn2);
+
+    // Verify we are on Course page
     await waitFor(() => {
       expect(screen.getByText('Course Map')).toBeInTheDocument();
     });
