@@ -1,0 +1,47 @@
+# Cloud Build configuration for course-catalog
+# Triggered on push to main via GitHub Actions or Cloud Build triggers
+#
+# Required substitutions (set via trigger or --substitutions):
+#   _REGION: GCP region (default: us-central1)
+#   _SERVICE_NAME: Cloud Run service name (default: tridorian-labs)
+#   _ARTIFACT_REGISTRY_REPO: Artifact Registry repo (default: cloud-run-source-deploy)
+
+substitutions:
+  _REGION: us-central1
+  _SERVICE_NAME: tridorian-labs
+  _ARTIFACT_REGISTRY_REPO: cloud-run-source-deploy
+
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:latest'
+      - '.'
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'services'
+      - 'replace'
+      - '.cloud-run/service.yaml'
+      - '--region=${_REGION}'
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

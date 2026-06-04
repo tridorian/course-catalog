@@ -2,4 +2,12 @@ node_modules
 dist
 .git
 .github
+.cloud-run
+.gemini
 *.log
+*.md
+cache
+scratch
+docs
+jules_sessions_raw.txt
+jules_sessions_updated.txt
