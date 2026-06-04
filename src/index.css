@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< HEAD
 /* ========================================
    TRIDORIAN THEME ENGINE
    5 themes via CSS custom properties
@@ -732,4 +733,19 @@ body.disable-custom-cursor input {
 }
 .quiz-option.quiz-unselected {
   opacity: 0.4 !important;
+}
+
+/* Custom Scrollbar for sidebar to match theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-bg);
 }
