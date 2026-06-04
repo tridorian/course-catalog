@@ -1182,7 +1182,7 @@ export function playThemeMusic(themeId) {
     } else if (themeId === 'kitten') {
       playLoopOrProcedural('kitten', '/audio/rainbow_kitten_loop.mp3', playRainbowKitten);
     } else if (themeId === 'caribbean') {
-      playCaribbeanMood();
+      playLoopOrProcedural('caribbean', '/audio/caribbean_mood_loop.mp3', playCaribbeanMood);
     } else if (themeId === 'lunar') {
       playLoopOrProcedural('lunar', '/audio/lunar_vibe_loop.mp3', playLunarVibe);
     } else if (themeId === 'jungle') {
