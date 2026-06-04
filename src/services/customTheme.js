@@ -270,20 +270,50 @@ export function getPatternSvg(patternType, accentColor, borderColor) {
   const accent = accentColor || '#22c55e';
   const border = borderColor || 'rgba(34, 197, 94, 0.2)';
   
+  let rawSvg = '';
   switch (patternType) {
     case 'grid':
-      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/></svg>`;
+      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/></svg>`;
+      break;
     case 'dots':
-      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5" fill="${encodeURIComponent(border)}"/></svg>`;
+      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5" fill="${encodeURIComponent(border)}"/></svg>`;
+      break;
     case 'stripes':
-      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M0,40 L40,0 M-10,10 L10,-10 M30,50 L50,30" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M0,40 L40,0 M-10,10 L10,-10 M30,50 L50,30" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+      break;
     case 'waves':
-      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 60 30"><path d="M 0 15 Q 15 0, 30 15 T 60 15" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 60 30"><path d="M 0 15 Q 15 0, 30 15 T 60 15" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+      break;
     case 'circuit':
-      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><path d="M0,20 L40,20 L50,30 L80,30 M30,0 L30,40 L40,50 L40,80 M60,80 L60,60 L70,50" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/><circle cx="50" cy="30" r="3" fill="${encodeURIComponent(accent)}"/><circle cx="40" cy="50" r="3" fill="${encodeURIComponent(accent)}"/></svg>`;
+      rawSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><path d="M0,20 L40,20 L50,30 L80,30 M30,0 L30,40 L40,50 L40,80 M60,80 L60,60 L70,50" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/><circle cx="50" cy="30" r="3" fill="${encodeURIComponent(accent)}"/><circle cx="40" cy="50" r="3" fill="${encodeURIComponent(accent)}"/></svg>`;
+      break;
     default:
       return '';
   }
+  
+  return rawSvg.replace(/</g, '%3C').replace(/>/g, '%3E');
+}
+
+function getMatchingBgImage(themeName = '', prompt = '', isLight = false) {
+  const combined = ((themeName || '') + ' ' + (prompt || '')).toLowerCase();
+  
+  if (combined.includes('jeep') || combined.includes('jungle') || combined.includes('safari') || combined.includes('forest') || combined.includes('jurassic') || combined.includes('dino') || combined.includes('dinosaur')) {
+    return '/jurassic_jeep_bg.png';
+  }
+  if (combined.includes('eva') || combined.includes('genesis') || combined.includes('mecha') || combined.includes('cyber') || combined.includes('neon') || combined.includes('purple')) {
+    return '/neon_genesis_bg.png';
+  }
+  if (combined.includes('lunar') || combined.includes('moon') || combined.includes('space') || combined.includes('night') || combined.includes('black') || combined.includes('monochrome') || combined.includes('darkness')) {
+    return '/lunar_vibe_bg.png';
+  }
+  if (combined.includes('caribbean') || combined.includes('sea') || combined.includes('beach') || combined.includes('ocean') || combined.includes('island') || combined.includes('water') || combined.includes('teal')) {
+    return '/caribbean_mood_bg.png';
+  }
+  if (combined.includes('kitten') || combined.includes('cat') || combined.includes('rainbow') || combined.includes('pink') || combined.includes('playful') || combined.includes('cute')) {
+    return '/rainbow_kitten_bg.png';
+  }
+
+  return isLight ? '/clean_light_bg.png' : '/tridorian_dark_bg.png';
 }
 
 export function injectCustomThemeStyles(vars) {
@@ -316,6 +346,7 @@ export function injectCustomThemeStyles(vars) {
 
   const patternType = vars['bg-pattern'] || 'grid';
   const patternSvg = getPatternSvg(patternType, accentBg, vars['border-main'] || vars['accent-border']);
+  const bgImage = getMatchingBgImage(vars['theme-name'], vars.prompt, isLight);
 
   const accentColor = accentBg;
   // Futuristic AI/tech crosshair reticle cursor
@@ -352,9 +383,10 @@ export function injectCustomThemeStyles(vars) {
       --quiz-incorrect-border: ${quizIncorrectBorder};
     }
     .theme-custom .theme-pattern-grid {
-      background-image: ${patternSvg ? `url("${patternSvg}")` : 'none'};
-      background-size: ${patternType === 'circuit' ? '80px 80px' : patternType === 'waves' ? '60px 30px' : '40px 40px'};
-      opacity: ${patternType === 'none' ? '0' : '0.55'};
+      background-image: ${patternSvg ? `url("${patternSvg}"), ` : ''}url("${bgImage}");
+      background-size: ${patternType === 'circuit' ? '80px 80px' : patternType === 'waves' ? '60px 30px' : '40px 40px'}, 1024px 1024px;
+      opacity: ${patternType === 'none' ? '0.15' : '0.45'};
+      background-repeat: repeat, repeat;
     }
     .theme-custom ::-webkit-scrollbar-thumb {
       background: var(--accent-bg);

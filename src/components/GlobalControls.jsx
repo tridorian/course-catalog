@@ -175,6 +175,7 @@ const GlobalControls = ({ theme, setTheme }) => {
         localStorage.setItem('tridorian_gemini_api_key', apiKey);
       }
 
+      themeVars.prompt = prompt;
       saveCustomTheme(themeVars);
       localStorage.setItem('tridorian_last_theme_gen_time', Date.now().toString());
 
