@@ -1,19 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getProgressFile, saveProgress } from '../services/googleDrive';
-import { getAccessToken } from '../services/googleAuth';
+import { getProgressFile, saveCourseProgress, loadProgress, syncOfflineQueue, syncProgressToDrive } from '../services/googleDrive';
+import { getAccessToken, signIn } from '../services/googleAuth';
 
 vi.mock('../services/googleAuth', () => ({
   getAccessToken: vi.fn(),
+  signIn: vi.fn(),
 }));
 
 describe('googleDrive service', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     global.fetch = vi.fn();
-    // Mock date to ensure consistent JSON body matching if needed,
-    // but we can also use expect.stringContaining
+    if (typeof localStorage !== 'undefined') {
+      localStorage.clear();
+    }
     vi.useFakeTimers();
-    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
   });
 
   afterEach(() => {
@@ -21,8 +23,9 @@ describe('googleDrive service', () => {
   });
 
   describe('getProgressFile', () => {
-    it('throws error when no access token is available', async () => {
+    it('throws error when no access token is available after signIn retry', async () => {
       getAccessToken.mockReturnValue(null);
+      signIn.mockResolvedValue({ access_token: null });
       await expect(getProgressFile()).rejects.toThrow('No access token available');
     });
 
@@ -38,7 +41,7 @@ describe('googleDrive service', () => {
       const result = await getProgressFile();
       expect(result).toEqual(mockFile);
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("name%20%3D%20'agv_course_progress.json'"),
+        expect.stringContaining("name%20%3D%20'agy_course_progress.json'"),
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer fake-token',
@@ -71,16 +74,13 @@ describe('googleDrive service', () => {
       // Verify POST request
       expect(global.fetch).toHaveBeenNthCalledWith(
         2,
-        'https://www.googleapis.com/drive/v3/files',
+        'https://www.googleapis.com/drive/v3/files?spaces=appDataFolder',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
-            name: 'agv_course_progress.json',
+            name: 'agy_course_progress.json',
+            parents: ['appDataFolder'],
             mimeType: 'application/json',
-            appProperties: {
-              activeStepIndex: '0',
-              lastUpdated: '2024-01-01T00:00:00.000Z'
-            }
           }),
           headers: expect.objectContaining({
             Authorization: 'Bearer fake-token',
@@ -89,77 +89,198 @@ describe('googleDrive service', () => {
         })
       );
     });
+  });
 
-    it('throws error when Drive API returns an error response', async () => {
-      getAccessToken.mockReturnValue('fake-token');
-      global.fetch.mockResolvedValue({
-        ok: false,
-        status: 403,
-        json: async () => ({ error: { message: 'Insufficient permissions' } }),
+  describe('loadProgress', () => {
+    it('returns local progress when no access token is available', async () => {
+      getAccessToken.mockReturnValue(null);
+      localStorage.setItem('agy_local_progress', JSON.stringify({ 'track1_course1': { activeModuleId: '1' } }));
+      const result = await loadProgress();
+      expect(result).toEqual({
+        progress: { 'track1_course1': { activeModuleId: '1' } },
+        fileId: null
       });
-
-      await expect(getProgressFile()).rejects.toThrow('Insufficient permissions');
     });
 
-    it('throws generic error when Drive API returns an error without message', async () => {
+    it('loads and merges remote progress when token is available', async () => {
       getAccessToken.mockReturnValue('fake-token');
-      global.fetch.mockResolvedValue({
-        ok: false,
-        status: 500,
-        json: async () => ({ error: {} }),
+      localStorage.setItem('agy_local_progress', JSON.stringify({ 'track1_course1': { activeModuleId: '1' } }));
+
+      // Mock getProgressFile return
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ files: [{ id: 'file-123' }] }),
       });
 
-      await expect(getProgressFile()).rejects.toThrow('Drive API error');
+      // Mock driveFetch for file content
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ 'track1_course2': { activeModuleId: '2' } }),
+      });
+
+      const result = await loadProgress();
+      expect(result.fileId).toBe('file-123');
+      expect(result.progress).toEqual({
+        'track1_course1': { activeModuleId: '1' },
+        'track1_course2': { activeModuleId: '2' }
+      });
     });
   });
 
-  describe('saveProgress', () => {
-    it('throws error when no access token is available', async () => {
-      getAccessToken.mockReturnValue(null);
-      await expect(saveProgress('file-123', 3)).rejects.toThrow('No access token available');
-    });
-
-    it('updates file progress successfully', async () => {
+  describe('saveCourseProgress', () => {
+    it('saves progress to local storage and updates Drive', async () => {
       getAccessToken.mockReturnValue('fake-token');
-      const updatedFile = { id: 'file-123', appProperties: { activeStepIndex: '3' } };
 
-      global.fetch.mockResolvedValue({
+      // Mock getProgressFile search (GET)
+      global.fetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: async () => updatedFile,
+        json: async () => ({ files: [{ id: 'file-123' }] }),
       });
 
-      const result = await saveProgress('file-123', 3);
-      expect(result).toEqual(updatedFile);
+      // Mock PATCH metadata (appProperties)
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      // Mock PATCH media content
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      });
+
+      await saveCourseProgress('track-1', 'course-2', 3, [1, 2]);
+
+      const localProgress = JSON.parse(localStorage.getItem('agy_local_progress'));
+      expect(localProgress['track-1_course-2']).toEqual({
+        activeModuleId: '3',
+        completedIndices: ['1', '2'],
+        lastUpdated: '2024-01-01T00:00:00.000Z'
+      });
+
+      // Verify the PATCH metadata call
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        2,
         'https://www.googleapis.com/drive/v3/files/file-123',
         expect.objectContaining({
           method: 'PATCH',
           body: JSON.stringify({
             appProperties: {
-              activeStepIndex: '3',
+              'progress_track-1_course-2_active': '3',
+              'progress_track-1_course-2_completed': '1,2',
+              'lastUpdated': '2024-01-01T00:00:00.000Z'
+            }
+          })
+        })
+      );
+
+      // Verify the PATCH media call
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        3,
+        'https://www.googleapis.com/drive/v3/files/file-123?uploadType=media',
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({
+            'track-1_course-2': {
+              activeModuleId: '3',
+              completedIndices: ['1', '2'],
               lastUpdated: '2024-01-01T00:00:00.000Z'
             }
-          }),
-          headers: expect.objectContaining({
-            Authorization: 'Bearer fake-token',
-            'Content-Type': 'application/json',
-          }),
+          })
         })
       );
     });
+  });
 
-    it('returns null when response status is 204', async () => {
+  describe('syncOfflineQueue', () => {
+    it('syncs offline items to Drive and resolves queue', async () => {
       getAccessToken.mockReturnValue('fake-token');
 
-      global.fetch.mockResolvedValue({
+      // Set up local storage queue and initial progress
+      localStorage.setItem('agy_offline_queue', JSON.stringify([
+        {
+          trackId: 'track-1',
+          courseId: 'course-2',
+          update: {
+            activeModuleId: '3',
+            completedIndices: ['1', '2'],
+            lastUpdated: '2024-01-01T00:00:00.000Z'
+          }
+        }
+      ]));
+
+      // Mock loadProgress (1. getProgressFile search, 2. fetch media content)
+      global.fetch.mockResolvedValueOnce({
         ok: true,
-        status: 204,
+        status: 200,
+        json: async () => ({ files: [{ id: 'file-123' }] }),
+      });
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
       });
 
-      const result = await saveProgress('file-123', 3);
-      expect(result).toBeNull();
+      // Mock PATCH metadata
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      });
+
+      // Mock PATCH media content
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      });
+
+      await syncOfflineQueue();
+
+      expect(localStorage.getItem('agy_offline_queue')).toBeNull();
+      const localProgress = JSON.parse(localStorage.getItem('agy_local_progress'));
+      expect(localProgress['track-1_course-2'].activeModuleId).toBe('3');
+    });
+  });
+
+  describe('syncProgressToDrive', () => {
+    it('syncs current local progress to Drive', async () => {
+      getAccessToken.mockReturnValue('fake-token');
+      localStorage.setItem('agy_local_progress', JSON.stringify({
+        'theme_config': { theme: 'dark' }
+      }));
+
+      // Mock getProgressFile (GET)
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ files: [{ id: 'file-123' }] }),
+      });
+
+      // Mock PATCH media content
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      });
+
+      await syncProgressToDrive();
+
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        2,
+        'https://www.googleapis.com/drive/v3/files/file-123?uploadType=media',
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({
+            'theme_config': { theme: 'dark' }
+          })
+        })
+      );
     });
   });
 });

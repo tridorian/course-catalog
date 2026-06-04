@@ -43,7 +43,7 @@ describe('googleAuth', () => {
       expect(window.google.accounts.oauth2.initTokenClient).toHaveBeenCalledWith(
         expect.objectContaining({
           client_id: clientId,
-          scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
+          scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/generative-language',
           callback: expect.any(Function)
         })
       );
