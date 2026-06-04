@@ -714,13 +714,9 @@ body.theme-jungle .progress-bar-fill {
 }
 
 /* EVA-01 HUD animations */
-body.theme-genesis .accent-btn:hover {
-  animation: cyber-glitch-sporadic 2.3s linear infinite;
-  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
-}
+body.theme-genesis .accent-btn:hover,
 body.theme-genesis nav div.group:hover {
-  animation: cyber-glitch-sporadic 1.9s linear infinite;
-  animation-delay: 0.4s;
+  animation: cyber-glitch 0.25s linear infinite alternate;
   box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
 }
 body.theme-genesis .rounded-xl:hover {
