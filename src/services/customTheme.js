@@ -1,5 +1,6 @@
 // src/services/customTheme.js
 // Stores, manages, and injects dynamic custom themes in browser cookies/localStorage.
+import { syncProgressToDrive } from './googleDrive';
 
 const CUSTOM_THEME_COOKIE = 'tridorian_custom_theme_vars';
 const CUSTOM_THEMES_LIST_KEY = 'tridorian_custom_themes_list';
@@ -82,6 +83,7 @@ export function saveCustomTheme(vars) {
       localProg['_custom_themes'] = updatedThemes;
       localProg['_custom_theme'] = vars;
       localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+      syncProgressToDrive();
     } catch (err) {
       console.warn("Failed to store custom themes in user progress profile:", err);
     }
@@ -106,6 +108,7 @@ export function setActiveCustomTheme(vars) {
       const localProg = JSON.parse(localStorage.getItem(LOCAL_PROGRESS_KEY) || '{}');
       localProg['_custom_theme'] = vars;
       localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+      syncProgressToDrive();
     } catch (err) {
       console.warn("Failed to store custom theme in user progress profile:", err);
     }
@@ -157,6 +160,7 @@ export function deleteCustomTheme(id) {
         delete localProg['_custom_theme'];
       }
       localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(localProg));
+      syncProgressToDrive();
     } catch (err) {}
   } catch (e) {
     console.error("Failed to delete custom theme:", e);
@@ -184,6 +188,26 @@ function isDarkColor(hex) {
   return true;
 }
 
+export function getPatternSvg(patternType, accentColor, borderColor) {
+  const accent = accentColor || '#22c55e';
+  const border = borderColor || 'rgba(34, 197, 94, 0.2)';
+  
+  switch (patternType) {
+    case 'grid':
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/></svg>`;
+    case 'dots':
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5" fill="${encodeURIComponent(border)}"/></svg>`;
+    case 'stripes':
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M0,40 L40,0 M-10,10 L10,-10 M30,50 L50,30" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+    case 'waves':
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 60 30"><path d="M 0 15 Q 15 0, 30 15 T 60 15" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1.5"/></svg>`;
+    case 'circuit':
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><path d="M0,20 L40,20 L50,30 L80,30 M30,0 L30,40 L40,50 L40,80 M60,80 L60,60 L70,50" fill="none" stroke="${encodeURIComponent(border)}" stroke-width="1"/><circle cx="50" cy="30" r="3" fill="${encodeURIComponent(accent)}"/><circle cx="40" cy="50" r="3" fill="${encodeURIComponent(accent)}"/></svg>`;
+    default:
+      return '';
+  }
+}
+
 // Inject styling variables for .theme-custom class dynamically
 export function injectCustomThemeStyles(vars) {
   if (!vars) return;
@@ -203,10 +227,14 @@ export function injectCustomThemeStyles(vars) {
   const quizIncorrectText = isLight ? '#842029' : '#fda4af';
   const quizIncorrectBorder = isLight ? 'rgba(220, 53, 69, 0.25)' : 'rgba(244, 63, 94, 0.4)';
 
+  const patternType = vars['bg-pattern'] || 'grid';
+  const patternSvg = getPatternSvg(patternType, vars['accent-bg'], vars['border-main'] || vars['accent-border']);
+
   styleTag.textContent = `
     .theme-custom {
       color-scheme: ${isLight ? 'light' : 'dark'};
       --bg-base: ${vars['bg-base'] || '#080c08'};
+      --bg-gradient: ${vars['bg-gradient'] || 'none'};
       --bg-panel: ${vars['bg-panel'] || '#0d180f'};
       --bg-muted: ${vars['bg-muted'] || '#122517'};
       --bg-elevated: ${vars['bg-elevated'] || '#1a3321'};
@@ -226,6 +254,11 @@ export function injectCustomThemeStyles(vars) {
       --quiz-incorrect-bg: ${quizIncorrectBg};
       --quiz-incorrect-text: ${quizIncorrectText};
       --quiz-incorrect-border: ${quizIncorrectBorder};
+    }
+    .theme-custom .theme-pattern-grid {
+      background-image: ${patternSvg ? `url("${patternSvg}")` : 'none'};
+      background-size: ${patternType === 'circuit' ? '80px 80px' : patternType === 'waves' ? '60px 30px' : '40px 40px'};
+      opacity: ${patternType === 'none' ? '0' : '0.45'};
     }
   `;
 }

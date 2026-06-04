@@ -256,3 +256,28 @@ export async function syncOfflineQueue() {
     console.error('Failed to sync offline queue:', err);
   }
 }
+
+/**
+ * Pushes the current local progress state directly to Google Drive.
+ * Useful for syncing configuration changes like custom themes immediately.
+ */
+export async function syncProgressToDrive() {
+  const token = getAccessToken();
+  if (!token || token === 'valid-token') {
+    return;
+  }
+
+  const fullProgress = getLocalProgress();
+
+  try {
+    const file = await getProgressFile();
+    const fileId = file.id;
+
+    await driveFetch(`${DRIVE_API_BASE}/${fileId}?uploadType=media`, {
+      method: 'PATCH',
+      body: JSON.stringify(fullProgress)
+    });
+  } catch (err) {
+    console.warn('Failed to sync progress profile to Google Drive:', err);
+  }
+}

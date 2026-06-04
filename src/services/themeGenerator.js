@@ -27,6 +27,8 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
 {
   "theme-name": "A short, cool, and creative name for this theme based on the prompt (e.g. 'Cyberpunk Oasis', 'Ethereal Forest', 'Midnight Neon')",
   "bg-base": "hex color for general page background",
+  "bg-gradient": "linear-gradient CSS string (e.g. 'linear-gradient(135deg, #050805 0%, #020402 100%)' using bg-base and a slightly darker or lighter shade)",
+  "bg-pattern": "one of: grid, dots, stripes, waves, circuit, none (choose the design texture overlay that best fits the theme prompt)",
   "bg-panel": "hex color for card panels",
   "bg-muted": "hex color for code block background",
   "bg-elevated": "hex color for hover states",

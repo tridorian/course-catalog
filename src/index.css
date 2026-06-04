@@ -180,8 +180,9 @@
   body {
     @apply antialiased;
     background-color: var(--bg-base);
+    background-image: var(--bg-gradient, none);
     color: var(--text-main);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease, background-image 0.3s ease;
   }
 }
 

@@ -4,7 +4,9 @@ import {
   saveCustomTheme, 
   getCustomTheme, 
   deleteCustomTheme, 
-  setActiveCustomTheme 
+  setActiveCustomTheme,
+  getPatternSvg,
+  injectCustomThemeStyles
 } from '../../services/customTheme';
 
 describe('Custom Theme Service', () => {
@@ -14,6 +16,9 @@ describe('Custom Theme Service', () => {
     document.cookie.split(";").forEach((c) => {
       document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
+    // Remove style element if present
+    const styleTag = document.getElementById('tridorian-custom-theme');
+    if (styleTag) styleTag.remove();
   });
 
   it('should return empty list initially if no themes exist', () => {
@@ -92,5 +97,46 @@ describe('Custom Theme Service', () => {
     // Delete the last remaining theme
     deleteCustomTheme('theme_1');
     expect(getCustomTheme()).toBeNull();
+  });
+
+  describe('getPatternSvg', () => {
+    it('returns grid SVG data URI', () => {
+      const svg = getPatternSvg('grid', '#ff0000', '#00ff00');
+      expect(svg).toContain('data:image/svg+xml');
+      expect(svg).toContain('stroke="%2300ff00"');
+    });
+
+    it('returns circuit SVG data URI with accent and border colors', () => {
+      const svg = getPatternSvg('circuit', '#ff0000', '#00ff00');
+      expect(svg).toContain('fill="%23ff0000"');
+      expect(svg).toContain('stroke="%2300ff00"');
+    });
+
+    it('returns empty string for none pattern', () => {
+      const svg = getPatternSvg('none');
+      expect(svg).toBe('');
+    });
+  });
+
+  describe('injectCustomThemeStyles', () => {
+    it('creates style tag and sets custom properties with background patterns and gradients', () => {
+      const themeVars = {
+        'bg-base': '#100a20',
+        'bg-gradient': 'linear-gradient(135deg, #100a20 0%, #05030a 100%)',
+        'bg-pattern': 'circuit',
+        'accent-bg': '#7928ca',
+        'border-main': '#444444',
+        'text-main': '#ffffff'
+      };
+
+      injectCustomThemeStyles(themeVars);
+
+      const styleTag = document.getElementById('tridorian-custom-theme');
+      expect(styleTag).not.toBeNull();
+      expect(styleTag.textContent).toContain('--bg-base: #100a20');
+      expect(styleTag.textContent).toContain('--bg-gradient: linear-gradient(135deg, #100a20 0%, #05030a 100%)');
+      expect(styleTag.textContent).toContain('background-image: url("data:image/svg+xml;utf8,');
+      expect(styleTag.textContent).toContain('background-size: 80px 80px');
+    });
   });
 });
