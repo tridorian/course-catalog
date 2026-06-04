@@ -89,4 +89,4 @@ The project uses `lucide-react`. You can import and use any icons from the Lucid
 
 ## Deployment Details
 
-The deployment uses the `actions/deploy-pages` action. Ensure that the GitHub repository settings have "GitHub Actions" selected as the source for Pages.
+The deployment uses GitHub Actions (`.github/workflows/deploy-cloudrun.yml`) to build the project as a containerized Vite + Nginx app and deploy it directly to Google Cloud Run, utilizing OIDC Workload Identity Federation (WIF) for secure, keyless GCP authentication.

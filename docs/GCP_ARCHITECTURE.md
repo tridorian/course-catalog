@@ -1,6 +1,6 @@
 # GCP Architecture & Google Workspace Sync
 
-This document outlines the planned architecture for moving the tridorian Course Platform from a static GitHub Pages deployment to a dynamic Google Cloud Platform (GCP) deployment, utilizing Google Drive and Docs as the primary Content Management System (CMS).
+This document outlines the current architecture for the tridorian Course Platform deployed on Google Cloud Platform (GCP) Cloud Run, utilizing Google Drive and Docs as the primary Content Management System (CMS).
 
 ## 1. Google Drive Structure (The CMS)
 
@@ -23,24 +23,23 @@ Instead of multiple files per course, **a single course is exactly one Google Do
 
 ## 2. The Sync Engine
 
-To ensure high performance for end-users, the React application will not query the Google Drive API directly for content on every load.
+To ensure high performance for end-users, the React application does not query the Google Drive API directly for content on every load.
 
-1.  **Sync Trigger:** A Google Workspace Add-on (or a webhook/admin dashboard button) triggers a sync.
-2.  **Parsing:** A backend service (e.g., Cloud Functions or Cloud Run) reads the Google Doc.
-3.  **Storage:** The parsed content (translated from Doc Tabs into JSON objects) is saved into a database (e.g., **Firestore**) for fast, scalable retrieval.
+1.  **CI/CD Sync Workflow:** A GitHub Actions workflow (`content-sync.yml`) runs on a nightly schedule (cron) or manually via `workflow_dispatch`.
+2.  **Doc Parsing:** The workflow runs `scripts/sync-docs.js` using Node.js, authenticating to the Google Docs API with a Service Account (`GOOGLE_SERVICE_ACCOUNT_KEY`).
+3.  **Commit & Deploy:** The parsed JSON course files are generated directly in `public/content/`, committed, and pushed back to the Git repository. A subsequent push to `main` triggers the Cloud Run deployment.
 
 ## 3. Frontend & Infrastructure
 
-*   **Hosting:** The React frontend will be hosted on GCP (e.g., Firebase Hosting or Cloud Run), while GitHub Pages will be reserved solely for developer documentation and project landing pages.
-*   **Database:** Firestore serves the JSON course content directly to the React frontend.
+*   **Hosting:** The React frontend is built as a Vite application and served by Nginx inside a Docker container on Cloud Run. Nginx acts as the primary web server and handles routing as well as API reverse proxying.
+*   **Content Delivery:** Course content is served directly as static JSON files from the `/content/` directory via Nginx, ensuring high performance, caching, and decoupling of content from code without requiring database overhead (like Firestore).
 
 ## 4. Authentication & Access Control
 
-The platform cannot be fully public. Access control will be implemented via **Google OAuth**.
+Access control is implemented client-side via **Google OAuth**.
 
-*   **Authentication:** Users must log in using their Google accounts.
-*   **Authorization (Phase 1):** Initially, we will gate access based on specific email domains (e.g., `@yourcompany.com`) to keep unauthorized users out.
-*   **Authorization (Phase 2):** Implement granular access control lists (ACLs) or Firestore Security Rules for more targeted user management later.
+*   **Authentication:** Users log in using Google Identity Services (GIS) OAuth2 client-side flow.
+*   **Authorization / Roles:** The user's role (`admin` or `student`) is dynamically determined. In testing/dev mode, an email comparison is performed (e.g. checking for `taylor@tridorian.com`). In production/non-testing mode, the user's role is checked by querying their edit capabilities on a specific shared Google Drive directory. If they have write/edit access, they are granted `admin` status (enabling features like the sync control panel).
 
 ## 5. Technical Validation: Google Docs Tabs API
 
@@ -69,11 +68,23 @@ To streamline authoring and prevent data collisions, we will develop a native **
 
 ## 8. Backend API Proxy (For Dynamic Themes)
 
-To protect developer API credentials while ensuring the AI Theme Generator works for users who cannot authenticate using Google Sign-In, the production environment will deploy a secure backend API proxy.
+To protect developer API credentials while ensuring the AI Theme Generator, Music Synthesizer (Lyria), and Image Generator (Imagen) work without exposing raw developer API keys to the browser, requests are routed through a secure backend proxy.
 
-1.  **Architecture**: The client application routes theme and music generation requests through `/api/generate-theme` and `/api/generate-music` on the application backend (or a dedicated Cloud Run / Cloud Function proxy).
-2.  **Secret Isolation**: The backend proxy holds the service-account-bound API key (`AQ....`) in its environment variables, fetched securely at launch from **GCP Secret Manager**.
-3.  **Local Development**: In local development, developers can run `scripts/gemini_proxy.js` or configure `VITE_PROXY_URL=http://localhost:5001` in their git-ignored `.env.local` file to bypass direct Google API requests.
+1.  **Architecture**: The client application routes theme, music, and image generation requests to `/api/generate-theme`, `/api/generate-music`, and `/api/generate-image`.
+2.  **Nginx Reverse Proxy**: Nginx in the Cloud Run container reverse proxies the `/api/` path to the secure Node.js Cloud Function (`theme-proxy`).
+3.  **Access Token via ADC**: The Cloud Function (`theme-proxy`) uses the standard `@google-cloud/functions-framework` and `google-auth-library` to dynamically retrieve an OAuth access token using the GCP Service Account via Application Default Credentials (ADC) with the scopes `https://www.googleapis.com/auth/generative-language` and `https://www.googleapis.com/auth/cloud-platform`.
+4.  **Local Development**: In local development, developers can run `scripts/gemini_proxy.js` or configure `VITE_PROXY_URL=http://localhost:5001` in their git-ignored `.env.local` file to bypass direct Google API requests, or run the Cloud Function locally.
+5.  **GCP Service Account Binding**: 
+    1. Create a dedicated service account:
+       ```bash
+       gcloud iam service-accounts create theme-generator-sa --display-name="Theme Generator Service Account"
+       ```
+    2. Grant it restricted access to Vertex AI / Gemini:
+       ```bash
+       gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+         --member="serviceAccount:theme-generator-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
+         --role="roles/aiplatform.user"
+       ```
 
 ## 9. References
 

@@ -123,10 +123,12 @@ The custom theme generator and music synthesizer (Lyria AI) require valid creden
 2. **Option B: Custom Gemini API Key**
    You can generate and enter your own Gemini API key via the "AI Theme Generator" modal. Your key is stored locally in the browser (`localStorage.setItem('tridorian_gemini_api_key', key)`).
 
-3. **Option C: Service Account-Bound API Keys (Production Deployment Plan)**
-   To support users who cannot authenticate using Google Sign-In without exposing raw developer API keys to the browser, we use **Authorization Keys** (API keys bound to a service account) coupled with a secure backend proxy:
+3. **Option C: Cloud Function Proxy with Service Account ADC (Production Deployment)**
+   To support users who cannot authenticate using Google Sign-In without exposing raw developer API keys to the browser, we use a secure backend proxy:
    
-   *   **The Backend Proxy (`scripts/gemini_proxy.js`)**: A lightweight server hosts `/generate-theme` and `/generate-music` endpoints, receiving client requests and calling the Google APIs on their behalf. The proxy server is configured with the environment variable `GEMINI_API_KEY`, keeping it hidden from the browser.
+   *   **The Backend Proxy (`functions/theme-proxy`)**: A secure Cloud Function endpoint handles requests for `/generate-theme`, `/generate-music`, and `/generate-image`, calling the Google APIs on the client's behalf.
+   *   **Application Default Credentials (ADC)**: Instead of API keys, the Cloud Function runs under a Google Cloud Service Account and uses standard GCP Application Default Credentials (ADC) to retrieve an OAuth access token dynamically with the required scopes (`https://www.googleapis.com/auth/generative-language` and `https://www.googleapis.com/auth/cloud-platform`).
+   *   **Nginx Reverse Proxy**: Requests to `/api/*` on the client application are reverse proxied via Nginx directly to the Cloud Function, keeping credentials completely hidden from the browser.
    *   **GCP Service Account Binding**: 
        1. Create a dedicated service account:
           ```bash
@@ -137,18 +139,6 @@ The custom theme generator and music synthesizer (Lyria AI) require valid creden
           gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
             --member="serviceAccount:theme-generator-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
             --role="roles/aiplatform.user"
-          ```
-       3. Create a secure API Key bound to this service account, restricted **exclusively** to the Gemini API (`generativelanguage.googleapis.com`) to enforce the organization policy constraint:
-          ```bash
-          gcloud alpha services api-keys create \
-            --display-name="Theme-Generator-Key-SA" \
-            --key-id="theme-generator-key-sa" \
-            --service-account="theme-generator-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
-            --api-target=service=generativelanguage.googleapis.com
-          ```
-       4. Retrieve the key string (starts with `AQ.`) and place it in the backend environment of your proxy:
-          ```bash
-          gcloud alpha services api-keys get-key-string projects/YOUR_PROJECT_ID/locations/global/keys/theme-generator-key-sa
           ```
 
 ### Restricting Leaked & Placeholder Keys

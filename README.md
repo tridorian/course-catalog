@@ -48,12 +48,15 @@ npm run build
 ```
 The production-ready files will be in the `dist` directory.
 
-## Deployment
+## Deployment & Hosting
 
 This project is configured for automated deployment to Google Cloud Run via GitHub Actions.
 
-- **Vite Config:** Uses `base: './'` for relative asset paths.
-- **Workflow:** `.github/workflows/deploy-cloudrun.yml` handles building, pushing Docker images, and deploying to Cloud Run on pushes to the `main` branch.
+- **Hosting Infrastructure:** The React frontend is built using Vite and served by Nginx inside an alpine-based Docker container deployed to Google Cloud Run.
+- **CI/CD Build & Deploy:** The GitHub Actions workflow `.github/workflows/deploy-cloudrun.yml` automates building the container, pushing it to GCP Artifact Registry, and deploying to Cloud Run on pushes to `main`.
+- **Workload Identity Federation (WIF):** The deployment pipeline uses keyless OIDC authentication via `google-github-actions/auth` to securely interact with GCP.
+- **Vite Config:** Uses `base: '/'` for root-relative asset routing.
+- **API Proxy Routing:** Nginx reverse proxies client requests under `/api/` (such as theme, music, and image generation) to a Node.js Cloud Function (`theme-proxy`), which obtains authorization using a dedicated Google Service Account with Application Default Credentials (ADC).
 
 ## Architecture
 

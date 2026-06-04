@@ -23,7 +23,7 @@ This document outlines the detailed development tasks and acceptance criteria fo
 
 Focuses on validating data serialization and mock-testing Google Drive operations under different states.
 
-#### [ ] Task 4.1.1: Mock Google Drive `appProperties` API
+#### [x] Task 4.1.1: Mock Google Drive `appProperties` API
 - **Description:** Implement a robust Vitest mock framework for the Google Drive v3 files endpoint (`https://www.googleapis.com/drive/v3/files`) and Google Auth token retrieval (`getAccessToken` from `src/services/googleAuth.js`). This mock must handle searching for `agv_course_progress.json`, file creation (POST), and file updates (PATCH) containing track/course progress.
 - **Acceptance Criteria:**
   - Mock API intercepts `fetch` calls to the Google Drive files endpoint.
@@ -34,7 +34,7 @@ Focuses on validating data serialization and mock-testing Google Drive operation
   - `src/__tests__/setup.js` (or a dedicated `src/__tests__/googleDriveMock.js`)
 - **Reference:** Specification Section 4.1 "Mock Google Drive `appProperties` API."
 
-#### [ ] Task 4.1.2: Progress Save/Load Unit & Integration Tests
+#### [x] Task 4.1.2: Progress Save/Load Unit & Integration Tests
 - **Description:** Write comprehensive unit and integration tests using Vitest and React Testing Library to verify that user progress is saved upon completing modules and loaded when the app initializes.
 - **Acceptance Criteria:**
   - Test that calling the save progress trigger updates the serialized completed steps on the mocked Google Drive file.
@@ -52,7 +52,7 @@ Focuses on validating data serialization and mock-testing Google Drive operation
 
 Updates the React client to handle hierarchical progress structures, display real-time sync feedback, and support resuming sessions.
 
-#### [ ] Task 4.2.1: Refine `src/services/googleDrive.js` for Hierarchical Progress
+#### [x] Task 4.2.1: Refine `src/services/googleDrive.js` for Hierarchical Progress
 - **Description:** Refactor the progress save and load functions to support multi-course progress across multiple tracks. Since Google Drive `appProperties` keys and values are limited to 124 bytes each (with up to 100 properties per file), we must serialize track-course specific progress using concise flat property keys.
 - **Key Scheme Design:**
   - Store progress as: `progress_[trackId]_[courseId]_completed` with value as a comma-separated string of completed module indices (e.g., `"0,1,2"`).
@@ -65,7 +65,7 @@ Updates the React client to handle hierarchical progress structures, display rea
   - `src/services/googleDrive.js`
 - **Reference:** Specification Section 4.2 "Refine `src/services/googleDrive.js` to handle the new hierarchical data structure."
 
-#### [ ] Task 4.2.2: Add Sync Status Indicator to UI
+#### [x] Task 4.2.2: Add Sync Status Indicator to UI
 - **Description:** Add a "Sync Status" indicator to the sidebar or main navigation header that displays the current sync state with Google Drive.
 - **Sync States:**
   - `Idle`: Up-to-date, no active syncing operations.
@@ -80,7 +80,7 @@ Updates the React client to handle hierarchical progress structures, display rea
   - `src/components/SyncStatus.jsx` (New component)
 - **Reference:** Specification Section 4.2 "Add a 'Sync Status' indicator (Success/Saving/Error) to the UI."
 
-#### [ ] Task 4.2.3: Implement "Resume Last Session" Prompt
+#### [x] Task 4.2.3: Implement "Resume Last Session" Prompt
 - **Description:** Create a prompt that displays upon course initialization if there is a saved active module/step in Google Drive that differs from the default (module 0/first module).
 - **Acceptance Criteria:**
   - When loading a course, check if a saved `activeStepId` exists in Google Drive progress.
@@ -97,7 +97,7 @@ Updates the React client to handle hierarchical progress structures, display rea
 
 Implements a secure, automated build script to convert Google Docs into static JSON assets matching the tridorian layout structure.
 
-#### [ ] Task 4.3.1: Create Sync Configuration Mapping
+#### [x] Task 4.3.1: Create Sync Configuration Mapping
 - **Description:** Define a configuration JSON file listing the source Google Docs mapped to the target tracks and courses.
 - **Acceptance Criteria:**
   - Create `scripts/sync-config.json` listing the doc mappings (e.g., mapping `GOOGLE_DOC_ID` to track `agentic-engineering` and course `agv-101`).
@@ -105,7 +105,7 @@ Implements a secure, automated build script to convert Google Docs into static J
   - `scripts/sync-config.json` (New file)
 - **Reference:** Structural configuration mapping for the Node.js sync engine.
 
-#### [ ] Task 4.3.2: Create Content Sync Script (`scripts/sync-docs.js`)
+#### [x] Task 4.3.2: Create Content Sync Script (`scripts/sync-docs.js`)
 - **Description:** Create `scripts/sync-docs.js` using Node.js to fetch tab contents from Google Docs using the Google Docs API v1 (utilizing `includeTabsContent=true`). The script must parse the tabs according to the tridorian Document Specification (TDS) and save them to the correct local paths.
 - **Parsing Rules:**
   - Tab 1 (`[Config]`): Parses key-value table containing `course_id`, `title`, `version`, `author`.
@@ -119,7 +119,7 @@ Implements a secure, automated build script to convert Google Docs into static J
   - `scripts/sync-docs.js` (New file)
 - **Reference:** Specification Section 4.3 "Update `scripts/sync-docs.js` to create the full `public/content/[track]/[course]/` folder structure based on the Google Doc tabs."
 
-#### [ ] Task 4.3.3: Implement Module Type Classification & Idempotency
+#### [x] Task 4.3.3: Implement Module Type Classification & Idempotency
 - **Description:** Refine `scripts/sync-docs.js` to dynamically classify modules based on tab details and ensure the writing actions are idempotent.
 - **Classification Rules:**
   - If the tab title contains `[Presentation]` or if the tab contains a Google Slides / Video URL, set the module type to `"presentation"` and write notes and url fields.
@@ -135,7 +135,7 @@ Implements a secure, automated build script to convert Google Docs into static J
   - `scripts/sync-docs.js`
 - **Reference:** Specification Section 4.3 "Ensure the script correctly classifies modules as Lab, Presentation, or Resource based on tab content or naming conventions" and Exit Criteria "The sync script is idempotent and handles folder creation/updates correctly."
 
-#### [ ] Task 4.3.4: Integrate GitHub Actions Workflow
+#### [x] Task 4.3.4: Integrate GitHub Actions Workflow
 - **Description:** Implement a GitHub Actions workflow to run the sync script automatically on repository updates.
 - **Acceptance Criteria:**
   - Create `.github/workflows/sync-docs.yml`.

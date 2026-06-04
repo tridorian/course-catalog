@@ -16,7 +16,7 @@ For detailed rationale and design decisions, please refer to the following ADRs:
 - **Build Tool:** [Vite](https://vitejs.dev/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) with `tailwindcss-animate`
 - **Icons:** [Lucide React](https://lucide.dev/)
-- **Deployment:** GitHub Pages via GitHub Actions
+- **Deployment:** Vite + Nginx on Cloud Run with OIDC WIF via GitHub Actions
 
 ## Content Hierarchy
 
@@ -82,11 +82,11 @@ The application uses a hybrid persistence model to save user progress:
 - **Auto-Reauth:** The Google Drive service automatically handles `401 Unauthorized` errors by triggering a transparent re-authentication flow via Google Identity Services.
 
 ### Routing
-The app uses `HashRouter` with four route patterns:
-- `/#/` — Dashboard, showing all available tracks from `catalog.json`.
-- `/#/:trackId` — Track page, showing all courses in a track from `track.json`.
-- `/#/:trackId/:courseId` — Course Map view showing all modules.
-- `/#/:trackId/:courseId/:moduleId` — Deep link to a specific module.
+The app uses `BrowserRouter` with four route patterns:
+- `/` — Dashboard, showing all available tracks from `catalog.json`.
+- `/:trackId` — Track page, showing all courses in a track from `track.json`.
+- `/:trackId/:courseId` — Course Map view showing all modules.
+- `/:trackId/:courseId/:moduleId` — Deep link to a specific module.
 
 ### Navigation
 Navigation is handled via a sidebar that displays the course structure.
