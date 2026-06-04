@@ -70,7 +70,7 @@ describe('App Integration', () => {
     expect(screen.getByText(/LOADING TRIDORIAN MISSION.../i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+      expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -93,7 +93,7 @@ describe('App Integration', () => {
     renderApp();
 
     await waitFor(() => {
-      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+      expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
     });
 
     // Wait for the button to appear and verify no checkmark
@@ -187,7 +187,7 @@ describe('App Integration', () => {
     renderApp();
 
     await waitFor(() => {
-      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+      expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
     });
 
     // Check that quiz question is displayed
@@ -226,7 +226,7 @@ describe('App Integration', () => {
     renderApp('/agentic-engineering/agy-101/module-2');
 
     await waitFor(() => {
-      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+      expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
     });
 
     // Complete course
@@ -264,7 +264,7 @@ describe('App Integration', () => {
     renderApp('/agentic-engineering/agy-102/module-2');
 
     await waitFor(() => {
-      expect(screen.getByText('TEST COURSE')).toBeInTheDocument();
+      expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
     });
 
     // Complete course

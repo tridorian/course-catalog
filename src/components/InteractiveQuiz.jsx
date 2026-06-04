@@ -77,6 +77,15 @@ function renderInlineText(text) {
   });
 }
 
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 const InteractiveQuiz = ({ questions, onPassed }) => {
   if (!questions || questions.length === 0) return null;
 
@@ -92,6 +101,29 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
   const currentQuestion = questions[currentIdx];
   const isQuestionCorrect = answeredStates[currentIdx] === true;
 
+  // Initialize shuffled options for the first question
+  const [shuffledOptions, setShuffledOptions] = useState(() => {
+    if (currentQuestion) {
+      const opts = currentQuestion.options.map((opt, i) => ({
+        text: opt,
+        isCorrect: i === currentQuestion.correctIndex
+      }));
+      return shuffleArray(opts);
+    }
+    return [];
+  });
+
+  // Reshuffle options when moving to next question or questions prop changes
+  useEffect(() => {
+    if (currentQuestion) {
+      const opts = currentQuestion.options.map((opt, i) => ({
+        text: opt,
+        isCorrect: i === currentQuestion.correctIndex
+      }));
+      setShuffledOptions(shuffleArray(opts));
+    }
+  }, [currentIdx, questions]);
+
   // Handle option click
   const handleSelectOption = (idx) => {
     if (isAnswered && !retrying) return;
@@ -101,9 +133,9 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
 
   // Submit selected answer
   const handleSubmit = () => {
-    if (selectedOpt === null) return;
+    if (selectedOpt === null || shuffledOptions.length === 0) return;
 
-    const isCorrect = selectedOpt === currentQuestion.correctIndex;
+    const isCorrect = shuffledOptions[selectedOpt].isCorrect;
     const newStates = [...answeredStates];
     newStates[currentIdx] = isCorrect;
     setAnsweredStates(newStates);
@@ -124,6 +156,15 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
     const newStates = [...answeredStates];
     newStates[currentIdx] = null;
     setAnsweredStates(newStates);
+
+    // Shuffle options again on incorrect retry
+    if (currentQuestion) {
+      const opts = currentQuestion.options.map((opt, i) => ({
+        text: opt,
+        isCorrect: i === currentQuestion.correctIndex
+      }));
+      setShuffledOptions(shuffleArray(opts));
+    }
   };
 
   // Advance to next question or complete quiz
@@ -164,11 +205,11 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
 
   if (quizFinished) {
     return (
-      <div className="bg-panel border-2 border-emerald-500/30 p-8 rounded-2xl text-center shadow-[0_0_30px_rgba(16,185,129,0.08)] my-8 animate-in fade-in slide-in-from-bottom duration-500">
-        <div className="w-16 h-16 bg-emerald-950/20 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-          <Icons.Check className="text-emerald-400 w-8 h-8" />
+      <div className="bg-panel border-2 border-[var(--quiz-correct-border)] p-8 rounded-2xl text-center shadow-[0_0_30px_rgba(16,185,129,0.08)] my-8 animate-in fade-in slide-in-from-bottom duration-500">
+        <div className="w-16 h-16 bg-[var(--quiz-correct-bg)] border border-[var(--quiz-correct-border)] rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+          <Icons.Check className="text-[var(--quiz-correct-text)] w-8 h-8" />
         </div>
-        <h3 className="text-2xl font-bold text-emerald-400 mb-2 uppercase tracking-wide">Comprehension Verified</h3>
+        <h3 className="text-2xl font-bold text-[var(--quiz-correct-text)] mb-2 uppercase tracking-wide">Comprehension Verified</h3>
         <p className="text-text-muted text-base max-w-md mx-auto mb-6 leading-relaxed">
           Excellent! You have successfully passed the module quiz. Course progression is now unlocked.
         </p>
@@ -218,9 +259,9 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
 
       {/* Option List */}
       <div className="space-y-3 mb-6">
-        {currentQuestion.options.map((option, idx) => {
+        {shuffledOptions.map((optObj, idx) => {
           const isSelected = selectedOpt === idx;
-          const isCorrectAnswer = idx === currentQuestion.correctIndex;
+          const isCorrectAnswer = optObj.isCorrect;
           const showAnswerStatus = isAnswered;
 
           let optionStyle = 'border-border-main bg-panel text-text-muted hover:bg-muted/50 hover:text-main';
@@ -230,9 +271,9 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
 
           if (showAnswerStatus) {
             if (isCorrectAnswer) {
-              optionStyle = 'bg-emerald-950/20 border-emerald-500/50 text-emerald-300';
+              optionStyle = 'bg-[var(--quiz-correct-bg)] border-[var(--quiz-correct-border)] text-[var(--quiz-correct-text)]';
             } else if (isSelected) {
-              optionStyle = 'bg-rose-950/20 border-rose-500/50 text-rose-300';
+              optionStyle = 'bg-[var(--quiz-incorrect-bg)] border-[var(--quiz-incorrect-border)] text-[var(--quiz-incorrect-text)]';
             } else {
               optionStyle = 'opacity-40 border-border-main text-text-muted bg-panel';
             }
@@ -266,7 +307,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
                   optionLetter
                 )}
               </div>
-              <span className="leading-relaxed text-sm md:text-base pt-0.5">{renderInlineText(option)}</span>
+              <span className="leading-relaxed text-sm md:text-base pt-0.5">{renderInlineText(optObj.text)}</span>
             </button>
           );
         })}
@@ -276,14 +317,14 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
       {isAnswered && (
         <div className={`p-5 rounded-xl border mb-6 animate-in fade-in slide-in-from-top-2 duration-300 ${
           answeredStates[currentIdx] === true
-            ? 'bg-emerald-950/10 border-emerald-500/20 text-emerald-300/90'
-            : 'bg-rose-950/10 border-rose-500/20 text-rose-300/90'
+            ? 'bg-[var(--quiz-correct-bg)] border-[var(--quiz-correct-border)] text-[var(--quiz-correct-text)]'
+            : 'bg-[var(--quiz-incorrect-bg)] border-[var(--quiz-incorrect-border)] text-[var(--quiz-incorrect-text)]'
         }`}>
           <div className="flex gap-2.5 items-start">
             {answeredStates[currentIdx] === true ? (
-              <Icons.CheckCircle2 className="text-emerald-400 mt-0.5 flex-shrink-0" size={18} />
+              <Icons.CheckCircle2 className="text-[var(--quiz-correct-text)] mt-0.5 flex-shrink-0" size={18} />
             ) : (
-              <Icons.XCircle className="text-rose-400 mt-0.5 flex-shrink-0" size={18} />
+              <Icons.XCircle className="text-[var(--quiz-incorrect-text)] mt-0.5 flex-shrink-0" size={18} />
             )}
             <div>
               <div className="font-bold text-xs uppercase tracking-wider mb-1 font-mono">
@@ -320,7 +361,7 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
         ) : (
           <button
             onClick={handleRetry}
-            className="px-6 py-2.5 border border-rose-500/40 text-rose-400 hover:bg-rose-500/10 font-bold rounded-lg transition-all flex items-center gap-2"
+            className="px-6 py-2.5 border border-[var(--quiz-incorrect-border)] text-[var(--quiz-incorrect-text)] hover:bg-[var(--quiz-incorrect-bg)] font-bold rounded-lg transition-all flex items-center gap-2"
           >
             <Icons.RotateCcw size={16} />
             Try Again

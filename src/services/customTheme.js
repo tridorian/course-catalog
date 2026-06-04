@@ -164,6 +164,27 @@ export function deleteCustomTheme(id) {
 }
 
 // Inject styling variables for .theme-custom class dynamically
+function isDarkColor(hex) {
+  if (!hex || typeof hex !== 'string') return true;
+  const cleanHex = hex.replace('#', '');
+  if (cleanHex.length === 3) {
+    const r = parseInt(cleanHex[0] + cleanHex[0], 16);
+    const g = parseInt(cleanHex[1] + cleanHex[1], 16);
+    const b = parseInt(cleanHex[2] + cleanHex[2], 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128;
+  }
+  if (cleanHex.length === 6) {
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128;
+  }
+  return true;
+}
+
+// Inject styling variables for .theme-custom class dynamically
 export function injectCustomThemeStyles(vars) {
   if (!vars) return;
   let styleTag = document.getElementById('tridorian-custom-theme');
@@ -173,9 +194,18 @@ export function injectCustomThemeStyles(vars) {
     document.head.appendChild(styleTag);
   }
 
+  const isLight = vars['text-main'] ? isDarkColor(vars['text-main']) : false;
+
+  const quizCorrectBg = isLight ? 'rgba(25, 135, 84, 0.08)' : 'rgba(16, 185, 129, 0.15)';
+  const quizCorrectText = isLight ? '#0f5132' : '#34d399';
+  const quizCorrectBorder = isLight ? 'rgba(25, 135, 84, 0.25)' : 'rgba(16, 185, 129, 0.4)';
+  const quizIncorrectBg = isLight ? 'rgba(220, 53, 69, 0.08)' : 'rgba(244, 63, 94, 0.15)';
+  const quizIncorrectText = isLight ? '#842029' : '#fda4af';
+  const quizIncorrectBorder = isLight ? 'rgba(220, 53, 69, 0.25)' : 'rgba(244, 63, 94, 0.4)';
+
   styleTag.textContent = `
     .theme-custom {
-      color-scheme: dark;
+      color-scheme: ${isLight ? 'light' : 'dark'};
       --bg-base: ${vars['bg-base'] || '#080c08'};
       --bg-panel: ${vars['bg-panel'] || '#0d180f'};
       --bg-muted: ${vars['bg-muted'] || '#122517'};
@@ -190,6 +220,12 @@ export function injectCustomThemeStyles(vars) {
       --accent-muted: ${vars['accent-muted'] || 'rgba(34, 197, 94, 0.08)'};
       --accent-border: ${vars['accent-border'] || 'rgba(34, 197, 94, 0.25)'};
       --shadow-accent: ${vars['shadow-accent'] || '0 0 15px rgba(34, 197, 94, 0.2)'};
+      --quiz-correct-bg: ${quizCorrectBg};
+      --quiz-correct-text: ${quizCorrectText};
+      --quiz-correct-border: ${quizCorrectBorder};
+      --quiz-incorrect-bg: ${quizIncorrectBg};
+      --quiz-incorrect-text: ${quizIncorrectText};
+      --quiz-incorrect-border: ${quizIncorrectBorder};
     }
   `;
 }
