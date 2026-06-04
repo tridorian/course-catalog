@@ -76,9 +76,12 @@ function AppContent() {
     }
   }
 
-  const activeStep = courseSteps[activeStepIndex];
+const activeStep = courseSteps[activeStepIndex];
   const totalSteps = courseSteps.length;
   const progressPercentage = totalSteps > 0 ? (completedSteps.length / totalSteps) * 100 : 0;
+
+  // Optimization: use a Set for O(1) lookups in loops
+  const completedStepsSet = new Set(completedSteps);
 
   // Scroll to top when step changes
   useEffect(() => {
@@ -176,9 +179,9 @@ function AppContent() {
           <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Course Modules</h2>
           <nav className="space-y-2">
             {courseSteps.map((step, index) => {
-              const isCompleted = completedSteps.includes(index);
+              const isCompleted = completedStepsSet.has(index);
               const isActive = index === activeStepIndex;
-              const isLocked = index > 0 && !completedSteps.includes(index - 1);
+              const isLocked = index > 0 && !completedStepsSet.has(index - 1);
 
               return (
                 <button
@@ -253,8 +256,8 @@ function AppContent() {
               <h1 className="text-3xl font-bold text-white mb-6">Course Map</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {courseSteps.map((step, index) => {
-                   const isCompleted = completedSteps.includes(index);
-                   const isLocked = index > 0 && !completedSteps.includes(index - 1);
+                   const isCompleted = completedStepsSet.has(index);
+                   const isLocked = index > 0 && !completedStepsSet.has(index - 1);
                    return (
                      <div key={step.id} className={`p-4 rounded-xl border ${isLocked ? 'border-[#1f3d25] bg-[#0a120c] opacity-50' : 'border-[#1f3d25] bg-[#132617]'}`}>
                         <h3 className="font-bold text-[#4ade80] mb-2">{step.title}</h3>
