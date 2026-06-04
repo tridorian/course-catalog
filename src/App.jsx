@@ -811,8 +811,6 @@ function AppContent({ theme, setTheme }) {
   );
 }
 
-// Global audio unlock state tracking across component mounts/unmounts/renders
-let isAudioUnlockedGlobal = false;
 
 export default function App() {
   const { theme, setTheme } = useTheme();
@@ -857,11 +855,10 @@ export default function App() {
 
   // Unlock browser audio context on user interaction and start theme music
   useEffect(() => {
-    if (isAudioUnlockedGlobal) return;
+    if (themeAudio.isAudioUnlocked()) return;
 
     const handleInteraction = () => {
-      if (isAudioUnlockedGlobal) return;
-      isAudioUnlockedGlobal = true;
+      if (themeAudio.isAudioUnlocked()) return;
       console.log(`[Theme Audio] Interaction detected. Launching theme music: ${theme}`);
       themeAudio.playThemeMusic(theme);
 

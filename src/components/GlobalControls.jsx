@@ -88,6 +88,9 @@ const GlobalControls = ({ theme, setTheme }) => {
       }
 
       e.preventDefault();
+      // Ensure audio context is initialized and unlocked on user scroll activation
+      themeAudio.playThemeMusic(theme);
+
       const change = e.deltaY < 0 ? 0.05 : -0.05;
       
       setAudioState(prev => {
@@ -102,7 +105,8 @@ const GlobalControls = ({ theme, setTheme }) => {
     return () => {
       window.removeEventListener('wheel', handleGlobalWheel);
     };
-  }, []);
+  }, [theme]);
+
 
 
   const toggleCursor = (e) => {
@@ -112,16 +116,19 @@ const GlobalControls = ({ theme, setTheme }) => {
 
   const handleToggleMute = (e) => {
     e.stopPropagation();
+    themeAudio.playThemeMusic(theme);
     const muted = themeAudio.toggleMute();
     setAudioState(prev => ({ ...prev, isMuted: muted }));
   };
 
   const handleVolumeChange = (e) => {
     e.stopPropagation();
+    themeAudio.playThemeMusic(theme);
     const vol = parseFloat(e.target.value);
     themeAudio.setVolume(vol);
     setAudioState(prev => ({ ...prev, volume: vol }));
   };
+
 
   const handleGenerateTheme = async () => {
     if (!prompt.trim()) {
@@ -499,12 +506,14 @@ const GlobalControls = ({ theme, setTheme }) => {
         onWheel={(e) => {
           e.stopPropagation();
           e.preventDefault();
+          themeAudio.playThemeMusic(theme);
           const change = e.deltaY < 0 ? 0.05 : -0.05;
           const newVol = Math.max(0, Math.min(1, parseFloat(audioState.volume) + change));
           const roundedVol = Math.round(newVol * 100) / 100;
           themeAudio.setVolume(roundedVol);
           setAudioState(prev => ({ ...prev, volume: roundedVol }));
         }}
+
       >
         <button
           onClick={handleToggleMute}

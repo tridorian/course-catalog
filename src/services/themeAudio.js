@@ -11,6 +11,8 @@ let schedulerTimer = null;
 let evolveTimer = null;
 let customAudioElement = null;
 let customAudioSource = null;
+let isUnlocked = false;
+
 
 // Persistent preference keys
 const VOL_KEY = 'tridorian_audio_volume';
@@ -1164,8 +1166,10 @@ export function playThemeMusic(themeId) {
       // Audio context needs user gesture to start
       audioCtx.resume();
     }
+    isUnlocked = true;
 
     if (currentLoopId === themeId) return;
+
     
     currentLoopId = themeId;
     cleanupActiveNodes();
@@ -1222,3 +1226,8 @@ export function toggleMute() {
 export function getAudioState() {
   return { ...state, currentLoopId };
 }
+
+export function isAudioUnlocked() {
+  return isUnlocked;
+}
+
