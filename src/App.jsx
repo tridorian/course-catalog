@@ -335,22 +335,7 @@ function AppContent() {
         )}
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
-        /* Custom Scrollbar for sidebar to match theme */
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #0a120c;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #1f3d25;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #4ade80;
-        }
-      `}} />
+
     </div>
   );
 }
