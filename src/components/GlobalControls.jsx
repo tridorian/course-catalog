@@ -29,6 +29,10 @@ const GlobalControls = ({ theme, setTheme }) => {
 
 
   // AI Theme Generator state
+  const isProxyActive = typeof window !== 'undefined' && import.meta.env.MODE !== 'test' && (
+    !!import.meta.env.VITE_PROXY_URL || (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
+  );
+
   const [showGenerator, setShowGenerator] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [apiKey, setApiKey] = useState(() => {
@@ -176,7 +180,12 @@ const GlobalControls = ({ theme, setTheme }) => {
 
     addLog("🚀 Initiating Custom Theme Pipeline...");
     addLog(`[Config] User Prompt: "${prompt}"`);
-    addLog(`[Config] Proxy Mode Enabled: Routing calls to secure backend proxy at ${import.meta.env.VITE_PROXY_URL || 'http://localhost:5001'}`);
+    const activeProxy = import.meta.env.VITE_PROXY_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? '/api' : '');
+    if (activeProxy) {
+      addLog(`[Config] Proxy Mode Enabled: Routing calls to secure backend proxy at ${activeProxy}`);
+    } else {
+      addLog("[Config] Direct Client-to-API Mode: Using client-side credentials / API Key.");
+    }
 
     try {
       addLog("Step 1/3: Calling Gemini API (gemini-2.5-flash) to generate custom color palette & styling tokens...");
@@ -625,27 +634,42 @@ const GlobalControls = ({ theme, setTheme }) => {
             </p>
             
             <div className="space-y-4">
-              {/* API Key */}
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-[10px] font-mono uppercase text-text-muted">Gemini API Key</label>
-                  <a
-                    href="https://aistudio.google.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[10px] text-accent-text hover:underline"
-                  >
-                    Get a Key
-                  </a>
+              {/* API Key Status / Entry */}
+              {isProxyActive ? (
+                <div className="p-3 rounded-lg border flex flex-col gap-2" style={{ backgroundColor: 'var(--accent-muted)', borderColor: 'var(--accent-border)' }}>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#26D07C] animate-pulse shrink-0"></span>
+                      <span className="text-[10px] font-mono uppercase font-bold text-accent-text">Service Account Active</span>
+                    </div>
+                    <span className="text-[9px] text-[#26D07C] font-mono uppercase tracking-wider bg-[#26D07C]/10 px-2 py-0.5 rounded border border-[#26D07C]/20">No Key Needed</span>
+                  </div>
+                  <p className="text-[10px] text-text-muted leading-relaxed">
+                    Theme generation is configured to securely authenticate via the application's GCP service account. No personal API key is required.
+                  </p>
                 </div>
-                <input
-                  type="password"
-                  placeholder="Enter API Key (pre-fills if saved)"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full px-3 py-2 bg-muted border border-border-main rounded-lg text-sm text-main placeholder-text-muted/50 focus:outline-none focus:border-accent"
-                />
-              </div>
+              ) : (
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[10px] font-mono uppercase text-text-muted">Gemini API Key</label>
+                    <a
+                      href="https://aistudio.google.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-accent-text hover:underline"
+                    >
+                      Get a Key
+                    </a>
+                  </div>
+                  <input
+                    type="password"
+                    placeholder="Enter API Key (pre-fills if saved)"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="w-full px-3 py-2 bg-muted border border-border-main rounded-lg text-sm text-main placeholder-text-muted/50 focus:outline-none focus:border-accent"
+                  />
+                </div>
+              )}
               
               {/* Theme Prompt */}
               <div>

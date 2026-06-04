@@ -38,7 +38,7 @@ function getValidApiKey(userApiKey = '') {
 }
 
 export async function generateThemeWithGemini(promptText, userApiKey = '') {
-  const proxyUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_PROXY_URL : '';
+  const proxyUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PROXY_URL) || '/api';
 
   if (proxyUrl) {
     const url = `${proxyUrl.replace(/\/$/, '')}/generate-theme`;
@@ -163,7 +163,7 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
 }
 
 export async function generateMusicWithLyria(promptText, userApiKey = '') {
-  const proxyUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_PROXY_URL : '';
+  const proxyUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PROXY_URL) || '/api';
 
   if (proxyUrl) {
     const url = `${proxyUrl.replace(/\/$/, '')}/generate-music`;
@@ -248,7 +248,7 @@ export async function generateMusicWithLyria(promptText, userApiKey = '') {
 }
 
 export async function generateImageWithImagen(promptText, userApiKey = '') {
-  const proxyUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_PROXY_URL : '';
+  const proxyUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PROXY_URL) || '/api';
 
   if (proxyUrl) {
     const url = `${proxyUrl.replace(/\/$/, '')}/generate-image`;
