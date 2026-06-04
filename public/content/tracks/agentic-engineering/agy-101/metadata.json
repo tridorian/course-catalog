@@ -2,7 +2,7 @@
   "course_id": "agy-101",
   "title": "AGY-101: Secure Agentic Development: Installation & Setup",
   "version": "1.0.0",
-  "author": "Tridorian Labs & Google Cloud",
+  "author": "tridorian Labs & Google Cloud",
   "description": "Welcome to the foundational course for Google Antigravity. This L100 module covers the secure installation, setup, and initialization of the Antigravity developer platform. Learners will understand installation surface tiers (Tiers 1, 2, and 3), navigate the initial launch configuration (setup flows, editor profiles), master execution policies (terminal execution, review, and JavaScript policies), select appropriate agent autonomy modes (secure mode vs review-driven development), and verify their environment through workspace testing.",
   "features": [
     {

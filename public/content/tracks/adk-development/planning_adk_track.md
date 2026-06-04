@@ -1,6 +1,6 @@
 # Curriculum Plan: ADK Development
 
-This document outlines the curriculum architecture, pedagogical progression, and detailed content outlines for the **ADK Development** track in the Tridorian Course Platform catalog.
+This document outlines the curriculum architecture, pedagogical progression, and detailed content outlines for the **ADK Development** track in the tridorian Course Platform catalog.
 
 ---
 

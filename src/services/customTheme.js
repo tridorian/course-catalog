@@ -299,11 +299,11 @@ export function injectCustomThemeStyles(vars) {
   const bgBase = vars['bg-base'] || '#080c08';
   const accentBg = vars['accent-bg'] || '#22c55e';
 
-  // Enforce WCAG AA 4.5:1 contrast ratio programmatically
-  const textMain = enforceContrast(vars['text-main'] || '#f0fdf4', bgPanel, 4.5);
-  const textMuted = enforceContrast(vars['text-muted'] || '#86efac', bgPanel, 4.5);
-  const accentText = enforceContrast(vars['accent-text'] || '#4ade80', bgPanel, 4.5);
-  const accentFg = enforceContrast(vars['accent-fg'] || '#ffffff', accentBg, 4.5);
+  // Enforce WCAG AAA 7.0:1 contrast ratio programmatically for readability
+  const textMain = enforceContrast(vars['text-main'] || '#f0fdf4', bgPanel, 7.0);
+  const textMuted = enforceContrast(vars['text-muted'] || '#86efac', bgPanel, 7.0);
+  const accentText = enforceContrast(vars['accent-text'] || '#4ade80', bgPanel, 7.0);
+  const accentFg = enforceContrast(vars['accent-fg'] || '#ffffff', accentBg, 5.0);
 
   const isLight = textMain ? isDarkColor(textMain) : false;
 

@@ -19,7 +19,7 @@ We use `react-router-dom`'s `BrowserRouter` for clean, standard URLs.
 - **Previous decision:** HashRouter was used when targeting GitHub Pages. Now that we deploy to Cloud Run (which supports proper server config), BrowserRouter is the modern standard.
 
 ### 2. Deployment Target: Google Cloud Run
-- **Reason:** Private repo cannot use GitHub Pages. Tridorian has an existing GCP sandbox.
+- **Reason:** Private repo cannot use GitHub Pages. tridorian has an existing GCP sandbox.
 - **Container:** Lightweight nginx image serving the Vite build output (`dist/`).
 - **CI/CD:** GitHub Actions → `docker build` → push to Artifact Registry → deploy to Cloud Run.
 - See `Dockerfile` and `.github/workflows/deploy-cloudrun.yml` for implementation.

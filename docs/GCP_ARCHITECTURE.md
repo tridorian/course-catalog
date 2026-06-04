@@ -1,6 +1,6 @@
 # GCP Architecture & Google Workspace Sync
 
-This document outlines the planned architecture for moving the Tridorian Course Platform from a static GitHub Pages deployment to a dynamic Google Cloud Platform (GCP) deployment, utilizing Google Drive and Docs as the primary Content Management System (CMS).
+This document outlines the planned architecture for moving the tridorian Course Platform from a static GitHub Pages deployment to a dynamic Google Cloud Platform (GCP) deployment, utilizing Google Drive and Docs as the primary Content Management System (CMS).
 
 ## 1. Google Drive Structure (The CMS)
 
@@ -18,7 +18,7 @@ To avoid building a custom editor, Google Drive serves as the source of truth fo
 
 ### Course Document Structure
 Instead of multiple files per course, **a single course is exactly one Google Doc**.
-- Modules are separated using **Tabs** within the Google Doc, adhering strictly to the Tridorian Document Specification (TDS).
+- Modules are separated using **Tabs** within the Google Doc, adhering strictly to the tridorian Document Specification (TDS).
 - **Versioning:** Course updates and drafts rely on Google Docs' native **Version History**. Authors edit the live document, and when a "Sync" is triggered, the engine pulls the latest named version or current state. We do *not* duplicate folders for drafts.
 
 ## 2. The Sync Engine
@@ -48,7 +48,7 @@ The single-document-with-tabs approach is fully supported by the Google Docs API
 - The `documents.get` method returns a `Document` resource.
 - Within the `Document` resource, the `tabs` property contains an array of `Tab` objects.
 - Each `Tab` contains its own `DocumentTab` object, which holds the structural elements (Body, Headers, Footers, etc.) identical to a standard, non-tabbed document.
-- The sync engine will iterate through the `tabs` array, treating each tab as a distinct Module according to the Tridorian Document Specification (TDS).
+- The sync engine will iterate through the `tabs` array, treating each tab as a distinct Module according to the tridorian Document Specification (TDS).
 
 ## 6. AI-Driven Updates & Sync Orchestration
 
@@ -62,7 +62,7 @@ To streamline the maintenance and generation of course content, the sync process
 
 To streamline authoring and prevent data collisions, we will develop a native **Google Workspace Add-on** for both Google Docs and Google Drive.
 
-*   **Authoring Companion:** The Add-on provides a sidebar inside Google Docs, allowing authors to validate the Tridorian Document Specification (TDS) syntax, preview module blocks, and manually trigger the Sync Engine without leaving the editor.
+*   **Authoring Companion:** The Add-on provides a sidebar inside Google Docs, allowing authors to validate the tridorian Document Specification (TDS) syntax, preview module blocks, and manually trigger the Sync Engine without leaving the editor.
 *   **Metadata Tattooing:** The Add-on and Sync Engine will utilize the Google Drive `Properties` (or `appProperties`) service and the Docs `DocumentProperties` to "tattoo" crucial metadata directly onto the files.
     *   **Stored Properties:** `last_sync_timestamp`, `live_version_id`, `course_slug`, and `validation_status`.
     *   **Stale Update Prevention:** Before the Sync Engine updates Firestore, it compares the tattooed `live_version_id` against the current Docs version. If a collision is detected (e.g., the doc was modified concurrently), the Add-on alerts the user, preventing stale or conflicting updates from going live.

@@ -2,7 +2,7 @@
   "course_id": "agy-421",
   "title": "AGY-421: Enterprise Governance & Rules (L400)",
   "version": "0.1.0",
-  "author": "Tridorian Labs & Google Cloud",
+  "author": "tridorian Labs & Google Cloud",
   "description": "Welcome to AGY-421: Enterprise Governance & Rules. This L400 course is designed exclusively for Lead Architects and Delivery Directors who are responsible for establishing, monitoring, and enforcing development standards, compliance frameworks, and security boundaries across autonomous agentic teams. Throughout this course, you will learn to codify enterprise compliance, configure local workspace firewalls using .gemini.md, restrict execution commands, design multi-agent workflows, verify architectural patterns, and integrate governance audits directly into CI/CD pipelines to prevent rule drift and maintain immutable security boundaries.",
   "features": [
     {

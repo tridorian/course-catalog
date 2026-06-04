@@ -1,4 +1,4 @@
-# Tridorian Course Platform Roadmap
+# tridorian Course Platform Roadmap
 
 This roadmap outlines the phased development of the platform, following a strict "Test-First" methodology. Each phase must meet its defined exit criteria before proceeding.
 

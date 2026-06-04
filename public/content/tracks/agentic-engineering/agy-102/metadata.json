@@ -2,7 +2,7 @@
   "course_id": "agy-102",
   "title": "AGY-102: The UI Landscape & Selection (L100)",
   "version": "0.1.0",
-  "author": "Tridorian Labs & Google Cloud",
+  "author": "tridorian Labs & Google Cloud",
   "description": "This course provides a comprehensive comparative tour of Google Antigravity's three main command interfaces: the standalone visual board (antigravity), the lightweight command line interface (agy), and the agent-integrated workspace editor (antigravity-ide). Learners will explore the design philosophy, target use cases, configuration setups, and selection workflows for each UI surface, culminating in a clear understanding of how to seamlessly coordinate across all three for peak agentic productivity.",
   "features": [
     {

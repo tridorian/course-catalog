@@ -23,7 +23,7 @@ The app requests two Google Drive scopes at sign-in:
 **Consent screen shows:** *"See, edit, create, and delete only the specific Google Drive files you use with this app"* — minimal and trust-friendly.
 
 **What users can do with `drive.file`:**
-- View earned certificates and badges in their Drive (in a `Tridorian Certificates/` folder)
+- View earned certificates and badges in their Drive (in a `tridorian Certificates/` folder)
 - Share certificates via Drive sharing
 - Delete their profile data and certificates at any time
 - Export saved resources (bookmarked modules, notes) as Drive files
@@ -42,7 +42,7 @@ The app requests two Google Drive scopes at sign-in:
 When a user completes a track or course, the app creates files in a visible Drive folder:
 ```
 My Drive/
-└── Tridorian Certificates/            # Created by the app, visible to user
+└── tridorian Certificates/            # Created by the app, visible to user
     ├── AGY-101 Certificate.pdf        # Completion certificate
     ├── Agentic Engineering Badge.png  # Track badge image
     └── profile.json                   # User profile data (deletable)

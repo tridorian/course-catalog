@@ -139,7 +139,7 @@ async function main() {
   const configTab = newTabs.find(t => t.tabProperties.title === '[Config]');
   if (configTab) {
     const configTabId = configTab.tabProperties.tabId;
-    let configText = `course_id: ${courseData.course_id}\ntitle: ${courseData.title}\nversion: 0.1.0\nauthor: Tridorian Labs & Google Cloud\nstatus: Draft\n`;
+    let configText = `course_id: ${courseData.course_id}\ntitle: ${courseData.title}\nversion: 0.1.0\nauthor: tridorian Labs & Google Cloud\nstatus: Draft\n`;
     
     const bodyContent = configTab.documentTab?.body?.content || [];
     let endOfFirstTab = 1;

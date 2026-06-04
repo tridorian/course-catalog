@@ -50,7 +50,7 @@ describe('AdminPanel Component', () => {
       </MemoryRouter>
     );
 
-    const title = await screen.findByText(/Tridorian Admin Control Center/i);
+    const title = await screen.findByText(/tridorian Admin Control Center/i);
     expect(title).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Trigger Catalog Sync/i })).toBeInTheDocument();
 

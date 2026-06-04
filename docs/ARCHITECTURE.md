@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the high-level architecture of the Tridorian Course Platform.
+This document describes the high-level architecture of the tridorian Course Platform.
 
 ## Architecture Decision Records (ADRs)
 
@@ -105,7 +105,7 @@ This makes it easy to identify and update stale or broken embed URLs without sea
 
 ## Styling & Theme
 
-The application uses the "Tridorian" dark theme:
+The application uses the "tridorian" dark theme:
 - **Primary Color:** Green (`#4ade80`).
 - **Background:** Deep Green/Black (`#050805`).
 - Custom scrollbars and animations are used to provide a "terminal" aesthetic.

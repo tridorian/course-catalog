@@ -1,6 +1,6 @@
 # Phase 4: State Persistence & Google Drive Sync Design Specification
 
-This architecture document specifies the technical design, schemas, and integration plans for implementing Google Drive state persistence and automated content synchronization (CI/CD) for the Tridorian Course Platform.
+This architecture document specifies the technical design, schemas, and integration plans for implementing Google Drive state persistence and automated content synchronization (CI/CD) for the tridorian Course Platform.
 
 ---
 
@@ -205,7 +205,7 @@ On app initialization (Dashboard load):
 
 ## 4. Automated Content Sync Script (`scripts/sync-docs.js`)
 
-This command-line script runs locally or within a GitHub Actions runner, pulling content from a Google Doc structure designed around the Tridorian Document Specification (TDS) v1.0 and writing it to `public/content/`.
+This command-line script runs locally or within a GitHub Actions runner, pulling content from a Google Doc structure designed around the tridorian Document Specification (TDS) v1.0 and writing it to `public/content/`.
 
 ### 4.1 CLI Interface & Auth Flow
 - **Execution**: `node scripts/sync-docs.js --docId <GOOGLE_DOC_ID> [--trackId <override-track>]`
@@ -363,7 +363,7 @@ jobs:
 
 ## 5. Security & Privacy Safeguards
 
-Protecting credential access and user privacy is paramount under the Tridorian standard.
+Protecting credential access and user privacy is paramount under the tridorian standard.
 
 ### 5.1 Client-Side Token Management
 - **In-Memory Storage Only:** The OAuth2 `accessToken` is stored strictly in memory closure (`accessToken` inside `googleAuth.js`). It must **never** be saved to `localStorage` or `sessionStorage`. If the user refreshes the page, they must re-authorize or rely on GIS's automatic token restoration.

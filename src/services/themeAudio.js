@@ -1,5 +1,5 @@
 // src/services/themeAudio.js
-// Advanced Procedural Audio Synthesizer for Tridorian Course Catalog
+// Advanced Procedural Audio Synthesizer for tridorian Course Catalog
 // Generates immersive, rich themed ambient music loops using the browser's Web Audio API.
 import { getCustomTheme } from './customTheme';
 
@@ -112,8 +112,8 @@ function playFMBell(freq, duration, modulationIndex, modulationRatio, gainVal, t
 
 // --- Synthesizers for each Theme ---
 
-// 1. Tridorian Dark: Cyberpunk Pulsating Drone & Analog Sequencer
-function playTridorianDark() {
+// 1. tridorian Dark: Cyberpunk Pulsating Drone & Analog Sequencer
+function playtridorianDark() {
   const now = audioCtx.currentTime;
 
   // Pulsating analog low bass drone (saw + detuned square)
@@ -1176,7 +1176,7 @@ export function playThemeMusic(themeId) {
 
     console.log(`[Theme Audio] Loading upgraded music loop: ${themeId}...`);
     if (themeId === 'dark') {
-      playLoopOrProcedural('dark', '/audio/tridorian_dark_loop.mp3', playTridorianDark);
+      playLoopOrProcedural('dark', '/audio/tridorian_dark_loop.mp3', playtridorianDark);
     } else if (themeId === 'light') {
       playLoopOrProcedural('light', '/audio/clean_light_loop.mp3', playCleanLight);
     } else if (themeId === 'kitten') {

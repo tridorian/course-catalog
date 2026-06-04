@@ -4,7 +4,7 @@ As an Enterprise Software Architect and DevOps Lead, my primary concerns revolve
 
 ### The "Agentic Engineering" Philosophy: Buzzwords Over Substance
 
-The very premise of "Agentic Engineering" using "Google Antigravity and the Tridorian standard" immediately raises red flags. "Autonomous AI agents for real-world software delivery" sounds less like a controlled, auditable process and more like a high-risk experiment. In an enterprise context, "autonomy" must be rigorously defined, constrained, and auditable. This track provides little evidence that it grasps the gravity of granting AI agents significant control over critical infrastructure and codebases. The marketing-heavy names "Antigravity" and "Tridorian standard" suggest proprietary solutions that will inevitably lead to vendor lock-in, a position no enterprise architect willingly embraces.
+The very premise of "Agentic Engineering" using "Google Antigravity and the tridorian standard" immediately raises red flags. "Autonomous AI agents for real-world software delivery" sounds less like a controlled, auditable process and more like a high-risk experiment. In an enterprise context, "autonomy" must be rigorously defined, constrained, and auditable. This track provides little evidence that it grasps the gravity of granting AI agents significant control over critical infrastructure and codebases. The marketing-heavy names "Antigravity" and "tridorian standard" suggest proprietary solutions that will inevitably lead to vendor lock-in, a position no enterprise architect willingly embraces.
 
 ### The Installation Nightmare: `agy-easy-install` and `agy-box`
 
@@ -75,7 +75,7 @@ The "Agentic Engineering" curriculum track, as presented, is a dangerous proposi
 
 *   The installation and sandboxing mechanisms (`agy-easy-install`, `agy-box`) are fundamentally insecure and violate core principles of enterprise DevOps and container security.
 *   The curriculum's depth is questionable, particularly in foundational security and architectural courses.
-*   The heavy reliance on proprietary "Google Antigravity," "Tridorian standard," and "Jules VM" creates significant vendor lock-in.
+*   The heavy reliance on proprietary "Google Antigravity," "tridorian standard," and "Jules VM" creates significant vendor lock-in.
 *   The certification system appears to inflate the value of basic tool usage into expert-level competency.
 *   The mechanisms for managing agent autonomy and safety are superficially addressed and highly unlikely to satisfy stringent corporate audit requirements.
 

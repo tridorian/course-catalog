@@ -1,6 +1,6 @@
 # Adding a New Theme
 
-This guide explains how to add a custom theme to the Tridorian Course Catalog.
+This guide explains how to add a custom theme to the tridorian Course Catalog.
 
 ## Quick Start (3 files to edit)
 
@@ -89,7 +89,7 @@ Every theme MUST pass these contrast checks:
 
 | Theme | ID | Type | Accent | Personality |
 |---|---|---|---|---|
-| 🌿 Tridorian Dark | `dark` | Dark | Green `#4ade80` | Professional, default |
+| 🌿 tridorian Dark | `dark` | Dark | Green `#4ade80` | Professional, default |
 | ☀️ Clean Light | `light` | Light | Green `#16a34a` | Bright, minimal |
 | 🐱 Rainbow Kitten | `kitten` | Light | Pink `#e91e8c` | Playful, warm |
 | 🏝️ Caribbean Mood | `caribbean` | Light | Teal `#0d9e8a` | Tropical, chill |

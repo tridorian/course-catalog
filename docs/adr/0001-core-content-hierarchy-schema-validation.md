@@ -7,7 +7,7 @@
 Accepted
 
 ## Context
-The Tridorian Course Platform needs to render rich educational content dynamically while maintaining a decoupled architecture where content changes do not require rebuilding the application code. We also need a structured hierarchy to organize content logically and validate it client-side to ensure the UI does not crash on malformed data.
+The tridorian Course Platform needs to render rich educational content dynamically while maintaining a decoupled architecture where content changes do not require rebuilding the application code. We also need a structured hierarchy to organize content logically and validate it client-side to ensure the UI does not crash on malformed data.
 
 ## Decision
 We establish a strict 4-tier hierarchy and local schema validation rules for all content files loaded by the system.
@@ -40,7 +40,7 @@ public/content/
 
 **Google Drive (authoring — source of truth for content):**
 ```
-Tridorian Course Catalog/             # Root Drive folder
+tridorian Course Catalog/             # Root Drive folder
 ├── tracks/
 │   ├── agentic-engineering/           # Track folder = track_id
 │   │   ├── agy-101/                   # Course folder = course_id

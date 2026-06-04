@@ -106,7 +106,7 @@ async function main() {
 course_id: ${course.id}
 title: ${course.title}
 version: 0.1.0
-author: Tridorian Labs & Google Cloud
+author: tridorian Labs & Google Cloud
 status: Draft
 
 [Intro]

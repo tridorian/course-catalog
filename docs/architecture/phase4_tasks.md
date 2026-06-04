@@ -74,7 +74,7 @@ Updates the React client to handle hierarchical progress structures, display rea
   - `Error`: Displays a red warning icon/badge if the save fails, indicating the network or auth token is broken, with a visual retry option.
 - **Acceptance Criteria:**
   - Indicator correctly updates based on status triggers from the progress sync logic.
-  - Stylings match the "Tridorian" theme aesthetics (green `#4ade80`, dark container backgrounds, clean animations).
+  - Stylings match the "tridorian" theme aesthetics (green `#4ade80`, dark container backgrounds, clean animations).
 - **Files to Create/Edit:**
   - `src/App.jsx`
   - `src/components/SyncStatus.jsx` (New component)
@@ -95,7 +95,7 @@ Updates the React client to handle hierarchical progress structures, display rea
 
 ### 4.3: Automated Content Sync CI/CD
 
-Implements a secure, automated build script to convert Google Docs into static JSON assets matching the Tridorian layout structure.
+Implements a secure, automated build script to convert Google Docs into static JSON assets matching the tridorian layout structure.
 
 #### [ ] Task 4.3.1: Create Sync Configuration Mapping
 - **Description:** Define a configuration JSON file listing the source Google Docs mapped to the target tracks and courses.
@@ -106,7 +106,7 @@ Implements a secure, automated build script to convert Google Docs into static J
 - **Reference:** Structural configuration mapping for the Node.js sync engine.
 
 #### [ ] Task 4.3.2: Create Content Sync Script (`scripts/sync-docs.js`)
-- **Description:** Create `scripts/sync-docs.js` using Node.js to fetch tab contents from Google Docs using the Google Docs API v1 (utilizing `includeTabsContent=true`). The script must parse the tabs according to the Tridorian Document Specification (TDS) and save them to the correct local paths.
+- **Description:** Create `scripts/sync-docs.js` using Node.js to fetch tab contents from Google Docs using the Google Docs API v1 (utilizing `includeTabsContent=true`). The script must parse the tabs according to the tridorian Document Specification (TDS) and save them to the correct local paths.
 - **Parsing Rules:**
   - Tab 1 (`[Config]`): Parses key-value table containing `course_id`, `title`, `version`, `author`.
   - Tab 2 (`[Intro]`): Parses course landing page metadata. Maps Course Title from Heading 1, course description from body text, and features card list from the 2-column icon table, writing them to `metadata.json`.

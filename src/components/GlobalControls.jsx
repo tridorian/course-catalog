@@ -5,7 +5,7 @@ import { saveCustomTheme, getCustomTheme, getCustomThemes, deleteCustomTheme, se
 import { generateThemeWithGemini, generateMusicWithLyria } from '../services/themeGenerator';
 
 const THEME_OPTIONS = [
-  { id: 'dark', label: '🌿 Tridorian Dark', swatches: ['#050805', '#4ade80', '#f0fdf4'] },
+  { id: 'dark', label: '🌿 tridorian Dark', swatches: ['#050805', '#4ade80', '#f0fdf4'] },
   { id: 'light', label: '☀️ Clean Light', swatches: ['#f8faf9', '#16a34a', '#0f1f15'] },
   { id: 'kitten', label: '🐱 Rainbow Kitten', swatches: ['#fef4f8', '#e91e8c', '#2d0b1a'] },
   { id: 'caribbean', label: '🏝️ Caribbean Mood', swatches: ['#e6f9f5', '#0d9e8a', '#0a2922'] },
@@ -473,7 +473,7 @@ const GlobalControls = ({ theme, setTheme }) => {
                 opacity: 0.5,
               }}
             >
-              Tridorian Theme Engine
+              tridorian Theme Engine
             </div>
           </div>
         )}

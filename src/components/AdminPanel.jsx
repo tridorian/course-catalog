@@ -124,7 +124,7 @@ const AdminPanel = ({ theme, setTheme }) => {
               <Shield size={18} />
               <span className="font-mono text-xs tracking-[0.3em] uppercase">Security Level: Administrator</span>
             </div>
-            <h1 className="text-4xl font-extrabold text-main">Tridorian Admin Control Center</h1>
+            <h1 className="text-4xl font-extrabold text-main">tridorian Admin Control Center</h1>
           </div>
           
           <div className="flex items-center gap-4">
@@ -228,7 +228,7 @@ const AdminPanel = ({ theme, setTheme }) => {
         {/* Footer */}
         <div className="mt-16 text-center">
           <div className="text-[10px] font-mono text-gray-600 tracking-widest uppercase mb-4">
-            Security Protocol T-104 // Tridorian Network Administration
+            Security Protocol T-104 // tridorian Network Administration
           </div>
         </div>
       </div>

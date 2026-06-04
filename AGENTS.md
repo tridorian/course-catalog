@@ -1,4 +1,4 @@
-# Agent Instructions — Tridorian Course Platform
+# Agent Instructions — tridorian Course Platform
 
 This document defines the rules, conventions, and context an AI coding agent needs to work effectively on this codebase.
 
@@ -6,7 +6,7 @@ This document defines the rules, conventions, and context an AI coding agent nee
 
 ## 1. Project Overview
 
-This is a **React + Vite** interactive course platform with a dark "Tridorian" terminal theme. Content is stored as JSON files and loaded dynamically at runtime — the app is completely decoupled from its content.
+This is a **React + Vite** interactive course platform with a dark "tridorian" terminal theme. Content is stored as JSON files and loaded dynamically at runtime — the app is completely decoupled from its content.
 
 ### Tech Stack
 

@@ -40,7 +40,7 @@ describe('GlobalControls Theme Integration', () => {
     fireEvent.click(pickerButton);
 
     // Verify default themes are rendered
-    expect(screen.getByText('🌿 Tridorian Dark')).toBeInTheDocument();
+    expect(screen.getByText('🌿 tridorian Dark')).toBeInTheDocument();
     expect(screen.getByText('☀️ Clean Light')).toBeInTheDocument();
     expect(screen.getByText('🐱 Rainbow Kitten')).toBeInTheDocument();
     expect(screen.getByText('🏝️ Caribbean Mood')).toBeInTheDocument();

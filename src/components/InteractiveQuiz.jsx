@@ -316,8 +316,8 @@ const InteractiveQuiz = ({ questions, onPassed }) => {
               spanStyle = 'text-[var(--quiz-incorrect-text)]';
               stateClass = 'quiz-incorrect';
             } else {
-              optionStyle = 'opacity-75 border-border-main text-muted bg-panel';
-              spanStyle = 'text-muted';
+              optionStyle = 'opacity-85 border-border-main text-muted bg-panel';
+              spanStyle = '';
               stateClass = 'quiz-unselected';
             }
           }

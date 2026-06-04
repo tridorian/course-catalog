@@ -2,7 +2,7 @@
   "course_id": "agy-104",
   "title": "AGY-104: Agent-Human Collaboration Loops (L100)",
   "version": "0.1.0",
-  "author": "Tridorian Labs & Google Cloud",
+  "author": "tridorian Labs & Google Cloud",
   "description": "Constructing clear instructions, managing terminal execution approvals, and learning how to safely pause, redirect, and resume an agent task.",
   "features": [
     {

@@ -175,5 +175,14 @@ describe('Custom Theme Service', () => {
       const bgRgb = hexToRgb(bg);
       expect(getContrastRatio(adjustedRgb, bgRgb)).toBeGreaterThanOrEqual(4.5);
     });
+
+    it('should adjust text color to satisfy a high target contrast ratio of 7.0', () => {
+      const text = '#888888';
+      const bg = '#111111';
+      const adjusted = enforceContrast(text, bg, 7.0);
+      const adjustedRgb = hexToRgb(adjusted);
+      const bgRgb = hexToRgb(bg);
+      expect(getContrastRatio(adjustedRgb, bgRgb)).toBeGreaterThanOrEqual(7.0);
+    });
   });
 });

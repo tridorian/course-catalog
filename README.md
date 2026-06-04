@@ -2,7 +2,7 @@
 
 [![Build and Deploy](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml/badge.svg)](https://github.com/wtg-codes/course-catalog/actions/workflows/deploy.yml)
 
-The course catalog demo. This project showcases the capabilities of  the Tridorian standard for  an interactive web-based course.
+The course catalog demo. This project showcases the capabilities of  the tridorian standard for  an interactive web-based course.
 
 **[🚀 Launch Live Course Catalog](https://wtg-codes.github.io/course-catalog/)**
 

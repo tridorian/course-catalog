@@ -58,7 +58,7 @@ const courseSteps = [
     content: (
       <div className="space-y-6">
         <h1 className="text-4xl font-extrabold text-white mb-6">Course Introduction</h1>
-        <p className="text-lg text-[#bbf7d0]">Welcome to the future of software engineering. This course introduces you to Google Antigravity (AGY) and the Tridorian standard for Secure Agentic Development.</p>
+        <p className="text-lg text-[#bbf7d0]">Welcome to the future of software engineering. This course introduces you to Google Antigravity (AGY) and the tridorian standard for Secure Agentic Development.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div className="bg-[#132617] p-6 rounded-xl border border-[#1f3d25]">
@@ -310,7 +310,7 @@ const courseSteps = [
 
         <h3 className="text-xl font-bold text-white mt-8 mb-4">1. Create a Rule</h3>
         <p className="text-[#bbf7d0]">Create the hidden directory and a rule file in your terminal:</p>
-        <CodeBlock language="bash" code={`mkdir -p .agents/rules\n\ncat << 'EOF' > .agents/rules/style.md\nAlways prepend the text \`# Copyright 2026 Tridorian\` as a comment at the top of any new source file you generate.\nEOF`} />
+        <CodeBlock language="bash" code={`mkdir -p .agents/rules\n\ncat << 'EOF' > .agents/rules/style.md\nAlways prepend the text \`# Copyright 2026 tridorian\` as a comment at the top of any new source file you generate.\nEOF`} />
 
         <h3 className="text-xl font-bold text-white mt-8 mb-4">2. Create a Workflow</h3>
         <p className="text-[#bbf7d0]">Create a custom slash-command to generate tests automatically:</p>

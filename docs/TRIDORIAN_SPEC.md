@@ -1,6 +1,6 @@
-# Tridorian Document Specification (TDS) v1.0
+# tridorian Document Specification (TDS) v1.0
 
-This document defines the format for creating course materials in Google Docs for synchronization with the Tridorian Course Platform.
+This document defines the format for creating course materials in Google Docs for synchronization with the tridorian Course Platform.
 
 ## 1. Document Structure
 
@@ -48,7 +48,7 @@ The sync engine maps Google Doc elements to React components:
 
 ## 3. Validation
 
-Before syncing, use the **Tridorian Validator** Apps Script (Extensions > Apps Script) to ensure the document is compliant. The validator checks for:
+Before syncing, use the **tridorian Validator** Apps Script (Extensions > Apps Script) to ensure the document is compliant. The validator checks for:
 - Existence of `[Config]` and `[Intro]` tabs.
 - Presence of required metadata in the Config table.
 - Heading 1 and Heading 2 in every module tab.

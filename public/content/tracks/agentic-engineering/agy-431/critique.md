@@ -39,7 +39,7 @@ For a course purporting to teach "immutable DevOps" in a "high-security enterpri
 *   **Systemd Overrides for Proxy Settings:** Using systemd drop-ins for proxy configuration is a standard and robust approach.
 
 **Weaknesses & Logical Flaws:**
-*   **Implicit Custom `agy-box` Image Build:** The Dockerfile example for injecting certificates implies that every enterprise must build and maintain its own custom `agy-box` image. This introduces significant maintenance overhead, complicates upgrades of the base `agy-box` image from "Tridorian Corp," and should be explicitly discussed as a strategy with its pros and cons, not just presented as a lab step.
+*   **Implicit Custom `agy-box` Image Build:** The Dockerfile example for injecting certificates implies that every enterprise must build and maintain its own custom `agy-box` image. This introduces significant maintenance overhead, complicates upgrades of the base `agy-box` image from "tridorian Corp," and should be explicitly discussed as a strategy with its pros and cons, not just presented as a lab step.
 *   **`NO_PROXY` and `iptables` Contradiction:** Module 1 explicitly rejects `169.254.169.254` via `iptables`. Module 2 then includes it in `NO_PROXY`. While not a critical flaw, it demonstrates a lack of unified thought across the curriculum. If access is rejected, bypassing the proxy for it is redundant.
 *   **Podman Daemon Restart Confusion:** `sudo systemctl restart podman` restarts the *rootful* Podman system service. This is inconsistent with the Module 1 emphasis on *rootless* Podman, which typically runs as a user service (`podman systemd --user`). This ambiguity will lead to misconfigurations.
 *   **Empty Section: "Google Chat App Setup"**: Another empty section, reinforcing the impression of an incomplete course.
@@ -93,6 +93,6 @@ AGY-431 is fundamentally flawed. It fails to provide a cohesive, secure, or prac
     *   Provide clear explanations for architectural choices.
     *   Include troubleshooting guides for common enterprise-specific issues (proxies, SSL, networking).
     *   Develop a comprehensive set of quiz questions and practical exercises for each module, not just one at the end.
-6.  **Review `agy-box` Details:** Provide more context on the `agy-box` image itself – its contents, versioning, and how it is updated by "Tridorian Corp."
+6.  **Review `agy-box` Details:** Provide more context on the `agy-box` image itself – its contents, versioning, and how it is updated by "tridorian Corp."
 
 Without these significant revisions, AGY-431 cannot be recommended for anyone seeking to implement secure, scalable, and reliable DevOps practices in an enterprise environment. It actively promotes insecure configurations and architectural confusion.

@@ -253,7 +253,7 @@ const HelpSection = ({ theme, setTheme }) => {
             <h1 className="text-4xl font-extrabold text-main tracking-tight">Help & Troubleshooting</h1>
           </div>
           <p className="text-text-muted text-sm max-w-2xl">
-            Detailed walkthroughs, sync instructions, and answers to common troubleshooting scenarios to help you navigate your Tridorian mission.
+            Detailed walkthroughs, sync instructions, and answers to common troubleshooting scenarios to help you navigate your tridorian mission.
           </p>
         </div>
 
@@ -305,7 +305,7 @@ const HelpSection = ({ theme, setTheme }) => {
 
         {/* Footer */}
         <div className="mt-20 border-t border-border-main pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-text-muted opacity-80">
-          <span>Tridorian User Guide & Troubleshooting Manual</span>
+          <span>tridorian User Guide & Troubleshooting Manual</span>
           <span className="hover:text-accent-text transition-colors cursor-pointer" onClick={() => navigate('/')}>
             Return to Dashboard
           </span>

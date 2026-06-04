@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Tridorian Course Catalog - Jules VM Environment Setup
+# tridorian Course Catalog - Jules VM Environment Setup
 # Enforces a clean, reproducible setup, warms dev caches, registers developer
 # aliases, autoconfigures Git credentials, and automates GCP credentials sync.
 # ==============================================================================
@@ -30,7 +30,7 @@ log_step() {
     echo -e "${BLUE}=== $1 ===${NC}"
 }
 
-log_step "Tridorian Jules VM Environment Setup & Optimization"
+log_step "tridorian Jules VM Environment Setup & Optimization"
 
 # 1. System Diagnostics
 log_info "Node.js version: $(node --version)"
@@ -98,7 +98,7 @@ fi
 log_info "Registering custom dev aliases in ~/.bashrc..."
 {
     echo ""
-    echo "# --- Tridorian Dev Shortcuts ---"
+    echo "# --- tridorian Dev Shortcuts ---"
     echo "alias test-catalog='npm test -- --run'"
     echo "alias build-catalog='npm run build'"
     echo "alias snap='node scripts/take-screenshots.js'"

@@ -13,7 +13,7 @@
     },
     {
       "type": "p",
-      "content": "You are a Competitive Intelligence Analyst at Tridorian. You are tasked with analyzing the pricing models of three competitor services. You must orchestrate three parallel agent cards on the `antigravity` dashboard to monitor three target sites, scrape their pricing details using visual browser automation, troubleshoot any loading delays, and compile a consolidated pricing matrix following the Zero-Placeholder Rule."
+      "content": "You are a Competitive Intelligence Analyst at tridorian. You are tasked with analyzing the pricing models of three competitor services. You must orchestrate three parallel agent cards on the `antigravity` dashboard to monitor three target sites, scrape their pricing details using visual browser automation, troubleshoot any loading delays, and compile a consolidated pricing matrix following the Zero-Placeholder Rule."
     },
     {
       "type": "h2",

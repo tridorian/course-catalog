@@ -246,7 +246,7 @@ const Dashboard = ({ theme, setTheme }) => {
 
         {/* Footer */}
         <div className="mt-16 text-center text-[10px] font-mono text-gray-600 tracking-widest uppercase">
-          Tridorian Learning Platform v1.0
+          tridorian Learning Platform v1.0
         </div>
       </div>
 

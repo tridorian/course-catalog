@@ -2,7 +2,7 @@
   "course_id": "agy-201",
   "title": "AGY-201: Standalone Operations (L200)",
   "version": "0.1.0",
-  "author": "Tridorian Labs & Google Cloud",
+  "author": "tridorian Labs & Google Cloud",
   "description": "An in-depth, hands-on guide to mastering Standalone Operations using the antigravity visual desktop board. Designed specifically for visual learners, solution architects, and technical business analysts, this course covers the configuration and management of asynchronous agent workflows, advanced prompt engineering techniques for structured document generation, and deep-dive troubleshooting of web-scraping agents via visual playback tapes. By the end of this course, you will be able to orchestrate complex multi-agent scraping pipelines, debug live selector issues, and compile clean markdown analytical dashboards with zero placeholders.",
   "features": [
     {

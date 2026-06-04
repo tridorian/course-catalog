@@ -2,7 +2,7 @@
   "course_id": "agy-202",
   "title": "AGY-202: AGY CLI Operations (L200)",
   "version": "0.1.0",
-  "author": "Tridorian Labs & Google Cloud",
+  "author": "tridorian Labs & Google Cloud",
   "description": "This course provides a comprehensive hands-on guide to mastering Google Antigravity's command line interface, agy. Built for terminal-first developers, DevOps engineers, and technical systems analysts, the course teaches you the global flag hierarchy, how to pipe local directory trees and text streams into agent contexts, the best practices for safe bulk file modifications and code refactoring using dry-run flags, and the automation of rapid batch query jobs. You will learn to integrate the agent directly into standard UNIX shell pipelines, culminating in a hands-on Specialist Capstone Challenge to earn your AGY Certified Terminal Specialist credential.",
   "features": [
     {

@@ -7,7 +7,7 @@
    5 themes via CSS custom properties
    ======================================== */
 
-/* Default: Tridorian Dark (green accent on dark bg) */
+/* Default: tridorian Dark (green accent on dark bg) */
 :root {
   color-scheme: dark;
   --bg-base: #050805;
@@ -181,7 +181,7 @@
   --bg-muted: #190f2d;
   --bg-elevated: #24163f;
   --text-main: #f3e8ff;
-  --text-muted: #c084fc;
+  --text-muted: #d8b4fe;
   --border-main: #341e57;
   --border-subtle: #190f2d;
   --accent-bg: #39ff14; /* Neon Green */
@@ -411,7 +411,7 @@ body.theme-genesis [role="button"] {
    THEME HOVER EFFECTS & MICRO-INTERACTIONS
    ======================================== */
 
-/* Tridorian Dark Hover */
+/* tridorian Dark Hover */
 body:not([class*="theme-"]) .accent-btn {
   position: relative;
   transition: all 0.2s ease-in-out;
@@ -422,7 +422,7 @@ body:not([class*="theme-"]) .accent-btn {
   50% { opacity: 1; }
 }
 
-/* Tridorian Dark Progress Glow & Scan */
+/* tridorian Dark Progress Glow & Scan */
 body:not([class*="theme-"]) .progress-bar-fill {
   background: linear-gradient(90deg, #22c55e 0%, #4ade80 50%, #22c55e 100%);
   background-size: 200% 100%;
@@ -434,7 +434,7 @@ body:not([class*="theme-"]) .progress-bar-fill {
   100% { background-position: -200% 0%; }
 }
 
-/* Tridorian Dark Checkbox Glitch */
+/* tridorian Dark Checkbox Glitch */
 body:not([class*="theme-"]) .group:hover svg.text-accent-text {
   animation: cyber-glitch 0.3s ease;
 }
@@ -751,6 +751,7 @@ body.disable-custom-cursor input {
 .quiz-option:disabled {
   opacity: 1 !important;
   cursor: not-allowed !important;
+  color: inherit !important;
 }
 .quiz-option.quiz-correct {
   background-color: var(--quiz-correct-bg) !important;
@@ -769,7 +770,7 @@ body.disable-custom-cursor input {
   color: var(--quiz-incorrect-text) !important;
 }
 .quiz-option.quiz-unselected {
-  opacity: 0.75 !important;
+  opacity: 0.85 !important;
 }
 
 /* Custom Scrollbar for sidebar to match theme */

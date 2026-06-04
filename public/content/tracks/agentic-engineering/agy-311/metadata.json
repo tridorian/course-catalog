@@ -2,7 +2,7 @@
   "course_id": "agy-311",
   "title": "AGY-311: Scripting with the SDK (L300)",
   "version": "0.1.0",
-  "author": "Tridorian Labs & Google Cloud",
+  "author": "tridorian Labs & Google Cloud",
   "description": "Learn to programmatically automate agentic workflows using the Google Antigravity SDK. This course covers initiating stateful conversation loops, managing token streams (text and thinking tokens), injecting structured context arrays, enforcing response schemas for machine-to-machine integrations, and controlling execution using lifecycle hooks and custom tools in both Python and Node.js environments.",
   "features": [
     {

@@ -99,6 +99,6 @@ Our course already implicitly or explicitly addresses many of your "Urgent Recom
 3.  **Address Maintenance Overhead:** The necessity of custom `agy-box` images is a core tenet, and maintenance implications are discussed live.
 4.  **Complete Missing Content:** "Empty sections" are intentional instructor-led discussion points, providing flexibility for dynamic content and real-world applicability.
 5.  **Enhance Pedagogical Rigor:** The rigor is centered on the hands-on Capstone Challenge, which demands synthesis and application of best practices, far exceeding a simple quiz.
-6.  **Review `agy-box` Details:** Details on `agy-box` (contents, versioning, updates) are part of the broader Tridorian Corp ecosystem documentation and instructor-led introductions, contextually provided.
+6.  **Review `agy-box` Details:** Details on `agy-box` (contents, versioning, updates) are part of the broader tridorian Corp ecosystem documentation and instructor-led introductions, contextually provided.
 
 AGY-431 is not a prescriptive blueprint for a greenfield environment; it is a **practical guide for navigating and improving existing enterprise infrastructure**. It prepares developers not just to *use* tools, but to *understand the context, trade-offs, and iterative nature* of implementing secure, scalable DevOps solutions for agent orchestration. It is, unequivocally, fit for its intended purpose of training L400 enterprise platform engineers.
