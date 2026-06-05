@@ -382,7 +382,7 @@ function AppContent({ theme, setTheme }) {
     return (
       <div className="min-h-screen bg-base flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
-          <AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
+          <AlertTriangle size={48} className="text-red-500 mx-auto mb-4" aria-hidden="true" />
           <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Mission Interrupted</h2>
           <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
           <button
@@ -430,9 +430,11 @@ function AppContent({ theme, setTheme }) {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
             className="md:hidden p-1.5 rounded-lg text-text-muted hover:text-main hover:bg-muted transition-colors flex-shrink-0"
             title="Toggle Menu"
-            aria-label="Toggle navigation menu"
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="main-sidebar"
           >
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {isMobileMenuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
           </button>
 
           {/* Desktop sidebar toggle button */}
@@ -440,15 +442,18 @@ function AppContent({ theme, setTheme }) {
             onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
             className="hidden md:block p-1.5 rounded-lg text-text-muted hover:text-main hover:bg-muted transition-colors flex-shrink-0"
             title="Toggle Sidebar"
-            aria-label="Toggle sidebar"
+            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            aria-expanded={isSidebarOpen}
+            aria-controls="main-sidebar"
           >
-            <Menu size={20} />
+            <Menu size={20} aria-hidden="true" />
           </button>
 
           {/* Logo */}
           <button 
             onClick={() => navigate('/')} 
             className="font-extrabold text-lg md:text-xl text-accent-text tracking-[0.2em] hover:opacity-85 transition-opacity whitespace-nowrap focus:outline-none"
+            aria-label="Tridorian Home"
           >
             TRIDORIAN
           </button>
@@ -473,7 +478,7 @@ function AppContent({ theme, setTheme }) {
       {/* Main Workspace Area (split into sidebar and content area) */}
       <div className="flex-1 flex flex-row relative overflow-hidden h-[calc(100vh-64px)]">
         {/* Sidebar Navigation */}
-        <aside className={`
+        <aside id="main-sidebar" className={`
           ${isMobileMenuOpen ? 'flex' : 'hidden'}
           md:flex flex-col flex-shrink-0 bg-panel border-border-main z-40
           transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar
@@ -484,7 +489,7 @@ function AppContent({ theme, setTheme }) {
           <div className="w-full md:w-80 flex-shrink-0 flex flex-col h-full justify-between">
             <div className="p-4 flex-1">
               <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-2">Course Modules</h2>
-              <nav className="space-y-2">
+              <nav className="space-y-2" aria-label="Course modules">
                 {courseSteps.map((step, index) => {
                   const isCompleted = completedSteps.includes(index);
                   const isActive = index === activeStepIndex;
@@ -508,6 +513,8 @@ function AppContent({ theme, setTheme }) {
                           setIsMobileMenuOpen(false);
                         }}
                         className="absolute inset-0 w-full h-full z-0 rounded-lg text-transparent select-none"
+                        aria-current={isActive ? 'step' : undefined}
+                        aria-label={`Go to module: ${step.title}`}
                       >
                         {step.title}
                       </button>
@@ -515,14 +522,15 @@ function AppContent({ theme, setTheme }) {
                         <button
                           onClick={(e) => handleToggleComplete(index, e)}
                           data-testid={`toggle-complete-${index}`}
-                          className="flex-shrink-0 focus:outline-none pointer-events-auto"
+                          className="flex-shrink-0 pointer-events-auto"
+                          aria-label={isLocked ? "Module locked" : isCompleted ? "Mark module as incomplete" : "Mark module as complete"}
                         >
                           {isLocked ? (
-                            <Lock size={14} className="text-gray-600" />
+                            <Lock size={14} className="text-gray-600" aria-hidden="true" />
                           ) : isCompleted ? (
-                            <CheckCircle2 size={14} className="text-accent-text" data-testid={`check-icon-${index}`} />
+                            <CheckCircle2 size={14} className="text-accent-text" data-testid={`check-icon-${index}`} aria-hidden="true" />
                           ) : (
-                            <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-accent animate-pulse' : 'border-gray-500'}`}></div>
+                            <div className={`w-3.5 h-3.5 rounded-full border ${isActive ? 'border-accent animate-pulse' : 'border-gray-500'}`} aria-hidden="true"></div>
                           )}
                         </button>
                         <span className="truncate">{step.title}</span>
@@ -559,8 +567,9 @@ function AppContent({ theme, setTheme }) {
               <button
                 onClick={() => navigate('/help')}
                 className="w-full mt-2 py-2 text-[10px] font-mono text-gray-500 hover:text-accent-text border border-border-main hover:border-accent-border rounded transition-all uppercase tracking-tighter flex items-center justify-center gap-1.5"
+                aria-label="Help and Troubleshooting"
               >
-                <HelpCircle size={10} />
+                <HelpCircle size={10} aria-hidden="true" />
                 Help & Troubleshooting
               </button>
             </div>
@@ -601,7 +610,7 @@ function AppContent({ theme, setTheme }) {
               <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center border border-accent-border">
-                    <History size={20} className="text-accent-text" />
+                    <History size={20} className="text-accent-text" aria-hidden="true" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-main">Resume Session?</div>
@@ -711,8 +720,9 @@ function AppContent({ theme, setTheme }) {
                     ? 'text-gray-600 cursor-not-allowed'
                     : 'text-main hover:bg-muted'
                 }`}
+                aria-label="Previous module"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={20} aria-hidden="true" />
                 Back
               </button>
 
@@ -723,7 +733,7 @@ function AppContent({ theme, setTheme }) {
                       onClick={completeCourse}
                       className="flex items-center gap-2 px-4 py-2 border border-border-main text-text-muted hover:text-main rounded-lg font-medium transition-colors"
                     >
-                      <Trophy size={16} />
+                      <Trophy size={16} aria-hidden="true" />
                       Review Badge
                     </button>
                     {nextCourse ? (
@@ -732,7 +742,7 @@ function AppContent({ theme, setTheme }) {
                         className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
                       >
                         Next Course
-                        <ChevronRight size={20} />
+                        <ChevronRight size={20} aria-hidden="true" />
                       </button>
                     ) : (
                       <button
@@ -753,7 +763,7 @@ function AppContent({ theme, setTheme }) {
                         : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
                     }`}
                   >
-                    {activeStepQuizPassed ? <Trophy size={20} /> : <Lock size={20} />}
+                    {activeStepQuizPassed ? <Trophy size={20} aria-hidden="true" /> : <Lock size={20} aria-hidden="true" />}
                     Complete Course
                   </button>
                 )
@@ -766,10 +776,11 @@ function AppContent({ theme, setTheme }) {
                       ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent'
                       : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
                   }`}
+                  aria-label="Next module"
                 >
-                  {!activeStepQuizPassed && <Lock size={16} />}
+                  {!activeStepQuizPassed && <Lock size={16} aria-hidden="true" />}
                   Next
-                  <ChevronRight size={20} />
+                  <ChevronRight size={20} aria-hidden="true" />
                 </button>
               )}
             </footer>
@@ -780,7 +791,7 @@ function AppContent({ theme, setTheme }) {
       {showScrollIndicator && (
         <div className="fixed bottom-24 md:bottom-8 right-6 bg-accent backdrop-blur text-accent-fg px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold shadow-accent animate-bounce z-40">
           <span>Scroll down to proceed</span>
-          <ArrowDown size={14} />
+          <ArrowDown size={14} aria-hidden="true" />
         </div>
       )}
 
