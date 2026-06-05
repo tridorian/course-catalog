@@ -50,7 +50,7 @@ describe('Dashboard Onboarding & Progress UX', () => {
 
     // Verify banner is shown
     expect(screen.getByText(/Connect Google Drive to Sync Progress/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Connect Sync/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Connect Google Drive to sync progress/i })).toBeInTheDocument();
   });
 
   it('triggers signIn flow when "Connect Sync" button is clicked', async () => {
@@ -63,7 +63,7 @@ describe('Dashboard Onboarding & Progress UX', () => {
       </MemoryRouter>
     );
 
-    const button = await screen.findByRole('button', { name: /Connect Sync/i });
+    const button = await screen.findByRole('button', { name: /Connect Google Drive to sync progress/i });
     fireEvent.click(button);
 
     expect(googleAuth.signIn).toHaveBeenCalledTimes(1);
