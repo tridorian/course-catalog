@@ -20,6 +20,7 @@ import SyncStatus from './SyncStatus';
 import GlobalControls from './GlobalControls';
 import BadgeCelebration from './BadgeCelebration';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent, fetchTrackManifest } from '../services/contentLoader';
+import * as contentLoaderService from '../services/contentLoader';
 import { checkUserRole } from '../services/roleManager';
 import { loadProgress, saveCourseProgress, syncOfflineQueue } from '../services/googleDrive';
 import { getAccessToken } from '../services/googleAuth';
@@ -827,3 +828,5 @@ export default function AppContent({ theme, setTheme }) {
       )}
 
     </div>
+  );
+}
