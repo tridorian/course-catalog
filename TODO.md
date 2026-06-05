@@ -100,3 +100,5 @@ This roadmap outlines the phased development of the platform, following a strict
 - [x] "Complete Course" button on last module (marks 100%, returns to Course Map).
 - [x] Add inter-course navigation (e.g., "Next Course" after completing all modules).
 - [x] Enforce rate limit constraints and maximum size constraints on dynamic theme generator.
+- [x] Resolve legacy Antigravity version constraint limitation (update v1.23.2 or lower checks to support v1.23.2+ and sync with agy-easy-install), integrate automated question & option consistency validation in catalog builder, and prune unreferenced legacy modules.
+

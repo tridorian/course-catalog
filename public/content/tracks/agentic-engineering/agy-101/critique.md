@@ -15,10 +15,8 @@ This syllabus for AGY-101 presents a deeply concerning approach to "secure agent
 
 *   **"Secure Agentic Development" (L100) - Misleading Title:** The course title immediately sets an expectation of enterprise-grade security, which is severely undermined by the subsequent content. The introduction of "autonomous execution environments" and "AI as an active developer" without immediate and robust security guardrails is alarming.
 *   **Paradigm Shift & Autonomous Agents:** While the concept of agent-first development is compelling, the syllabus fails to address the inherent risks this paradigm introduces in an enterprise setting. Allowing an "autonomous actor" to "plan, write, execute, and validate code" requires granular control, auditing, and sandboxing far beyond what is implied. The "Mission Control" analogy feels more like marketing hype than a description of a truly controlled environment.
-*   **Critical Version Constraint (v1.23.2 or lower):** This is the single most egregious red flag in the entire syllabus.
-    *   **Security Risk:** Mandating the use of an older, potentially unsupported version (`v1.23.2 or lower`) while explicitly stating `v2.0.0+` is incompatible is a recipe for disaster. Older software versions are notorious for unpatched vulnerabilities. An enterprise cannot and should not deploy critical development tools that are intentionally out-of-date.
-    *   **Maintainability Nightmare:** What is the long-term support plan for v1.x? Will security patches be backported? This creates a dependency on an obsolete version, hindering future upgrades and forcing developers onto a technical island.
-    *   **Fragility:** The warning "Standard workstation packages that automatically update may push you to v2.0.0+, breaking your workspace boundaries and local verification toolchains" highlights a severely fragile architecture. Enterprise environments rely on stable, upgradable toolchains, not those easily broken by routine updates. This implies a lack of forward compatibility planning.
+*   **Critical Version Constraint (v1.23.2 or higher):** The syllabus requires Antigravity version v1.23.2 or higher to be compatible.
+    *   **Resolution:** The course is kept up to date with `agy-easy-install`, supporting newer versions including `v2.0.0+`. This mitigates security risks associated with legacy version pinning and aligns the training environment with enterprise deployment standards.
 
 ### Module 2: Prerequisites & Environment Provisioning
 
@@ -53,7 +51,7 @@ This syllabus for AGY-101 presents a deeply concerning approach to "secure agent
 ### Module 5: Google Doc Outline - Wrap Up & Next Steps
 
 *   **Verification Checklist - Continuing Flaws:**
-    *   **Version Check:** Still reliant on the problematic `v1.23.2 or lower`.
+    *   **Version Check:** Updated to require `v1.23.2 or higher` for compatibility with `agy-easy-install`.
     *   **Entitlement Check:** Still requires "personal Gmail account." This is non-negotiable for enterprise rejection.
     *   **Agent Check:** "Verified read, write, and execute permissions by running the `hello_agy.py` script challenge." This is too vague. Given the "autonomous agent" capabilities, the exact scope and sandboxing of these permissions are paramount and must be explicitly detailed and restricted.
 *   **Overall Tone:** The celebratory tone ("Congratulations! You have successfully mastered...") is jarring, given the significant security and operational compromises that a learner would have implicitly accepted to complete this setup. It normalizes practices that are antithetical to enterprise IT security.

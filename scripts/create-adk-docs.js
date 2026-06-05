@@ -33,6 +33,35 @@ async function main() {
 
   const env = { ...process.env, GOOGLE_WORKSPACE_CLI_TOKEN: token };
 
+  // Get all subfolders of TRACK_FOLDER_ID to check inside them as well (preventing duplicate creation if moved to subfolders)
+  console.log('Querying subfolders of the track folder to prevent duplicates...');
+  const foldersQuery = `'${TRACK_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+  const foldersResult = spawnSync('gws', [
+    'drive',
+    'files',
+    'list',
+    '--params',
+    JSON.stringify({
+      q: foldersQuery,
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true
+    })
+  ], { env, encoding: 'utf8' });
+
+  const allowedFolderIds = [TRACK_FOLDER_ID];
+  if (foldersResult.status === 0) {
+    try {
+      const folderList = JSON.parse(foldersResult.stdout);
+      if (folderList.files) {
+        folderList.files.forEach(f => {
+          allowedFolderIds.push(f.id);
+        });
+      }
+    } catch (e) {
+      console.error('Failed to parse subfolders list output:', foldersResult.stdout);
+    }
+  }
+
   // Load existing sync config
   let syncConfig = [];
   if (fs.existsSync(CONFIG_JSON_PATH)) {
@@ -43,34 +72,64 @@ async function main() {
     const docName = `${course.id.toUpperCase()} Draft`;
     console.log(`\nChecking Google Doc for course: "${docName}"...`);
 
-    // Check if doc exists in track folder
-    const query = `'${TRACK_FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.document' and name = '${docName.replace(/'/g, "\\'")}' and trashed = false`;
-    const listResult = spawnSync('gws', [
-      'drive',
-      'files',
-      'list',
-      '--params',
-      JSON.stringify({
-        q: query,
-        supportsAllDrives: true,
-        includeItemsFromAllDrives: true
-      })
-    ], { env, encoding: 'utf8' });
+    const configItem = syncConfig.find(item => item.courseId === course.id);
+    let docId = configItem?.docId;
+    let existingDocs = [];
 
-    if (listResult.status !== 0) {
-      console.error(`Error checking Google Doc for ${course.id}:`, listResult.stderr || listResult.error);
-      continue;
+    // 1. If we have a docId in config, check if it exists in Drive first
+    if (docId) {
+      const checkResult = spawnSync('gws', [
+        'drive',
+        'files',
+        'list',
+        '--params',
+        JSON.stringify({
+          q: `id = '${docId}' and trashed = false`,
+          supportsAllDrives: true,
+          includeItemsFromAllDrives: true
+        })
+      ], { env, encoding: 'utf8' });
+
+      if (checkResult.status === 0) {
+        try {
+          const filesList = JSON.parse(checkResult.stdout);
+          existingDocs = filesList.files || [];
+        } catch (e) {
+          console.error('Failed to parse check file response:', checkResult.stdout);
+        }
+      }
     }
 
-    let filesList = { files: [] };
-    try {
-      filesList = JSON.parse(listResult.stdout);
-    } catch (e) {
-      console.error('Failed to parse file list output:', listResult.stdout);
+    // 2. If not found by ID, fallback to searching by name in track folder and all subfolders
+    if (existingDocs.length === 0) {
+      const parentConditions = allowedFolderIds.map(id => `'${id}' in parents`).join(' or ');
+      const query = `(${parentConditions}) and mimeType = 'application/vnd.google-apps.document' and name = '${docName.replace(/'/g, "\\'")}' and trashed = false`;
+      const listResult = spawnSync('gws', [
+        'drive',
+        'files',
+        'list',
+        '--params',
+        JSON.stringify({
+          q: query,
+          supportsAllDrives: true,
+          includeItemsFromAllDrives: true
+        })
+      ], { env, encoding: 'utf8' });
+
+      if (listResult.status !== 0) {
+        console.error(`Error checking Google Doc for ${course.id}:`, listResult.stderr || listResult.error);
+        continue;
+      }
+
+      let filesList = { files: [] };
+      try {
+        filesList = JSON.parse(listResult.stdout);
+      } catch (e) {
+        console.error('Failed to parse file list output:', listResult.stdout);
+      }
+      existingDocs = filesList.files || [];
     }
 
-    let docId;
-    const existingDocs = filesList.files || [];
     if (existingDocs.length > 0) {
       docId = existingDocs[0].id;
       console.log(`Google Doc already exists: "${docName}" (ID: ${docId})`);

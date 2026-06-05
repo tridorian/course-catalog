@@ -31,7 +31,7 @@
       "type": "list",
       "items": [
         "**Workstation Check:** Linux workspace or Cloudtop VM is active and writeable.",
-        "**Version Check:** Running Antigravity version v1.23.2 or lower.",
+        "**Version Check:** Running Antigravity version v1.23.2 or higher.",
         "**Entitlement Check:** Signed into the Mission Control dashboard using a personal Gmail account.",
         "**Binary Check:** Sourced local path correctly, allowing `agy --version` to run in the terminal.",
         "**Agent Check:** Verified read, write, and execute permissions by running the `hello_agy.py` script challenge."

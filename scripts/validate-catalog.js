@@ -29,6 +29,50 @@ function validateCatalog() {
 
   let totalErrors = 0;
 
+  function validateQuestionBlock(qText, options, feedback, file) {
+    const context = `${file} -> "${qText.substring(0, 45).replace(/\n/g, ' ')}..."`;
+    
+    if (options.length === 0) {
+      return;
+    }
+    
+    if (!feedback) {
+      console.error(`    ERROR: Question is missing feedback: ${context}`);
+      totalErrors++;
+      return;
+    }
+
+    const fbLower = feedback.toLowerCase();
+    let correctLetter = null;
+    
+    const optionMatch = fbLower.match(/option\s+([a-d])/i) || 
+                        fbLower.match(/correct answer:\s*\**\s*([a-d])/i) || 
+                        fbLower.match(/([a-d])\s+is\s+correct/i) ||
+                        fbLower.match(/answer\s+([a-d])/i) ||
+                        fbLower.match(/\b([a-d])\b/i);
+    
+    if (optionMatch) {
+      correctLetter = optionMatch[1].toUpperCase();
+    }
+
+    if (!correctLetter) {
+      console.error(`    ERROR: Could not determine correct answer letter in feedback for: ${context}`);
+      totalErrors++;
+    } else {
+      const hasCorrectOpt = options.some(opt => {
+        const cleaned = opt.trim().replace(/^[-*]\s+/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
+        return cleaned.toUpperCase().startsWith(correctLetter) || 
+               cleaned.toUpperCase().startsWith(`${correctLetter})`) ||
+               cleaned.toUpperCase().startsWith(`${correctLetter}.`);
+      });
+
+      if (!hasCorrectOpt) {
+        console.error(`    ERROR: Correct answer letter '${correctLetter}' not found in options: [${options.map(o => o.trim()).join(', ')}] for ${context}`);
+        totalErrors++;
+      }
+    }
+  }
+
   catalog.tracks.forEach(track => {
     console.log(`\nValidating Track: ${track.id} ("${track.title}")`);
     const trackDir = path.join(PUBLIC_DIR, `content/tracks/${track.id}`);
@@ -162,12 +206,106 @@ function validateCatalog() {
             console.error(`    ERROR: Lab module missing "blocks" array in ${modRef.file}`);
             totalErrors++;
           } else {
+            let currentQuestion = null;
+            let currentOptions = [];
+            let currentFeedback = null;
+
             moduleData.blocks.forEach((block, idx) => {
               if (!block.type) {
                 console.error(`      ERROR: Block at index ${idx} in ${modRef.file} is missing "type"`);
                 totalErrors++;
+                return;
+              }
+
+              const content = block.content || '';
+              const lowerContent = content.toLowerCase();
+
+              // Check if this block contains a single-block question (contains question, options, and feedback all in one)
+              const isSingleBlockQ = lowerContent.includes('question') &&
+                                     (lowerContent.includes('feedback') || lowerContent.includes('correct answer') || lowerContent.includes('correct:')) &&
+                                     content.includes('\n');
+
+              if (isSingleBlockQ) {
+                if (currentQuestion) {
+                  validateQuestionBlock(currentQuestion, currentOptions, currentFeedback, modRef.file);
+                  currentQuestion = null;
+                  currentOptions = [];
+                  currentFeedback = null;
+                }
+
+                // Parse single block
+                const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+                let qText = '';
+                let opts = [];
+                let fb = '';
+
+                lines.forEach(line => {
+                  const cleanLine = line.replace(/^\*+/, '').replace(/\*+$/, '').trim();
+                  const cleanLowerLine = cleanLine.toLowerCase();
+
+                  if (cleanLowerLine.startsWith('question') || (!qText && !cleanLine.startsWith('-') && !cleanLine.match(/^[a-d][\.\)]/i))) {
+                    qText += (qText ? '\n' : '') + line;
+                  } else if (cleanLine.startsWith('-') || cleanLine.match(/^[A-D][\.\)]/i)) {
+                    opts.push(line);
+                  } else if (cleanLowerLine.includes('feedback') || cleanLowerLine.includes('correct:') || cleanLowerLine.includes('correct answer')) {
+                    fb += (fb ? '\n' : '') + line;
+                  } else {
+                    if (fb) {
+                      fb += '\n' + line;
+                    } else if (opts.length > 0) {
+                      opts[opts.length - 1] += '\n' + line;
+                    } else {
+                      qText += '\n' + line;
+                    }
+                  }
+                });
+
+                validateQuestionBlock(qText, opts, fb, modRef.file);
+                return;
+              }
+
+              const isQuestion = content.trim().toLowerCase().startsWith('question') ||
+                                 (block.type === 'p' && content.includes('Question') && (content.includes('?') || content.includes(':'))) ||
+                                 (block.type === 'p' && lowerContent.startsWith('**question'));
+
+              if (isQuestion) {
+                if (currentQuestion) {
+                  validateQuestionBlock(currentQuestion, currentOptions, currentFeedback, modRef.file);
+                }
+                currentQuestion = content;
+                currentOptions = [];
+                currentFeedback = null;
+              } else if (currentQuestion) {
+                const isOption = block.type === 'list' ||
+                                 content.trim().startsWith('- ') ||
+                                 content.trim().match(/^[A-D]\)/i) ||
+                                 content.trim().match(/^[A-D]\.\s/i);
+                const isFeedback = block.type === 'info' ||
+                                   lowerContent.includes('feedback') ||
+                                   lowerContent.includes('correct answer') ||
+                                   lowerContent.includes('correct:');
+
+                if (block.type === 'list' && block.items) {
+                  currentOptions.push(...block.items);
+                } else if (isOption) {
+                  if (content.includes('\n')) {
+                    currentOptions.push(...content.split('\n').map(l => l.trim()).filter(Boolean));
+                  } else {
+                    currentOptions.push(content);
+                  }
+                } else if (isFeedback) {
+                  currentFeedback = content;
+                  validateQuestionBlock(currentQuestion, currentOptions, currentFeedback, modRef.file);
+                  currentQuestion = null;
+                  currentOptions = [];
+                  currentFeedback = null;
+                }
               }
             });
+
+            if (currentQuestion) {
+              validateQuestionBlock(currentQuestion, currentOptions, currentFeedback, modRef.file);
+            }
           }
         }
       });

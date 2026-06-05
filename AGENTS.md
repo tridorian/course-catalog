@@ -292,6 +292,8 @@ The app uses `HashRouter` (for GitHub Pages compatibility):
 
 4. **Test mock manifests** — When writing tests, the mock manifest must use `file` (not `path`) for module entries to match what `App.jsx` reads: `mod.file`.
 
+5. **Google Drive Document Duplication** — The course doc creation scripts (`create-course-docs.js` and `create-adk-docs.js`) originally queried only the top-level track folder. If `reorganize-drive.js` had moved a course document to its level subfolder (e.g. `L100`), the creation scripts would fail to find it, causing duplicates to be created in the top-level folder. Both scripts now check Drive by ID first (from `sync-config.json`) and fallback to checking both the track folder and its subfolders by name.
+
 ---
 
 ## 9. Current Roadmap Status
