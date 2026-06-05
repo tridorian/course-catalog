@@ -135,29 +135,72 @@ describe('App Integration', () => {
     await renderApp('/agentic-engineering/agy-101/1');
 
     await waitFor(() => {
-      expect(screen.getByText('Numeric Module')).toBeInTheDocument();
+      expect(screen.getAllByText(/Numeric Module/i)[0]).toBeInTheDocument();
     }, { timeout: 10000 });
   });
 
   it('locks progression if active module contains a quiz', async () => {
-    contentLoader.fetchModuleContent.mockResolvedValue({
-      id: 'module-1',
-      title: 'Quiz Module',
-      type: 'lab',
-      blocks: [
-        { type: 'quiz', content: 'Quiz Question' } // Simple quiz detection
-      ]
+    // Override test1.json mock to have a quiz
+    contentLoader.fetchModuleContent.mockImplementation((trackId, courseId, path) => {
+      if (path === 'test1.json') {
+        return Promise.resolve({
+          id: 'module-1',
+          title: 'Quiz Module',
+          type: 'lab',
+          blocks: [
+            { type: 'h1', content: 'Hello World 1' },
+            { type: 'h2', content: 'Check your understanding' },
+            { type: 'p', content: 'Question 1: Is this a test?' },
+            { type: 'list', items: ['A) Yes', 'B) No'] },
+            { type: 'p', content: 'Correct Answer: A' }
+          ]
+        });
+      }
+      return Promise.resolve({
+        id: 'module-2',
+        title: 'Test Module 2',
+        type: 'lab',
+        blocks: [{ type: 'h1', content: 'Hello World 2' }]
+      });
     });
+
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
     await renderApp();
 
     await waitFor(() => {
-      expect(screen.getByText('Quiz Module')).toBeInTheDocument();
+      expect(screen.getAllByText(/Quiz Module/i)[0]).toBeInTheDocument();
+    }, { timeout: 10000 });
+
+    // Check that quiz question is displayed
+    await waitFor(() => {
+      expect(screen.getByText('Is this a test?')).toBeInTheDocument();
     }, { timeout: 10000 });
 
     // Next button should be disabled
     const nextBtn = screen.getByRole('button', { name: /Next/i });
     expect(nextBtn).toBeDisabled();
+
+    // Clicking completion checkbox in the sidebar for active step should show alert
+    const checkboxToggle = screen.getByTestId('toggle-complete-0');
+    fireEvent.click(checkboxToggle);
+    expect(alertMock).toHaveBeenCalledWith(expect.stringContaining("Comprehension check required"));
+
+    // Select the correct option: "Yes"
+    const optionBtn = screen.getByRole('button', { name: /Yes/i });
+    fireEvent.click(optionBtn);
+
+    // Submit answer
+    const submitBtn = screen.getByRole('button', { name: /Submit Answer/i });
+    fireEvent.click(submitBtn);
+
+    // Quiz passed, nextBtn should be enabled
+    await waitFor(() => {
+      expect(nextBtn).not.toBeDisabled();
+    }, { timeout: 10000 });
+
+    // Clean up
+    alertMock.mockRestore();
   });
 
   it('displays Next Course button in celebration modal and footer when there is a next course', async () => {
@@ -185,10 +228,27 @@ describe('App Integration', () => {
       fireEvent.click(dismissBtn);
     });
 
-    // Verify we are back on Course page (it should show Course Map now)
+    // Verify we are back on Track Overview (TrackPage)
+    await waitFor(() => {
+      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+    }, { timeout: 10000 });
+
+    // Navigate back to the course page from TrackPage
+    const courseBtn = screen.getByRole('button', { name: /AGY-101/i });
+    await act(async () => {
+      fireEvent.click(courseBtn);
+    });
+
+    // Verify we are on Course page
     await waitFor(() => {
       expect(screen.getByText('Course Map')).toBeInTheDocument();
     }, { timeout: 10000 });
+
+    // Go back to Module 2 to check its footer
+    const reviewBtns = screen.getAllByRole('button', { name: /Review Module/i });
+    await act(async () => {
+      fireEvent.click(reviewBtns[1]);
+    });
 
     // Footer should also show Next Course button now that it's completed
     await waitFor(() => {
@@ -204,7 +264,7 @@ describe('App Integration', () => {
     await renderApp('/agentic-engineering/agy-102/module-2');
 
     await waitFor(() => {
-      expect(screen.getByText('AGY-102')).toBeInTheDocument();
+      expect(screen.getAllByText('AGY-102')[0]).toBeInTheDocument();
     }, { timeout: 10000 });
 
     const completeBtn = screen.getByRole('button', { name: /Complete Course/i });
@@ -220,6 +280,28 @@ describe('App Integration', () => {
     const dismissBtn = screen.getByRole('button', { name: /Return to Course Map/i });
     await act(async () => {
       fireEvent.click(dismissBtn);
+    });
+
+    // Verify we are back on Track Overview (TrackPage)
+    await waitFor(() => {
+      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+    }, { timeout: 10000 });
+
+    // Navigate back to the course page from TrackPage
+    const courseBtn2 = screen.getByRole('button', { name: /AGY-102/i });
+    await act(async () => {
+      fireEvent.click(courseBtn2);
+    });
+
+    // Verify we are on Course page
+    await waitFor(() => {
+      expect(screen.getByText('Course Map')).toBeInTheDocument();
+    }, { timeout: 10000 });
+
+    // Go back to Module 2 to check its footer
+    const reviewBtns2 = screen.getAllByRole('button', { name: /Review Module/i });
+    await act(async () => {
+      fireEvent.click(reviewBtns2[1]);
     });
 
     // Footer should show "Complete Track" button
