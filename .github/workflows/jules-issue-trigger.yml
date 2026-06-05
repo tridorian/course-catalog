@@ -1,0 +1,35 @@
+name: Trigger Jules on Issue Comment Mention
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  trigger-jules:
+    # ⚠️ CRITICAL SECURITY: Only run if '@jules' is tagged AND the user is trusted.
+    # Leaving this wide open allows anyone to open an issue and burn your compute/API credits.
+    if: |
+      contains(github.event.comment.body, '@jules') && 
+      contains(fromJSON('["wtg-codes"]'), github.event.comment.user.login)
+    
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Invoke Jules Autonomous Agent
+        uses: google-labs-code/jules-invoke@v1
+        with:
+          prompt: |
+            You have been invoked via a comment tag inside a GitHub Issue.
+            
+            Issue Title: ${{ github.event.issue.title }}
+            Original Issue Specification:
+            ${{ github.event.issue.body }}
+            
+            Specific User Comment/Instruction:
+            ${{ github.event.comment.body }}
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}

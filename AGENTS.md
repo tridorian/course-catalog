@@ -294,7 +294,7 @@ The app uses `HashRouter` (for GitHub Pages compatibility):
 
 5. **Google Drive Document Duplication** — The course doc creation scripts (`create-course-docs.js` and `create-adk-docs.js`) originally queried only the top-level track folder. If `reorganize-drive.js` had moved a course document to its level subfolder (e.g. `L100`), the creation scripts would fail to find it, causing duplicates to be created in the top-level folder. Both scripts now check Drive by ID first (from `sync-config.json`) and fallback to checking both the track folder and its subfolders by name.
 
-6. **Triggering Jules on GitHub Issues** — Creating an issue or tagging `@jules` in the issue body or comments does not automatically trigger the Jules agent. To trigger Jules on a GitHub issue, you must add the label `jules` to the issue. This fires the GitHub webhook to instantiate and run a remote session for that issue.
+6. **Triggering Jules on GitHub Issues** — Natively, the Jules GitHub app listens for the **`jules` label** on issues rather than comment tags. Alternatively, teams can configure custom workflows using GitHub Actions to trigger Jules on `@jules` comment tags. See the comprehensive [Jules Integration & Triggering Guide](file:///var/home/wtg/Repos/course-catalog/docs/JULES.md) for setup instructions.
 
 ---
 
