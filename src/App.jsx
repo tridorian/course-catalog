@@ -20,6 +20,7 @@ import ModuleRenderer from './components/ModuleRenderer';
 import SyncStatus from './components/SyncStatus';
 import Dashboard from './components/Dashboard';
 import TrackPage from './components/TrackPage';
+import RouteAnnouncer from './components/RouteAnnouncer';
 import AdminPanel from './components/AdminPanel';
 import HelpSection from './components/HelpSection';
 import { fetchCourseManifest, fetchCourseMetadata, fetchModuleContent } from './services/contentLoader';
@@ -383,7 +384,7 @@ function AppContent({ theme, setTheme }) {
       <div className="min-h-screen bg-base flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
           <AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Mission Interrupted</h2>
+          <h1 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Mission Interrupted</h1>
           <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
           <button
             onClick={() => navigate('/')}
@@ -446,12 +447,15 @@ function AppContent({ theme, setTheme }) {
           </button>
 
           {/* Logo */}
-          <button 
-            onClick={() => navigate('/')} 
-            className="font-extrabold text-lg md:text-xl text-accent-text tracking-[0.2em] hover:opacity-85 transition-opacity whitespace-nowrap focus:outline-none"
-          >
-            TRIDORIAN
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => navigate('/')}
+              className="font-extrabold text-lg md:text-xl text-accent-text tracking-[0.2em] hover:opacity-85 transition-opacity whitespace-nowrap focus:outline-none"
+              aria-label="Return to Home Dashboard"
+            >
+              TRIDORIAN
+            </button>
+          </div>
 
           {/* Vertical Divider */}
           <div className="hidden md:block w-px h-6 bg-border-main" />
@@ -500,6 +504,7 @@ function AppContent({ theme, setTheme }) {
                             ? 'text-gray-600 opacity-50'
                             : 'text-gray-400 hover:bg-muted/50 hover:text-main'
                       }`}
+                      aria-current={isActive ? 'page' : undefined}
                     >
                       <button
                         disabled={isLocked}
@@ -553,6 +558,7 @@ function AppContent({ theme, setTheme }) {
               <button
                 onClick={() => setShowResetModal(true)}
                 className="w-full py-2 text-[10px] font-mono text-gray-500 hover:text-red-400 border border-border-main hover:border-red-900/30 rounded transition-all uppercase tracking-tighter"
+                aria-label="Reset all progress for this course"
               >
                 Reset Progress
               </button>
@@ -648,14 +654,14 @@ function AppContent({ theme, setTheme }) {
 
             {!moduleId ? (
               <div className="space-y-6">
-                <h1 className="text-3xl font-bold text-main mb-6">Course Map</h1>
+                <h1 className="text-3xl font-bold text-main mb-6">Course Map: {courseMetadata?.title}</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {courseSteps.map((step, index) => {
                      const isCompleted = completedSteps.includes(index);
                      const isLocked = index > 0 && !completedSteps.includes(index - 1);
                      return (
                        <div key={step.id} className={`p-4 rounded-xl border transition-all ${isLocked ? 'border-border-main bg-panel' : 'border-border-main bg-muted hover:border-accent/40'}`}>
-                          <h3 className={`font-bold mb-2 ${isLocked ? 'text-text-muted' : 'text-accent-text'}`}>{step.title}</h3>
+                          <h2 className={`font-bold mb-2 ${isLocked ? 'text-text-muted' : 'text-accent-text'}`}>{step.title}</h2>
                           <p className={`text-sm mb-4 ${isLocked ? 'text-text-muted opacity-60' : 'text-text-muted'}`}>{step.description || 'Module details'}</p>
                           <button
                             disabled={isLocked}
@@ -692,6 +698,11 @@ function AppContent({ theme, setTheme }) {
                   ></div>
                 </div>
 
+                {/* Module Title */}
+                <h1 className="text-3xl font-extrabold text-main mb-8">
+                  {activeStep.title}
+                </h1>
+
                 {/* Inject Content */}
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} onQuizPassed={() => setActiveStepQuizPassed(true)} />
@@ -711,6 +722,7 @@ function AppContent({ theme, setTheme }) {
                     ? 'text-gray-600 cursor-not-allowed'
                     : 'text-main hover:bg-muted'
                 }`}
+                aria-label="Previous module"
               >
                 <ChevronLeft size={20} />
                 Back
@@ -722,6 +734,7 @@ function AppContent({ theme, setTheme }) {
                     <button
                       onClick={completeCourse}
                       className="flex items-center gap-2 px-4 py-2 border border-border-main text-text-muted hover:text-main rounded-lg font-medium transition-colors"
+                      aria-label="Review course badge"
                     >
                       <Trophy size={16} />
                       Review Badge
@@ -730,6 +743,7 @@ function AppContent({ theme, setTheme }) {
                       <button
                         onClick={() => navigate(`/${currentTrackId}/${nextCourse.id}`)}
                         className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
+                        aria-label={`Continue to next course: ${nextCourse.title}`}
                       >
                         Next Course
                         <ChevronRight size={20} />
@@ -738,6 +752,7 @@ function AppContent({ theme, setTheme }) {
                       <button
                         onClick={() => navigate('/')}
                         className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all"
+                        aria-label="Complete track and return to catalog"
                       >
                         Complete Track
                       </button>
@@ -752,6 +767,7 @@ function AppContent({ theme, setTheme }) {
                         ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent animate-pulse'
                         : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
                     }`}
+                    aria-label="Complete this course"
                   >
                     {activeStepQuizPassed ? <Trophy size={20} /> : <Lock size={20} />}
                     Complete Course
@@ -766,6 +782,7 @@ function AppContent({ theme, setTheme }) {
                       ? 'bg-accent text-accent-fg hover:brightness-110 shadow-accent'
                       : 'bg-muted text-gray-500 border border-border-main cursor-not-allowed opacity-50'
                   }`}
+                  aria-label="Next module"
                 >
                   {!activeStepQuizPassed && <Lock size={16} />}
                   Next
@@ -887,6 +904,8 @@ export default function App() {
 
 
   return (
+    <>
+    <RouteAnnouncer />
     <Routes>
       <Route path="/" element={<Dashboard theme={theme} setTheme={setTheme} />} />
       <Route path="/admin" element={<AdminPanel theme={theme} setTheme={setTheme} />} />
@@ -895,5 +914,6 @@ export default function App() {
       <Route path="/:trackId/:courseId" element={<AppContent theme={theme} setTheme={setTheme} />} />
       <Route path="/:trackId/:courseId/:moduleId" element={<AppContent theme={theme} setTheme={setTheme} />} />
     </Routes>
+    </>
   );
 }
