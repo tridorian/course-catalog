@@ -7,7 +7,7 @@ const SyncStatus = ({ status, onRetry }) => {
     switch (status) {
       case 'synced':
         return {
-          icon: <CheckCircle size={16} className="text-accent-text" />,
+          icon: <CheckCircle size={16} className="text-accent-text" aria-hidden="true" />,
           text: 'Synced',
           tooltip: 'All changes saved to Google Drive',
           color: 'text-accent-text',
@@ -16,7 +16,7 @@ const SyncStatus = ({ status, onRetry }) => {
         };
       case 'syncing':
         return {
-          icon: <Cloud size={16} className="text-[#f59e0b] animate-pulse" />,
+          icon: <Cloud size={16} className="text-[#f59e0b] animate-pulse" aria-hidden="true" />,
           text: 'Syncing',
           tooltip: 'Saving changes...',
           color: 'text-[#f59e0b]',
@@ -25,7 +25,7 @@ const SyncStatus = ({ status, onRetry }) => {
         };
       case 'error':
         return {
-          icon: <CloudOff size={16} className="text-[#ef4444]" />,
+          icon: <CloudOff size={16} className="text-[#ef4444]" aria-hidden="true" />,
           text: 'Error',
           tooltip: 'Sync failed. Click to retry.',
           color: 'text-[#ef4444]',
@@ -43,16 +43,25 @@ const SyncStatus = ({ status, onRetry }) => {
 
   return (
     <div 
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${config.bg} ${config.border} ${config.clickable ? 'cursor-pointer hover:bg-red-500/20' : ''} transition-all duration-200`}
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${config.bg} ${config.border} ${config.clickable ? 'cursor-pointer hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500' : ''} transition-all duration-200`}
       title={config.tooltip}
       onClick={config.clickable ? onRetry : undefined}
+      onKeyDown={(e) => {
+        if (config.clickable && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onRetry();
+        }
+      }}
+      role={config.clickable ? "button" : "status"}
+      tabIndex={config.clickable ? 0 : undefined}
+      aria-label={config.tooltip}
       data-testid={`sync-status-${status}`}
     >
       {config.icon}
       <span className={`text-[10px] font-mono uppercase font-bold tracking-wider ${config.color}`}>
         {config.text}
       </span>
-      {config.clickable && <RefreshCw size={10} className={`${config.color} animate-spin-slow`} />}
+      {config.clickable && <RefreshCw size={10} className={`${config.color} animate-spin-slow`} aria-hidden="true" />}
     </div>
   );
 };
