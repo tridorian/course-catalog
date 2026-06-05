@@ -89,9 +89,9 @@ This roadmap outlines the phased development of the platform, following a strict
 ---
 
 ## Maintenance & Polish
-- [ ] Audit all components for accessibility (A11y).
-- [ ] Optimize build size and asset loading.
-- [ ] Implement search across all modules in a track.
+- [x] Audit all components for accessibility (A11y).
+- [x] Optimize build size and asset loading.
+- [x] Implement search across all modules in a track.
 - [x] Add a track-level index/landing page for browsing multiple courses within a track.
 - [x] Add root Dashboard page (`catalog.json`) for browsing all tracks.
 - [x] Add `track.json` manifests for per-track course listings.
