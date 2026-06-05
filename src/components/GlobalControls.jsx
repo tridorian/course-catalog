@@ -340,9 +340,12 @@ const GlobalControls = ({ theme, setTheme }) => {
             color: 'var(--accent-text)',
           }}
           title="Change Theme"
+          aria-label="Theme settings"
+          aria-expanded={isOpen}
+          aria-haspopup="true"
           data-testid="global-theme-picker"
         >
-          <Palette size={12} />
+          <Palette size={12} aria-hidden="true" />
           Theme
         </button>
 
@@ -398,7 +401,7 @@ const GlobalControls = ({ theme, setTheme }) => {
                     </div>
                     <span className="flex-1 text-left">{opt.label}</span>
                     {isActive && (
-                      <Check size={14} style={{ color: 'var(--accent-text)' }} />
+                      <Check size={14} style={{ color: 'var(--accent-text)' }} aria-hidden="true" />
                     )}
                   </button>
                 );
@@ -450,16 +453,17 @@ const GlobalControls = ({ theme, setTheme }) => {
                         {opt['theme-name'] || opt.themeName || 'AI Custom Theme'}
                       </span>
                       {isActive && (
-                        <Check size={12} className="shrink-0 text-accent-text" />
+                        <Check size={12} className="shrink-0 text-accent-text" aria-hidden="true" />
                       )}
                     </button>
                     <button
                       onClick={(e) => handleDeleteTheme(e, opt.id)}
                       className="p-2 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-all duration-150 shrink-0 opacity-40 group-hover:opacity-100 focus:opacity-100"
                       title="Delete Custom Theme"
+                      aria-label="Delete custom theme"
                       data-testid={`delete-theme-${opt.id}`}
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={12} aria-hidden="true" />
                     </button>
                   </div>
                 );
@@ -475,16 +479,21 @@ const GlobalControls = ({ theme, setTheme }) => {
                 }}
                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-mono font-bold hover:bg-muted/20 text-text-muted transition-all duration-150"
                 data-testid="pattern-sandbox-trigger"
+                aria-expanded={showTester}
+                aria-controls="background-sandbox-controls"
               >
                 <div className="flex items-center gap-2">
-                  <Grid size={12} />
+                  <Grid size={12} aria-hidden="true" />
                   <span>Background Sandbox</span>
                 </div>
-                <Sliders size={12} className={`transition-transform duration-200 ${showTester ? 'rotate-90' : ''}`} />
+                <Sliders size={12} className={`transition-transform duration-200 ${showTester ? 'rotate-90' : ''}`} aria-hidden="true" />
               </button>
 
               {showTester && (
-                <div className="mt-2 p-2 rounded-lg space-y-3 bg-black/20 border border-border-subtle font-mono text-[10px]">
+                <div
+                  id="background-sandbox-controls"
+                  className="mt-2 p-2 rounded-lg space-y-3 bg-black/20 border border-border-subtle font-mono text-[10px]"
+                >
                   <div className="space-y-1">
                     <div className="flex justify-between text-text-muted uppercase tracking-wider">
                       <span>Opacity</span>
@@ -500,6 +509,7 @@ const GlobalControls = ({ theme, setTheme }) => {
                       onClick={(e) => e.stopPropagation()}
                       className="w-full h-1 bg-muted rounded appearance-none cursor-pointer"
                       style={{ accentColor: 'var(--accent-bg)' }}
+                      aria-label="Pattern Opacity"
                       data-testid="sandbox-opacity-slider"
                     />
                   </div>
@@ -519,6 +529,7 @@ const GlobalControls = ({ theme, setTheme }) => {
                       onClick={(e) => e.stopPropagation()}
                       className="w-full h-1 bg-muted rounded appearance-none cursor-pointer"
                       style={{ accentColor: 'var(--accent-bg)' }}
+                      aria-label="Pattern Scale"
                       data-testid="sandbox-scale-slider"
                     />
                   </div>
@@ -536,7 +547,7 @@ const GlobalControls = ({ theme, setTheme }) => {
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-mono font-bold bg-accent/10 hover:bg-accent/20 text-accent-text border border-accent-border transition-all duration-150"
                 data-testid="ai-theme-gen-trigger"
               >
-                <Cpu size={12} />
+                <Cpu size={12} aria-hidden="true" />
                 <span>AI Theme Generator</span>
               </button>
             </div>
@@ -566,9 +577,10 @@ const GlobalControls = ({ theme, setTheme }) => {
           boxShadow: isCursorEnabled ? '0 0 12px var(--accent-border)' : 'none',
         }}
         title={isCursorEnabled ? "Disable Custom Cursor" : "Enable Custom Cursor"}
+        aria-label={isCursorEnabled ? "Disable custom cursor" : "Enable custom cursor"}
         data-testid="global-cursor-toggle"
       >
-        <Sparkles size={12} className={isCursorEnabled ? "animate-pulse" : ""} />
+        <Sparkles size={12} className={isCursorEnabled ? "animate-pulse" : ""} aria-hidden="true" />
       </button>
 
       {/* 3. Static Audio Controls */}
@@ -596,8 +608,9 @@ const GlobalControls = ({ theme, setTheme }) => {
           onClick={handleToggleMute}
           className="flex items-center justify-center hover:text-main transition-colors focus:outline-none pr-1"
           title={audioState.isMuted ? "Unmute Ambient Music" : "Mute Ambient Music"}
+          aria-label={audioState.isMuted ? "Unmute ambient music" : "Mute ambient music"}
         >
-          {audioState.isMuted ? <VolumeX size={12} className="text-red-400" /> : <Volume2 size={12} />}
+          {audioState.isMuted ? <VolumeX size={12} className="text-red-400" aria-hidden="true" /> : <Volume2 size={12} aria-hidden="true" />}
         </button>
 
         <div 
@@ -620,6 +633,7 @@ const GlobalControls = ({ theme, setTheme }) => {
             style={{
               accentColor: 'var(--accent-bg)',
             }}
+            aria-label="Volume level"
           />
         </div>
       </div>

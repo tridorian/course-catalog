@@ -248,6 +248,22 @@
   button:disabled {
     -webkit-text-fill-color: currentColor;
   }
+
+  /* Improved Global Focus States */
+  :focus-visible {
+    outline: 2px solid var(--accent-bg);
+    outline-offset: 2px;
+  }
+
+  /* Buttons and inputs should have consistent focus rings */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--accent-bg);
+    outline-offset: 2px;
+  }
 }
 
 /* ========================================
