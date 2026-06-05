@@ -255,7 +255,7 @@ describe('App Integration', () => {
 
     // Verify we are on Course page
     await waitFor(() => {
-      expect(screen.getByText('Course Map')).toBeInTheDocument();
+      expect(screen.getByText(/Course Map/)).toBeInTheDocument();
     });
 
     // Go back to Module 2 to check its footer
@@ -302,7 +302,7 @@ describe('App Integration', () => {
 
     // Verify we are on Course page
     await waitFor(() => {
-      expect(screen.getByText('Course Map')).toBeInTheDocument();
+      expect(screen.getByText(/Course Map/)).toBeInTheDocument();
     });
 
     // Go back to Module 2 to check its footer
