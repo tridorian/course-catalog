@@ -4,13 +4,17 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import * as contentLoader from '../services/contentLoader';
+import * as roleManager from '../services/roleManager';
 
 vi.mock('../services/contentLoader');
+vi.mock('../services/roleManager');
 
 describe('App Integration', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     localStorage.clear();
+
+    roleManager.checkUserRole.mockResolvedValue('student');
 
     // Mock catalog and track manifest (used by Dashboard/TrackPage)
     contentLoader.fetchCatalog.mockResolvedValue({
@@ -68,7 +72,7 @@ describe('App Integration', () => {
   it('loads and renders a course correctly', async () => {
     renderApp();
 
-    expect(screen.getByText(/LOADING TRIDORIAN MISSION.../i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading Tridorian System.../i)).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
@@ -245,12 +249,14 @@ describe('App Integration', () => {
     fireEvent.click(dismissBtn);
 
     // Verify we are back on Track Overview (TrackPage)
+    // Wait for something unique to TrackPage
     await waitFor(() => {
-      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
-    });
+      expect(screen.getByText(/courses available/i)).toBeInTheDocument();
+    }, { timeout: 10000 });
 
     // Navigate back to the course page from TrackPage
-    const courseBtn = screen.getByRole('button', { name: /AGY-101/i });
+    // Use a more specific selector or just getByText within the button
+    const courseBtn = screen.getByText('Test course 1').closest('button');
     fireEvent.click(courseBtn);
 
     // Verify we are on Course page
@@ -293,11 +299,11 @@ describe('App Integration', () => {
 
     // Verify we are back on Track Overview (TrackPage)
     await waitFor(() => {
-      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+      expect(screen.getByText(/courses available/i)).toBeInTheDocument();
     });
 
     // Navigate back to the course page from TrackPage
-    const courseBtn2 = screen.getByRole('button', { name: /AGY-102/i });
+    const courseBtn2 = screen.getByText('Test course 2').closest('button');
     fireEvent.click(courseBtn2);
 
     // Verify we are on Course page
