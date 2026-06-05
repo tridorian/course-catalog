@@ -38,7 +38,7 @@ describe('TrackPage Component', () => {
 
     renderTrackPage();
 
-    expect(screen.getByText(/LOADING TRACK DATA/i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading Tridorian System/i)).toBeInTheDocument();
   });
 
   it('renders track data successfully', async () => {
