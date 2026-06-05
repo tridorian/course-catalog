@@ -4,6 +4,7 @@ import * as Icons from 'lucide-react';
 import { fetchTrackManifest } from '../services/contentLoader';
 import { checkUserRole } from '../services/roleManager';
 import GlobalControls from './GlobalControls';
+import LoadingFallback from './LoadingFallback';
 
 // Simple markdown formatter helper for titles and descriptions
 function renderSimpleMarkdown(text) {
@@ -68,13 +69,7 @@ const TrackPage = ({ theme, setTheme }) => {
   }, [trackId]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-base flex items-center justify-center">
-        <div className="text-accent-text font-mono animate-pulse text-xl tracking-widest">
-          LOADING TRACK DATA...
-        </div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
   const filteredCourses = track ? track.courses.filter(course => {
