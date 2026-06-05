@@ -9,7 +9,7 @@
     },
     {
       "type": "p",
-      "content": "In this lab, you will deploy the Antigravity v1.23.2 binary on your system. Depending on your corporate security limits, you can choose between Tier 1 (Interactive Scripted) or Tier 2 (Manual Hardened Tarball extraction)."
+      "content": "In this lab, you will deploy the Antigravity binary (v1.23.2 or higher) on your system. Depending on your corporate security limits, you can choose between Tier 1 (Interactive Scripted) or Tier 2 (Manual Hardened Tarball extraction)."
     },
     {
       "type": "h2",

@@ -64,13 +64,13 @@
         {
           "type": "list",
           "items": [
-            "**Visual:** Warning banner highlighting the strict version boundary between Antigravity v1.x and v2.x.",
-            "**Talking Track:** \"We have a critical constraint: you must use Antigravity version v1.23.2 or lower. Version v2.0.0 and higher represent a different product model and are incompatible with the policies, local execution targets, and browser subagents configured in this course.\""
+            "**Visual:** Parity banner highlighting support for Antigravity v1.23.2 and higher.",
+            "**Talking Track:** \"We want to ensure version parity: you must use Antigravity version v1.23.2 or higher. The curriculum is kept fully up to date with the `agy-easy-install` tool, ensuring compatibility across all newer versions, including v2.0.0+.\""
           ]
         },
         {
           "type": "warning",
-          "content": "Always check your version before installing. Standard workstation packages that automatically update may push you to v2.0.0+, breaking your workspace boundaries and local verification toolchains."
+          "content": "Always check your version before installing. Use the `agy-easy-install` tool to ensure your workstation is configured with a compatible version (v1.23.2 or higher) that supports all workspace boundaries and local verification toolchains."
         },
         {
           "type": "h2",
@@ -91,10 +91,8 @@
         {
           "type": "list",
           "items": [
-            "**Terminal Execution Policy:** Controls whether the agent can execute commands in your terminal (Always proceed vs Request review).",
-            "**Review Policy:** Determines when the agent pauses to request approval for plans and artifacts (Always proceed, Agent decides, or Request review).",
-            "**JavaScript Execution Policy:** Restricts browser agent JavaScript capabilities (Always proceed, Request review, or Disabled).",
-            "**Profiles:** Secure Mode (highest restriction), Review-Driven Development (balanced/recommended), and Agent-Driven Development (maximum autonomy)."
+            "**Visual:** Table displaying the security profiles and policies configured during setup.",
+            "**Talking Track:** \"Antigravity allows you to configure security policies that govern what tasks the agent can execute autonomously. The default mode is Review-Driven Development, providing a balanced workflow with explicit human approvals.\""
           ]
         },
         {
@@ -103,23 +101,23 @@
         },
         {
           "type": "p",
-          "content": "Question 1: Why must learners ensure their Antigravity version is v1.23.2 or lower for this course?"
+          "content": "Question 1: What is the version requirement for Antigravity in this course to ensure all local execution targets and workspace policies are supported?"
         },
         {
           "type": "p",
-          "content": "- A) Version v1.23.2 is the only version that supports Python and Node.js dependencies."
+          "content": "- A) Any legacy version (v1.0.0 or lower) must be used."
         },
         {
           "type": "p",
-          "content": "- B) Newer versions (v2.0.0+) introduce a different architecture, interface model, and set of capabilities that are incompatible with this curriculum's exercises."
+          "content": "- B) Antigravity version v1.23.2 or higher (v1.23.2+) is required to support the modern workspace policies and toolchains taught in this curriculum."
         },
         {
           "type": "p",
-          "content": "- C) v1.23.2 is a lightweight command-line-only tool while v2.0.0+ is a graphical-only application."
+          "content": "- C) Only beta pre-release versions are supported."
         },
         {
           "type": "p",
-          "content": "Feedback: Option B is correct. Antigravity v1.23.2 or lower contains the specific local execution agent, browser subagent, and workspace policies taught in this curriculum."
+          "content": "Feedback: Option B is correct. Antigravity version v1.23.2 or higher contains the local execution agent, browser subagent, and workspace policies taught in this curriculum, and is kept up-to-date via agy-easy-install."
         },
         {
           "type": "p",
@@ -204,7 +202,7 @@
         },
         {
           "type": "p",
-          "content": "Question 1: What type of Google Account is required to access the free preview quota and premier models in Antigravity v1.23.2?"
+          "content": "Question 1: What type of Google Account is required to access the free preview quota and premier models in Antigravity (v1.23.2 or higher)?"
         },
         {
           "type": "p",
@@ -253,7 +251,7 @@
         },
         {
           "type": "p",
-          "content": "In this lab, you will deploy the Antigravity v1.23.2 binary on your system. Depending on your corporate security limits, you can choose between Tier 1 (Interactive Scripted) or Tier 2 (Manual Hardened Tarball extraction)."
+          "content": "In this lab, you will deploy the Antigravity binary (v1.23.2 or higher) on your system. Depending on your corporate security limits, you can choose between Tier 1 (Interactive Scripted) or Tier 2 (Manual Hardened Tarball extraction)."
         },
         {
           "type": "h2",
@@ -557,7 +555,7 @@
           "type": "list",
           "items": [
             "**Workstation Check:** Linux workspace or Cloudtop VM is active and writeable.",
-            "**Version Check:** Running Antigravity version v1.23.2 or lower.",
+            "**Version Check:** Running Antigravity version v1.23.2 or higher.",
             "**Entitlement Check:** Signed into the Mission Control dashboard using a personal Gmail account.",
             "**Binary Check:** Sourced local path correctly, allowing `agy --version` to run in the terminal.",
             "**Agent Check:** Verified read, write, and execute permissions by running the `hello_agy.py` script challenge."
