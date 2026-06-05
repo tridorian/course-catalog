@@ -230,7 +230,7 @@ describe('App Integration', () => {
 
     // Verify we are back on Track Overview (TrackPage)
     await waitFor(() => {
-      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+      expect(screen.getByText('ALL TRACKS')).toBeInTheDocument();
     }, { timeout: 10000 });
 
     // Navigate back to the course page from TrackPage
@@ -284,7 +284,7 @@ describe('App Integration', () => {
 
     // Verify we are back on Track Overview (TrackPage)
     await waitFor(() => {
-      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+      expect(screen.getByText('ALL TRACKS')).toBeInTheDocument();
     }, { timeout: 10000 });
 
     // Navigate back to the course page from TrackPage
