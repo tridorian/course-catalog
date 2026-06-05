@@ -24,6 +24,7 @@ import { loadProgress, saveCourseProgress, syncOfflineQueue } from '../services/
 import { getAccessToken } from '../services/googleAuth';
 import { extractQuizQuestions } from '../services/quizParser';
 import { saveCustomTheme } from '../services/customTheme';
+import LoadingFallback from './LoadingFallback';
 
 // --- AppContent Component ---
 
@@ -354,13 +355,7 @@ export default function AppContent({ theme, setTheme }) {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-base flex items-center justify-center">
-        <div className="text-accent-text font-mono animate-pulse text-xl tracking-widest">
-          LOADING TRIDORIAN MISSION...
-        </div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
   if (error) {
