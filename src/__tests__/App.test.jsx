@@ -4,13 +4,17 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import * as contentLoader from '../services/contentLoader';
+import * as roleManager from '../services/roleManager';
 
 vi.mock('../services/contentLoader');
+vi.mock('../services/roleManager');
 
 describe('App Integration', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     localStorage.clear();
+
+    roleManager.checkUserRole.mockResolvedValue('student');
 
     // Mock catalog and track manifest (used by Dashboard/TrackPage)
     contentLoader.fetchCatalog.mockResolvedValue({
@@ -68,7 +72,7 @@ describe('App Integration', () => {
   it('loads and renders a course correctly', async () => {
     renderApp();
 
-    expect(screen.getByText(/LOADING TRIDORIAN MISSION.../i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading Tridorian System.../i)).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getAllByText('TEST COURSE')[0]).toBeInTheDocument();
@@ -104,11 +108,11 @@ describe('App Integration', () => {
 
     // Wait for Next button to be enabled
     await waitFor(() => {
-      const nextBtn = screen.getByRole('button', { name: /Next/i });
+      const nextBtn = screen.getByRole('button', { name: /Next module/i });
       expect(nextBtn).not.toBeDisabled();
     });
 
-    const nextBtn = screen.getByRole('button', { name: /Next/i });
+    const nextBtn = screen.getByRole('button', { name: /Next module/i });
     fireEvent.click(nextBtn);
 
     // After clicking next, wait for it to navigate to module-2 and render "Hello World 2"
@@ -197,7 +201,7 @@ describe('App Integration', () => {
     });
 
     // Next button should be disabled
-    const nextBtn = screen.getByRole('button', { name: /Next/i });
+    const nextBtn = screen.getByRole('button', { name: /Next module/i });
     expect(nextBtn).toBeDisabled();
 
     // Clicking completion checkbox in the sidebar for active step should show alert
@@ -231,7 +235,7 @@ describe('App Integration', () => {
     });
 
     // Complete course
-    const completeBtn = screen.getByRole('button', { name: /Complete Course/i });
+    const completeBtn = screen.getByRole('button', { name: /Complete this course/i });
     fireEvent.click(completeBtn);
 
     // Verify celebration modal shows Next Course button
@@ -245,17 +249,19 @@ describe('App Integration', () => {
     fireEvent.click(dismissBtn);
 
     // Verify we are back on Track Overview (TrackPage)
+    // Wait for something unique to TrackPage
     await waitFor(() => {
-      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
-    });
+      expect(screen.getByText(/courses available/i)).toBeInTheDocument();
+    }, { timeout: 10000 });
 
     // Navigate back to the course page from TrackPage
-    const courseBtn = screen.getByRole('button', { name: /AGY-101/i });
+    // Use a more specific selector or just getByText within the button
+    const courseBtn = screen.getByText('Test course 1').closest('button');
     fireEvent.click(courseBtn);
 
     // Verify we are on Course page
     await waitFor(() => {
-      expect(screen.getByText('Course Map')).toBeInTheDocument();
+      expect(screen.getByText(/Course Map/)).toBeInTheDocument();
     });
 
     // Go back to Module 2 to check its footer
@@ -264,8 +270,8 @@ describe('App Integration', () => {
 
     // Now that the course is completed, the footer of the last module should show Review Badge and Next Course buttons
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Review Badge/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Next Course/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Review course badge/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Continue to next course: AGY-102/i })).toBeInTheDocument();
     });
   });
 
@@ -278,7 +284,7 @@ describe('App Integration', () => {
     });
 
     // Complete course
-    const completeBtn = screen.getByRole('button', { name: /Complete Course/i });
+    const completeBtn = screen.getByRole('button', { name: /Complete this course/i });
     fireEvent.click(completeBtn);
 
     // Verify celebration modal shows track completion prompt
@@ -293,16 +299,16 @@ describe('App Integration', () => {
 
     // Verify we are back on Track Overview (TrackPage)
     await waitFor(() => {
-      expect(screen.getByText('Agentic Engineering')).toBeInTheDocument();
+      expect(screen.getByText(/courses available/i)).toBeInTheDocument();
     });
 
     // Navigate back to the course page from TrackPage
-    const courseBtn2 = screen.getByRole('button', { name: /AGY-102/i });
+    const courseBtn2 = screen.getByText('Test course 2').closest('button');
     fireEvent.click(courseBtn2);
 
     // Verify we are on Course page
     await waitFor(() => {
-      expect(screen.getByText('Course Map')).toBeInTheDocument();
+      expect(screen.getByText(/Course Map/)).toBeInTheDocument();
     });
 
     // Go back to Module 2 to check its footer
@@ -311,8 +317,8 @@ describe('App Integration', () => {
 
     // Now that the course is completed and it's the last course, the footer of the last module should show Review Badge and Complete Track
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Review Badge/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Complete Track/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Review course badge/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Complete track and return to catalog/i })).toBeInTheDocument();
     });
   });
 

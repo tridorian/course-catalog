@@ -49,7 +49,7 @@ describe('Sidebar Progress Management & Reset', () => {
     );
 
     // Wait for course to load
-    const resetButton = await screen.findByRole('button', { name: /Reset Progress/i });
+    const resetButton = await screen.findByRole('button', { name: /Reset all progress for this course/i });
     expect(resetButton).toBeInTheDocument();
   });
 
@@ -60,7 +60,7 @@ describe('Sidebar Progress Management & Reset', () => {
       </MemoryRouter>
     );
 
-    const resetButton = await screen.findByRole('button', { name: /Reset Progress/i });
+    const resetButton = await screen.findByRole('button', { name: /Reset all progress for this course/i });
     fireEvent.click(resetButton);
 
     expect(screen.getByText(/Are you sure you want to reset your progress/i)).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('Sidebar Progress Management & Reset', () => {
       </MemoryRouter>
     );
 
-    const resetButton = await screen.findByRole('button', { name: /Reset Progress/i });
+    const resetButton = await screen.findByRole('button', { name: /Reset all progress for this course/i });
     fireEvent.click(resetButton);
 
     const confirmButton = screen.getByRole('button', { name: /Confirm Reset/i });

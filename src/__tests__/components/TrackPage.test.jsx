@@ -38,7 +38,7 @@ describe('TrackPage Component', () => {
 
     renderTrackPage();
 
-    expect(screen.getByText(/LOADING TRACK DATA/i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading Tridorian System/i)).toBeInTheDocument();
   });
 
   it('renders track data successfully', async () => {
@@ -68,7 +68,7 @@ describe('TrackPage Component', () => {
 
     // Verify loading state disappears
     await waitFor(() => {
-      expect(screen.queryByText(/LOADING TRACK DATA/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Loading Tridorian System/i)).not.toBeInTheDocument();
     });
 
     // Verify track details are rendered
@@ -92,7 +92,7 @@ describe('TrackPage Component', () => {
     renderTrackPage();
 
     await waitFor(() => {
-      expect(screen.queryByText(/LOADING TRACK DATA/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Loading Tridorian System/i)).not.toBeInTheDocument();
     });
 
     expect(screen.getByText(/Track Not Found/i)).toBeInTheDocument();

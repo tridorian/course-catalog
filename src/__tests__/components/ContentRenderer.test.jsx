@@ -30,21 +30,21 @@ describe('ContentRenderer', () => {
       const blocks = [{ type: 'h1', content: 'Heading 1' }];
       render(<ContentRenderer blocks={blocks} />);
       expect(screen.getByText('Heading 1')).toBeInTheDocument();
-      expect(screen.getByText('Heading 1').tagName).toBe('H1');
+      expect(screen.getByText('Heading 1').tagName).toBe('H2');
     });
 
     it('renders h2 block', () => {
       const blocks = [{ type: 'h2', content: 'Heading 2' }];
       render(<ContentRenderer blocks={blocks} />);
       expect(screen.getByText('Heading 2')).toBeInTheDocument();
-      expect(screen.getByText('Heading 2').tagName).toBe('H2');
+      expect(screen.getByText('Heading 2').tagName).toBe('H3');
     });
 
     it('renders h3 block', () => {
       const blocks = [{ type: 'h3', content: 'Heading 3' }];
       render(<ContentRenderer blocks={blocks} />);
       expect(screen.getByText('Heading 3')).toBeInTheDocument();
-      expect(screen.getByText('Heading 3').tagName).toBe('H3');
+      expect(screen.getByText('Heading 3').tagName).toBe('H4');
     });
 
     it('renders paragraph with markdown (bold, code, links)', () => {

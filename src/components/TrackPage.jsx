@@ -4,6 +4,7 @@ import * as Icons from 'lucide-react';
 import { fetchTrackManifest } from '../services/contentLoader';
 import { checkUserRole } from '../services/roleManager';
 import GlobalControls from './GlobalControls';
+import LoadingFallback from './LoadingFallback';
 
 // Simple markdown formatter helper for titles and descriptions
 function renderSimpleMarkdown(text) {
@@ -28,6 +29,7 @@ const TrackPage = ({ theme, setTheme }) => {
   const [error, setError] = useState(null);
   const [courseProgress, setCourseProgress] = useState({});
   const [role, setRole] = useState('student');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function loadTrack() {
@@ -67,21 +69,26 @@ const TrackPage = ({ theme, setTheme }) => {
   }, [trackId]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-base flex items-center justify-center">
-        <div className="text-accent-text font-mono animate-pulse text-xl tracking-widest">
-          LOADING TRACK DATA...
-        </div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
+
+  const filteredCourses = track ? track.courses.filter(course => {
+    const matchesRole = role === 'admin' || course.status !== 'Draft';
+    if (!matchesRole) return false;
+
+    const query = searchQuery.toLowerCase();
+    return (
+      (course.title && course.title.toLowerCase().includes(query)) ||
+      (course.description && course.description.toLowerCase().includes(query))
+    );
+  }) : [];
 
   if (error) {
     return (
       <div className="min-h-screen bg-base flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
           <Icons.AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Track Not Found</h2>
+          <h1 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Track Not Found</h1>
           <p className="text-gray-400 font-mono text-sm mb-6">{error}</p>
           <button
             onClick={() => navigate('/')}
@@ -106,6 +113,7 @@ const TrackPage = ({ theme, setTheme }) => {
           <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-accent-text transition-colors tracking-wider group"
+            aria-label="Return to all tracks"
           >
             <Icons.ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
             ALL TRACKS
@@ -114,6 +122,7 @@ const TrackPage = ({ theme, setTheme }) => {
             <Link 
               to="/help" 
               className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+              aria-label="Help and Troubleshooting"
             >
               <Icons.HelpCircle size={12} />
               Help & Troubleshooting
@@ -125,18 +134,39 @@ const TrackPage = ({ theme, setTheme }) => {
         {/* Track Header */}
         <div className="mb-12">
           <div className="text-[10px] font-mono text-gray-600 tracking-widest uppercase mb-3">{track.track_id}</div>
-          <h1 className="text-4xl font-extrabold text-main mb-4">{track.title}</h1>
+          <h2 className="text-4xl font-extrabold text-main mb-4">{track.title}</h2>
           <p className="text-lg text-text-muted max-w-3xl leading-relaxed">{track.description}</p>
-          <div className="mt-4 text-xs font-mono text-gray-500">
-            {track.courses.length} {track.courses.length === 1 ? 'course' : 'courses'} available
+
+          <div className="mt-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative max-w-md w-full">
+               <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+               <input
+                 type="text"
+                 placeholder="Search modules..."
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+                 className="w-full bg-panel border border-border-main rounded-lg py-2 pl-10 pr-10 text-sm focus:outline-none focus:border-accent transition-all"
+               />
+               {searchQuery && (
+                 <button
+                   onClick={() => setSearchQuery('')}
+                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-main"
+                   aria-label="Clear search"
+                 >
+                   <Icons.X size={16} />
+                 </button>
+               )}
+            </div>
+            <div className="text-xs font-mono text-gray-500">
+              {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'} available
+            </div>
           </div>
         </div>
 
         {/* Course Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {track.courses
-            .filter(course => role === 'admin' || course.status !== 'Draft')
-            .map((course, index) => {
+        {filteredCourses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredCourses.map((course, index) => {
             const CourseIcon = Icons[course.icon] || Icons.BookOpen;
             const progress = courseProgress[course.id];
             const isCompleted = progress && progress.completed === progress.total;
@@ -200,6 +230,7 @@ const TrackPage = ({ theme, setTheme }) => {
                 key={course.id}
                 onClick={() => navigate(`/${trackId}/${course.id}`)}
                 className={`group text-left bg-panel border ${style.borderColor} rounded-xl p-6 transition-all duration-300 ${style.glow} relative overflow-hidden flex flex-col justify-between`}
+                aria-label={`${progress ? 'Resume' : 'Start'} course: ${course.title}`}
               >
                 {/* Hover glow */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${style.bgGlow} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}></div>
@@ -236,9 +267,9 @@ const TrackPage = ({ theme, setTheme }) => {
                         <CourseIcon style={{ color: style.accent || 'var(--accent-bg)' }} size={24} />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-main group-hover:text-accent-text transition-colors leading-tight">
+                        <h2 className="text-lg font-bold text-main group-hover:text-accent-text transition-colors leading-tight">
                           {renderSimpleMarkdown(course.title)}
-                        </h3>
+                        </h2>
                       </div>
                     </div>
 
@@ -298,6 +329,19 @@ const TrackPage = ({ theme, setTheme }) => {
             );
           })}
         </div>
+        ) : (
+          <div className="text-center py-20 bg-panel border border-border-main rounded-xl">
+            <Icons.Search size={48} className="text-gray-600 mx-auto mb-4 opacity-20" />
+            <h3 className="text-lg font-bold text-main mb-2">No missions found</h3>
+            <p className="text-gray-400 font-mono text-sm">Try adjusting your search query for "{searchQuery}"</p>
+            <button
+               onClick={() => setSearchQuery('')}
+               className="mt-6 text-accent-text hover:underline text-xs font-mono uppercase tracking-widest"
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
