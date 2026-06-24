@@ -35,7 +35,7 @@ describe('ModuleRenderer', () => {
     };
     render(<ModuleRenderer module={moduleData} />);
     expect(screen.getByText('Resource description')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /open resource/i })).toHaveAttribute('href', moduleData.url);
+    expect(screen.getByRole('link', { name: new RegExp(`open external resource: ${moduleData.title}`, 'i') })).toHaveAttribute('href', moduleData.url);
   });
 
   it('integrates the quiz parser and renders an interactive quiz when lab has check your understanding', () => {

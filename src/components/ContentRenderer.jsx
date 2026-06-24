@@ -14,13 +14,13 @@ const ContentRenderer = ({ blocks, sourceFile, onQuizPassed }) => {
       {blocks.map((block, index) => {
         switch (block.type) {
           case 'h1':
-            return <h1 key={index} className="text-4xl font-extrabold text-main mb-8 mt-4 leading-tight">{block.content}</h1>;
+            return <h2 key={index} className="text-4xl font-extrabold text-main mb-8 mt-4 leading-tight">{block.content}</h2>;
 
           case 'h2':
-            return <h2 key={index} className="text-2xl font-bold text-main mt-12 mb-6 border-b border-border-main pb-3 leading-snug">{block.content}</h2>;
+            return <h3 key={index} className="text-2xl font-bold text-main mt-12 mb-6 border-b border-border-main pb-3 leading-snug">{block.content}</h3>;
 
           case 'h3':
-            return <h3 key={index} className="text-xl font-bold text-accent-text mt-8 mb-4 leading-normal">{block.content}</h3>;
+            return <h4 key={index} className="text-xl font-bold text-accent-text mt-8 mb-4 leading-normal">{block.content}</h4>;
 
           case 'p':
             return (
@@ -186,7 +186,7 @@ const ContentRenderer = ({ blocks, sourceFile, onQuizPassed }) => {
             return (
               <div key={index} className="space-y-6 text-center py-16">
                 <Icons.CheckCircle2 className="text-accent-text w-24 h-24 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]" />
-                <h1 className="text-5xl font-extrabold text-main mb-4">Congratulations!</h1>
+                <h2 className="text-5xl font-extrabold text-main mb-4">Congratulations!</h2>
                 <p className="text-xl text-text-muted max-w-2xl mx-auto leading-relaxed">
                   {block.content}
                 </p>

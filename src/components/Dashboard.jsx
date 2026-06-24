@@ -133,7 +133,7 @@ const Dashboard = ({ theme, setTheme }) => {
       <div className="min-h-screen bg-base flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center">
           <Icons.AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-red-500 mb-2">CATALOG UNAVAILABLE</h2>
+          <h1 className="text-xl font-bold text-red-500 mb-2">CATALOG UNAVAILABLE</h1>
           <p className="text-gray-400 font-mono text-sm">{error}</p>
         </div>
       </div>
@@ -153,6 +153,7 @@ const Dashboard = ({ theme, setTheme }) => {
             <Link 
               to="/help" 
               className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+              aria-label="Help and Troubleshooting"
             >
               <Icons.HelpCircle size={12} />
               Help & Troubleshooting
@@ -160,6 +161,7 @@ const Dashboard = ({ theme, setTheme }) => {
             <button
               onClick={() => setIsProfileOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+              aria-label="Open My Profile"
             >
               <Icons.User size={12} />
               My Profile
@@ -170,6 +172,7 @@ const Dashboard = ({ theme, setTheme }) => {
             <Link 
               to="/admin" 
               className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+              aria-label="Admin Control Panel"
             >
               <Icons.Shield size={12} />
               Admin Control Panel
@@ -186,13 +189,14 @@ const Dashboard = ({ theme, setTheme }) => {
                   <Icons.CloudOff className="text-accent-text" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-main font-bold">Connect Google Drive to Sync Progress</h3>
+                  <div className="text-main font-bold">Connect Google Drive to Sync Progress</div>
                   <p className="text-text-muted text-sm">Save your mission status across devices and resume where you left off.</p>
                 </div>
               </div>
               <button
                 onClick={handleConnect}
                 className="px-6 py-2 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 transition-all shadow-accent whitespace-nowrap"
+                aria-label="Connect Google Drive to sync progress"
               >
                 Connect Sync
               </button>
@@ -223,6 +227,7 @@ const Dashboard = ({ theme, setTheme }) => {
                 key={track.id}
                 onClick={() => navigate(`/${track.id}`)}
                 className="group text-left w-full bg-panel border border-border-main rounded-2xl p-8 hover:border-accent transition-all duration-300 hover:shadow-accent relative overflow-hidden"
+                aria-label={`View courses in ${track.title} track`}
               >
                 {/* Hover glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-accent/0 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
