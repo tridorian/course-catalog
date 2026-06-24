@@ -82,7 +82,9 @@ The application uses a hybrid persistence model to save user progress:
 - **Auto-Reauth:** The Google Drive service automatically handles `401 Unauthorized` errors by triggering a transparent re-authentication flow via Google Identity Services.
 
 ### Routing
-The app uses `BrowserRouter` with four route patterns:
+The app uses `BrowserRouter` (replacing the legacy `HashRouter` used during GitHub Pages hosting). Because the application is deployed to Google Cloud Run and served via Nginx, clean paths are fully supported by configuring fallback rewrites to `index.html`. 
+
+There are four core route patterns:
 - `/` — Dashboard, showing all available tracks from `catalog.json`.
 - `/:trackId` — Track page, showing all courses in a track from `track.json`.
 - `/:trackId/:courseId` — Course Map view showing all modules.

@@ -56,6 +56,7 @@ This project is configured for automated deployment to Google Cloud Run via GitH
 - **CI/CD Build & Deploy:** The GitHub Actions workflow `.github/workflows/deploy-cloudrun.yml` automates building the container, pushing it to GCP Artifact Registry, and deploying to Cloud Run on pushes to `main`.
 - **Workload Identity Federation (WIF):** The deployment pipeline uses keyless OIDC authentication via `google-github-actions/auth` to securely interact with GCP.
 - **Vite Config:** Uses `base: '/'` for root-relative asset routing.
+- **Routing:** Employs standard clean paths via `BrowserRouter` (replacing the legacy GitHub Pages `HashRouter` setup), which is fully supported by Nginx rewrite rules in the Docker container.
 - **API Proxy Routing:** Nginx reverse proxies client requests under `/api/` (such as theme, music, and image generation) to a Node.js Cloud Function (`theme-proxy`), which obtains authorization using a dedicated Google Service Account with Application Default Credentials (ADC).
 
 ## Architecture

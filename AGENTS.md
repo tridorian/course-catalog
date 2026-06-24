@@ -14,11 +14,11 @@ This is a **React + Vite** interactive course platform with a dark "tridorian" t
 |-------|------|-------|
 | Framework | React 18 | Functional components, hooks only |
 | Build | Vite 5 | Config in `vite.config.js` |
-| Routing | react-router-dom v7 | HashRouter, `useParams()` returns **strings** |
+| Routing | react-router-dom v7 | BrowserRouter, `useParams()` returns **strings** |
 | Styling | Tailwind CSS 3 | With `tailwindcss-animate` plugin |
 | Icons | Lucide React | Import from `lucide-react` |
 | Testing | Vitest + React Testing Library | Config in `vitest.config.js` |
-| Deployment | GitHub Pages | Via GitHub Actions on `main` |
+| Deployment | Google Cloud Run | Via GitHub Actions on `main` |
 
 ### Content Hierarchy (4-tier)
 
@@ -57,7 +57,7 @@ course-catalog/
 │       └── 04-phase-4-*.md
 │
 ├── src/                         # Application source code
-│   ├── main.jsx                 # React root + HashRouter
+│   ├── main.jsx                 # React root + BrowserRouter
 │   ├── App.jsx                  # Main controller (routing, state, layout)
 │   ├── index.css                # Global styles
 │   │
@@ -235,14 +235,14 @@ git add -A && git commit -m "feat: description"
 1. Add entry to `public/content/catalog.json` with `id`, `title`, `description`, `icon`
 2. Create directory: `public/content/tracks/[new-track]/`
 3. Add `track.json` listing the courses in this track
-4. Navigate to `/#/[new-track]` — no code changes needed
+4. Navigate to `/[new-track]` — no code changes needed
 
 ### Adding a New Course
 
 1. Create directory: `public/content/tracks/[track]/[new-course]/`
 2. Add `manifest.json`, `metadata.json`, and `modules/` directory
 3. Add the course to the track's `track.json`
-4. Navigate to `/#/[track]/[new-course]` — no code changes needed
+4. Navigate to `/[track]/[new-course]` — no code changes needed
 
 ---
 
@@ -271,14 +271,14 @@ State is managed via React hooks in `AppContent` (inside `App.jsx`):
 
 ## 7. Routing
 
-The app uses `HashRouter` (for GitHub Pages compatibility):
+The app uses `BrowserRouter` (for Google Cloud Run deployment):
 
 | Pattern | View | Example |
 |---------|------|---------|
-| `/#/` | Dashboard (all tracks) | `/#/` |
-| `/#/:trackId` | Track page (all courses) | `/#/agentic-engineering` |
-| `/#/:trackId/:courseId` | Course Map | `/#/agentic-engineering/agy-101` |
-| `/#/:trackId/:courseId/:moduleId` | Module view | `/#/agentic-engineering/agy-101/1` |
+| `/` | Dashboard (all tracks) | `/` |
+| `/:trackId` | Track page (all courses) | `/agentic-engineering` |
+| `/:trackId/:courseId` | Course Map | `/agentic-engineering/agy-101` |
+| `/:trackId/:courseId/:moduleId` | Module view | `/agentic-engineering/agy-101/1` |
 
 ---
 
