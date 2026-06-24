@@ -5,6 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AGY Course Demo</title>
+    <script>
+      if (window.location.hostname.endsWith('github.io')) {
+        const target = 'https://tridorian-labs-zqfmig3vcq-uc.a.run.app';
+        const path = window.location.pathname.replace(/^\/course-catalog/, '');
+        window.location.replace(target + path + window.location.search + window.location.hash);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
