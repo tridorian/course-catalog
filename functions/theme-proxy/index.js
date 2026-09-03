@@ -97,17 +97,18 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
   }
 }`;
 
+  const apiKey = process.env.GEMINI_API_KEY;
   let url;
   const headers = { 'Content-Type': 'application/json' };
 
-  if (process.env.GEMINI_API_KEY) {
-    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+  if (apiKey) {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   } else {
     // When using Google Cloud Service Account ADC, Generative Language API restricts access.
     // Use Vertex AI endpoint which fully supports Service Account authorization.
     const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT || 'tridorian-taylor-sandbox';
     const location = process.env.LOCATION || 'us-central1';
-    url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/gemini-2.0-flash:generateContent`;
+    url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/gemini-2.5-flash:generateContent`;
     headers['Authorization'] = `Bearer ${token}`;
   }
 
