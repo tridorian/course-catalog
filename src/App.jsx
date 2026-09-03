@@ -5,6 +5,8 @@ import LoadingFallback from './components/LoadingFallback';
 import { useTheme } from './hooks/useTheme';
 import * as themeAudio from './services/themeAudio';
 
+import { AuthProvider } from './context/AuthContext';
+
 // Lazy-loaded components for all main views
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const TrackPage = lazy(() => import('./components/TrackPage'));
@@ -83,7 +85,7 @@ export default function App() {
   }, [theme]);
 
   return (
-    <>
+    <AuthProvider>
       <RouteAnnouncer />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
@@ -95,6 +97,6 @@ export default function App() {
           <Route path="/:trackId/:courseId/:moduleId" element={<AppContent theme={theme} setTheme={setTheme} />} />
         </Routes>
       </Suspense>
-    </>
+    </AuthProvider>
   );
 }

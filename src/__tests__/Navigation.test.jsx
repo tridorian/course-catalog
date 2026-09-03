@@ -9,6 +9,13 @@ vi.mock('../services/contentLoader');
 describe('Navigation & Deep Linking', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem('tridorian_user_session', JSON.stringify({
+      user: { email: 'nav@tridorian.com', name: 'Nav Tester', role: 'student' },
+      role: 'student',
+      token: 'mock-nav-token'
+    }));
 
     // Mock catalog and track manifest (used by Dashboard/TrackPage)
     contentLoader.fetchCatalog.mockResolvedValue({

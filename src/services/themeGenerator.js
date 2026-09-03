@@ -1,6 +1,7 @@
 // src/services/themeGenerator.js
 // Integrates with Gemini API to generate custom color theme JSON variables.
 import { getAccessToken } from './googleAuth';
+import { APP_CONFIG } from '../config';
 
 function getValidApiKey(userApiKey = '') {
   const LEAKED_KEY = 'AIzaSyCrQVmC1PFEFb-oLAuOQdT7Jr-gb9W-JzY';
@@ -112,13 +113,14 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
   }
 }`;
 
+  const model = APP_CONFIG.defaultThemeModel || 'gemini-2.0-flash';
   let url;
   const headers = { 'Content-Type': 'application/json' };
 
   if (apiKey) {
-    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   } else {
-    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
+    url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
     headers['Authorization'] = `Bearer ${gAuthToken}`;
   }
 

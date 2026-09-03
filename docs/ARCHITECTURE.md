@@ -67,10 +67,19 @@ A single Track can contain multiple Courses. Each course lives in its own direct
 ### ID Format Requirement
 > **Important:** Module IDs in both `manifest.json` and individual module JSON files **must be strings**, not numbers. React Router's `useParams()` returns URL parameters as strings, and the application uses strict comparison. Numeric IDs (e.g., `"id": 1`) will silently break navigation. Always use `"id": "1"`.
 
-### State Management
+### State Management & Authentication
+- `AuthContext`: Wraps the application root to manage Google Identity Services (GIS) OAuth2 authentication, active user profile (`email`, `name`, `picture`, `role`), access token, and loading states.
+- `tridorian_user_session`: User auth state is persisted to `localStorage` and `sessionStorage` across sessions and reloads.
+- **Role Management:** Checks user email against `APP_CONFIG.adminEmails` to assign `'admin'` or `'student'` roles. Admins have access to the Admin Control Center (`/admin`) and catalog sync dispatch actions.
 - `activeStepIndex`: Derived from the URL `moduleId` param matched against `courseSteps[].id` using `String()` coercion.
 - `completedSteps`: An array of indices representing finished modules, used for progress tracking and locking. Reset on course switch.
 - `courseMetadata`: Stores the high-level information about the current course.
+
+### Hybrid 20% Course Preview Gating
+- To drive user engagement and sign-ups while providing open access to introductory material, courses enforce a 20% preview limit for unauthenticated visitors:
+  $$\text{previewLimit} = \max(1, \lceil \text{modules.length} \times (\text{previewModuleLimitPercent} \lor 0.2) \rceil)$$
+- **Unauthenticated Visitors:** Can view the first 20% of modules. Navigating to any module index at or beyond the preview limit replaces the module body with a sleek "Preview Limit Reached" lock card prompting the user to sign in with Google.
+- **Authenticated Students & Admins:** Have complete, unrestricted access to all modules, quizzes, and labs across all tracks, with mission progress automatically syncing to their Google Drive.
 
 ### Persistence & Offline Support
 The application uses a hybrid persistence model to save user progress:
@@ -104,6 +113,13 @@ In development (`npm run dev`), all embed components (SlideDeckEmbed, VideoEmbed
 - **Copy buttons** for both fields
 
 This makes it easy to identify and update stale or broken embed URLs without searching through JSON files manually. The overlay is only visible in dev mode (`import.meta.env.DEV`) and is stripped from production builds.
+
+### Drive-to-UI Catalog Sync Pipeline (Option B)
+The platform features an automated pipeline to sync content directly from Google Drive Docs to the UI:
+1. **GitHub Repository Dispatch:** `.github/workflows/content-sync.yml` is configured with `repository_dispatch: types: [sync-catalog]` (alongside nightly cron and manual workflow dispatch).
+2. **Backend Proxy Dispatch Endpoint (`/sync-catalog`):** Both `functions/theme-proxy/index.js` and `scripts/gemini_proxy.js` expose `POST /sync-catalog` (and `/api/sync-catalog`). When configured with `GITHUB_DISPATCH_TOKEN` or `GITHUB_TOKEN`, it triggers a repository dispatch on GitHub.
+3. **Automated Continuous Deployment:** When `content-sync.yml` commits updated JSON files into `public/content/`, it uses the commit message `chore: automated content sync from Google Drive` without `[skip ci]`, automatically triggering `deploy-cloudrun.yml` to build and redeploy the live Cloud Run application.
+4. **Admin Panel UI Integration:** Administrators on `/admin` can trigger catalog synchronization with a single click. The UI displays an active progress spinner, real-time success states with direct links to the GitHub Actions workflow runner, and graceful fallback buttons ("Trigger via GitHub Actions") when tokens are not configured on the proxy.
 
 ## Styling & Theme
 

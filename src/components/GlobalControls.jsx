@@ -137,6 +137,40 @@ const GlobalControls = ({ theme, setTheme }) => {
     setGenLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
   };
 
+  const handleDemoReset = () => {
+    try {
+      localStorage.removeItem('tridorian_last_theme_gen_time');
+      const currentThemes = getCustomThemes();
+      if (currentThemes.length >= 3) {
+        const sorted = [...currentThemes].sort((a, b) => new Date(a.generatedAt || 0) - new Date(b.generatedAt || 0));
+        const oldest = sorted[0];
+        if (oldest && oldest.id) {
+          deleteCustomTheme(oldest.id);
+          setCustomThemes(getCustomThemes());
+        }
+      }
+      const updatedThemes = getCustomThemes();
+      let themesModified = false;
+      updatedThemes.forEach(t => {
+        if (t.generatedAt) {
+          const tTime = new Date(t.generatedAt).getTime();
+          if (Date.now() - tTime < 3600000) {
+            t.generatedAt = new Date(Date.now() - 3600000 - 1000).toISOString();
+            themesModified = true;
+          }
+        }
+      });
+      if (themesModified) {
+        localStorage.setItem('tridorian_custom_themes_list', JSON.stringify(updatedThemes));
+        setCustomThemes(updatedThemes);
+      }
+    } catch (e) {
+      console.warn("Demo reset error:", e);
+    }
+    setGenError(null);
+    addLog("⚡ [Demo Mode] Cooldown timer reset. You can generate another theme immediately.");
+  };
+
   const handleGenerateTheme = async () => {
     if (!prompt.trim()) {
       setGenError("Prompt cannot be empty.");
@@ -188,7 +222,7 @@ const GlobalControls = ({ theme, setTheme }) => {
     }
 
     try {
-      addLog("Step 1/3: Calling Gemini API (gemini-2.5-flash) to generate custom color palette & styling tokens...");
+      addLog("Step 1/3: Calling Gemini API (gemini-2.0-flash) to generate custom color palette & styling tokens...");
       const themeVars = await generateThemeWithGemini(prompt, apiKey);
       addLog(`[Gemini] ✅ Colors generated successfully! Created theme: "${themeVars['theme-name']}"`);
       addLog(`[Gemini] Theme Variables:`);
@@ -721,12 +755,16 @@ const GlobalControls = ({ theme, setTheme }) => {
 
               {genError && (
                 <div className="text-red-400 text-xs font-mono max-w-xl break-words">
-                  {genError}
+                  <div>{genError}</div>
+                  {(genError.includes("per hour") || genError.includes("limit of 3") || genError.includes("cooldown")) && (
+                    <button type="button" onClick={handleDemoReset} className="mt-2 text-xs font-mono text-accent-text hover:underline flex items-center gap-1">⚡ Demo Reset: Clear Cooldown</button>
+                  )}
                 </div>
               )}
               
               {/* Actions */}
-              <div className="flex gap-3 border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
+              <div className="flex items-center justify-between gap-3 border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
+                <button type="button" onClick={handleDemoReset} className="text-[10px] font-mono text-text-muted hover:text-accent-text transition-colors opacity-60 hover:opacity-100 shrink-0" title="Clear theme cooldown timer for live demonstrations">⚡ Demo Reset</button>
                 <button
                   disabled={isGenerating}
                   onClick={() => {

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { checkUserRole } from '../../services/roleManager';
 import * as googleAuth from '../../services/googleAuth';
+import { APP_CONFIG } from '../../config';
 
 vi.mock('../../services/googleAuth');
 
@@ -35,7 +36,24 @@ describe('roleManager Service', () => {
     expect(role).toBe('admin');
   });
 
-  it('returns student role in testing mode if email does not match allowed admin', async () => {
+  it('returns admin role if email matches APP_CONFIG.adminEmails without overrides', async () => {
+    googleAuth.getAccessToken.mockReturnValue('valid-token');
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('userinfo')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ email: APP_CONFIG.adminEmails[0] })
+        });
+      }
+      return Promise.reject(new Error('Unknown URL'));
+    });
+
+    const role = await checkUserRole();
+    expect(role).toBe('admin');
+  });
+
+  it('returns student role in testing mode if email does not match allowed admin or APP_CONFIG', async () => {
     googleAuth.getAccessToken.mockReturnValue('valid-token');
 
     global.fetch.mockImplementation((url) => {
@@ -49,6 +67,15 @@ describe('roleManager Service', () => {
     });
 
     const role = await checkUserRole({ testingMode: true, allowedAdmin: 'taylor@tridorian.com' });
+    expect(role).toBe('student');
+  });
+
+  it('returns student role gracefully when userinfo request fails', async () => {
+    googleAuth.getAccessToken.mockReturnValue('valid-token');
+
+    global.fetch.mockImplementation(() => Promise.reject(new Error('Network offline')));
+
+    const role = await checkUserRole();
     expect(role).toBe('student');
   });
 

@@ -13,6 +13,12 @@ describe('App Integration', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem('tridorian_user_session', JSON.stringify({
+      user: { email: 'student@tridorian.com', name: 'Student', picture: '', role: 'student' },
+      role: 'student',
+      token: 'mock-auth-token'
+    }));
 
     roleManager.checkUserRole.mockResolvedValue('student');
 
@@ -345,5 +351,23 @@ describe('App Integration', () => {
 
     // Clean up
     localStorage.removeItem('agy_local_progress');
+  });
+
+  it('gates access with a lock card on modules past 20% limit when unauthenticated', async () => {
+    // Clear auth session so user is unauthenticated
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Render directly at module 2 (index 1 >= previewModuleLimit 1)
+    renderApp('/agentic-engineering/agy-101/module-2');
+
+    await waitFor(() => {
+      expect(screen.getByText(/Unlock Full Course Access/i)).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByText(/PREVIEW LIMIT REACHED/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /Sign In with Google/i }).length).toBeGreaterThan(0);
+    // Should NOT render module 2 lab content
+    expect(screen.queryByText('Hello World 2')).not.toBeInTheDocument();
   });
 });

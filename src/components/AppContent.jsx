@@ -12,7 +12,10 @@ import {
   History,
   CheckCircle,
   HelpCircle,
-  ArrowDown
+  ArrowDown,
+  LogIn,
+  LogOut,
+  User
 } from 'lucide-react';
 
 import ModuleRenderer from './ModuleRenderer';
@@ -26,6 +29,8 @@ import { loadProgress, saveCourseProgress, syncOfflineQueue } from '../services/
 import { getAccessToken } from '../services/googleAuth';
 import { extractQuizQuestions } from '../services/quizParser';
 import { saveCustomTheme } from '../services/customTheme';
+import { useAuth } from '../context/AuthContext';
+import { APP_CONFIG } from '../config';
 import LoadingFallback from './LoadingFallback';
 import * as themeAudio from '../services/themeAudio';
 
@@ -33,6 +38,7 @@ import * as themeAudio from '../services/themeAudio';
 // --- Main App Component ---
 
 export default function AppContent({ theme, setTheme }) {
+  const { user, role: authRole, isAuthenticated, signIn, signOut } = useAuth();
   const [courseMetadata, setCourseMetadata] = useState(null);
   const [courseSteps, setCourseSteps] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -198,6 +204,10 @@ export default function AppContent({ theme, setTheme }) {
       activeStepIndex = index;
     }
   }
+
+  const effectiveUserRole = authRole || userRole || 'student';
+  const previewModuleLimit = Math.max(1, Math.ceil(courseSteps.length * (APP_CONFIG.previewModuleLimitPercent || 0.2)));
+  const isPreviewGated = !isAuthenticated && activeStepIndex >= previewModuleLimit;
 
   // Scroll indicator hook
   useEffect(() => {
@@ -469,6 +479,42 @@ export default function AppContent({ theme, setTheme }) {
           <div className="hidden sm:block">
             <SyncStatus status={syncStatus} onRetry={handleRetrySync} />
           </div>
+
+          {/* Auth Chip */}
+          {!isAuthenticated ? (
+            <button
+              onClick={signIn}
+              className="flex items-center gap-2 px-3 py-1.5 bg-accent text-accent-fg rounded-full text-[10px] font-mono font-bold hover:brightness-110 transition-all uppercase tracking-wider shadow-accent"
+              aria-label="Sign In with Google"
+            >
+              <LogIn size={12} />
+              <span className="hidden sm:inline">Sign In with Google</span>
+              <span className="sm:hidden">Sign In</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-2.5 py-1 bg-panel border border-border-main rounded-full text-xs font-mono">
+              {user?.picture ? (
+                <img src={user.picture} alt="" className="w-4 h-4 rounded-full border border-border-main" />
+              ) : (
+                <User size={12} className="text-accent-text" />
+              )}
+              <span className="text-main font-medium hidden sm:inline truncate max-w-[120px]">{user?.email || 'User'}</span>
+              {effectiveUserRole === 'admin' && (
+                <span className="px-1.5 py-0.5 bg-accent/20 text-accent-text border border-accent-border text-[8px] font-bold rounded uppercase">
+                  Admin
+                </span>
+              )}
+              <button
+                onClick={signOut}
+                className="ml-1 text-text-muted hover:text-red-400 transition-colors p-0.5"
+                title="Sign Out"
+                aria-label="Sign Out"
+              >
+                <LogOut size={12} />
+              </button>
+            </div>
+          )}
+
           <GlobalControls theme={theme} setTheme={setTheme} />
         </div>
       </header>
@@ -707,9 +753,33 @@ export default function AppContent({ theme, setTheme }) {
                 </h1>
 
                 {/* Inject Content */}
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} onQuizPassed={() => setActiveStepQuizPassed(true)} />
-                </div>
+                {isPreviewGated ? (
+                  <div className="my-8 p-8 md:p-12 bg-panel border border-border-main rounded-2xl text-center shadow-xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="w-16 h-16 bg-accent/10 border border-accent-border rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Lock size={32} className="text-accent-text" />
+                    </div>
+                    <div className="font-mono text-xs tracking-widest text-accent-text uppercase mb-2">
+                      Preview Limit Reached
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-main mb-4">
+                      Unlock Full Course Access
+                    </h2>
+                    <p className="text-text-muted text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed">
+                      PREVIEW LIMIT REACHED: You are previewing the first 20% of this course. Sign in with your Google account to unlock all modules, complete labs, and sync your mission progress to Google Drive.
+                    </p>
+                    <button
+                      onClick={signIn}
+                      className="px-8 py-3 bg-accent text-accent-fg font-bold rounded-xl hover:brightness-110 shadow-accent transition-all text-sm uppercase tracking-wider inline-flex items-center gap-3"
+                    >
+                      <LogIn size={18} />
+                      Sign In with Google
+                    </button>
+                  </div>
+                ) : (
+                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <ModuleRenderer module={activeStep} sourceFile={activeStep?._sourceFile} onQuizPassed={() => setActiveStepQuizPassed(true)} />
+                  </div>
+                )}
               </>
             )}
           </main>
@@ -731,7 +801,16 @@ export default function AppContent({ theme, setTheme }) {
                 Back
               </button>
 
-              {activeStepIndex === totalSteps - 1 ? (
+              {isPreviewGated ? (
+                <button
+                  onClick={signIn}
+                  className="flex items-center gap-2 px-6 py-2 bg-accent text-accent-fg rounded-lg font-bold hover:brightness-110 shadow-accent transition-all text-sm"
+                  aria-label="Sign In with Google to Unlock"
+                >
+                  <Lock size={16} />
+                  Sign In with Google to Unlock
+                </button>
+              ) : activeStepIndex === totalSteps - 1 ? (
                 completedSteps.includes(activeStepIndex) ? (
                   <div className="flex gap-3">
                     <button

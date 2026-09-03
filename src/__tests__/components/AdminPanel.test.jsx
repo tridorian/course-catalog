@@ -60,11 +60,15 @@ describe('AdminPanel Component', () => {
     expect(screen.getByText('PUBLISHED')).toBeInTheDocument();
   });
 
-  it('triggers GitHub Repository Dispatch sync webhook on Sync click', async () => {
+  it('triggers GitHub Repository Dispatch sync webhook on Sync click and displays workflow link', async () => {
     roleManager.checkUserRole.mockResolvedValue('admin');
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ message: 'Workflow dispatched' })
+      json: () => Promise.resolve({
+        success: true,
+        message: 'Catalog sync dispatched! GitHub Action is pulling Google Docs and deploying to Cloud Run.',
+        workflowUrl: 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml'
+      })
     });
 
     render(
@@ -79,7 +83,46 @@ describe('AdminPanel Component', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalled();
     });
+
+    const [calledUrl, calledOptions] = global.fetch.mock.calls[0];
+    expect(calledUrl).toContain('/sync-catalog');
+    expect(calledOptions.method).toBe('POST');
+    expect(JSON.parse(calledOptions.body)).toHaveProperty('email');
     
-    expect(screen.getByText(/Sync action dispatched successfully/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Sync Action Dispatched Successfully/i)).toBeInTheDocument();
+    expect(screen.getByText(/Catalog sync dispatched! GitHub Action is pulling Google Docs and deploying to Cloud Run./i)).toBeInTheDocument();
+    const workflowLink = screen.getByRole('link', { name: /View GitHub Actions Workflow/i });
+    expect(workflowLink).toHaveAttribute('href', 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml');
+  });
+
+  it('handles sync dispatch errors and displays fallback button to GitHub Actions', async () => {
+    roleManager.checkUserRole.mockResolvedValue('admin');
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 200,
+      json: () => Promise.resolve({
+        success: false,
+        error: 'GITHUB_DISPATCH_TOKEN not set on server. You can trigger sync manually via GitHub Actions.',
+        workflowUrl: 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml'
+      })
+    });
+
+    render(
+      <MemoryRouter>
+        <AdminPanel />
+      </MemoryRouter>
+    );
+
+    const syncButton = await screen.findByRole('button', { name: /Trigger Catalog Sync/i });
+    fireEvent.click(syncButton);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+
+    expect(await screen.findByText(/Sync Dispatch Encountered an Issue/i)).toBeInTheDocument();
+    expect(screen.getByText(/GITHUB_DISPATCH_TOKEN not set on server/i)).toBeInTheDocument();
+    const fallbackButton = screen.getByRole('link', { name: /Trigger via GitHub Actions/i });
+    expect(fallbackButton).toHaveAttribute('href', 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml');
   });
 });

@@ -40,6 +40,14 @@ const server = http.createServer(async (req, res) => {
   req.on('end', async () => {
     try {
       const payload = JSON.parse(body || '{}');
+
+      const pathname = (req.url || '').split('?')[0];
+      if (pathname === '/sync-catalog' || pathname === '/api/sync-catalog') {
+        console.log(`[Proxy] Handling sync-catalog request...`);
+        await handleSyncCatalog(payload, res);
+        return;
+      }
+
       const prompt = payload.prompt;
 
       if (!prompt) {
@@ -119,7 +127,7 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
   }
 }`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -262,6 +270,64 @@ async function handleGenerateImage(prompt, res) {
 
   res.writeHead(500, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: `All Imagen models failed. Last error: ${lastError ? lastError.message : 'Unknown'}` }));
+}
+
+async function handleSyncCatalog(payload, res) {
+  const dispatchToken = process.env.GITHUB_DISPATCH_TOKEN || process.env.GITHUB_TOKEN;
+  const workflowUrl = 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml';
+
+  if (!dispatchToken) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: false,
+      error: 'GITHUB_DISPATCH_TOKEN not set on server. You can trigger sync manually via GitHub Actions.',
+      workflowUrl
+    }));
+    return;
+  }
+
+  try {
+    const ghResponse = await fetch('https://api.github.com/repos/tridorian/course-catalog/dispatches', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${dispatchToken}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+        'User-Agent': 'tridorian-course-catalog-proxy'
+      },
+      body: JSON.stringify({
+        event_type: 'sync-catalog',
+        client_payload: payload || {}
+      })
+    });
+
+    if (!ghResponse.ok) {
+      const errText = await ghResponse.text();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        error: `GitHub Dispatch error: ${errText}`,
+        workflowUrl
+      }));
+      return;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      message: 'Catalog sync dispatched! GitHub Action is pulling Google Docs and deploying to Cloud Run.',
+      workflowUrl
+    }));
+  } catch (error) {
+    console.error('Sync Dispatch Error:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: false,
+      error: error.message,
+      workflowUrl
+    }));
+  }
 }
 
 server.listen(PORT, () => {
