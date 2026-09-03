@@ -19,7 +19,8 @@ vi.mock('../../services/contentLoader', () => ({
       }
     ]
   })),
-  fetchTrackManifest: vi.fn(() => Promise.resolve({ courses: [] }))
+  fetchTrackManifest: vi.fn(() => Promise.resolve({ courses: [] })),
+  fetchSyncConfig: vi.fn(() => Promise.resolve([]))
 }));
 
 describe('AdminPanel Component', () => {

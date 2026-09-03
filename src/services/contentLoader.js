@@ -41,6 +41,14 @@ export async function fetchCatalog() {
 }
 
 /**
+ * Fetches sync configuration mapping course IDs to Google Docs IDs.
+ */
+export async function fetchSyncConfig() {
+  const path = `/sync-config.json`;
+  return fetchWithCache(path, `Failed to load sync config`).catch(() => []);
+}
+
+/**
  * Fetches a track manifest listing all courses in a track.
  */
 export async function fetchTrackManifest(trackId) {

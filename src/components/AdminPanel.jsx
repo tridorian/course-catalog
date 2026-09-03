@@ -1,19 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, ExternalLink, LogIn } from 'lucide-react';
+import { 
+  Shield, 
+  RefreshCw, 
+  ChevronLeft, 
+  ChevronDown, 
+  ChevronRight, 
+  AlertCircle, 
+  CheckCircle, 
+  ExternalLink, 
+  LogIn, 
+  Folder, 
+  FolderOpen, 
+  FileText, 
+  Save, 
+  Search, 
+  Maximize2, 
+  Minimize2 
+} from 'lucide-react';
 import { checkUserRole } from '../services/roleManager';
-import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
+import { fetchCatalog, fetchTrackManifest, fetchSyncConfig } from '../services/contentLoader';
 import { useAuth } from '../context/AuthContext';
 import { APP_CONFIG } from '../config';
 import GlobalControls from './GlobalControls';
+
+// Track folder mappings in Google Drive
+const DEFAULT_TRACK_FOLDERS = {
+  'agentic-engineering': '1Qz3O9gMN96IdSKE2lKmYjj75CmCQ_Mq2',
+  'adk-development': '1YA7-uzdcoPT6w0ImvFZeHXrBOOJUNe0q'
+};
 
 const AdminPanel = ({ theme, setTheme }) => {
   const { user, role: authRole, isAuthenticated, signIn } = useAuth();
   const [role, setRole] = useState(authRole || null);
   const [isLoading, setIsLoading] = useState(true);
   const [catalog, setCatalog] = useState(null);
+  const [syncConfig, setSyncConfig] = useState([]);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Parent Drive folder state
+  const [parentFolderId, setParentFolderId] = useState(() => {
+    return (typeof localStorage !== 'undefined' && localStorage.getItem('tridorian_parent_drive_folder_id')) || APP_CONFIG.parentDriveFolderId || '1UTsC7YPjz72BiwqJDyJx6VydyHGgW160';
+  });
+  const [savedFolderAlert, setSavedFolderAlert] = useState(false);
+
+  // Track collapse state (keyed by track.id -> boolean; false = expanded, true = collapsed)
+  const [collapsedTracks, setCollapsedTracks] = useState({});
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,10 +74,18 @@ const AdminPanel = ({ theme, setTheme }) => {
               }
               try {
                 const trackManifest = await fetchTrackManifest(t.id);
-                return { ...t, courses: trackManifest.courses || [] };
+                return { 
+                  ...t, 
+                  driveFolderId: t.driveFolderId || DEFAULT_TRACK_FOLDERS[t.id] || '',
+                  courses: trackManifest.courses || [] 
+                };
               } catch (err) {
                 console.error(`Failed to load track manifest for ${t.id}:`, err);
-                return { ...t, courses: [] };
+                return { 
+                  ...t, 
+                  driveFolderId: t.driveFolderId || DEFAULT_TRACK_FOLDERS[t.id] || '',
+                  courses: [] 
+                };
               }
             })
           );
@@ -51,11 +94,47 @@ const AdminPanel = ({ theme, setTheme }) => {
         } catch (err) {
           console.error('Failed to load admin catalog:', err);
         }
+
+        // Load sync-config mapping for Google Doc links
+        try {
+          const syncData = await fetchSyncConfig();
+          setSyncConfig(Array.isArray(syncData) ? syncData : []);
+        } catch (e) {
+          setSyncConfig([]);
+        }
       }
       setIsLoading(false);
     }
     init();
   }, [authRole]);
+
+  const toggleTrackCollapse = (trackId) => {
+    setCollapsedTracks(prev => ({
+      ...prev,
+      [trackId]: !prev[trackId]
+    }));
+  };
+
+  const collapseAll = () => {
+    if (!catalog?.tracks) return;
+    const allCollapsed = {};
+    catalog.tracks.forEach(t => { allCollapsed[t.id] = true; });
+    setCollapsedTracks(allCollapsed);
+  };
+
+  const expandAll = () => {
+    setCollapsedTracks({});
+  };
+
+  const handleSaveParentFolder = (e) => {
+    e.preventDefault();
+    const trimmed = parentFolderId.trim();
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('tridorian_parent_drive_folder_id', trimmed);
+    }
+    setSavedFolderAlert(true);
+    setTimeout(() => setSavedFolderAlert(false), 3000);
+  };
 
   const triggerSync = async () => {
     setSyncing(true);
@@ -73,6 +152,7 @@ const AdminPanel = ({ theme, setTheme }) => {
         },
         body: JSON.stringify({
           email: user?.email || 'admin@tridorian.com',
+          parentFolderId: parentFolderId.trim(),
           initiatedAt: new Date().toISOString()
         })
       });
@@ -113,6 +193,12 @@ const AdminPanel = ({ theme, setTheme }) => {
     } finally {
       setSyncing(false);
     }
+  };
+
+  const getDocIdForCourse = (trackId, courseId) => {
+    if (!Array.isArray(syncConfig)) return null;
+    const entry = syncConfig.find(item => item && item.courseId === courseId && (item.trackId === trackId || !item.trackId));
+    return entry?.docId;
   };
 
   if (isLoading) {
@@ -165,6 +251,21 @@ const AdminPanel = ({ theme, setTheme }) => {
     );
   }
 
+  // Filter tracks and courses by search
+  const filteredTracks = catalog?.tracks.map(track => {
+    if (!searchQuery.trim()) return track;
+    const q = searchQuery.toLowerCase();
+    const trackMatches = track.title?.toLowerCase().includes(q) || track.id?.toLowerCase().includes(q);
+    const matchingCourses = track.courses.filter(c => 
+      c.title?.toLowerCase().includes(q) || 
+      c.id?.toLowerCase().includes(q) ||
+      c.level?.toLowerCase().includes(q) ||
+      (c.tags && c.tags.some(tag => tag.toLowerCase().includes(q)))
+    );
+    if (trackMatches) return track;
+    return { ...track, courses: matchingCourses };
+  }).filter(track => track.courses.length > 0 || track.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+
   return (
     <div className="min-h-screen bg-base text-main selection:bg-accent selection:text-accent-fg relative overflow-hidden">
       <div className="theme-pattern-grid" />
@@ -173,7 +274,7 @@ const AdminPanel = ({ theme, setTheme }) => {
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
           <div>
             <div className="flex items-center gap-2 text-accent-text mb-2">
               <Shield size={18} />
@@ -200,6 +301,54 @@ const AdminPanel = ({ theme, setTheme }) => {
               {syncing ? 'Dispatching...' : 'Trigger Catalog Sync'}
             </button>
           </div>
+        </div>
+
+        {/* Google Drive Parent Folder Configuration Bar */}
+        <div className="mb-8 p-5 bg-panel border border-border-main rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent-border flex items-center justify-center text-accent-text shrink-0">
+              <Folder size={20} />
+            </div>
+            <div>
+              <div className="text-xs font-mono text-text-muted uppercase tracking-wider">Root Course Catalog Drive Folder</div>
+              <div className="text-sm font-bold text-main flex items-center gap-2 mt-0.5">
+                Google Drive Storage Parent
+                <a 
+                  href={`https://drive.google.com/drive/folders/${parentFolderId.trim()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent-text hover:underline text-xs font-mono flex items-center gap-1"
+                  title="Open Parent Drive Folder"
+                >
+                  <ExternalLink size={12} />
+                  Open in Drive
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveParentFolder} className="flex items-center gap-2 flex-1 max-w-md">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={parentFolderId}
+                onChange={(e) => setParentFolderId(e.target.value)}
+                placeholder="Google Drive Parent Folder ID"
+                className="w-full bg-base border border-border-main rounded-lg px-3 py-2 text-xs font-mono text-main focus:outline-none focus:border-accent"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-muted hover:bg-elevated text-main border border-border-main rounded-lg text-xs font-mono flex items-center gap-1.5 transition-all shrink-0"
+              title="Save Folder ID locally"
+            >
+              <Save size={14} className="text-accent-text" />
+              Save
+            </button>
+            {savedFolderAlert && (
+              <span className="text-[10px] font-mono text-accent-text animate-pulse">Saved!</span>
+            )}
+          </form>
         </div>
 
         {/* Rich Sync Card */}
@@ -283,72 +432,174 @@ const AdminPanel = ({ theme, setTheme }) => {
           </div>
         )}
 
+        {/* Search and Global Expand/Collapse Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="relative flex-1 max-w-sm">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search tracks, courses, or tags..."
+              className="w-full bg-panel border border-border-main rounded-lg pl-9 pr-4 py-2 text-xs font-mono text-main focus:outline-none focus:border-accent"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={expandAll}
+              className="px-3 py-1.5 bg-panel border border-border-main hover:bg-muted rounded-lg text-xs font-mono text-text-muted hover:text-main flex items-center gap-1.5 transition-all"
+            >
+              <Maximize2 size={12} />
+              Expand All
+            </button>
+            <button
+              onClick={collapseAll}
+              className="px-3 py-1.5 bg-panel border border-border-main hover:bg-muted rounded-lg text-xs font-mono text-text-muted hover:text-main flex items-center gap-1.5 transition-all"
+            >
+              <Minimize2 size={12} />
+              Collapse All
+            </button>
+          </div>
+        </div>
+
         {/* Catalog Content */}
-        <div className="space-y-12">
-          {catalog?.tracks.map((track) => (
-            <div key={track.id} className="bg-panel border border-border-main rounded-2xl overflow-hidden shadow-xl">
-              <div className="p-6 bg-muted/50 border-b border-border-main flex justify-between items-center">
-                <div>
-                  <h2 className="text-xl font-bold text-main flex items-center gap-3">
-                    {track.title}
-                    <span className="px-2 py-0.5 bg-base text-text-muted text-[10px] font-mono border border-border-main rounded">
-                      {track.id}
-                    </span>
-                  </h2>
-                  <p className="text-text-muted text-sm mt-1">{track.description}</p>
-                </div>
-                <Link 
-                  to={`/${track.id}`}
-                  className="text-accent-text hover:text-text-muted transition-colors p-2"
-                  title="View Track"
+        <div className="space-y-8">
+          {filteredTracks?.map((track) => {
+            const isCollapsed = Boolean(collapsedTracks[track.id]);
+            const driveFolderId = track.driveFolderId || DEFAULT_TRACK_FOLDERS[track.id];
+
+            return (
+              <div key={track.id} className="bg-panel border border-border-main rounded-2xl overflow-hidden shadow-xl transition-all">
+                {/* Track Header (Clickable to collapse) */}
+                <div 
+                  onClick={() => toggleTrackCollapse(track.id)}
+                  className="p-5 bg-muted/40 hover:bg-muted/70 cursor-pointer border-b border-border-main flex justify-between items-center transition-colors select-none"
                 >
-                  <ExternalLink size={20} />
-                </Link>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      type="button"
+                      className="text-text-muted hover:text-accent-text transition-colors p-1"
+                      aria-label={isCollapsed ? 'Expand Track' : 'Collapse Track'}
+                    >
+                      {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                    </button>
+                    <div>
+                      <h2 className="text-lg font-bold text-main flex items-center gap-2.5 flex-wrap">
+                        {track.title}
+                        <span className="px-2 py-0.5 bg-base text-text-muted text-[10px] font-mono border border-border-main rounded">
+                          {track.id}
+                        </span>
+                        <span className="text-xs font-mono font-normal text-text-muted">
+                          ({track.courses.length} courses)
+                        </span>
+                      </h2>
+                      <p className="text-text-muted text-xs mt-0.5 line-clamp-1">{track.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                    {driveFolderId && (
+                      <a
+                        href={`https://drive.google.com/drive/folders/${driveFolderId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-base hover:bg-elevated text-accent-text border border-accent-border/40 rounded-lg text-xs font-mono transition-all"
+                        title="Open Track Google Drive Folder"
+                      >
+                        <FolderOpen size={14} />
+                        Drive Folder
+                        <ExternalLink size={10} />
+                      </a>
+                    )}
+                    <Link 
+                      to={`/${track.id}`}
+                      className="text-accent-text hover:text-text-muted transition-colors p-2"
+                      title="View Track in Portal"
+                    >
+                      <ExternalLink size={18} />
+                    </Link>
+                  </div>
+                </div>
+                
+                {/* Collapsible Course Table */}
+                {!isCollapsed && (
+                  <div className="overflow-x-auto animate-in fade-in duration-200">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-border-main text-[10px] font-mono text-gray-500 uppercase tracking-widest bg-base/50">
+                          <th className="px-6 py-3 font-medium">Course ID</th>
+                          <th className="px-6 py-3 font-medium">Course Title</th>
+                          <th className="px-6 py-3 font-medium">Modules</th>
+                          <th className="px-6 py-3 font-medium">Status</th>
+                          <th className="px-6 py-3 font-medium text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y border-border-main">
+                        {track.courses.map((course) => {
+                          const docId = getDocIdForCourse(track.id, course.id);
+
+                          return (
+                            <tr key={course.id} className="hover:bg-muted/20 transition-colors group">
+                              <td className="px-6 py-3 font-mono text-xs text-text-muted">{course.id}</td>
+                              <td className="px-6 py-3">
+                                <div className="font-medium text-main group-hover:text-accent-text transition-colors flex items-center gap-2">
+                                  {course.title}
+                                  {docId && (
+                                    <a
+                                      href={`https://docs.google.com/document/d/${docId}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-text-muted hover:text-accent-text opacity-50 group-hover:opacity-100 transition-opacity"
+                                      title="Open Source Google Doc"
+                                    >
+                                      <FileText size={13} />
+                                    </a>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-6 py-3 text-sm text-text-muted">{course.modules}</td>
+                              <td className="px-6 py-3">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter ${
+                                  course.status?.toLowerCase() === 'draft' 
+                                    ? 'bg-yellow-900/20 text-yellow-500 border border-yellow-900/50' 
+                                    : 'bg-accent/10 text-accent-text border border-accent-border'
+                                }`}>
+                                  {(course.status || 'PUBLISHED').toUpperCase()}
+                                </span>
+                              </td>
+                              <td className="px-6 py-3 text-right">
+                                <div className="flex items-center justify-end gap-3">
+                                  {docId && (
+                                    <a
+                                      href={`https://docs.google.com/document/d/${docId}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-accent-text hover:underline font-mono flex items-center gap-1"
+                                      title="Edit Google Doc"
+                                    >
+                                      <FileText size={12} />
+                                      DOC
+                                    </a>
+                                  )}
+                                  <Link 
+                                    to={`/${track.id}/${course.id}`}
+                                    className="text-xs text-gray-500 hover:text-accent-text transition-colors font-mono"
+                                  >
+                                    PREVIEW
+                                  </Link>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-border-main text-[10px] font-mono text-gray-500 uppercase tracking-widest bg-base/50">
-                      <th className="px-6 py-4 font-medium">Course ID</th>
-                      <th className="px-6 py-4 font-medium">Course Title</th>
-                      <th className="px-6 py-4 font-medium">Modules</th>
-                      <th className="px-6 py-4 font-medium">Status</th>
-                      <th className="px-6 py-4 font-medium text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-main">
-                    {track.courses.map((course) => (
-                      <tr key={course.id} className="hover:bg-muted/20 transition-colors group">
-                        <td className="px-6 py-4 font-mono text-xs text-text-muted">{course.id}</td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-main group-hover:text-accent-text transition-colors">{course.title}</div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-text-muted">{course.modules}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter ${
-                            course.status?.toLowerCase() === 'draft' 
-                              ? 'bg-yellow-900/20 text-yellow-500 border border-yellow-900/50' 
-                              : 'bg-accent/10 text-accent-text border border-accent-border'
-                          }`}>
-                            {(course.status || 'PUBLISHED').toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <Link 
-                            to={`/${track.id}/${course.id}`}
-                            className="text-xs text-gray-500 hover:text-accent-text transition-colors font-mono"
-                          >
-                            PREVIEW_MODULES
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Footer */}
