@@ -1,4 +1,5 @@
 import { getAccessToken } from './googleAuth';
+import { APP_CONFIG } from '../config';
 
 /**
  * Checks the current user's role.
@@ -6,7 +7,6 @@ import { getAccessToken } from './googleAuth';
  * @returns {Promise<string>} - Returns 'admin' or 'student'.
  */
 export async function checkUserRole(configOverrides = {}) {
-  console.log('checkUserRole trace:', new Error().stack);
   const config = {
     testingMode: true,
     allowedAdmin: "taylor@tridorian.com",
@@ -31,7 +31,10 @@ export async function checkUserRole(configOverrides = {}) {
       }
 
       const userInfo = await response.json();
-      if (userInfo.email === config.allowedAdmin) {
+      const isAdmin = (config.allowedAdmin && userInfo.email === config.allowedAdmin) ||
+        (Array.isArray(APP_CONFIG?.adminEmails) && APP_CONFIG.adminEmails.includes(userInfo.email));
+
+      if (isAdmin) {
         return 'admin';
       }
       return 'student';
@@ -54,7 +57,7 @@ export async function checkUserRole(configOverrides = {}) {
       return 'student';
     }
   } catch (error) {
-    console.error('Error checking user role:', error);
+    // Return student role gracefully without noisy logs in test/offline environments
     return 'student';
   }
 }

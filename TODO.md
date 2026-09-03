@@ -73,9 +73,13 @@ This roadmap outlines the phased development of the platform, following a strict
 - [x] **Step 1:** Mock Google Drive API responses to test `ProgressService` save/load cycles.
 - [x] **Step 2:** Implement a "Sync Status" indicator test (Idle, Syncing, Error, Success).
 
-### 4.2 Progress Persistence
+### 4.2 Progress Persistence & Authentication
 - [x] **Sub-step:** Refine `src/services/googleDrive.js` to store `completedSteps` and `activeStep` in `appProperties`.
 - [x] **Sub-step:** Implement "Resume from last session" prompt on course load.
+- [x] **Sub-step:** Implement `AuthContext` with Google Identity Services (GIS), session persistence, and role management.
+- [x] **Sub-step:** Implement 20% course preview gating in `AppContent` with interactive lock card and Google Sign-In call to action.
+- [x] **Sub-step:** Integrate Auth chip and Drive sync indicator across Dashboard, TrackPage, and AppContent navigation headers.
+- [x] **Sub-step:** Enforce role-based access control and administrator sign-in on AdminPanel (`/admin`).
 
 ### 4.3 Content Sync Engine (CI/CD)
 - [x] **Sub-step:** Expand `scripts/sync-docs.js` to automatically create/update the `public/content/` folder structure based on the Google Doc tabs.

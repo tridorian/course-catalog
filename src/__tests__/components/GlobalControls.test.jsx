@@ -261,4 +261,51 @@ describe('GlobalControls Theme Integration', () => {
 
     expect(themeAudio.setVolume).toHaveBeenCalledWith(0.35);
   });
+
+  it('verifies that clicking "⚡ Demo Reset" clears tridorian_last_theme_gen_time from localStorage and clears the rate limit error', () => {
+    const mockSetTheme = vi.fn();
+    const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+
+    // Set last gen time in localStorage to 30 minutes ago
+    localStorage.setItem('tridorian_last_theme_gen_time', thirtyMinutesAgo.toString());
+
+    render(<GlobalControls theme="dark" setTheme={mockSetTheme} />);
+
+    // Open picker dropdown
+    fireEvent.click(screen.getByTestId('global-theme-picker'));
+
+    // Trigger the generator modal
+    fireEvent.click(screen.getByTestId('ai-theme-gen-trigger'));
+
+    // Enter prompt
+    const textarea = screen.getByPlaceholderText(/e.g. Cyberpunk neon orange/i);
+    fireEvent.change(textarea, { target: { value: 'Theme Two Prompt' } });
+
+    // Click generate button to trigger rate limit
+    const generateBtn = screen.getByRole('button', { name: /Generate Theme Colors/i });
+    fireEvent.click(generateBtn);
+
+    // Verify rate limit message is displayed
+    expect(screen.getByText(/You can only generate one custom theme per hour/i)).toBeInTheDocument();
+
+    // Verify Demo Reset button is displayed in the error area
+    const resetErrorBtn = screen.getByRole('button', { name: /⚡ Demo Reset: Clear Cooldown/i });
+    expect(resetErrorBtn).toBeInTheDocument();
+
+    // Also verify subtle footer button exists
+    const footerResetBtn = screen.getByTitle('Clear theme cooldown timer for live demonstrations');
+    expect(footerResetBtn).toBeInTheDocument();
+
+    // Click the Demo Reset button
+    fireEvent.click(resetErrorBtn);
+
+    // Verify localStorage item is cleared
+    expect(localStorage.getItem('tridorian_last_theme_gen_time')).toBeNull();
+
+    // Verify rate limit error is cleared
+    expect(screen.queryByText(/You can only generate one custom theme per hour/i)).not.toBeInTheDocument();
+
+    // Verify log message was added
+    expect(screen.getByText(/\[Demo Mode\] Cooldown timer reset/i)).toBeInTheDocument();
+  });
 });

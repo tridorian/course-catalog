@@ -5,6 +5,7 @@ import { fetchTrackManifest } from '../services/contentLoader';
 import { checkUserRole } from '../services/roleManager';
 import GlobalControls from './GlobalControls';
 import LoadingFallback from './LoadingFallback';
+import { useAuth } from '../context/AuthContext';
 
 // Simple markdown formatter helper for titles and descriptions
 function renderSimpleMarkdown(text) {
@@ -22,6 +23,7 @@ function renderSimpleMarkdown(text) {
 }
 
 const TrackPage = ({ theme, setTheme }) => {
+  const { user, role: authRole, isAuthenticated, signIn, signOut } = useAuth();
   const { trackId } = useParams();
   const navigate = useNavigate();
   const [track, setTrack] = useState(null);
@@ -30,6 +32,8 @@ const TrackPage = ({ theme, setTheme }) => {
   const [courseProgress, setCourseProgress] = useState({});
   const [role, setRole] = useState('student');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const effectiveRole = (authRole === 'admin' || role === 'admin') ? 'admin' : 'student';
 
   useEffect(() => {
     async function loadTrack() {
@@ -118,7 +122,40 @@ const TrackPage = ({ theme, setTheme }) => {
             <Icons.ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
             ALL TRACKS
           </button>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Auth Chip */}
+            {!isAuthenticated ? (
+              <button
+                onClick={signIn}
+                className="flex items-center gap-2 px-3 py-1.5 bg-accent text-accent-fg rounded-full text-[10px] font-mono font-bold hover:brightness-110 transition-all uppercase tracking-wider shadow-accent"
+                aria-label="Sign In with Google"
+              >
+                <Icons.LogIn size={12} />
+                <span>Sign In with Google</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 px-2.5 py-1 bg-panel border border-border-main rounded-full text-xs font-mono">
+                {user?.picture ? (
+                  <img src={user.picture} alt="" className="w-4 h-4 rounded-full border border-border-main" />
+                ) : (
+                  <Icons.User size={12} className="text-accent-text" />
+                )}
+                <span className="text-main font-medium truncate max-w-[140px]">{user?.email || 'User'}</span>
+                {effectiveRole === 'admin' && (
+                  <span className="px-1.5 py-0.5 bg-accent/20 text-accent-text border border-accent-border text-[8px] font-bold rounded uppercase">
+                    Admin
+                  </span>
+                )}
+                <button
+                  onClick={signOut}
+                  className="ml-1 text-text-muted hover:text-red-400 transition-colors p-0.5"
+                  title="Sign Out"
+                  aria-label="Sign Out"
+                >
+                  <Icons.LogOut size={12} />
+                </button>
+              </div>
+            )}
             <Link 
               to="/help" 
               className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
@@ -127,7 +164,7 @@ const TrackPage = ({ theme, setTheme }) => {
               <Icons.HelpCircle size={12} />
               Help & Troubleshooting
             </Link>
-             <GlobalControls theme={theme} setTheme={setTheme} />
+            <GlobalControls theme={theme} setTheme={setTheme} />
           </div>
         </div>
 

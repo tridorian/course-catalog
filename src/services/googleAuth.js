@@ -51,10 +51,13 @@ export const signIn = () => {
 
 export const signOut = () => {
   if (accessToken) {
-    window.google.accounts.oauth2.revoke(accessToken, () => {
-      accessToken = null;
-    });
+    if (typeof window !== 'undefined' && window.google?.accounts?.oauth2?.revoke) {
+      window.google.accounts.oauth2.revoke(accessToken, () => {
+        accessToken = null;
+      });
+    }
   }
+  accessToken = null;
 };
 
 export const getAccessToken = () => {
@@ -62,6 +65,17 @@ export const getAccessToken = () => {
     const mock = window.sessionStorage.getItem('mockToken') || 
                  new URLSearchParams(window.location.search).get('mockToken');
     if (mock) return mock;
+
+    if (!accessToken) {
+      try {
+        const stored = window.localStorage.getItem('tridorian_user_session') ||
+                       window.sessionStorage.getItem('tridorian_user_session');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed?.token) return parsed.token;
+        }
+      } catch (e) {}
+    }
   }
   return accessToken;
 };

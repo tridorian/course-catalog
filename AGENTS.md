@@ -286,7 +286,7 @@ The app uses `BrowserRouter` (for Google Cloud Run deployment):
 
 1. **`app.js` is legacy** — The root-level `app.js` is the original monolithic version with hardcoded JSX content. It is NOT used by the current app. Do not modify it. It will be removed in a future cleanup.
 
-2. **Google services are Phase 4** — `googleAuth.js` and `googleDrive.js` are now functional but integration into the main UI components is still pending. Use the refined `googleDrive.js` for all persistence needs.
+2. **Google services & Authentication** — `googleAuth.js`, `googleDrive.js`, and `AuthContext.jsx` are now integrated across all primary UI components (`Dashboard.jsx`, `TrackPage.jsx`, `AppContent.jsx`, `AdminPanel.jsx`). Auth session persists via `localStorage`/`sessionStorage` under `tridorian_user_session`. Courses enforce a 20% preview limit for unauthenticated users with an interactive lock card.
 
 3. **Tailwind JIT purging** — Dynamic class names constructed via string interpolation may be purged. Always use full class strings or pass via `style` prop.
 
@@ -306,7 +306,7 @@ The app uses `BrowserRouter` (for Google Cloud Run deployment):
 | 2: Multi-Type Modules | ✅ Complete | Lab, Presentation, Resource renderers |
 | 3: Dynamic Navigation | ✅ Complete | Deep linking, breadcrumbs, course map |
 | Bug Fix: Navigation | ✅ Complete | ID type mismatch + multi-course support |
-| 4: State Persistence | 🔲 Not Started | Google Drive sync, resume from session |
+| 4: State Persistence & Auth | ✅ Complete | Google Identity Services, session persistence, 20% preview gating, Drive sync |
 | Maintenance | 🔲 Ongoing | A11y, search, track-level index |
 
 See [TODO.md](./TODO.md) for the detailed checklist.

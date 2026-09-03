@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
+import { Shield, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, ExternalLink, LogIn } from 'lucide-react';
 import { checkUserRole } from '../services/roleManager';
 import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
+import { useAuth } from '../context/AuthContext';
 import GlobalControls from './GlobalControls';
 
 const AdminPanel = ({ theme, setTheme }) => {
-  const [role, setRole] = useState(null);
+  const { user, role: authRole, isAuthenticated, signIn } = useAuth();
+  const [role, setRole] = useState(authRole || null);
   const [isLoading, setIsLoading] = useState(true);
   const [catalog, setCatalog] = useState(null);
   const [syncing, setSyncing] = useState(false);
@@ -15,7 +17,13 @@ const AdminPanel = ({ theme, setTheme }) => {
 
   useEffect(() => {
     async function init() {
-      const userRole = await checkUserRole();
+      let userRole = authRole;
+      if (!userRole || userRole === 'student') {
+        try {
+          const r = await checkUserRole();
+          if (r === 'admin') userRole = 'admin';
+        } catch (e) {}
+      }
       setRole(userRole);
       
       if (userRole === 'admin') {
@@ -46,7 +54,7 @@ const AdminPanel = ({ theme, setTheme }) => {
       setIsLoading(false);
     }
     init();
-  }, []);
+  }, [authRole]);
 
   const triggerSync = async () => {
     setSyncing(true);
@@ -98,13 +106,35 @@ const AdminPanel = ({ theme, setTheme }) => {
         <div className="max-w-md w-full bg-panel border border-red-900/50 rounded-lg p-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.1)]">
           <Shield size={48} className="text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-tighter">Access Denied</h2>
-          <p className="text-gray-400 font-mono text-sm mb-6">Administrator Credentials Required</p>
-          <button
-            onClick={() => navigate('/')}
-            className="px-6 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded font-mono text-xs transition-all w-full"
-          >
-            RETURN TO DASHBOARD
-          </button>
+          <p className="text-gray-400 font-mono text-sm mb-2">Administrator Credentials Required</p>
+          <p className="text-text-muted text-xs font-mono mb-6">
+            Authorized administrator account (<span className="text-accent-text font-bold">taylor.granstaff@tridorian.com</span>) required to access this console.
+          </p>
+          <div className="space-y-3">
+            <button
+              onClick={async () => {
+                try {
+                  const signedInUser = await signIn();
+                  if (signedInUser?.role === 'admin') {
+                    setRole('admin');
+                  }
+                } catch (e) {
+                  console.error('Admin sign in failed:', e);
+                }
+              }}
+              className="px-6 py-2.5 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 transition-all font-mono text-xs w-full shadow-accent flex items-center justify-center gap-2"
+              aria-label="Sign In as Administrator"
+            >
+              <LogIn size={14} />
+              Sign In as Administrator
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded font-mono text-xs transition-all w-full"
+            >
+              RETURN TO DASHBOARD
+            </button>
+          </div>
         </div>
       </div>
     );

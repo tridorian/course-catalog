@@ -8,8 +8,10 @@ import GlobalControls from './GlobalControls';
 import ProfileModal from './ProfileModal';
 import { loadProgress } from '../services/googleDrive';
 import { saveCustomTheme } from '../services/customTheme';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = ({ theme, setTheme }) => {
+  const { user, role: authRole, isAuthenticated, signIn, signOut } = useAuth();
   const [catalog, setCatalog] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,6 +20,9 @@ const Dashboard = ({ theme, setTheme }) => {
   const [role, setRole] = useState('student');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
+
+  const isDriveConnected = Boolean(isAuthenticated || isConnected || googleAuth.getAccessToken());
+  const currentRole = (authRole === 'admin' || role === 'admin') ? 'admin' : 'student';
 
   useEffect(() => {
     async function loadCatalog() {
@@ -111,7 +116,7 @@ const Dashboard = ({ theme, setTheme }) => {
 
   const handleConnect = async () => {
     try {
-      await googleAuth.signIn();
+      await signIn();
       setIsConnected(true);
     } catch (err) {
       console.error('Failed to connect to Google Drive:', err);
@@ -168,21 +173,58 @@ const Dashboard = ({ theme, setTheme }) => {
             </button>
             <GlobalControls theme={theme} setTheme={setTheme} />
           </div>
-          {role === 'admin' && (
-            <Link 
-              to="/admin" 
-              className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
-              aria-label="Admin Control Panel"
-            >
-              <Icons.Shield size={12} />
-              Admin Control Panel
-            </Link>
-          )}
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Auth Chip */}
+            {!isAuthenticated ? (
+              <button
+                onClick={signIn}
+                className="flex items-center gap-2 px-3.5 py-1.5 bg-accent text-accent-fg rounded-full text-[10px] font-mono font-bold hover:brightness-110 transition-all uppercase tracking-wider shadow-accent"
+                aria-label="Sign In with Google"
+              >
+                <Icons.LogIn size={12} />
+                <span>Sign In with Google</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1 bg-panel border border-border-main rounded-full text-xs font-mono">
+                {user?.picture ? (
+                  <img src={user.picture} alt="" className="w-5 h-5 rounded-full border border-border-main" />
+                ) : (
+                  <Icons.User size={13} className="text-accent-text" />
+                )}
+                <span className="text-main font-medium truncate max-w-[160px]">{user?.email || 'User'}</span>
+                {currentRole === 'admin' && (
+                  <span className="px-1.5 py-0.5 bg-accent/20 text-accent-text border border-accent-border text-[9px] font-bold rounded uppercase">
+                    Admin
+                  </span>
+                )}
+                <button
+                  onClick={signOut}
+                  className="ml-1 text-text-muted hover:text-red-400 transition-colors p-0.5"
+                  title="Sign Out"
+                  aria-label="Sign Out"
+                >
+                  <Icons.LogOut size={13} />
+                </button>
+              </div>
+            )}
+
+            {currentRole === 'admin' && (
+              <Link 
+                to="/admin" 
+                className="flex items-center gap-2 px-3 py-1.5 bg-muted text-accent-text border border-accent-border rounded-full text-[10px] font-mono hover:bg-accent/10 transition-all uppercase tracking-widest"
+                aria-label="Admin Control Panel"
+              >
+                <Icons.Shield size={12} />
+                Admin Control Panel
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Connection Status / Onboarding Banner */}
         <div className="mb-12">
-          {!isConnected ? (
+          {!isDriveConnected ? (
             <div className="bg-muted border border-accent-border rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-accent">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center border border-accent-border">
@@ -204,7 +246,7 @@ const Dashboard = ({ theme, setTheme }) => {
           ) : (
             <div className="flex items-center justify-end gap-2 text-[10px] font-mono text-accent-text uppercase tracking-widest opacity-70">
               <Icons.Cloud size={12} />
-              <span>Drive Sync Connected</span>
+              <span>{user?.email ? `Drive Sync Active (${user.email})` : 'Drive Sync Connected'}</span>
             </div>
           )}
         </div>
