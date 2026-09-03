@@ -114,6 +114,13 @@ In development (`npm run dev`), all embed components (SlideDeckEmbed, VideoEmbed
 
 This makes it easy to identify and update stale or broken embed URLs without searching through JSON files manually. The overlay is only visible in dev mode (`import.meta.env.DEV`) and is stripped from production builds.
 
+### Drive-to-UI Catalog Sync Pipeline (Option B)
+The platform features an automated pipeline to sync content directly from Google Drive Docs to the UI:
+1. **GitHub Repository Dispatch:** `.github/workflows/content-sync.yml` is configured with `repository_dispatch: types: [sync-catalog]` (alongside nightly cron and manual workflow dispatch).
+2. **Backend Proxy Dispatch Endpoint (`/sync-catalog`):** Both `functions/theme-proxy/index.js` and `scripts/gemini_proxy.js` expose `POST /sync-catalog` (and `/api/sync-catalog`). When configured with `GITHUB_DISPATCH_TOKEN` or `GITHUB_TOKEN`, it triggers a repository dispatch on GitHub.
+3. **Automated Continuous Deployment:** When `content-sync.yml` commits updated JSON files into `public/content/`, it uses the commit message `chore: automated content sync from Google Drive` without `[skip ci]`, automatically triggering `deploy-cloudrun.yml` to build and redeploy the live Cloud Run application.
+4. **Admin Panel UI Integration:** Administrators on `/admin` can trigger catalog synchronization with a single click. The UI displays an active progress spinner, real-time success states with direct links to the GitHub Actions workflow runner, and graceful fallback buttons ("Trigger via GitHub Actions") when tokens are not configured on the proxy.
+
 ## Styling & Theme
 
 The application uses the "tridorian" dark theme:

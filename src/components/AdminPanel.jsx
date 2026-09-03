@@ -4,6 +4,7 @@ import { Shield, RefreshCw, ChevronLeft, AlertCircle, CheckCircle, ExternalLink,
 import { checkUserRole } from '../services/roleManager';
 import { fetchCatalog, fetchTrackManifest } from '../services/contentLoader';
 import { useAuth } from '../context/AuthContext';
+import { APP_CONFIG } from '../config';
 import GlobalControls from './GlobalControls';
 
 const AdminPanel = ({ theme, setTheme }) => {
@@ -12,7 +13,7 @@ const AdminPanel = ({ theme, setTheme }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [catalog, setCatalog] = useState(null);
   const [syncing, setSyncing] = useState(false);
-  const [notification, setNotification] = useState(null);
+  const [syncResult, setSyncResult] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,32 +59,56 @@ const AdminPanel = ({ theme, setTheme }) => {
 
   const triggerSync = async () => {
     setSyncing(true);
+    setSyncResult({ status: 'syncing' });
+    const proxyBase = (APP_CONFIG.proxyUrl || '/api').replace(/\/+$/, '');
+    const syncUrl = `${proxyBase}/sync-catalog`;
+    const defaultWorkflowUrl = 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml';
+
     try {
-      console.log('Dispatching GitHub Repository Dispatch event...');
-      const response = await fetch('https://api.github.com/repos/tridorian/course-catalog/dispatches', {
+      console.log(`[Admin] Triggering catalog sync via proxy: ${syncUrl}`);
+      const response = await fetch(syncUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          event_type: 'sync-catalog'
+          email: user?.email || 'admin@tridorian.com',
+          initiatedAt: new Date().toISOString()
         })
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to dispatch sync');
+
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = {};
       }
-      
-      setNotification({
-        type: 'success',
-        message: 'Sync action dispatched successfully'
-      });
-      
-      setTimeout(() => setNotification(null), 5000);
+
+      if (!response.ok || data.success === false) {
+        const errorMsg = data.error || (response.statusText ? `Request failed with status ${response.status}` : 'Failed to dispatch sync action');
+        const workflowUrl = data.workflowUrl || defaultWorkflowUrl;
+        setSyncResult({
+          status: 'error',
+          error: errorMsg,
+          workflowUrl,
+          isMissingToken: errorMsg.includes('GITHUB_DISPATCH_TOKEN') || errorMsg.includes('token')
+        });
+      } else {
+        const successMsg = data.message || 'Catalog sync dispatched! GitHub Action is pulling Google Docs and deploying to Cloud Run.';
+        const workflowUrl = data.workflowUrl || defaultWorkflowUrl;
+        setSyncResult({
+          status: 'success',
+          message: successMsg,
+          workflowUrl
+        });
+      }
     } catch (err) {
-      setNotification({
-        type: 'error',
-        message: 'Failed to dispatch sync action'
+      console.error('[Admin] Sync dispatch failed:', err);
+      setSyncResult({
+        status: 'error',
+        error: err.message || 'Failed to dispatch sync action',
+        workflowUrl: defaultWorkflowUrl,
+        isMissingToken: (err.message || '').includes('token')
       });
     } finally {
       setSyncing(false);
@@ -177,13 +202,84 @@ const AdminPanel = ({ theme, setTheme }) => {
           </div>
         </div>
 
-        {/* Notifications */}
-        {notification && (
-          <div className={`mb-8 p-4 rounded-lg border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
-            notification.type === 'success' ? 'bg-muted border-accent-border text-accent-text' : 'bg-red-900/10 border-red-900/50 text-red-400'
-          }`}>
-            {notification.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-            <span className="font-mono text-sm">{notification.message}</span>
+        {/* Rich Sync Card */}
+        {syncResult && (
+          <div className="mb-8 rounded-2xl border bg-panel overflow-hidden shadow-2xl transition-all animate-in fade-in slide-in-from-top-4 duration-300">
+            {syncResult.status === 'syncing' && (
+              <div className="p-6 border border-accent-border/50 bg-accent/5 flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent-border flex items-center justify-center text-accent-text">
+                    <RefreshCw size={22} className="animate-spin" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-main flex items-center gap-2">
+                      Catalog Sync in Progress...
+                    </h3>
+                    <p className="text-xs font-mono text-text-muted mt-0.5">
+                      Dispatching trigger to GitHub Actions pipeline (fetching Docs & compiling JSONs)...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {syncResult.status === 'success' && (
+              <div className="p-6 border border-accent-border bg-accent/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent-border flex items-center justify-center text-accent-text shrink-0 mt-0.5">
+                    <CheckCircle size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-accent-text flex items-center gap-2">
+                      Sync Action Dispatched Successfully
+                    </h3>
+                    <p className="text-xs font-mono text-text-muted mt-1">
+                      {syncResult.message}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <a
+                    href={syncResult.workflowUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-fg font-bold rounded-lg hover:brightness-110 transition-all text-xs font-mono shadow-accent"
+                  >
+                    <ExternalLink size={14} />
+                    View GitHub Actions Workflow
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {syncResult.status === 'error' && (
+              <div className="p-6 border border-red-900/50 bg-red-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-red-900/30 border border-red-900/50 flex items-center justify-center text-red-400 shrink-0 mt-0.5">
+                    <AlertCircle size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-red-400 flex items-center gap-2">
+                      Sync Dispatch Encountered an Issue
+                    </h3>
+                    <p className="text-xs font-mono text-red-300/80 mt-1">
+                      {syncResult.error}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <a
+                    href={syncResult.workflowUrl || 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-red-900/40 hover:bg-red-900/60 text-red-200 border border-red-700/50 rounded-lg text-xs font-mono transition-all"
+                  >
+                    <ExternalLink size={14} />
+                    Trigger via GitHub Actions
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

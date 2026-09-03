@@ -17,8 +17,8 @@ functions.http('themeProxy', async (req, res) => {
   }
 
   // Check path
-  const path = req.path || req.url || '';
-  const match = path.match(/\/(generate-theme|generate-music|generate-image)$/);
+  const path = (req.path || req.url || '').split('?')[0];
+  const match = path.match(/\/(generate-theme|generate-music|generate-image|sync-catalog)$/);
   if (!match) {
     res.status(404).json({ error: 'Not Found' });
     return;
@@ -28,6 +28,11 @@ functions.http('themeProxy', async (req, res) => {
 
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method Not Allowed' });
+    return;
+  }
+
+  if (endpoint === 'sync-catalog') {
+    await handleSyncCatalog(req, res);
     return;
   }
 
@@ -220,4 +225,58 @@ async function handleGenerateImage(prompt, token, res) {
   }
 
   res.status(500).json({ error: `All Imagen models failed. Last error: ${lastError ? lastError.message : 'Unknown'}` });
+}
+
+async function handleSyncCatalog(req, res) {
+  const dispatchToken = process.env.GITHUB_DISPATCH_TOKEN || process.env.GITHUB_TOKEN;
+  const workflowUrl = 'https://github.com/tridorian/course-catalog/actions/workflows/content-sync.yml';
+
+  if (!dispatchToken) {
+    res.status(200).json({
+      success: false,
+      error: 'GITHUB_DISPATCH_TOKEN not set on server. You can trigger sync manually via GitHub Actions.',
+      workflowUrl
+    });
+    return;
+  }
+
+  try {
+    const ghResponse = await fetch('https://api.github.com/repos/tridorian/course-catalog/dispatches', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${dispatchToken}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+        'User-Agent': 'tridorian-course-catalog-proxy'
+      },
+      body: JSON.stringify({
+        event_type: 'sync-catalog',
+        client_payload: req.body || {}
+      })
+    });
+
+    if (!ghResponse.ok) {
+      const errText = await ghResponse.text();
+      res.status(200).json({
+        success: false,
+        error: `GitHub Dispatch error: ${errText}`,
+        workflowUrl
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Catalog sync dispatched! GitHub Action is pulling Google Docs and deploying to Cloud Run.',
+      workflowUrl
+    });
+  } catch (error) {
+    console.error('Sync Dispatch Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      workflowUrl
+    });
+  }
 }

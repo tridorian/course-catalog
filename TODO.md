@@ -105,4 +105,5 @@ This roadmap outlines the phased development of the platform, following a strict
 - [x] Add inter-course navigation (e.g., "Next Course" after completing all modules).
 - [x] Enforce rate limit constraints and maximum size constraints on dynamic theme generator.
 - [x] Resolve legacy Antigravity version constraint limitation (update v1.23.2 or lower checks to support v1.23.2+ and sync with agy-easy-install), integrate automated question & option consistency validation in catalog builder, and prune unreferenced legacy modules.
+- [x] Option B: Drive-to-UI Catalog Sync Pipeline (`repository_dispatch` trigger in `content-sync.yml`, secure backend `/sync-catalog` proxy dispatch endpoint in `theme-proxy` & `gemini_proxy.js`, and Admin Panel rich sync card with live workflow link & fallback).
 
