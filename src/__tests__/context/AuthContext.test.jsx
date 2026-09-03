@@ -9,7 +9,8 @@ vi.mock('../../services/googleAuth', () => ({
   initGoogleAuth: vi.fn().mockResolvedValue(true),
   signIn: vi.fn(),
   signOut: vi.fn(),
-  getAccessToken: vi.fn().mockReturnValue(null)
+  getAccessToken: vi.fn().mockReturnValue(null),
+  isAuthReady: vi.fn().mockReturnValue(true)
 }));
 
 const TestConsumer = () => {
