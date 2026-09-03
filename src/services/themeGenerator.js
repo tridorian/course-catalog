@@ -293,63 +293,49 @@ export async function generateImageWithImagen(promptText, userApiKey = '') {
     throw new Error('API_KEY_REQUIRED');
   }
 
-  const models = ['imagen-4.0-generate-001', 'imagen-4.0-fast-generate-001', 'imagen-4.0-ultra-generate-001'];
-  let lastError = null;
+  let url;
+  const headers = { 'Content-Type': 'application/json' };
 
-  for (const model of models) {
-    try {
-      let url;
-      const headers = { 'Content-Type': 'application/json' };
-
-      if (apiKey) {
-        url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
-      } else {
-        url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict`;
-        headers['Authorization'] = `Bearer ${gAuthToken}`;
-      }
-
-      const payload = {
-        instances: [
-          {
-            prompt: `A subtle, premium, seamless and tileable abstract repeating background pattern/texture overlay for a web app dashboard. Theme/Style: ${promptText}. Purely visual pattern of abstract shapes, geometry, lines or textures. ABSOLUTELY NO text, NO words, NO letters, NO numbers, NO typography, NO labels. Extremely clean, low contrast, elegant, decorative only.`
-          }
-        ],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: "1:1",
-          outputMimeType: "image/jpeg"
-        }
-      };
-
-      console.log(`[Client] [Image] Dispatching Imagen request to model ${model} at: ${url}`);
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(30000)
-      });
- 
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error(`[Client] [Image] Model ${model} returned error status ${response.status}: ${errText}`);
-        throw new Error(`Model ${model} failed with status ${response.status}: ${errText}`);
-      }
- 
-      const data = await response.json();
-      const prediction = data.predictions?.[0];
-      if (!prediction || !prediction.bytesBase64Encoded) {
-        console.error(`[Client] [Image] Empty prediction or bytes returned from model ${model}:`, data);
-        throw new Error(`Model ${model} returned empty predictions`);
-      }
- 
-      const imageUri = `data:image/jpeg;base64,${prediction.bytesBase64Encoded}`;
-      console.log(`[Client] [Image] Model ${model} generated image successfully! Base64 length: ${imageUri.length}`);
-      return imageUri;
-    } catch (err) {
-      console.warn(`[Client] [Image] Model ${model} failed:`, err.message);
-      lastError = err;
-    }
+  if (apiKey) {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+  } else {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent`;
+    headers['Authorization'] = `Bearer ${gAuthToken}`;
   }
 
-  throw new Error(`All Imagen models failed to generate background image. Last error: ${lastError ? lastError.message : 'Unknown'}`);
+  const payload = {
+    contents: [{
+      parts: [{
+        text: `A subtle, premium, seamless and tileable abstract repeating background pattern/texture overlay for a web app dashboard. Theme/Style: ${promptText}. Purely visual pattern of abstract shapes, geometry, lines or textures. ABSOLUTELY NO text, NO words, NO letters, NO numbers, NO typography, NO labels. Extremely clean, low contrast, elegant, decorative only.`
+      }]
+    }],
+    generationConfig: {
+      responseModalities: ['TEXT', 'IMAGE']
+    }
+  };
+
+  console.log(`[Client] [Image] Dispatching image request to: ${url}`);
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(30000)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error(`[Client] [Image] Image API error: ${response.status} - ${errText}`);
+    throw new Error(`Image API error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  const imagePart = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.data);
+  if (!imagePart) {
+    throw new Error('No image inlineData returned from model');
+  }
+
+  const mimeType = imagePart.inlineData.mimeType || 'image/png';
+  const imageUri = `data:${mimeType};base64,${imagePart.inlineData.data}`;
+  console.log(`[Client] [Image] Generated image successfully! Base64 length: ${imageUri.length}`);
+  return imageUri;
 }

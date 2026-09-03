@@ -149,13 +149,20 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
 }
 
 async function handleGenerateMusic(prompt, token, res) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/lyria-3-clip-preview:generateContent`;
+  const apiKey = process.env.GEMINI_API_KEY;
+  let url;
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (apiKey) {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/lyria-3-clip-preview:generateContent?key=${apiKey}`;
+  } else {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/lyria-3-clip-preview:generateContent`;
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
+    headers: headers,
     body: JSON.stringify({
       contents: {
         parts: [{ text: `Generate exactly a 30-second seamless, perfectly looping instrumental background music track. No spoken vocals. It must have clean, smooth matching transitions at both start and end so it repeats flawlessly without any clicks or gaps. The genre, style, instrumentation, and mood of the track must match this description: ${prompt}` }]
@@ -189,53 +196,53 @@ async function handleGenerateMusic(prompt, token, res) {
 }
 
 async function handleGenerateImage(prompt, token, res) {
-  const models = ['imagen-4.0-generate-001', 'imagen-4.0-fast-generate-001', 'imagen-4.0-ultra-generate-001'];
-  let lastError = null;
+  const apiKey = process.env.GEMINI_API_KEY;
 
-  for (const model of models) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          instances: [
-            {
-              prompt: `A subtle, premium, seamless and tileable abstract repeating background pattern/texture overlay for a web app dashboard. Theme/Style: ${prompt}. Purely visual pattern of abstract shapes, geometry, lines or textures. ABSOLUTELY NO text, NO words, NO letters, NO numbers, NO typography, NO labels. Extremely clean, low contrast, elegant, decorative only.`
-            }
-          ],
-          parameters: {
-            sampleCount: 1,
-            aspectRatio: "1:1",
-            outputMimeType: "image/jpeg"
-          }
-        }),
-        signal: AbortSignal.timeout(30000)
-      });
+  // Use multimodal Gemini image generation (Nano Banana / gemini-2.5-flash-image)
+  try {
+    let url;
+    const headers = { 'Content-Type': 'application/json' };
 
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Model ${model} returned status ${response.status}: ${errText}`);
-      }
-
-      const data = await response.json();
-      const prediction = data.predictions?.[0];
-      if (!prediction || !prediction.bytesBase64Encoded) {
-        throw new Error(`Model ${model} returned empty predictions`);
-      }
-
-      res.status(200).json({ imageDataUrl: `data:image/jpeg;base64,${prediction.bytesBase64Encoded}` });
-      return;
-    } catch (err) {
-      console.warn(`Model ${model} failed:`, err.message);
-      lastError = err;
+    if (apiKey) {
+      url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+    } else {
+      url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent`;
+      headers['Authorization'] = `Bearer ${token}`;
     }
-  }
 
-  res.status(500).json({ error: `All Imagen models failed. Last error: ${lastError ? lastError.message : 'Unknown'}` });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `A subtle, premium, seamless and tileable abstract repeating background pattern/texture overlay for a web app dashboard. Theme/Style: ${prompt}. Purely visual pattern of abstract shapes, geometry, lines or textures. ABSOLUTELY NO text, NO words, NO letters, NO numbers, NO typography, NO labels. Extremely clean, low contrast, elegant, decorative only.`
+          }]
+        }],
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE']
+        }
+      }),
+      signal: AbortSignal.timeout(30000)
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Image generation failed: ${response.status} - ${errText}`);
+    }
+
+    const data = await response.json();
+    const imagePart = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.data);
+    if (!imagePart) {
+      throw new Error('No image inlineData returned from model');
+    }
+
+    const mimeType = imagePart.inlineData.mimeType || 'image/png';
+    res.status(200).json({ imageDataUrl: `data:${mimeType};base64,${imagePart.inlineData.data}` });
+  } catch (err) {
+    console.error('Image generation error:', err);
+    res.status(500).json({ error: `Image generation failed: ${err.message}` });
+  }
 }
 
 async function handleSyncCatalog(req, res) {
