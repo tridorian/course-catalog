@@ -310,6 +310,8 @@ const GlobalControls = ({ theme, setTheme }) => {
       addLog(`❌ Pipeline aborted with error: ${e.message}`);
       if (e.message === 'API_KEY_REQUIRED') {
         setGenError("A Gemini API Key is required to run the theme generator.");
+      } else if (e.message.includes('restricted with service accounts') || e.message.includes('PERMISSION_DENIED') || e.message.includes('403')) {
+        setGenError("GCP Service Account authorization returned 403. You can enter your personal Gemini API key below to generate themes directly.");
       } else {
         setGenError(e.message);
       }
@@ -684,17 +686,39 @@ const GlobalControls = ({ theme, setTheme }) => {
             <div className="space-y-4">
               {/* API Key Status / Entry */}
               {isProxyActive ? (
-                <div className="p-3 rounded-lg border flex flex-col gap-2" style={{ backgroundColor: 'var(--accent-muted)', borderColor: 'var(--accent-border)' }}>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#26D07C] animate-pulse shrink-0"></span>
-                      <span className="text-[10px] font-mono uppercase font-bold text-accent-text">Service Account Active</span>
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg border flex flex-col gap-2" style={{ backgroundColor: 'var(--accent-muted)', borderColor: 'var(--accent-border)' }}>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#26D07C] animate-pulse shrink-0"></span>
+                        <span className="text-[10px] font-mono uppercase font-bold text-accent-text">GCP Backend Proxy Active</span>
+                      </div>
+                      <span className="text-[9px] text-[#26D07C] font-mono uppercase tracking-wider bg-[#26D07C]/10 px-2 py-0.5 rounded border border-[#26D07C]/20">Auto Proxy</span>
                     </div>
-                    <span className="text-[9px] text-[#26D07C] font-mono uppercase tracking-wider bg-[#26D07C]/10 px-2 py-0.5 rounded border border-[#26D07C]/20">No Key Needed</span>
+                    <p className="text-[10px] text-text-muted leading-relaxed">
+                      Theme generation routes through the Cloud Function proxy. If proxy permissions are not configured or return 403, you can enter a direct Gemini API key below.
+                    </p>
                   </div>
-                  <p className="text-[10px] text-text-muted leading-relaxed">
-                    Theme generation is configured to securely authenticate via the application's GCP service account. No personal API key is required.
-                  </p>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-mono uppercase text-text-muted">Personal Gemini API Key (Optional Override)</label>
+                      <a
+                        href="https://aistudio.google.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-accent-text hover:underline"
+                      >
+                        Get a Key
+                      </a>
+                    </div>
+                    <input
+                      type="password"
+                      placeholder="Enter personal Gemini API key"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-muted border border-border-main rounded-lg text-xs text-main placeholder-text-muted/50 focus:outline-none focus:border-accent"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div>

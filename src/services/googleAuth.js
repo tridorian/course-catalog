@@ -32,6 +32,8 @@ export const initGoogleAuth = (clientId) => {
   });
 };
 
+export const isAuthReady = () => Boolean(tokenClient);
+
 export const signIn = () => {
   return new Promise((resolve, reject) => {
     if (!tokenClient) return reject('Auth not initialized');

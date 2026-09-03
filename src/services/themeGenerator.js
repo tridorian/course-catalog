@@ -39,27 +39,36 @@ function getValidApiKey(userApiKey = '') {
 }
 
 export async function generateThemeWithGemini(promptText, userApiKey = '') {
+  const apiKey = getValidApiKey(userApiKey);
   const proxyUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PROXY_URL) || '/api';
 
-  if (proxyUrl) {
-    const url = `${proxyUrl.replace(/\/$/, '')}/generate-theme`;
-    console.log(`[Client] [Theme] Routing theme generation request to proxy: ${url}`);
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: promptText })
-    });
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`[Client] [Theme] Proxy request failed: ${response.status} - ${errText}`);
-      throw new Error(`Proxy error: ${response.status} - ${errText}`);
+  // If user explicitly supplied a valid API key, prefer direct API call
+  if (!apiKey && proxyUrl) {
+    try {
+      const url = `${proxyUrl.replace(/\/$/, '')}/generate-theme`;
+      console.log(`[Client] [Theme] Routing theme generation request to proxy: ${url}`);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptText })
+      });
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`[Client] [Theme] Proxy request failed: ${response.status} - ${errText}`);
+        throw new Error(`Proxy error: ${response.status} - ${errText}`);
+      }
+      const themeVars = await response.json();
+      console.log(`[Client] [Theme] Proxy returned custom theme successfully!`, themeVars);
+      return themeVars;
+    } catch (proxyErr) {
+      console.warn('[Client] [Theme] Proxy attempt failed, checking for direct credentials:', proxyErr.message);
+      // Fall through to try direct credentials if available
+      if (!apiKey) {
+        throw proxyErr;
+      }
     }
-    const themeVars = await response.json();
-    console.log(`[Client] [Theme] Proxy returned custom theme successfully!`, themeVars);
-    return themeVars;
   }
 
-  const apiKey = getValidApiKey(userApiKey);
   const gAuthToken = getAccessToken();
 
   if (!apiKey && !gAuthToken) {

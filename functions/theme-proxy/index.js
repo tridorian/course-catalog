@@ -97,18 +97,28 @@ Specify these exact keys with hex values or standard rgba strings, plus a music 
   }
 }`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+  let url;
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (process.env.GEMINI_API_KEY) {
+    url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+  } else {
+    // When using Google Cloud Service Account ADC, Generative Language API restricts access.
+    // Use Vertex AI endpoint which fully supports Service Account authorization.
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT || 'tridorian-taylor-sandbox';
+    const location = process.env.LOCATION || 'us-central1';
+    url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/gemini-2.0-flash:generateContent`;
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
+    headers: headers,
     body: JSON.stringify({
-      contents: {
+      contents: [{
         role: 'user',
         parts: [{ text: `Generate a theme for: ${prompt}` }]
-      },
+      }],
       systemInstruction: {
         parts: [{ text: systemInstruction }]
       },
