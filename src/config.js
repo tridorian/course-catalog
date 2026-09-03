@@ -11,5 +11,6 @@ export const APP_CONFIG = {
   googleClientId: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GOOGLE_CLIENT_ID) || "601897044120-nv8j0idm63m92us8189sbulev16m2js2.apps.googleusercontent.com",
   enableAiTheming: true,
   defaultThemeModel: "gemini-2.5-flash",
+  parentDriveFolderId: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PARENT_DRIVE_FOLDER_ID) || "1UTsC7YPjz72BiwqJDyJx6VydyHGgW160",
   proxyUrl: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PROXY_URL) || "/api"
 };
